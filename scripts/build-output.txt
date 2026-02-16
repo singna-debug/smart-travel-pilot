@@ -1,0 +1,57 @@
+﻿[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+
+> smart-travel-pilot@0.1.0 build
+> next build
+
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+??Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+??Compiled successfully in 37.0s
+  Running TypeScript ...
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+  Collecting page data using 7 workers ...
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+  Generating static pages using 7 workers (0/19) ...
+  Generating static pages using 7 workers (4/19) 
+  Generating static pages using 7 workers (9/19) 
+  Generating static pages using 7 workers (14/19) 
+??Generating static pages using 7 workers (19/19) in 1335.6ms
+  Finalizing page optimization ...
+
+Route (app)
+????/
+????/_not-found
+??? /api/analyze-url
+??? /api/chat
+??? /api/chats
+??? /api/chats/[id]
+??? /api/crawl
+??? /api/debug
+??? /api/kakao-skill
+??? /api/logs
+??? /api/manual-log
+??? /api/setup-products
+??? /api/sheets
+??? /api/stats
+????/chats
+??? /chats/[id]
+????/logs
+????/manual-log
+????/products
+????/tools
+
+
+?? (Static)   prerendered as static content
+?  (Dynamic)  server-rendered on demand
+

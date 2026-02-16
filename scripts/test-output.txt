@@ -1,0 +1,12 @@
+--- Google Sheets Connection Test (JSON File) ---
+Credentials Path: C:\Users\vbxn6\.gemini\antigravity\scratch\smart-travel-pilot\google-credentials.json
+File Exists: true
+Email: modetour@gen-lang-client-0510450295.iam.gserviceaccount.com
+Project: gen-lang-client-0510450295
+Sheet ID: 17aVvFt29xlEvW5na0zvqN7B5HPOqxt55AzFJuabn2fk
+Auth created
+Sheets client created, calling API...
+✅ SUCCESS!
+Title: 2026년 클럽모두 상담내역
+Tabs: 시트1, 시트2
+--- Test Complete ---

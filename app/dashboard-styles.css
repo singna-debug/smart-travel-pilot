@@ -1,0 +1,171 @@
+/* 대시보드 리스트 테이블 */
+.dashboard-list-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-top: 32px;
+}
+
+.dashboard-list-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dashboard-list-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.list-count {
+    background: rgba(0, 212, 170, 0.1);
+    color: var(--accent-primary);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.consultation-table-wrapper {
+    overflow-x: auto;
+}
+
+.consultation-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.consultation-table th {
+    text-align: left;
+    padding: 16px 24px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    white-space: nowrap;
+}
+
+.consultation-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    vertical-align: top;
+}
+
+.consultation-table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.cell-primary {
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.cell-secondary {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.cell-sub {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-badge.confirmed {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.status-badge.paid {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.status-badge.consulting {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.status-badge.canceled {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.status-badge.default {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.remark-text {
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.remark-urgent {
+    color: #ef4444;
+}
+
+.remark-followup {
+    color: #f59e0b;
+}
+
+/* Stats Card Active States */
+.stats-card.active {
+    border-color: var(--accent-primary);
+    background: rgba(0, 212, 170, 0.03);
+    box-shadow: 0 0 20px rgba(0, 212, 170, 0.1);
+}
+
+.stats-card.urgent .stats-value {
+    color: #ef4444;
+    -webkit-text-fill-color: #ef4444;
+    background: none;
+}
+
+.stats-card.urgent.active {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.05);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.1);
+}
+
+.section-label {
+    margin-bottom: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.click-hint {
+    font-size: 12px;
+    font-weight: normal;
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.empty-state {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-secondary);
+}

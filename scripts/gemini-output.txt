@@ -1,0 +1,7 @@
+﻿[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+=== Gemini API Test ===
+API Key: AIzaSyBODTq7JDE...
+Model created. Testing...
+SUCCESS!
+Response: OK
+
