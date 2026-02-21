@@ -15,6 +15,7 @@ export default function ConfirmationPage() {
     const [analyzing, setAnalyzing] = useState(false);
     const [analysisResult, setAnalysisResult] = useState<DetailedProductInfo | null>(null);
     const [analysisError, setAnalysisError] = useState('');
+    const [analysisStep, setAnalysisStep] = useState('');
 
     // 폼 데이터
     const [customerName, setCustomerName] = useState('');
@@ -111,17 +112,41 @@ export default function ConfirmationPage() {
         if (!productUrl) return;
         setAnalyzing(true);
         setAnalysisError('');
+        setAnalysisStep('1단계: 데이터 수집 중... (약 5-10초)');
         setAnalysisResult(null);
+
         try {
-            const res = await fetch('/api/confirmation/analyze', {
+            // [Step 1] Crawl
+            const crawlRes = await fetch('/api/confirmation/analyze/crawl', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: productUrl }),
             });
+            const crawlJson = await crawlRes.json();
+
+            if (!crawlJson.success) {
+                setAnalysisError(crawlJson.error || '데이터 수집에 실패했습니다.');
+                setAnalyzing(false);
+                return;
+            }
+
+            setAnalysisStep('2단계: AI 분석 중... (약 3-5초)');
+
+            // [Step 2] Analyze
+            const res = await fetch('/api/confirmation/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    url: productUrl,
+                    html: crawlJson.html
+                }),
+            });
             const json = await res.json();
+
             if (json.success && json.data) {
                 const raw = json.data;
                 setAnalysisResult(raw);
+                setAnalysisStep('');
 
                 // ---- 기본 정보 ----
                 if (raw.title) setProductName(raw.title);
@@ -198,6 +223,7 @@ export default function ConfirmationPage() {
             setAnalysisError(err.message);
         } finally {
             setAnalyzing(false);
+            setAnalysisStep('');
         }
     };
 
@@ -356,7 +382,7 @@ export default function ConfirmationPage() {
                 </div>
                 {analyzing && (
                     <div className="analysis-status">
-                        <div className="spinner-small"></div> URL을 분석하고 있습니다...
+                        <div className="spinner-small"></div> {analysisStep || 'URL을 분석하고 있습니다...'}
                     </div>
                 )}
                 {analysisError && (

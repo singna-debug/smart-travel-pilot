@@ -90,7 +90,7 @@ export async function fetchContent(url: string): Promise<{ text: string, nextDat
     }
 }
 
-function htmlToText(html: string): string {
+export function htmlToText(html: string): string {
     // 메타데이터 추출
     let pageTitle = '';
     const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
@@ -241,7 +241,7 @@ ${text.substring(0, 8000)}
 /**
  * 확정서 전용 종합 분석 — 페이지 전체 내용에서 일정/식사/호텔/포함사항 등 모두 추출
  */
-async function analyzeForConfirmation(text: string, url: string, nextData?: string): Promise<any | null> {
+export async function analyzeForConfirmation(text: string, url: string, nextData?: string): Promise<any | null> {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return null;
 
