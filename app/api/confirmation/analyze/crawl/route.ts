@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { scrapeWithBrowser } from '@/lib/browser-crawler';
+import { htmlToText } from '@/lib/url-crawler';
 
 /**
- * scrapeWithScrapingBee - lib/url-crawler.ts의 로직을 재사용하되 API 라우트에서 직접 호출
- */
-/**
- * scrapeWithScrapingBee - 최적화된 수집 로직
+ * scrapeWithScrapingBeeTiered - 최적화된 수집 로직
  * tier: 1(Interactive), 2(Simple Render), 3(Fast Fetch)
  */
 async function scrapeWithScrapingBeeTiered(url: string, tier: number): Promise<string | null> {
@@ -17,24 +14,24 @@ async function scrapeWithScrapingBeeTiered(url: string, tier: number): Promise<s
         let timeout = 7000;
 
         if (tier === 1) {
-            // Tier 1: Interactive (Scroll + Click)
+            // Tier 1: Interactive (Scroll + Click) - 5.5초로 제한하여 오버헤드 확보
             const jsScenario = {
                 instructions: [
                     { scroll_to: "bottom" },
-                    { wait: 1000 },
-                    { evaluate: "document.querySelectorAll('button, a, div, span').forEach(el => { const txt = el.innerText || ''; if(['상세', '전체', '펼치기', '더보기'].some(w => txt.includes(w))) { try { el.click(); } catch(e){} } })" },
-                    { wait: 1000 },
+                    { wait: 800 },
+                    { evaluate: "document.querySelectorAll('button, a, div, span').forEach(el => { const txt = el.innerText || ''; if(['상세', '전체', '펼치기', '더보기', '일정'].some(w => txt.includes(w))) { try { el.click(); } catch(e){} } })" },
+                    { wait: 800 },
                     { scroll_to: "bottom" }
                 ]
             };
-            scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=load&timeout=15000&js_scenario=${encodeURIComponent(JSON.stringify(jsScenario))}`;
-            timeout = 6500;
+            scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=load&timeout=12000&js_scenario=${encodeURIComponent(JSON.stringify(jsScenario))}`;
+            timeout = 5500;
         } else if (tier === 2) {
-            // Tier 2: Simple JS Render (No scenario)
+            // Tier 2: Simple JS Render (No scenario) - 2.5초
             scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=load&timeout=10000`;
             timeout = 2500;
         } else {
-            // Tier 3: Fast Fetch (No JS)
+            // Tier 3: Fast Fetch (No JS) - 0.8초
             scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&timeout=5000`;
             timeout = 800;
         }
@@ -65,15 +62,15 @@ export async function POST(request: NextRequest) {
 
         let html: string | null = null;
 
-        // [Tier 1] 정밀 수집 시도 (6.5초)
+        // 1단계: 정밀 수집 시도
         html = await scrapeWithScrapingBeeTiered(url, 1);
 
-        // [Tier 2] 실패 시 간편 렌더링 시도 (2.5초)
+        // 2단계: 실패 시 간편 렌더링 시도
         if (!html) {
             html = await scrapeWithScrapingBeeTiered(url, 2);
         }
 
-        // [Tier 3] 실패 시 초고속 수집 시도 (0.8초)
+        // 3단계: 실패 시 초고속 수집 시도
         if (!html) {
             html = await scrapeWithScrapingBeeTiered(url, 3);
         }
@@ -81,12 +78,31 @@ export async function POST(request: NextRequest) {
         if (!html) {
             return NextResponse.json({
                 success: false,
-                error: '데이터 수집 실패 (타임아웃 또는 API 오류). API 설정과 주소를 확인해주세요.'
+                error: '데이터 수집 실패 (타임아웃 또는 API 오류).'
             });
         }
 
-        console.log(`[CrawlAPI] 수집 성공: ${html.length}자`);
-        return NextResponse.json({ success: true, html });
+        // [핵심 최적화] HTML 전체 대신 정제된 텍스트와 NEXT_DATA만 추출하여 반환
+        // 이를 통해 페이로드 크기를 4.5MB 이하(보통 수십KB)로 줄여 Vercel 제한을 회피함
+        const cleanedText = htmlToText(html);
+
+        let nextData: string | undefined = undefined;
+        const startIdx = html.indexOf('<script id="__NEXT_DATA__"');
+        if (startIdx !== -1) {
+            const jsonStart = html.indexOf('>', startIdx) + 1;
+            const jsonEnd = html.indexOf('</script>', jsonStart);
+            if (jsonStart !== 0 && jsonEnd !== -1) {
+                nextData = html.substring(jsonStart, jsonEnd);
+            }
+        }
+
+        console.log(`[CrawlAPI] 수집 성공 (정제됨): ${cleanedText.length}자, NextData: ${nextData?.length || 0}자`);
+
+        return NextResponse.json({
+            success: true,
+            text: cleanedText,
+            nextData: nextData
+        });
     } catch (error: any) {
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }

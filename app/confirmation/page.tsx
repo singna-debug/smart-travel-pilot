@@ -138,7 +138,8 @@ export default function ConfirmationPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     url: productUrl,
-                    html: crawlJson.html
+                    text: crawlJson.text,
+                    nextData: crawlJson.nextData
                 }),
             });
             const json = await res.json();
