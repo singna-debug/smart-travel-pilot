@@ -98,9 +98,6 @@ export async function scrapeWithBrowser(url: string): Promise<string | null> {
             console.log('[Browser] 클릭 처리 중 오류 발생 (무시하고 진행)', e);
         }
 
-        console.log('[Browser] 스크린샷 캡쳐 중...');
-        await page.screenshot({ path: 'puppeteer-debug.png', fullPage: true });
-
         console.log('[Browser] 텍스트 및 속성 추출...');
         const content = await page.evaluate(() => {
             // img 태그를 제외한 스크립트, 스타일 등만 제거

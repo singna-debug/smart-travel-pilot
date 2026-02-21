@@ -52,9 +52,6 @@ async function quickFetch(url: string, retries = 2): Promise<{ html: string; tit
         const titleMatch = text.match(/<title[^>]*>(.*?)<\/title>/i);
         if (titleMatch) title = titleMatch[1].trim();
 
-        // 디버깅용 HTML 덤프
-        require('fs').writeFileSync('raw_html_dump.html', text);
-
         return { html: text, title };
 
     } catch (error) {
