@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { crawlForConfirmation } from '@/lib/url-crawler';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // 60초까지 연장 (Vercel Pro 플랜 지원)
 
 /**
  * POST /api/confirmation/analyze
