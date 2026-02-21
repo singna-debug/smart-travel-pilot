@@ -63,7 +63,7 @@ export default function DashboardPage() {
     return <div className="loading-spinner">대시보드 데이터를 불러오는 중...</div>;
   }
 
-  const currentList = data?.lists[activeFilter as keyof typeof data.lists] || [];
+  const currentList = data ? data.lists[activeFilter as keyof typeof data.lists] : [];
 
   return (
     <div>
@@ -87,24 +87,24 @@ export default function DashboardPage() {
           <div onClick={() => handleCardClick('completedInquiries', '결제 완료')} style={{ cursor: 'pointer' }}>
             <StatsCard value={data?.summary.completedCount || 0} label="결제 완료" isActive={activeFilter === 'completedInquiries'} />
           </div>
-          <div onClick={() => handleCardClick('needReminders', '리마인드 필요')} style={{ cursor: 'pointer' }}>
-            <StatsCard value={data?.summary.reminderCount || 0} label="리마인드 필요" isActive={activeFilter === 'needReminders'} isUrgent={true} />
-          </div>
         </div>
       </section>
 
-      {/* 2. 스케줄링 (향후 7일) */}
+      {/* 2. 스케줄링 */}
       <section className="dashboard-section" style={{ marginTop: '32px' }}>
-        <div className="section-label">🗓️ 챙겨야 할 스케줄 (향후 7일)</div>
+        <div className="section-label">🗓️ 챙겨야할 스케줄</div>
         <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-          <div onClick={() => handleCardClick('balanceDueTargets', '잔금 요청 대상')} style={{ cursor: 'pointer' }}>
-            <StatsCard value={data?.schedule.balanceDueCount || 0} label="잔금 요청" isActive={activeFilter === 'balanceDueTargets'} />
+          <div onClick={() => handleCardClick('needReminders', '리마인드 필요')} style={{ cursor: 'pointer' }}>
+            <StatsCard value={data?.summary.reminderCount || 0} label="리마인드 필요" isActive={activeFilter === 'needReminders'} isUrgent={true} />
           </div>
-          <div onClick={() => handleCardClick('travelNoticeTargets', '여행 안내문 발송')} style={{ cursor: 'pointer' }}>
-            <StatsCard value={data?.schedule.travelNoticeCount || 0} label="출발 3일 전 (안내문)" isActive={activeFilter === 'travelNoticeTargets'} />
+          <div onClick={() => handleCardClick('balanceDueTargets', '전체 예약 확정 현황')} style={{ cursor: 'pointer' }}>
+            <StatsCard value={data?.schedule.balanceDueCount || 0} label="예약 확정 (전체)" isActive={activeFilter === 'balanceDueTargets'} />
           </div>
-          <div onClick={() => handleCardClick('postTripTargets', '해피콜/후기 요청')} style={{ cursor: 'pointer' }}>
-            <StatsCard value={data?.schedule.postTripCount || 0} label="여행 종료 (후기)" isActive={activeFilter === 'postTripTargets'} />
+          <div onClick={() => handleCardClick('travelNoticeTargets', '전체 결제 완료 현황')} style={{ cursor: 'pointer' }}>
+            <StatsCard value={data?.schedule.travelNoticeCount || 0} label="결제 완료 (전체)" isActive={activeFilter === 'travelNoticeTargets'} />
+          </div>
+          <div onClick={() => handleCardClick('postTripTargets', '전체 상담 완료 현황')} style={{ cursor: 'pointer' }}>
+            <StatsCard value={data?.schedule.postTripCount || 0} label="상담 완료 (전체)" isActive={activeFilter === 'postTripTargets'} />
           </div>
         </div>
       </section>

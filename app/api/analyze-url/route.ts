@@ -115,11 +115,11 @@ async function analyzeMultipleUrls(urls: string[]) {
     const comparison = compareProducts(products);
 
     // 각 상품 정보
-    const productDetails = successfulResults.map(r => ({
+    const productDetails = successfulResults.map((r, i) => ({
         url: r.url,
         index: r.index,
         raw: r.info,
-        formatted: formatProductInfo(r.info!),
+        formatted: formatProductInfo(r.info!, i),
     }));
 
     return NextResponse.json({

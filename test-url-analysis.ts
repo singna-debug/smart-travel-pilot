@@ -16,7 +16,7 @@ if (fs.existsSync(envPath)) {
 }
 
 async function test() {
-    const url = 'https://www.modetour.com/package/99693648';
+    const url = 'https://www.modetour.com/package/102840987';
     console.log(`Testing URL: ${url}`);
     const startTime = Date.now();
 
@@ -31,6 +31,7 @@ async function test() {
         }
 
         console.log('Crawled Result:', JSON.stringify(result, null, 2));
+        fs.writeFileSync('test_crawler_output.json', JSON.stringify(result, null, 2));
 
     } catch (error) {
         console.error('Error during test:', error);

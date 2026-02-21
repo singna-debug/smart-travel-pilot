@@ -142,6 +142,8 @@ export async function GET(request: NextRequest) {
             lastMessageAt: c.timestamp ? new Date(c.timestamp).toISOString() : new Date().toISOString(),
             messageCount: 1,
             sheetRowIndex: c.sheetRowIndex,
+            sheetName: c.sheetName,
+            sheetGid: c.sheetGid,
         }));
 
         return NextResponse.json({

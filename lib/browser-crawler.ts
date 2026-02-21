@@ -15,6 +15,8 @@ export async function scrapeWithBrowser(url: string): Promise<string | null> {
 
         const page = await browser.newPage();
 
+        page.on('console', msg => console.log('\x1b[36m[Page]\x1b[0m', msg.text()));
+
         // 1. 데스크탑 환경 설정
         // await page.setUserAgent(DESKTOP_UA); // Modetour blocking issue?
         await page.setViewport({ width: 1920, height: 1080 });
@@ -67,24 +69,67 @@ export async function scrapeWithBrowser(url: string): Promise<string | null> {
             console.log('[Browser] 전체 콘텐츠 로딩 대기 실패 (시간 초과), 계속 진행');
         }
 
-        // 안정화 대기 시간 단축 (0.5초)
-        await new Promise(resolve => setTimeout(resolve, 500));
+        console.log('[Browser] 숨겨진 정보(더보기, 호텔정보 등) 로딩을 위한 클릭 처리...');
+        try {
+            await page.evaluate(async () => {
+                // 클릭할 키워드 목록
+                const keywords = ['더보기', '자세히 보기', '자세히보기', '펼치기', '상세보기', '상세', '호텔정보', '호텔 정보', '숙박정보', '포함', '불포함', '일정'];
 
-        console.log('[Browser] 텍스트 추출...');
+                // button, a, div, span 중에서 키워드를 포함하는 요소 찾기
+                const elements = Array.from(document.querySelectorAll('button, a, div.btn, span.btn, div[role="button"], span[role="button"]')) as HTMLElement[];
+
+                let clickedCount = 0;
+                for (const el of elements) {
+                    const text = (el.innerText || el.textContent || '').trim();
+                    if (text.length > 0 && text.length < 15 && keywords.some(k => text.includes(k))) {
+                        try {
+                            el.click();
+                            clickedCount++;
+                            // 클릭 후 잠시 대기
+                            await new Promise(r => setTimeout(r, 200));
+                        } catch (e) { }
+                    }
+                }
+                console.log(`[Browser In-Page] 클릭된 버튼 수: ${clickedCount}`);
+            });
+            // 모달이나 추가 콘텐츠가 로드될 시간 대기
+            await new Promise(resolve => setTimeout(resolve, 1500));
+        } catch (e) {
+            console.log('[Browser] 클릭 처리 중 오류 발생 (무시하고 진행)', e);
+        }
+
+        console.log('[Browser] 스크린샷 캡쳐 중...');
+        await page.screenshot({ path: 'puppeteer-debug.png', fullPage: true });
+
+        console.log('[Browser] 텍스트 및 속성 추출...');
         const content = await page.evaluate(() => {
-            const scripts = document.querySelectorAll('script, style, noscript, svg, img, header, footer');
+            // img 태그를 제외한 스크립트, 스타일 등만 제거
+            const scripts = document.querySelectorAll('script, style, noscript, svg, header, footer');
             scripts.forEach(s => s.remove());
 
-            // Prefix 없이 제목 + 본문 (단순화: debug-scraper.ts 방식)
-            return `${document.title}\n\n${document.body.innerText}`;
+            // 페이지 내 모든 이미지 수집 (숨겨진 모달 이미지 포함)
+            const images = document.querySelectorAll('img');
+            const imageUrls = new Set<string>();
+            images.forEach(img => {
+                if (img.src && typeof img.src === 'string' && img.src.startsWith('http')) {
+                    imageUrls.add(`[IMG: ${img.src}]`);
+                }
+            });
+
+            // 눈에 보이는 텍스트 추출
+            const visibleText = document.body.innerText;
+
+            // 텍스트와 이미지 결합
+            const imgBlock = Array.from(imageUrls).join('\n');
+            return `${document.title}\n\n${visibleText}\n\n--- [페이지 내 발견된 이미지 목록] ---\n${imgBlock}`;
         });
 
-        console.log(`[Browser] 추출 완료: ${content.length}자 (SIMPLE LOGIC)`);
+        console.log(`[Browser] 추출 완료: ${content.length}자`);
         return content;
 
     } catch (error) {
         console.error('[Browser] 오류:', error);
-        return null; // fallback to ScrapingBee
+        return null;
     } finally {
         if (browser) await browser.close();
     }

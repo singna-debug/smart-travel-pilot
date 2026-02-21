@@ -11,13 +11,12 @@ interface NavItem {
 
 const navItems: NavItem[] = [
     { href: '/', label: '대시보드', icon: '📊' },
-    { href: '/chat', label: 'AI 채팅', icon: '🤖' },
     { href: '/chats', label: '상담 목록', icon: '💬' },
+    { href: '/confirmation', label: '확정서 제작', icon: '📄' },
     { href: '/products', label: '상품 교육', icon: '🎓' },
     { href: '/manual-log', label: '수동 상담', icon: '📝' },
     { href: '/tools', label: 'URL 분석', icon: '🔧' },
     { href: '/messages', label: '멘트제작', icon: '✉️' },
-    { href: '/logs', label: '활동 로그', icon: '📋' },
 ];
 
 export default function Sidebar() {
