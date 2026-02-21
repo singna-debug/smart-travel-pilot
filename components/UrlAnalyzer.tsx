@@ -270,13 +270,44 @@ export default function UrlAnalyzer() {
 
         setLoading(true);
         setError('');
+        setAnalysisStep('1단계: 각 상품 데이터 수집 중... (약 10초)');
         setCompareResult(null);
 
         try {
+            // [Step 1] Crawl all URLs in parallel
+            const crawlResults = await Promise.all(
+                validUrls.map(async (url) => {
+                    try {
+                        const res = await fetch('/api/confirmation/analyze/crawl', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url }),
+                        });
+                        const json = await res.json();
+                        return { url, html: json.success ? json.html : null };
+                    } catch (e) {
+                        return { url, html: null };
+                    }
+                })
+            );
+
+            const successfulCrawls = crawlResults.filter(r => r.html !== null);
+            if (successfulCrawls.length < 2) {
+                setError('최소 2개 이상의 상품 정보 수집에 성공해야 비교가 가능합니다.');
+                setLoading(false);
+                return;
+            }
+
+            setAnalysisStep('2단계: 상품 비교 분석 중... (약 5-8초)');
+
+            // [Step 2] Analyze
             const response = await fetch('/api/analyze-url', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ urls: validUrls }),
+                body: JSON.stringify({
+                    urls: successfulCrawls.map(c => c.url),
+                    htmls: successfulCrawls.map(c => c.html) // 전달된 HTML들
+                }),
             });
 
             const data = await response.json();
@@ -296,6 +327,7 @@ export default function UrlAnalyzer() {
             console.error(err);
         } finally {
             setLoading(false);
+            setAnalysisStep('');
         }
     };
 

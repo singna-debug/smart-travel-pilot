@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
         // 다중 URL
         if (urls && Array.isArray(urls)) {
-            return await analyzeMultipleUrls(urls);
+            return await analyzeMultipleUrls(urls, body.htmls);
         }
 
         return NextResponse.json(
@@ -95,29 +95,53 @@ async function analyzeSingleUrl(url: string, html?: string) {
     });
 }
 
-async function analyzeMultipleUrls(urls: string[]) {
+async function analyzeMultipleUrls(urls: string[], htmls?: (string | null)[]) {
     // URL 유효성 검사
-    const validUrls = urls.filter(url => {
+    const validInputs = urls.map((url, i) => ({
+        url,
+        html: htmls ? htmls[i] : undefined
+    })).filter(input => {
         try {
-            new URL(url);
+            new URL(input.url);
             return true;
         } catch {
             return false;
         }
     }).slice(0, 5); // 최대 5개
 
-    if (validUrls.length === 0) {
+    if (validInputs.length === 0) {
         return NextResponse.json(
             { success: false, error: '유효한 URL이 없습니다.' },
             { status: 400 }
         );
     }
 
-    // 병렬로 크롤링
+    // 병렬로 분석 (이미 HTML이 있으면 수집 스킵)
     const results = await Promise.all(
-        validUrls.map(async (url, index) => {
-            const info = await crawlTravelProduct(url);
-            return { url, index: index + 1, info };
+        validInputs.map(async (input, index) => {
+            let info: DetailedProductInfo | null = null;
+
+            if (input.html) {
+                console.log(`[API] Multi-Analyze [${index + 1}] 2단계 모드`);
+                const fullText = htmlToText(input.html);
+
+                let nextData: string | undefined = undefined;
+                const startIdx = input.html.indexOf('<script id="__NEXT_DATA__"');
+                if (startIdx !== -1) {
+                    const jsonStart = input.html.indexOf('>', startIdx) + 1;
+                    const jsonEnd = input.html.indexOf('</script>', jsonStart);
+                    if (jsonStart !== 0 && jsonEnd !== -1) {
+                        nextData = input.html.substring(jsonStart, jsonEnd);
+                    }
+                }
+
+                info = await analyzeForConfirmation(fullText, input.url, nextData);
+            } else {
+                console.log(`[API] Multi-Analyze [${index + 1}] 1단계 모드`);
+                info = await crawlTravelProduct(input.url);
+            }
+
+            return { url: input.url, index: index + 1, info };
         })
     );
 
