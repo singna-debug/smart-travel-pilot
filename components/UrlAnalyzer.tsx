@@ -229,7 +229,8 @@ export default function UrlAnalyzer() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     url: singleUrl,
-                    html: crawlJson.html
+                    text: crawlJson.text,
+                    nextData: crawlJson.nextData
                 }),
             });
 
@@ -284,14 +285,18 @@ export default function UrlAnalyzer() {
                             body: JSON.stringify({ url }),
                         });
                         const json = await res.json();
-                        return { url, html: json.success ? json.html : null };
+                        return {
+                            url,
+                            text: json.success ? json.text : null,
+                            nextData: json.success ? json.nextData : null
+                        };
                     } catch (e) {
                         return { url, html: null };
                     }
                 })
             );
 
-            const successfulCrawls = crawlResults.filter(r => r.html !== null);
+            const successfulCrawls = crawlResults.filter(r => r.text !== null);
             if (successfulCrawls.length < 2) {
                 setError('최소 2개 이상의 상품 정보 수집에 성공해야 비교가 가능합니다.');
                 setLoading(false);
@@ -306,7 +311,8 @@ export default function UrlAnalyzer() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     urls: successfulCrawls.map(c => c.url),
-                    htmls: successfulCrawls.map(c => c.html) // 전달된 HTML들
+                    texts: successfulCrawls.map(c => (c as any).text),
+                    nextDatas: successfulCrawls.map(c => (c as any).nextData)
                 }),
             });
 
