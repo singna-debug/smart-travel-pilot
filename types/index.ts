@@ -20,7 +20,10 @@ export interface ConsultationData {
     next_followup: string;
   };
   sheetRowIndex?: number;
+  sheetName?: string;
+  sheetGid?: number;
   summary?: string;
+  source?: '카카오톡' | '웹' | '대시보드' | '직접입력' | string;
   timestamp?: string;
   visitor_id?: string;
 }
@@ -128,4 +131,108 @@ export interface DetailedProductInfo {
   hasNoOption: boolean;
   hasFreeSchedule: boolean;
   isProduct?: boolean;
+  index?: number;
+}
+
+// URL 분석기 단일 결과 타입
+export interface SingleResult {
+  raw: DetailedProductInfo;
+  formatted: string;
+  recommendation: string;
+}
+
+// URL 다중 분석 결과 항목 타입
+export interface AnalysisResult {
+  url: string;
+  index: number;
+  raw: DetailedProductInfo;
+  formatted: string;
+}
+
+// 확정서 업로드 파일 타입
+export interface DocumentFile {
+  id: string;
+  name: string;
+  type: 'boarding_pass' | 'visa' | 'insurance' | 'other';
+  label: string;
+  url: string;
+  uploadedAt: string;
+}
+
+// 여행자 정보
+export interface TravelerInfo {
+  name: string;
+  type: 'adult' | 'child' | 'infant';
+}
+
+// 호텔 기본 정보
+export interface HotelInfo {
+  name: string;
+  address: string;
+  checkIn: string;
+  checkOut: string;
+  images?: string[];
+  amenities?: string[];
+}
+
+// 모바일 확정서 데이터
+export interface ConfirmationDocument {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+
+  // 예약 기본 정보
+  reservationNumber: string;
+  status: '결제완료' | '예약확정' | '확정';
+
+  // 고객 정보
+  customer: {
+    name: string;
+    phone: string;
+  };
+
+  // 여행 정보
+  trip: {
+    productName: string;
+    productUrl: string;
+    destination: string;
+    departureDate: string;
+    returnDate: string;
+    duration: string;
+    travelers: TravelerInfo[];
+    adultCount: number;
+    childCount: number;
+    infantCount: number;
+  };
+
+  // 항공 정보
+  flight: {
+    airline: string;
+    departureAirport: string;
+    departureTime: string;
+    arrivalTime: string;
+    returnDepartureTime: string;
+    returnArrivalTime: string;
+  };
+
+  // 숙박 정보
+  hotel: HotelInfo;
+
+  // 일정표 (URL 분석에서 가져옴)
+  itinerary: any[];
+
+  // 포함/불포함
+  inclusions: string[];
+  exclusions: string[];
+
+  // 관리자 메모
+  notices: string;
+  checklist: string;
+  cancellationPolicy: string;
+
+  // 업로드 서류
+  files: DocumentFile[];
+
+  // 상품 분석 원본 데이터
+  productData?: DetailedProductInfo;
 }

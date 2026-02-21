@@ -70,26 +70,194 @@ async function getSheetTitles(sheets: any, spreadsheetId: string) {
         const sheetList = response.data.sheets || [];
 
         let consultationsSheet = 'Sheet1';
-        let messagesSheet = 'Sheet2';
         let consultationsGid = 0;
-        let messagesGid = 0;
+
+        // 월별 시트 목록 및 GID 매핑
+        const monthlySheets: string[] = [];
+        const monthGids: Record<string, number> = {};
+        const monthPattern = /^\d{4}-\d{2}$/;
 
         sheetList.forEach((s: any) => {
             const title = s.properties.title;
             const gid = s.properties.sheetId;
+
+            if (monthPattern.test(title)) {
+                monthlySheets.push(title);
+                monthGids[title] = gid;
+            }
+
             if (title === '시트1' || title === 'Sheet1') {
                 consultationsSheet = title;
                 consultationsGid = gid;
             }
-            if (title === '시트2' || title === 'Sheet2') {
-                messagesSheet = title;
-                messagesGid = gid;
+        });
+
+        // 월별 시트가 있으면 가장 최신 달을 기본 상담 시트로 설정
+        if (monthlySheets.length > 0) {
+            monthlySheets.sort().reverse();
+            consultationsSheet = monthlySheets[0];
+            consultationsGid = monthGids[consultationsSheet] || 0;
+        }
+
+        return { consultationsSheet, consultationsGid, monthlySheets, monthGids, sheetList };
+    } catch (e) {
+        return { consultationsSheet: 'Sheet1', consultationsGid: 0, monthlySheets: [], monthGids: {}, sheetList: [] };
+    }
+}
+
+/**
+ * 특정 월의 시트 GID를 가져옵니다.
+ */
+export async function getMonthSheetGid(month?: string): Promise<number> {
+    try {
+        const sheets = getGoogleSheetsClient();
+        const sheetId = process.env.GOOGLE_SHEET_ID;
+        if (!sheetId) return 0;
+
+        const targetMonth = month || format(new Date(), 'yyyy-MM');
+        const { monthGids } = await getSheetTitles(sheets, sheetId);
+
+        return monthGids[targetMonth] || 0;
+    } catch (error) {
+        return 0;
+    }
+}
+
+/**
+ * 특정 월의 시트를 가져오거나 없으면 생성합니다.
+ */
+async function getOrCreateMonthlySheet(sheets: any, spreadsheetId: string, month: string) {
+    try {
+        const response = await sheets.spreadsheets.get({ spreadsheetId });
+        const sheetList = response.data.sheets || [];
+        const existingSheet = sheetList.find((s: any) => s.properties.title === month);
+
+        if (existingSheet) {
+            return { title: month, gid: existingSheet.properties.sheetId };
+        }
+
+        // '시트1' 또는 'Sheet1'이 있고, 목표하는 시트(month)가 없으면 '시트1'을 이름 변경 시도
+        const defaultSheet = sheetList.find((s: any) => s.properties.title === '시트1' || s.properties.title === 'Sheet1');
+        if (defaultSheet) {
+            // 해당 시트의 내용을 확인하여 비어있으면 이름 변경 (실제 구현에선 안전을 위해 이름 변경만 수행하거나 새로 생성)
+            // 여기서는 사용자 요청에 따라 이름 변경을 우선 시도
+            await sheets.spreadsheets.batchUpdate({
+                spreadsheetId,
+                requestBody: {
+                    requests: [{
+                        updateSheetProperties: {
+                            properties: {
+                                sheetId: defaultSheet.properties.sheetId,
+                                title: month,
+                            },
+                            fields: 'title',
+                        }
+                    }]
+                }
+            });
+            console.log(`[Google Sheets] '${defaultSheet.properties.title}'를 '${month}'로 변경했습니다.`);
+            return { title: month, gid: defaultSheet.properties.sheetId };
+        }
+
+        // 시트가 없으면 신규 생성
+        const addSheetResponse = await sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            requestBody: {
+                requests: [{
+                    addSheet: {
+                        properties: { title: month }
+                    }
+                }]
             }
         });
 
-        return { consultationsSheet, messagesSheet, consultationsGid, messagesGid };
-    } catch (e) {
-        return { consultationsSheet: 'Sheet1', messagesSheet: 'Sheet2', consultationsGid: 0, messagesGid: 0 };
+        const newSheetId = addSheetResponse.data.replies[0].addSheet.properties.sheetId;
+
+        // 헤더 초기화
+        const consultationHeaders = [
+            '상담일시', '고객성함', '연락처', '목적지', '출발일', '귀국일', '기간', '상품명', '상품URL', '상담요약', '상담단계', '팔로업일', '잔금기한', '안내발송일', '유입경로'
+        ];
+
+        await sheets.spreadsheets.values.update({
+            spreadsheetId,
+            range: `${month}!A1:O1`,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: { values: [consultationHeaders] },
+        });
+
+        await applyDropdownValidation(sheets, spreadsheetId, newSheetId);
+
+        return { title: month, gid: newSheetId };
+    } catch (error) {
+        console.error(`[Google Sheets] 월별 시트(${month}) 처리 오류:`, error);
+        throw error;
+    }
+}
+
+/**
+ * 상담단계 열(K열)에 드롭다운 데이터 유효성 검사를 추가합니다.
+ */
+async function applyDropdownValidation(sheets: any, spreadsheetId: string, sheetGid: number) {
+    try {
+        await sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            requestBody: {
+                requests: [
+                    {
+                        setDataValidation: {
+                            range: {
+                                sheetId: sheetGid,
+                                startRowIndex: 1, // 헤더 다음 줄부터
+                                startColumnIndex: 10, // K 열
+                                endColumnIndex: 11,
+                            },
+                            rule: {
+                                condition: {
+                                    type: 'ONE_OF_LIST',
+                                    values: [
+                                        { userEnteredValue: '상담중' },
+                                        { userEnteredValue: '견적제공' },
+                                        { userEnteredValue: '예약확정' },
+                                        { userEnteredValue: '결제완료' },
+                                        { userEnteredValue: '취소/보류' }
+                                    ]
+                                },
+                                showCustomUi: true,
+                                strict: false
+                            }
+                        }
+                    }
+                ]
+            }
+        });
+    } catch (error) {
+        console.error(`[Google Sheets] 드롭다운 적용 오류 (GID: ${sheetGid}):`, error);
+    }
+}
+
+/**
+ * 12개월분 시트를 미리 생성합니다.
+ */
+export async function preCreateMonthlySheets(year?: string): Promise<boolean> {
+    try {
+        const sheets = getGoogleSheetsClient();
+        const sheetId = process.env.GOOGLE_SHEET_ID;
+        if (!sheetId) return false;
+
+        const targetYear = year || format(new Date(), 'yyyy');
+        const months = Array.from({ length: 12 }, (_, i) => `${targetYear}-${String(i + 1).padStart(2, '0')}`);
+
+        console.log(`[Google Sheets] ${targetYear}년도 12개월 시트 생성을 시작합니다...`);
+
+        for (const month of months) {
+            await getOrCreateMonthlySheet(sheets, sheetId, month);
+        }
+
+        console.log(`[Google Sheets] ${targetYear}년도 시트 생성 완료`);
+        return true;
+    } catch (error) {
+        console.error('[Google Sheets] 월별 시트 일괄 생성 실패:', error);
+        return false;
     }
 }
 
@@ -106,7 +274,8 @@ export async function appendConsultationToSheet(data: ConsultationData): Promise
             return false;
         }
 
-        const { consultationsSheet } = await getSheetTitles(sheets, sheetId);
+        const currentMonth = format(new Date(), 'yyyy-MM');
+        const { title: targetSheet } = await getOrCreateMonthlySheet(sheets, sheetId, currentMonth);
 
         const timestamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
 
@@ -126,18 +295,19 @@ export async function appendConsultationToSheet(data: ConsultationData): Promise
             data.automation.next_followup,      // L: 팔로업일
             data.automation.balance_due_date,   // M: 잔금기한
             data.automation.notice_date,        // N: 안내발송일
+            data.source || '카카오톡',           // O: 유입경로 (기본값 카카오톡)
         ];
 
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
-            range: `${consultationsSheet}!A:L`,
+            range: `${targetSheet}!A:O`,
             valueInputOption: 'USER_ENTERED',
             requestBody: {
                 values: [row],
             },
         });
 
-        console.log('상담 데이터가 Google Sheets에 기록되었습니다.');
+        console.log(`상담 데이터가 Google Sheets (${targetSheet})에 기록되었습니다.`);
         cachedConsultations = null; // 캐시 초기화
         return true;
     } catch (error) {
@@ -164,16 +334,15 @@ export async function upsertConsultationToSheet(data: ConsultationData): Promise
             console.log(msg);
         };
 
-        const { consultationsSheet, consultationsGid } = await getSheetTitles(sheets, sheetId);
+        const { monthlySheets, consultationsSheet: fallbackSheet, consultationsGid: fallbackGid } = await getSheetTitles(sheets, sheetId);
 
-        // 1. 기존 데이터 조회
-        const response = await sheets.spreadsheets.values.get({
-            spreadsheetId: sheetId,
-            range: `${consultationsSheet}!A:N`,
-        });
+        // 검색할 시트 목록 (월별 시트 + 기본 시트)
+        const sheetsToSearch = monthlySheets.length > 0 ? monthlySheets : [fallbackSheet];
 
-        const rows = response.data.values || [];
-        const rowsToDelete: number[] = []; // 삭제할 행 번호들 (1-based)
+        let foundRow: any[] | null = null;
+        let foundSheet = '';
+        let foundGid = 0;
+        let foundRowIndex = -1;
         let oldDestination = '';
 
         // 성함 또는 연락처로 매칭
@@ -181,30 +350,43 @@ export async function upsertConsultationToSheet(data: ConsultationData): Promise
         const targetPhone = safePhone.replace(/[^0-9]/g, ''); // 숫자만 남김
         log(`[Upsert] 탐색 시작 (${data.customer.name}, ${targetPhone})`);
 
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i];
-            const rowName = (row[1] || '').trim();
-            const rowPhone = (row[2] || '').replace(/[^0-9]/g, '');
+        // 모든 시트를 돌며 최신 매칭 항목 찾기
+        for (const sheetTitle of sheetsToSearch) {
+            const resp = await sheets.spreadsheets.values.get({
+                spreadsheetId: sheetId,
+                range: `${sheetTitle}!A:O`,
+            });
+            const rows = resp.data.values || [];
 
-            let matched = false;
-            // 1. 전화번호 매칭
-            if (targetPhone && targetPhone.length > 5 && rowPhone === targetPhone) {
-                matched = true;
-                log(`[Upsert] 매칭 성공(전화번호) - 행: ${i + 1}`);
-            }
-            // 2. 이름 매칭
-            else if (data.customer.name !== '미정' && rowName === data.customer.name && (!targetPhone || targetPhone.length <= 5)) {
-                matched = true;
-                log(`[Upsert] 매칭 성공(이름) - 행: ${i + 1}`);
-            }
+            for (let i = rows.length - 1; i >= 1; i--) {
+                const row = rows[i];
+                const rowName = (row[1] || '').trim();
+                const rowPhone = (row[2] || '').replace(/[^0-9]/g, '');
 
-            if (matched) {
-                rowsToDelete.push(i + 1);
-                oldDestination = row[3] || '';
+                let matched = false;
+                if (targetPhone && targetPhone.length > 5 && rowPhone === targetPhone) matched = true;
+                else if (data.customer.name !== '미정' && rowName === data.customer.name && (!targetPhone || targetPhone.length <= 5)) matched = true;
+
+                if (matched) {
+                    foundRow = row;
+                    foundSheet = sheetTitle;
+                    foundRowIndex = i + 1;
+                    oldDestination = row[3] || '';
+
+                    // GID 찾기 위해 다시 조회 (or sheetTitle이 '시트1'이면 fallbackGid 사용)
+                    if (sheetTitle === fallbackSheet) foundGid = fallbackGid;
+                    else {
+                        const sInfo = await sheets.spreadsheets.get({ spreadsheetId: sheetId });
+                        const s = sInfo.data.sheets?.find((s: any) => s.properties.title === sheetTitle);
+                        foundGid = s?.properties?.sheetId || 0;
+                    }
+                    break;
+                }
             }
+            if (foundRow) break;
         }
 
-        // 여행지가 변경되었는지 확인 및 요약 업데이트
+        // 여행지 변경 확인 및 요약 업데이트
         let updatedSummary = data.summary || '';
         if (oldDestination && data.trip.destination && oldDestination !== data.trip.destination) {
             const historyNote = `[이력: 전에는 ${oldDestination} 여행지를 고려했었다]`;
@@ -229,45 +411,40 @@ export async function upsertConsultationToSheet(data: ConsultationData): Promise
             data.automation.next_followup,      // L: 팔로업일
             data.automation.balance_due_date,   // M: 잔금기한
             data.automation.notice_date,        // N: 안내발송일
+            data.source || '카카오톡',           // O: 유입경로
         ];
 
-        // 2. 행 삭제 (역순으로 삭제해야 인덱스 꼬임 방지)
-        if (rowsToDelete.length > 0) {
-            rowsToDelete.sort((a, b) => b - a); // 내림차순 정렬
-            log(`[Upsert] 삭제할 행 목록: ${rowsToDelete.join(', ')}`);
-
-            const requests = rowsToDelete.map(rowIndex => ({
-                deleteDimension: {
-                    range: {
-                        sheetId: consultationsGid,
-                        dimension: 'ROWS',
-                        startIndex: rowIndex - 1,
-                        endIndex: rowIndex,
-                    },
+        // 2. 행 삭제
+        if (foundRowIndex > 0) {
+            log(`[Upsert] 기존 데이터 발견: ${foundSheet}, 행 ${foundRowIndex}. 삭제 실행.`);
+            await sheets.spreadsheets.batchUpdate({
+                spreadsheetId: sheetId,
+                requestBody: {
+                    requests: [{
+                        deleteDimension: {
+                            range: {
+                                sheetId: foundGid,
+                                dimension: 'ROWS',
+                                startIndex: foundRowIndex - 1,
+                                endIndex: foundRowIndex,
+                            },
+                        },
+                    }],
                 },
-            }));
-
-            try {
-                await sheets.spreadsheets.batchUpdate({
-                    spreadsheetId: sheetId,
-                    requestBody: { requests },
-                });
-                log(`[Upsert] ${rowsToDelete.length}개 행 삭제 성공`);
-            } catch (deleteError: any) {
-                log(`[Upsert] 행 삭제 실패: ${deleteError.message}`);
-            }
-        } else {
-            log('[Upsert] 삭제할 기존 행 없음 (신규 추가)');
+            });
         }
 
-        // 새 데이터 추가
+        // 3. 새 데이터 추가 (현재 월 시트에)
+        const currentMonth = format(new Date(), 'yyyy-MM');
+        const { title: targetSheet } = await getOrCreateMonthlySheet(sheets, sheetId, currentMonth);
+
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
-            range: `${consultationsSheet}!A:N`,
+            range: `${targetSheet}!A:O`,
             valueInputOption: 'USER_ENTERED',
             requestBody: { values: [newRow] },
         });
-        log('[Upsert] 새 데이터 추가 완료');
+        log(`[Upsert] 새 데이터 추가 완료 (${targetSheet})`);
         cachedConsultations = null; // 캐시 초기화
         return true;
     } catch (error: any) {
@@ -297,7 +474,7 @@ export async function initializeSheetHeaders(): Promise<boolean> {
 
         // 1. 상담 요약 시트 (사용자 맞춤 순서)
         const consultationHeaders = [
-            '상담일시', '고객성함', '연락처', '목적지', '출발일', '귀국일', '기간', '상품명', '상품URL', '상담요약', '상담단계', '팔로업일', '잔금기한', '안내발송일'
+            '상담일시', '고객성함', '연락처', '목적지', '출발일', '귀국일', '기간', '상품명', '상품URL', '상담요약', '상담단계', '팔로업일', '잔금기한', '안내발송일', '유입경로'
         ];
 
         // 2. 메시지 로그 시트
@@ -305,33 +482,64 @@ export async function initializeSheetHeaders(): Promise<boolean> {
             '일시', '사용자ID', '발신자', '내용'
         ];
 
-        const { consultationsSheet, messagesSheet } = await getSheetTitles(sheets, sheetId);
+        // 12개월 시트 생성
+        await preCreateMonthlySheets();
 
-        // 상담 요약 업데이트
+        const { consultationsSheet, consultationsGid, monthlySheets, monthGids } = await getSheetTitles(sheets, sheetId);
+
+        // 상담 요약 업데이트 (이미 위에서 생성되었을 수 있으나 헤더 보장 위해 호출)
         await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
-            range: `${consultationsSheet}!A1:L1`,
+            range: `${consultationsSheet}!A1:O1`,
             valueInputOption: 'USER_ENTERED',
             requestBody: { values: [consultationHeaders] },
         });
-        console.log(`✅ ${consultationsSheet} (상담 요약) 헤더 초기화 완료`);
 
-        // Sheet2 업데이트
-        try {
-            await sheets.spreadsheets.values.update({
-                spreadsheetId: sheetId,
-                range: `${messagesSheet}!A1:D1`,
-                valueInputOption: 'USER_ENTERED',
-                requestBody: { values: [messageHeaders] },
+        // 모든 시트에 드롭다운 적용
+        const dropdownRequests: any[] = [];
+        const gidsToUpdate = new Set<number>();
+        if (consultationsGid) gidsToUpdate.add(consultationsGid);
+        monthlySheets.forEach((m) => {
+            if (monthGids[m]) gidsToUpdate.add(monthGids[m]);
+        });
+
+        for (const gid of gidsToUpdate) {
+            dropdownRequests.push({
+                setDataValidation: {
+                    range: {
+                        sheetId: gid,
+                        startRowIndex: 1, // 헤더 다음 줄부터
+                        startColumnIndex: 10, // K 열 (상담단계)
+                        endColumnIndex: 11,
+                    },
+                    rule: {
+                        condition: {
+                            type: 'ONE_OF_LIST',
+                            values: [
+                                { userEnteredValue: '상담중' },
+                                { userEnteredValue: '견적제공' },
+                                { userEnteredValue: '예약확정' },
+                                { userEnteredValue: '결제완료' },
+                                { userEnteredValue: '상담완료' },
+                                { userEnteredValue: '취소/보류' }
+                            ]
+                        },
+                        showCustomUi: true,
+                        strict: false
+                    }
+                }
             });
-            console.log(`✅ ${messagesSheet} (메시지 로그) 헤더 초기화 완료`);
-        } catch (e: any) {
-            if (e.message?.includes('exceeds the sheet bounds') || e.message?.includes('not find range')) {
-                console.log(`ℹ️ ${messagesSheet}가 없습니다. 수동으로 하단 [+] 버튼을 눌러 시트를 추가해주세요.`);
-            } else {
-                console.warn(`⚠️ ${messagesSheet} 초기화 중 주의사항:`, e.message);
-            }
         }
+
+        if (dropdownRequests.length > 0) {
+            await sheets.spreadsheets.batchUpdate({
+                spreadsheetId: sheetId,
+                requestBody: { requests: dropdownRequests }
+            });
+            console.log(`✅ 모든 시트 상담단계(K열) 드롭다운 적용 완료`);
+        }
+
+        console.log(`✅ ${consultationsSheet} (상담 요약) 헤더 초기화 완료`);
 
         return true;
     } catch (error: any) {
@@ -349,21 +557,7 @@ export async function initializeSheetHeaders(): Promise<boolean> {
  */
 export async function appendMessageToSheet(visitorId: string, sender: 'user' | 'assistant', content: string): Promise<boolean> {
     try {
-        const sheets = getGoogleSheetsClient();
-        const sheetId = process.env.GOOGLE_SHEET_ID;
-        if (!sheetId) return false;
-
-        const { messagesSheet } = await getSheetTitles(sheets, sheetId);
-        const timestamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
-        const row = [timestamp, visitorId, sender === 'user' ? '고객' : 'AI상담사', content];
-
-        await sheets.spreadsheets.values.append({
-            spreadsheetId: sheetId,
-            range: `${messagesSheet}!A:D`,
-            valueInputOption: 'USER_ENTERED',
-            requestBody: { values: [row] },
-        });
-
+        // 메시지 로그 기록 기능이 필요 없으면 여기서 바로 true 리턴하거나 로직 제거
         return true;
     } catch (error) {
         console.error('메시지 시트 기록 오류:', error);
@@ -379,49 +573,56 @@ export async function getConsultationHistory(customerPhone: string): Promise<Con
         const sheets = getGoogleSheetsClient();
         const sheetId = process.env.GOOGLE_SHEET_ID;
 
-        if (!sheetId) {
-            return [];
-        }
+        if (!sheetId) return [];
 
-        const { consultationsSheet } = await getSheetTitles(sheets, sheetId);
-
-        const response = await sheets.spreadsheets.values.get({
-            spreadsheetId: sheetId,
-            range: `${consultationsSheet}!A:N`,
-        });
-
-        const rows = response.data.values || [];
+        const { monthlySheets, consultationsSheet: fallbackSheet } = await getSheetTitles(sheets, sheetId);
+        const sheetsToSearch = monthlySheets.length > 0 ? monthlySheets : [fallbackSheet];
         const history: ConsultationData[] = [];
 
-        // 첫 번째 행(헤더)은 제외
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i];
-            if (row[2] === customerPhone) { // 연락처(C)로 매칭
-                history.push({
-                    customer: {
-                        name: row[1] || '미정',
-                        phone: row[2] || '미정',
-                    },
-                    trip: {
-                        destination: row[3] || '',
-                        departure_date: row[4] || '',
-                        return_date: row[5] || '',    // F column
-                        duration: row[6] || '',       // G column
-                        product_name: row[7] || '',   // H column
-                        url: row[8] || '',            // I column
-                    },
-                    summary: row[9] || '',            // J column
-                    automation: {
-                        status: row[10] as ConsultationData['automation']['status'] || '상담중', // K column
-                        next_followup: row[11] || '',      // L column
-                        balance_due_date: row[12] || '',   // M column
-                        notice_date: row[13] || '',        // N column
-                    },
-                    timestamp: row[0],
-                    visitor_id: '',
-                });
+        for (const sName of sheetsToSearch) {
+            const response = await sheets.spreadsheets.values.get({
+                spreadsheetId: sheetId,
+                range: `${sName}!A:O`,
+            });
+
+            const rows = response.data.values || [];
+
+            // 첫 번째 행(헤더)은 제외
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (row[2] === customerPhone) { // 연락처(C)로 매칭
+                    history.push({
+                        customer: {
+                            name: row[1] || '미정',
+                            phone: row[2] || '미정',
+                        },
+                        trip: {
+                            destination: row[3] || '',
+                            departure_date: row[4] || '',
+                            return_date: row[5] || '',    // F column
+                            duration: row[6] || '',       // G column
+                            product_name: row[7] || '',   // H column
+                            url: row[8] || '',            // I column
+                        },
+                        summary: row[9] || '',            // J column
+                        automation: {
+                            status: row[10] as ConsultationData['automation']['status'] || '상담중', // K column
+                            next_followup: row[11] || '',      // L column
+                            balance_due_date: row[12] || '',   // M column
+                            notice_date: row[13] || '',        // N column
+                        },
+                        source: row[14] || '',               // O column
+                        timestamp: row[0],
+                        sheetName: sName,
+                        sheetRowIndex: i + 1,
+                        visitor_id: '',
+                    });
+                }
             }
         }
+
+        // 오래된순 정렬 (상담일시 기준) - 사용자가 신규상담이 밑으로 내려가길 원함
+        history.sort((a, b) => new Date(a.timestamp || 0).getTime() - new Date(b.timestamp || 0).getTime());
 
         return history;
     } catch (error) {
@@ -452,60 +653,73 @@ export async function getAllConsultations(forceRefresh = false): Promise<Consult
             return [];
         }
 
-        const { consultationsSheet } = await getSheetTitles(sheets, sheetId);
+        const { monthlySheets, consultationsSheet: fallbackSheet, sheetList } = await getSheetTitles(sheets, sheetId);
 
-        // console.log('[Google Sheets] 상담 목록 새로고침...');
-        const response = await sheets.spreadsheets.values.get({
-            spreadsheetId: sheetId,
-            range: `${consultationsSheet}!A:N`,
+        // 모든 월별 시트 + 기본 시트에서 데이터 수집
+        const sheetsToRead = monthlySheets.length > 0 ? monthlySheets : [fallbackSheet];
+        const allRows: any[] = [];
+
+        for (const sName of sheetsToRead) {
+            const resp = await sheets.spreadsheets.values.get({
+                spreadsheetId: sheetId,
+                range: `${sName}!A:O`,
+            });
+            const rows = resp.data.values || [];
+            if (rows.length > 1) {
+                // 헤더 제외하고 시트명 포함하여 저장
+                for (let i = 1; i < rows.length; i++) {
+                    const row: any = rows[i];
+                    row._sheetName = sName;
+                    row._rowIndex = i + 1;
+                    row._sheetGid = sheetList.find((s: any) => s.properties.title === sName)?.properties?.sheetId || 0;
+                    allRows.push(row);
+                }
+            }
+        }
+
+        const consultations: ConsultationData[] = [];
+        const processedKeys = new Set<string>();
+
+        // 최신순 정렬 (상담일시 기준) - 중복 제거 시 최신 데이터를 남기기 위함
+        allRows.sort((a, b) => {
+            const dateA = new Date(a[0] || 0).getTime();
+            const dateB = new Date(b[0] || 0).getTime();
+            return dateB - dateA;
         });
 
-        const rows = response.data.values || [];
-        const consultations: ConsultationData[] = [];
-        const processedKeys = new Set<string>(); // 중복 방지용 키 집합
-
-        // 역순으로 순회 (최신 데이터가 아래에 있으므로, 아래부터 읽어야 최신 우선)
-        for (let i = rows.length - 1; i >= 1; i--) {
-            const row = rows[i];
-
-            // 이름이나 폰번호가 없으면 유효하지 않은 데이터로 간주
+        for (const row of allRows) {
             if (!row[1] && !row[2]) continue;
 
-            const timestamp = row[0];
             const name = row[1] || '미정';
             const phone = row[2] || '미정';
-
-            // 고유 키 생성: 이름+전화번호 (전화번호가 없으면 이름만으로)
             const uniqueKey = phone !== '미정' ? `${name}-${phone}` : name;
 
-            // 이미 처리된(더 최신의) 데이터가 있으면 스킵 (중복 제거)
             if (processedKeys.has(uniqueKey)) continue;
-
             processedKeys.add(uniqueKey);
 
             consultations.push({
-                timestamp: timestamp,
-                customer: {
-                    name: name,
-                    phone: phone,
-                },
+                timestamp: row[0],
+                customer: { name, phone },
                 trip: {
                     destination: row[3] || '',
                     departure_date: row[4] || '',
-                    return_date: row[5] || '',    // F column
-                    duration: row[6] || '',       // G column
-                    product_name: row[7] || '',   // H column
-                    url: row[8] || '',            // I column
+                    return_date: row[5] || '',
+                    duration: row[6] || '',
+                    product_name: row[7] || '',
+                    url: row[8] || '',
                 },
-                summary: row[9] || '',            // J column (상담요약)
+                summary: row[9] || '',
                 automation: {
-                    status: (row[10] as ConsultationData['automation']['status']) || '상담중', // K column
-                    next_followup: row[11] || '',      // L column
-                    balance_due_date: row[12] || '',   // M column
-                    notice_date: row[13] || '',        // N column
+                    status: (row[10] as ConsultationData['automation']['status']) || '상담중',
+                    next_followup: row[11] || '',
+                    balance_due_date: row[12] || '',
+                    notice_date: row[13] || '',
                 },
-                sheetRowIndex: i + 1, // 1-based index (실제 시트 행 번호)
-                visitor_id: '',       // 시트에는 visitor_id가 없으므로 공란 (매칭 시 채워짐)
+                source: row[14] || '',
+                sheetRowIndex: row._rowIndex,
+                sheetName: row._sheetName,
+                sheetGid: row._sheetGid,
+                visitor_id: '',
             });
         }
 
@@ -524,81 +738,20 @@ export async function getAllConsultations(forceRefresh = false): Promise<Consult
  * 특정 사용자의 대화 내역 전체를 조회합니다 (시트 기반).
  */
 export async function getMessagesByVisitorId(visitorId: string): Promise<any[]> {
-    try {
-        const sheets = getGoogleSheetsClient();
-        const sheetId = process.env.GOOGLE_SHEET_ID;
-        if (!sheetId) return [];
-
-        const { messagesSheet } = await getSheetTitles(sheets, sheetId);
-
-        const response = await sheets.spreadsheets.values.get({
-            spreadsheetId: sheetId,
-            range: `${messagesSheet}!A:D`,
-        });
-
-        const rows = response.data.values || [];
-        const messages: any[] = [];
-
-        // 첫 번째 행 제외
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i];
-            if (row[1] === visitorId) {
-                messages.push({
-                    timestamp: row[0],
-                    role: row[2] === 'AI상담사' ? 'assistant' : 'user',
-                    content: row[3] || '',
-                });
-            }
-        }
-
-        return messages;
-    } catch (error) {
-        console.error('메시지 조회 오류:', error);
-        return [];
-    }
+    return [];
 }
 
 /**
  * 모든 메시지 로그를 조회합니다 (대시보드 통계용).
  */
 export async function getAllMessages(): Promise<any[]> {
-    try {
-        const sheets = getGoogleSheetsClient();
-        const sheetId = process.env.GOOGLE_SHEET_ID;
-        if (!sheetId) return [];
-
-        const { messagesSheet } = await getSheetTitles(sheets, sheetId);
-
-        const response = await sheets.spreadsheets.values.get({
-            spreadsheetId: sheetId,
-            range: `${messagesSheet}!A:D`,
-        });
-
-        const rows = response.data.values || [];
-        const allMessages: any[] = [];
-
-        // 첫 번째 행 제외
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i];
-            allMessages.push({
-                timestamp: row[0],
-                visitorId: row[1],
-                sender: row[2],
-                content: row[3] || '',
-            });
-        }
-
-        return allMessages;
-    } catch (error) {
-        console.error('전체 메시지 조회 오류:', error);
-        return [];
-    }
+    return [];
 }
 
 /**
  * Google Sheets에서 특정 행을 삭제합니다.
  */
-export async function deleteConsultationFromSheet(rowIndex: number): Promise<boolean> {
+export async function deleteConsultationFromSheet(rowIndex: number, sheetName?: string): Promise<boolean> {
     try {
         const sheets = getGoogleSheetsClient();
         const sheetId = process.env.GOOGLE_SHEET_ID;
@@ -608,9 +761,10 @@ export async function deleteConsultationFromSheet(rowIndex: number): Promise<boo
             return false;
         }
 
-        // 스프레드시트 정보 가져오기
+        // 시트명 확인
+        const targetSheetName = sheetName || '시트1';
         const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sheetId });
-        const sheet = spreadsheet.data.sheets?.[0];
+        const sheet = spreadsheet.data.sheets?.find((s: any) => s.properties.title === targetSheetName);
         const sheetGid = sheet?.properties?.sheetId || 0;
 
         // 행 삭제 요청
@@ -632,7 +786,7 @@ export async function deleteConsultationFromSheet(rowIndex: number): Promise<boo
             },
         });
 
-        console.log(`[Google Sheets] 행 ${rowIndex} 삭제 완료`);
+        console.log(`[Google Sheets] ${targetSheetName} 행 ${rowIndex} 삭제 완료`);
         cachedConsultations = null; // 캐시 초기화
         return true;
     } catch (error: any) {
@@ -644,7 +798,7 @@ export async function deleteConsultationFromSheet(rowIndex: number): Promise<boo
 /**
  * Google Sheets에서 특정 상담의 상태를 업데이트합니다.
  */
-export async function updateConsultationStatus(rowIndex: number, status: string): Promise<boolean> {
+export async function updateConsultationStatus(rowIndex: number, status: string, sheetName?: string): Promise<boolean> {
     try {
         const sheets = getGoogleSheetsClient();
         const sheetId = process.env.GOOGLE_SHEET_ID;
@@ -654,19 +808,19 @@ export async function updateConsultationStatus(rowIndex: number, status: string)
             return false;
         }
 
-        const { consultationsSheet } = await getSheetTitles(sheets, sheetId);
+        const targetSheetName = sheetName || '시트1';
 
         // K열(11번째)이 상담단계 컬럼
         await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
-            range: `${consultationsSheet}!K${rowIndex}`,
+            range: `${targetSheetName}!K${rowIndex}`,
             valueInputOption: 'USER_ENTERED',
             requestBody: {
                 values: [[status]],
             },
         });
 
-        console.log(`[Google Sheets] 행 ${rowIndex} 상태 업데이트: ${status}`);
+        console.log(`[Google Sheets] ${targetSheetName} 행 ${rowIndex} 상태 업데이트: ${status}`);
         cachedConsultations = null; // 캐시 초기화
         return true;
     } catch (error: any) {

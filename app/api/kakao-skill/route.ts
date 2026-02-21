@@ -80,6 +80,7 @@ export async function POST(request: NextRequest) {
         );
 
         consultationData.visitor_id = visitorId;
+        consultationData.source = '카카오톡';
 
         // [Optimized] 응답 속도 개선: 시트 저장은 백그라운드로 미루고 응답부터 보냄
         const response = await createResponseData(visitorId, responseMessage, consultationData);
@@ -135,6 +136,7 @@ async function processBackgroundTask(body: KakaoSkillRequest, callbackUrl: strin
     }
 
     consultationData.visitor_id = visitorId;
+    consultationData.source = '카카오톡';
 
     // 3. 응답 데이터 생성
     const responseBody = await createResponseData(visitorId, responseMessage, consultationData);

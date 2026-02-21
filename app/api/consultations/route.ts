@@ -5,7 +5,7 @@ import { deleteConsultationFromSheet, updateConsultationStatus } from '@/lib/goo
 export async function PUT(request: NextRequest) {
     try {
         const body = await request.json();
-        const { sessionId, rowIndex, status } = body;
+        const { sessionId, rowIndex, status, sheetName } = body;
 
         if (!rowIndex || !status) {
             return NextResponse.json(
@@ -15,7 +15,7 @@ export async function PUT(request: NextRequest) {
         }
 
         // Google Sheets 상태 업데이트
-        const success = await updateConsultationStatus(rowIndex, status);
+        const success = await updateConsultationStatus(rowIndex, status, sheetName);
 
         if (success) {
             return NextResponse.json({
@@ -42,6 +42,7 @@ export async function DELETE(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const rowIndex = searchParams.get('rowIndex');
+        const sheetName = searchParams.get('sheetName');
         const sessionId = searchParams.get('sessionId');
 
         if (!rowIndex) {
@@ -54,7 +55,7 @@ export async function DELETE(request: NextRequest) {
         const rowNum = parseInt(rowIndex, 10);
 
         // Google Sheets에서 삭제
-        const success = await deleteConsultationFromSheet(rowNum);
+        const success = await deleteConsultationFromSheet(rowNum, sheetName || undefined);
 
         if (success) {
             return NextResponse.json({

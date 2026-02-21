@@ -5,7 +5,9 @@ import "./message-creator.css";
 import "./chat.css";
 import "./buttons.css";
 import "./chat-viewer.css";
-import Sidebar from "@/components/Sidebar";
+import "./confirmation.css";
+import "./mobile-confirmation.css";
+import ClientLayoutWrapper from "./ClientLayoutWrapper";
 
 export const metadata: Metadata = {
   title: "Smart Travel Pilot - Admin Dashboard",
@@ -34,14 +36,12 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
       </head>
       <body style={{ fontFamily: "'Noto Sans KR', sans-serif" }} suppressHydrationWarning={true}>
-        <div className="app-layout">
-          <Sidebar />
-          <main className="main-content">
-            {children}
-          </main>
-        </div>
+        <ClientLayoutWrapper>
+          {children}
+        </ClientLayoutWrapper>
       </body>
     </html>
   );

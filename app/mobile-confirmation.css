@@ -1,0 +1,998 @@
+/* ================================
+   모바일 확정서 뷰어 - 고객용 (밝은 테마)
+   ================================ */
+
+.mobile-confirm {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #f8fafc;
+    min-height: 100vh;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #1e293b;
+    padding-bottom: 80px;
+    /* 하단 버튼 공간 */
+}
+
+/* 상단 공지 배너 */
+.mc-top-notice {
+    background: #fffbeb;
+    border-bottom: 1px solid #fde68a;
+    padding: 12px 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.mc-top-notice .nt-icon {
+    font-size: 1.2rem;
+}
+
+.mc-top-notice .nt-text {
+    font-size: 0.82rem;
+    color: #92400e;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+/* 헤더 배너 */
+.mc-header {
+    background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+    color: #fff;
+    padding: 28px 20px;
+    text-align: center;
+}
+
+.mc-header .mc-brand {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.mc-header h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.mc-header .mc-subtitle {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+/* 상태 배지 */
+.mc-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 12px;
+    backdrop-filter: blur(4px);
+}
+
+.mc-status-badge .badge-dot {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+}
+
+/* 섹션 공통 */
+.mc-section {
+    background: #fff;
+    margin: 12px 12px;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.mc-section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.mc-section-title .sec-icon {
+    font-size: 1.1rem;
+}
+
+/* 정보 그리드 */
+.mc-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+    padding: 4px 0;
+    justify-items: start;
+    /* 추가: 그리드 아이템 자체가 왼쪽 시작점에 붙도록 */
+}
+
+.mc-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start !important;
+    /* 강제 왼쪽 정렬 */
+    text-align: left !important;
+    width: 100%;
+    /* 너비 확보 */
+}
+
+.mc-info-item.full {
+    grid-column: 1 / -1;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 12px;
+    margin-top: 4px;
+}
+
+.mc-info-item .info-label {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left !important;
+}
+
+.mc-info-item .info-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e293b;
+    text-align: left !important;
+}
+
+.mc-info-item .info-value.highlight {
+    color: #0ea5e9;
+}
+
+/* D-Day 배지 */
+.dday-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 6px;
+}
+
+/* 항공 정보 카드 */
+.mc-flight-card {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+.mc-flight-row {
+    display: grid;
+    grid-template-columns: 1fr 90px 1fr;
+    align-items: center;
+    padding: 12px 0;
+    gap: 8px;
+}
+
+.mc-flight-row+.mc-flight-row {
+    border-top: 1px dashed #e2e8f0;
+}
+
+.flight-time:first-child {
+    text-align: left;
+}
+
+.flight-time .ft-time {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.flight-time .ft-airport {
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+.flight-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: #94a3b8;
+    font-size: 0.7rem;
+}
+
+.flight-arrow .arrow-line {
+    width: 60px;
+    height: 1px;
+    background: #cbd5e1;
+    position: relative;
+}
+
+.flight-arrow .arrow-line::after {
+    content: '✈️';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.9rem;
+}
+
+/* 일정표 */
+.mc-itinerary {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.mc-day-card {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 14px;
+    border-left: 3px solid #6366f1;
+}
+
+.mc-day-card .day-number {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6366f1;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mc-day-card .day-content {
+    font-size: 0.85rem;
+    color: #475569;
+    line-height: 1.6;
+}
+
+/* 추가 일정 상세 스타일 */
+.day-transport {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f1f5f9;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 10px;
+}
+
+.trans-icon {
+    font-size: 1rem;
+}
+
+.day-hotel {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.dh-name {
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 2px;
+}
+
+.dh-times {
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+.day-notices {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.day-notice-item {
+    font-size: 0.78rem;
+    color: #64748b;
+    display: flex;
+    gap: 6px;
+    line-height: 1.5;
+}
+
+.dn-bullet {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* 파일 다운로드 */
+.mc-file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mc-file-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: inherit;
+}
+
+.mc-file-btn:hover,
+.mc-file-btn:active {
+    background: #f1f5f9;
+    border-color: #0ea5e9;
+}
+
+.mc-file-btn .file-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.mc-file-btn .file-info {
+    flex: 1;
+}
+
+.mc-file-btn .file-info .file-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.mc-file-btn .file-info .file-desc {
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+.mc-file-btn .file-download {
+    color: #0ea5e9;
+    font-size: 1rem;
+}
+
+/* 체크리스트 */
+.mc-checklist {
+    list-style: none;
+    padding: 0;
+}
+
+.mc-checklist li {
+    padding: 8px 0;
+    font-size: 0.85rem;
+    color: #475569;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.mc-checklist li:last-child {
+    border-bottom: none;
+}
+
+.mc-checklist li .check-icon {
+    color: #0ea5e9;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* 포함/불포함 */
+.mc-include-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mc-include-item {
+    font-size: 0.83rem;
+    color: #475569;
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mc-include-item.included .inc-icon {
+    color: #22c55e;
+}
+
+.mc-include-item.excluded .inc-icon {
+    color: #ef4444;
+}
+
+/* 호텔 상세 모달 */
+.mc-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    display: flex;
+    align-items: flex-start;
+    /* 상단 정렬 */
+    justify-content: center;
+    padding: 20px;
+    padding-top: 80px;
+    /* 유저 요청 빨간선 부근 */
+    animation: fadeInOverlay 0.2s ease-out;
+}
+
+.mc-modal {
+    background: #fff;
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+    border-radius: 20px;
+    /* 전체 둥글게 */
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    animation: fadeInScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.mc-modal-header {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    background: #fff;
+}
+
+.mc-modal-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.mc-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: #94a3b8;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.mc-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    background: #fff;
+}
+
+/* 하단 고정 액션 바 */
+.mc-bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 480px;
+    margin: 0 auto;
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+    padding: 10px 12px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.mc-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.mc-action-btn.phone {
+    background: #22c55e;
+    color: #fff;
+}
+
+.mc-action-btn.kakao {
+    background: #FEE500;
+    color: #000;
+}
+
+.mc-action-btn.share {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.mc-action-btn:hover {
+    opacity: 0.85;
+}
+
+/* 빈 상태 안내 */
+.mc-empty-notice {
+    text-align: center;
+    color: #94a3b8;
+    padding: 40px 20px;
+    font-size: 0.85rem;
+}
+
+/* 취소 규정 */
+.mc-policy-text {
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    background: #f8fafc;
+    padding: 14px;
+    border-radius: 8px;
+}
+
+/* 호텔 정보 */
+.mc-hotel-card {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 14px;
+}
+
+.mc-hotel-card .hotel-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.mc-hotel-card .hotel-detail {
+    font-size: 0.8rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+/* 탭 네비게이션 */
+.mc-tabs {
+    display: flex;
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.mc-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* 탭 아이콘 & 배지 */
+.mc-tab {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    padding: 16px 6px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #94a3b8;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.mch-amenities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.mc-chip {
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 15px;
+    /* 둥근 박스 */
+    border: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.mc-chip:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.tab-badge {
+    background: #0ea5e9;
+    color: #fff;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 8px;
+}
+
+.right-align {
+    text-align: right;
+    align-items: flex-end;
+}
+
+/* 호텔 요약 카드 (일정표 탭 상단) */
+.mc-hotel-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: #f8fafc;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.mc-hotel-summary:active {
+    background: #f1f5f9;
+}
+
+.hotel-summary-img {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.hotel-summary-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.hotel-summary-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hotel-summary-addr {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hotel-summary-meta {
+    font-size: 0.7rem;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+.hotel-summary-arrow {
+    color: #cbd5e1;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+/* 아코디언 일정 카드 */
+.mc-day-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 3px solid #6366f1;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.mc-day-card.closed {
+    background: #fff;
+    border: 1px solid #f1f5f9;
+    border-left: 3px solid #6366f1;
+}
+
+.day-header {
+    display: flex;
+    align-items: center;
+    padding: 14px;
+    cursor: pointer;
+    gap: 8px;
+    user-select: none;
+}
+
+.day-number {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6366f1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.day-date {
+    margin-left: 6px;
+    color: #94a3b8;
+    font-weight: 400;
+    font-size: 0.7rem;
+}
+
+.day-title {
+    flex: 1;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.day-chevron {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.day-chevron.open {
+    transform: rotate(0deg);
+}
+
+.day-chevron:not(.open) {
+    transform: rotate(-90deg);
+}
+
+.day-body {
+    padding: 0 14px 14px;
+    animation: fadeIn 0.2s ease;
+}
+
+.day-content {
+    font-size: 0.85rem;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.day-activity {
+    padding: 2px 0;
+}
+
+/* 식사 칩 */
+.day-meals {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.meal-chip {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.meal-chip.included {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.meal-chip.excluded {
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+}
+
+/* 해당일 호텔 */
+.day-hotel {
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #f1f5f9;
+}
+
+/* 서류 빈 상태 */
+.mc-file-empty {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.file-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.file-empty-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 6px;
+}
+
+.file-empty-sub {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    line-height: 1.5;
+}
+
+/* 인터랙티브 체크리스트 */
+.checklist-progress {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: #0ea5e9;
+    font-weight: 600;
+}
+
+.checklist-progress-bar {
+    height: 4px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.checklist-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0ea5e9, #6366f1);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.mc-checklist-interactive {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    border-radius: 8px;
+}
+
+.checklist-item:active {
+    background: #f8fafc;
+}
+
+.checklist-item:last-child {
+    border-bottom: none;
+}
+
+.checklist-item.checked .check-text {
+    text-decoration: line-through;
+    color: #94a3b8;
+}
+
+.check-box {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+}
+
+.checklist-item:active .check-box {
+    transform: scale(1.2);
+}
+
+.check-text {
+    font-size: 0.88rem;
+    color: #334155;
+    transition: color 0.15s;
+}
+
+/* 모달 체크인/아웃 시간 */
+.mcm-times {
+    font-size: 0.8rem;
+    color: #475569;
+    margin-bottom: 16px;
+    background: #f8fafc;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInOverlay {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* 반응형: 이미 모바일 우선이므로 큰 화면에서 조정 */
+@media (min-width: 481px) {
+    .mobile-confirm {
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        min-height: auto;
+        overflow: hidden;
+        position: relative;
+        /* 모바일 틀 내부 기준 고정 */
+    }
+
+    .mc-bottom-bar {
+        position: absolute;
+    }
+
+    .mc-modal-overlay {
+        position: absolute;
+    }
+}

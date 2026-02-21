@@ -15,9 +15,11 @@ interface ChatItem {
     lastMessageAt: string;
     messageCount: number;
     sheetRowIndex?: number;
+    sheetName?: string;
+    sheetGid?: number;
 }
 
-const STATUS_OPTIONS = ['상담중', '견적제공', '예약확정', '결제완료', '상담완료', '취소'];
+const STATUS_OPTIONS = ['상담중', '견적제공', '예약확정', '결제완료', '상담완료', '취소/보류'];
 
 // 다크 테마 색상
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
@@ -26,7 +28,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
     '예약확정': { bg: '#10b981', text: '#fff' },
     '결제완료': { bg: '#8b5cf6', text: '#fff' },
     '상담완료': { bg: '#6b7280', text: '#fff' },
-    '취소': { bg: '#ef4444', text: '#fff' },
+    '취소/보류': { bg: '#ef4444', text: '#fff' },
 };
 
 export default function ChatsPage() {
@@ -34,6 +36,7 @@ export default function ChatsPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
+    const [selectedMonth, setSelectedMonth] = useState<string>(''); // 추가된 상태
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [updating, setUpdating] = useState<string | null>(null);
@@ -99,6 +102,7 @@ export default function ChatsPage() {
                 body: JSON.stringify({
                     rowIndex: chat.sheetRowIndex,
                     status: newStatus,
+                    sheetName: chat.sheetName,
                 }),
             });
 
@@ -130,6 +134,39 @@ export default function ChatsPage() {
         });
     };
 
+    const formatDateOnly = (dateStr: string) => {
+        if (!dateStr) return '-';
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return '-';
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
+    // 고유 월 목록 추출 및 자동 선택 로직
+    const allMonths = Array.from(new Set(chats.map(c => {
+        if (!c.lastMessageAt) return '';
+        const d = new Date(c.lastMessageAt);
+        if (isNaN(d.getTime())) return '';
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    }).filter(Boolean))).sort().reverse();
+
+    useEffect(() => {
+        if (!selectedMonth && allMonths.length > 0) {
+            setSelectedMonth(allMonths[0]);
+        }
+    }, [allMonths, selectedMonth]);
+
+    const monthFilteredChats = selectedMonth
+        ? chats.filter(c => c.lastMessageAt && c.lastMessageAt.startsWith(selectedMonth))
+        : chats;
+
+    const filteredChats = searchQuery
+        ? monthFilteredChats.filter(chat =>
+            chat.visitorName.includes(searchQuery) ||
+            chat.destination.includes(searchQuery) ||
+            chat.productName.includes(searchQuery)
+        )
+        : monthFilteredChats;
+
     const toggleSelectAll = () => {
         if (selectedIds.size === filteredChats.length) {
             setSelectedIds(new Set());
@@ -159,10 +196,8 @@ export default function ChatsPage() {
 
         for (const chat of sortedSheetItems) {
             try {
-                const response = await fetch(
-                    `/api/consultations?rowIndex=${chat.sheetRowIndex}`,
-                    { method: 'DELETE' }
-                );
+                const url = `/api/consultations?rowIndex=${chat.sheetRowIndex}${chat.sheetName ? `&sheetName=${encodeURIComponent(chat.sheetName)}` : ''}`;
+                const response = await fetch(url, { method: 'DELETE' });
                 const data = await response.json();
                 if (data.success) {
                     successCount++;
@@ -219,37 +254,45 @@ export default function ChatsPage() {
         return `${Math.floor(diff / 86400000)}일 전`;
     };
 
-    const openGoogleSheet = (e: React.MouseEvent, rowIndex?: number) => {
+    const openGoogleSheet = (e: React.MouseEvent, rowIndex?: number, sheetName?: string, sheetGid?: number) => {
         e.preventDefault();
         e.stopPropagation();
         const sheetId = process.env.NEXT_PUBLIC_SHEET_ID;
-        if (sheetId && rowIndex) {
-            window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=0&range=A${rowIndex}`, '_blank');
-        } else if (sheetId) {
-            window.open(`https://docs.google.com/spreadsheets/d/${sheetId}`, '_blank');
+
+        if (sheetId) {
+            const baseUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+            const gidParam = sheetGid !== undefined ? `gid=${sheetGid}` : '';
+            const rangeParam = rowIndex ? `range=A${rowIndex}` : '';
+
+            let finalUrl = baseUrl;
+            const params = [gidParam, rangeParam].filter(Boolean).join('&');
+            if (params) {
+                finalUrl += `#${params}`;
+            }
+
+            console.log('Opening Google Sheet:', finalUrl);
+            window.open(finalUrl, '_blank');
+        } else {
+            console.error('NEXT_PUBLIC_SHEET_ID is missing');
+            alert('구글 시트 ID가 설정되지 않았습니다. .env 파일을 확인해 주세요.');
         }
     };
 
     const getStatusStyle = (status: string) => {
         const colors = STATUS_COLORS[status] || STATUS_COLORS['상담중'];
         return {
-            backgroundColor: colors.bg,
-            color: colors.text,
+            backgroundColor: `${colors.bg}20`,
+            border: `1px solid ${colors.bg}50`,
+            color: colors.bg === '#3b82f6' ? '#60a5fa' : (colors.bg === '#f59e0b' ? '#fbbf24' : (colors.bg === '#10b981' ? '#34d399' : (colors.bg === '#8b5cf6' ? '#a78bfa' : (colors.bg === '#ef4444' ? '#f87171' : colors.text)))),
             padding: '4px 10px',
-            borderRadius: '4px',
+            borderRadius: '20px',
             fontSize: '12px',
-            fontWeight: 500,
+            fontWeight: 600,
             display: 'inline-block',
         };
     };
 
-    const filteredChats = searchQuery
-        ? chats.filter(chat =>
-            chat.visitorName.includes(searchQuery) ||
-            chat.destination.includes(searchQuery) ||
-            chat.productName.includes(searchQuery)
-        )
-        : chats;
+
 
     if (loading) {
         return <div className="loading-spinner">상담 목록 불러오는 중...</div>;
@@ -262,43 +305,125 @@ export default function ChatsPage() {
                 <p className="page-subtitle">카카오톡 채널 상담 내역을 확인하고 관리하세요</p>
             </header>
 
-            {/* 검색 및 필터 */}
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <input
-                    type="text"
-                    placeholder="고객명, 목적지, 상품명으로 검색..."
-                    className="search-input"
-                    style={{ flex: 1, minWidth: '200px' }}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                />
+            {/* 월별 탭 */}
+            {allMonths.length > 0 && (
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', overflowX: 'auto', paddingBottom: '8px' }}>
+                    <button
+                        onClick={() => setSelectedMonth('')}
+                        style={{
+                            padding: '8px 16px',
+                            borderRadius: '20px',
+                            border: '1px solid',
+                            borderColor: selectedMonth === '' ? '#3b82f6' : '#374151',
+                            backgroundColor: selectedMonth === '' ? '#3b82f620' : '#1f2937',
+                            color: selectedMonth === '' ? '#60a5fa' : '#9ca3af',
+                            cursor: 'pointer',
+                            fontWeight: selectedMonth === '' ? 600 : 400,
+                            whiteSpace: 'nowrap',
+                            transition: 'all 0.2s',
+                        }}
+                    >
+                        전체 내역
+                    </button>
+                    {allMonths.map(month => (
+                        <button
+                            key={month}
+                            onClick={() => setSelectedMonth(month)}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '20px',
+                                border: '1px solid',
+                                borderColor: selectedMonth === month ? '#3b82f6' : '#374151',
+                                backgroundColor: selectedMonth === month ? '#3b82f620' : '#1f2937',
+                                color: selectedMonth === month ? '#60a5fa' : '#9ca3af',
+                                cursor: 'pointer',
+                                fontWeight: selectedMonth === month ? 600 : 400,
+                                whiteSpace: 'nowrap',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {month.split('-')[0]}년 {month.split('-')[1]}월
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {/* 고급 검색 바 디자인 */}
+            <div style={{
+                backgroundColor: '#1f2937',
+                padding: '16px',
+                borderRadius: '12px',
+                marginBottom: '24px',
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'center',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                flexWrap: 'wrap'
+            }}>
+                <div style={{ position: 'relative', flex: 1, minWidth: '250px' }}>
+                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }}>
+                        🔍
+                    </span>
+                    <input
+                        type="text"
+                        placeholder="고객명, 목적지, 상품명으로 검색..."
+                        style={{
+                            width: '100%',
+                            padding: '10px 12px 10px 36px',
+                            backgroundColor: '#111827',
+                            border: '1px solid #374151',
+                            borderRadius: '8px',
+                            color: '#fff',
+                            fontSize: '14px',
+                            transition: 'border-color 0.2s',
+                            outline: 'none',
+                        }}
+                        onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                        onBlur={(e) => e.target.style.borderColor = '#374151'}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    />
+                </div>
                 <select
-                    className="search-input"
-                    style={{ maxWidth: 150 }}
+                    style={{
+                        padding: '10px 12px',
+                        backgroundColor: '#111827',
+                        border: '1px solid #374151',
+                        borderRadius: '8px',
+                        color: '#fff',
+                        fontSize: '14px',
+                        minWidth: '140px',
+                        outline: 'none',
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                    onBlur={(e) => e.target.style.borderColor = '#374151'}
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                    <option value="">전체 상태</option>
+                    <option value="">🔘 전체 상태</option>
                     {STATUS_OPTIONS.map(s => (
                         <option key={s} value={s}>{s}</option>
                     ))}
                 </select>
-                <button
-                    className="action-button"
-                    onClick={() => fetchChats(true)}
-                    title="최신 데이터 불러오기"
-                >
-                    🔄 새로고침
-                </button>
-                <button
-                    className="action-button"
-                    onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${process.env.NEXT_PUBLIC_SHEET_ID || ''}`, '_blank')}
-                >
-                    📊 시트 열기
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                        className="action-button"
+                        onClick={() => fetchChats(true)}
+                        title="최신 데이터 불러오기"
+                        style={{ padding: '10px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                        🔄 새로고침
+                    </button>
+                    <button
+                        className="action-button"
+                        onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${process.env.NEXT_PUBLIC_SHEET_ID || ''}`, '_blank')}
+                        style={{ padding: '10px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#10b981', color: 'white', border: 'none' }}
+                    >
+                        📊 시트 열기
+                    </button>
+                </div>
             </div>
-
             {/* 일괄 삭제 툴바 */}
             {selectedIds.size > 0 && (
                 <div style={{
@@ -332,146 +457,153 @@ export default function ChatsPage() {
             )}
 
             {/* 상담 목록 */}
-            {filteredChats.length === 0 ? (
-                <div className="empty-state-small">
-                    {searchQuery ? '검색 결과가 없습니다.' : '아직 상담 내역이 없습니다.'}
-                </div>
-            ) : (
-                <div style={{ backgroundColor: '#111827', borderRadius: '8px', overflow: 'hidden' }}>
-                    {/* 헤더 */}
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: '40px 1fr 90px 130px 90px 50px',
-                        padding: '12px 16px',
-                        backgroundColor: '#1f2937',
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        color: '#9ca3af',
-                        gap: '16px',
-                    }}>
-                        <div>
-                            <input
-                                type="checkbox"
-                                checked={selectedIds.size === filteredChats.length && filteredChats.length > 0}
-                                onChange={toggleSelectAll}
-                                style={{ cursor: 'pointer' }}
-                            />
-                        </div>
-                        <div>고객 정보</div>
-                        <div>상태</div>
-                        <div>상태 변경</div>
-                        <div>최근 활동</div>
-                        <div>시트</div>
+            {
+                filteredChats.length === 0 ? (
+                    <div className="empty-state-small">
+                        {searchQuery ? '검색 결과가 없습니다.' : '아직 상담 내역이 없습니다.'}
                     </div>
-
-                    {/* 목록 */}
-                    {filteredChats.map((chat) => (
-                        <div
-                            key={chat.id}
-                            style={{
-                                display: 'grid',
-                                gridTemplateColumns: '40px 1fr 90px 130px 90px 50px',
-                                padding: '16px',
-                                borderBottom: '1px solid #374151',
-                                alignItems: 'center',
-                                backgroundColor: selectedIds.has(chat.id) ? '#1f2937' : '#111827',
-                                transition: 'background-color 0.2s',
-                                gap: '16px',
-                            }}
-                        >
-                            {/* 체크박스 */}
+                ) : (
+                    <div style={{ backgroundColor: '#111827', borderRadius: '8px', overflow: 'hidden' }}>
+                        {/* 헤더 */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '40px 100px 1fr 90px 130px 90px 50px',
+                            padding: '12px 16px',
+                            backgroundColor: '#1f2937',
+                            fontWeight: 600,
+                            fontSize: '13px',
+                            color: '#9ca3af',
+                            gap: '16px',
+                        }}>
                             <div>
                                 <input
                                     type="checkbox"
-                                    checked={selectedIds.has(chat.id)}
-                                    onChange={() => toggleSelect(chat.id)}
+                                    checked={selectedIds.size === filteredChats.length && filteredChats.length > 0}
+                                    onChange={toggleSelectAll}
                                     style={{ cursor: 'pointer' }}
                                 />
                             </div>
-
-                            {/* 고객 정보 */}
-                            <Link href={`/chats/${chat.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <div style={{
-                                        width: '36px',
-                                        height: '36px',
-                                        borderRadius: '50%',
-                                        backgroundColor: '#374151',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '16px',
-                                    }}>
-                                        👤
-                                    </div>
-                                    <div>
-                                        <div style={{ fontWeight: 500, color: '#fff', marginBottom: '2px' }}>
-                                            {chat.visitorName}
-                                        </div>
-                                        <div style={{ fontSize: '12px', color: '#9ca3af' }}>
-                                            {chat.destination && <span style={{ marginRight: '8px' }}>📍 {chat.destination}</span>}
-                                            {chat.departureDate && <span>📅 {chat.departureDate}</span>}
-                                        </div>
-                                    </div>
-                                </div>
-                            </Link>
-
-                            {/* 상태 배지 */}
-                            <div>
-                                <span style={getStatusStyle(chat.status)}>
-                                    {chat.status}
-                                </span>
-                            </div>
-
-                            {/* 상태 변경 드롭다운 */}
-                            <div>
-                                <select
-                                    value={chat.status}
-                                    onChange={(e) => handleStatusChange(chat, e.target.value)}
-                                    disabled={updating === chat.id}
-                                    style={{
-                                        padding: '6px 8px',
-                                        borderRadius: '4px',
-                                        border: '1px solid #374151',
-                                        fontSize: '12px',
-                                        cursor: 'pointer',
-                                        backgroundColor: updating === chat.id ? '#374151' : '#1f2937',
-                                        color: '#fff',
-                                        width: '100%',
-                                    }}
-                                >
-                                    {STATUS_OPTIONS.map(s => (
-                                        <option key={s} value={s}>{s}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* 최근 활동 */}
-                            <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                                {formatTime(chat.lastMessageAt)}
-                            </div>
-
-                            {/* 시트 링크 */}
-                            <div>
-                                <button
-                                    onClick={(e) => openGoogleSheet(e, chat.sheetRowIndex)}
-                                    title="Google Sheets에서 보기"
-                                    style={{
-                                        padding: '6px 8px',
-                                        border: '1px solid #374151',
-                                        borderRadius: '4px',
-                                        backgroundColor: '#1f2937',
-                                        cursor: 'pointer',
-                                        fontSize: '14px',
-                                    }}
-                                >
-                                    📊
-                                </button>
-                            </div>
+                            <div>상담일자</div>
+                            <div>고객 정보</div>
+                            <div>상태</div>
+                            <div>상태 변경</div>
+                            <div>최근 활동</div>
+                            <div>시트</div>
                         </div>
-                    ))}
-                </div>
-            )}
+
+                        {/* 목록 */}
+                        {filteredChats.map((chat) => (
+                            <div
+                                key={chat.id}
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '40px 100px 1fr 90px 130px 90px 50px',
+                                    padding: '16px',
+                                    borderBottom: '1px solid #374151',
+                                    alignItems: 'center',
+                                    backgroundColor: selectedIds.has(chat.id) ? '#37415150' : '#111827',
+                                    transition: 'background-color 0.2s',
+                                    gap: '16px',
+                                }}
+                            >
+                                {/* 체크박스 */}
+                                <div>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedIds.has(chat.id)}
+                                        onChange={() => toggleSelect(chat.id)}
+                                        style={{ cursor: 'pointer' }}
+                                    />
+                                </div>
+
+                                {/* 상담일자 */}
+                                <div style={{ fontSize: '13px', color: '#9ca3af', fontWeight: 500 }}>
+                                    {formatDateOnly(chat.lastMessageAt)}
+                                </div>
+
+                                {/* 고객 정보 */}
+                                <Link href={`/chats/${chat.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{
+                                            width: '36px',
+                                            height: '36px',
+                                            borderRadius: '50%',
+                                            backgroundColor: '#374151',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: '16px',
+                                        }}>
+                                            👤
+                                        </div>
+                                        <div>
+                                            <div style={{ fontWeight: 500, color: '#fff', marginBottom: '2px' }}>
+                                                {chat.visitorName}
+                                            </div>
+                                            <div style={{ fontSize: '12px', color: '#9ca3af' }}>
+                                                {chat.destination && <span style={{ marginRight: '8px' }}>📍 {chat.destination}</span>}
+                                                {chat.departureDate && <span>📅 {chat.departureDate}</span>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+
+                                {/* 상태 배지 */}
+                                <div>
+                                    <span style={getStatusStyle(chat.status)}>
+                                        {chat.status}
+                                    </span>
+                                </div>
+
+                                {/* 상태 변경 드롭다운 */}
+                                <div>
+                                    <select
+                                        value={chat.status}
+                                        onChange={(e) => handleStatusChange(chat, e.target.value)}
+                                        disabled={updating === chat.id}
+                                        style={{
+                                            padding: '6px 8px',
+                                            borderRadius: '4px',
+                                            border: '1px solid #374151',
+                                            fontSize: '12px',
+                                            cursor: 'pointer',
+                                            backgroundColor: updating === chat.id ? '#374151' : '#1f2937',
+                                            color: '#fff',
+                                            width: '100%',
+                                        }}
+                                    >
+                                        {STATUS_OPTIONS.map(s => (
+                                            <option key={s} value={s}>{s}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* 최근 활동 */}
+                                <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                                    {formatTime(chat.lastMessageAt)}
+                                </div>
+
+                                {/* 시트 링크 */}
+                                <div>
+                                    <button
+                                        onClick={(e) => openGoogleSheet(e, chat.sheetRowIndex, chat.sheetName, chat.sheetGid)}
+                                        title={`Google Sheets (${chat.sheetName || '기본'})에서 보기`}
+                                        style={{
+                                            padding: '6px 8px',
+                                            border: '1px solid #374151',
+                                            borderRadius: '4px',
+                                            backgroundColor: '#1f2937',
+                                            cursor: 'pointer',
+                                            fontSize: '14px',
+                                        }}
+                                    >
+                                        📊
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
             {/* 삭제 확인 팝업 */}
             {showDeleteConfirm && (

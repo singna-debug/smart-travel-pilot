@@ -1,0 +1,811 @@
+{
+  "props": {
+    "pageProps": {
+      "departureDate": "2026-07-17",
+      "productCode2": "BVA201TW5M",
+      "productName": "나트랑 자유 5일 (아미아나리조트-디럭스빌라가든뷰)",
+      "isHideMainLayout": true,
+      "initialState": {
+        "auth": {},
+        "test": {
+          "testValue": 1
+        },
+        "flight": {
+          "typeTrip": "roundTrip",
+          "selectedRegionType": "overseas"
+        },
+        "uiState": {
+          "isSrcolling": false,
+          "scrollPercentage": 0,
+          "stopScroll": false,
+          "time": "2026-02-13T07:20:39.256Z",
+          "hidden": true,
+          "transparent": true,
+          "backgroundColor": 0,
+          "positionLogo": "all",
+          "tabMainSearchPC": 1,
+          "tabMainSearchMO": "해외여행",
+          "fixed": false,
+          "isHeartIcon": true,
+          "resetSearchPackage": false,
+          "changeWeekCalendar": false,
+          "app": {
+            "version": "v.1.02.7"
+          }
+        },
+        "myPage": {
+          "nickName": "홍길동",
+          "avatar": null,
+          "old": 14,
+          "temporaryMembered": true,
+          "snsMembered": true,
+          "passWordCheck": false,
+          "travelAgent": false,
+          "email": null,
+          "id": null,
+          "totalNewNotifications": 0,
+          "paymentSuccess": false
+        },
+        "searchHistory": {
+          "searchHistoryData": [
+            {
+              "type": "commonSearch",
+              "json": []
+            },
+            {
+              "type": "overseaTravelSearch",
+              "json": []
+            },
+            {
+              "type": "domesticTravelSearch",
+              "json": []
+            },
+            {
+              "type": "flightSearch",
+              "json": []
+            },
+            {
+              "type": "hotelSearch",
+              "json": []
+            },
+            {
+              "type": "localTourSearch",
+              "json": []
+            },
+            {
+              "type": "discountFlightSearch",
+              "json": []
+            }
+          ]
+        },
+        "searchHotel": {
+          "listRecentSearch": [],
+          "dataOverseasRegion": {
+            "nameParent": "일본",
+            "valueParent": "1",
+            "areaKeyWordId": "",
+            "data": {
+              "name": "일본",
+              "value": "JP",
+              "children": {
+                "name": "오사카",
+                "value": "4EE3F602-7C8A-4E81-B6AD-039B03B377DE"
+              },
+              "endLocation": "오사카"
+            }
+          },
+          "typeSearchHotel": "domestic",
+          "dataSearchHotel": {
+            "cityCode": "",
+            "cityNameEng": "",
+            "countryCode": "",
+            "cityStay": "",
+            "dateStay": {
+              "startDate": "2026-02-28",
+              "endDate": "2026-03-01"
+            },
+            "peopleAndRoom": [
+              {
+                "id": 1,
+                "room": 1,
+                "adult": 2,
+                "child": 0,
+                "ageChilds": [
+                  null,
+                  null
+                ]
+              }
+            ]
+          },
+          "sort": {
+            "label": "추천순",
+            "value": "RecommendOrder"
+          },
+          "onMap": false,
+          "filtered": [],
+          "pageCurrent": 0,
+          "countItemFilter": {},
+          "hotelLocationFilter": [],
+          "filterSearch": {},
+          "priceFeeRangeFilter": {
+            "minimum": 0,
+            "maximum": 199999
+          }
+        },
+        "commentPopUp": {
+          "open": false,
+          "type": "REVIEW_COMMENT"
+        },
+        "filteredResultSrarchMain": {
+          "filtered": []
+        },
+        "ProductDetail": {
+          "type": ""
+        },
+        "wishedProductPc": {
+          "comparisonOptions": [],
+          "ListProductToCompare": []
+        },
+        "specialExhibition": {
+          "filtered": []
+        },
+        "customerCenter": {
+          "optionsTravelHistory": []
+        },
+        "myTravelReview": {
+          "listTravelReviews": [],
+          "totalReviews": 0
+        },
+        "allWin": {},
+        "event": {
+          "urlIframe": "https://nguyenthanhhoai-se.github.io/events_exhibition/events-desktop/main/main.html",
+          "contentHeight": 40
+        },
+        "dateFuture": {
+          "dateFuture": "2026-02-12T07:20:39.256Z"
+        },
+        "tokenNotLogin": {
+          "tokenNotLogin": "Web2591808345215:1a464de3"
+        },
+        "tourPasVehicle": {
+          "idTourPass": "",
+          "dataCurrentTourPass": {}
+        },
+        "tourPassVehicleFilter": {
+          "regionPopularSelected": [],
+          "categorySelected": [],
+          "keywordSelected": "",
+          "regionIndex": 1,
+          "isReadyToUseSelected": []
+        },
+        "hotel": {
+          "dataCurrentHotel": {}
+        },
+        "package": {
+          "totalPrincipalPrice": 0
+        },
+        "tourMileage": {
+          "familyMileages": [],
+          "isLoading": false
+        },
+        "timeDeal": {
+          "productMasterCode": "",
+          "timeDealDetailResult": {},
+          "isLoading": false
+        },
+        "api": {
+          "queries": {
+            "getPackageGetProductAllInfoById({\"productId\":102840987})": {
+              "status": "fulfilled",
+              "endpointName": "getPackageGetProductAllInfoById",
+              "requestId": "RVzn1OuFWOI1VmT_CqCGN",
+              "originalArgs": {
+                "productId": 102840987
+              },
+              "startedTimeStamp": 1771678574374,
+              "data": {
+                "messageCode": 200,
+                "message": "Success",
+                "content": {
+                  "isDomestic": false,
+                  "transportationMethodEngName": null,
+                  "flightCode": "TW5M",
+                  "flightCodeLogoImage": null,
+                  "reserveStatus": "Available",
+                  "reserveStatusKorean": "예약가능",
+                  "reserveStatusColor": "blue",
+                  "meetSrc": "http://img.modetour.co.kr/mode2010/modetour/product/img_meetingmap.gif",
+                  "leaderStatus": "인솔자는 동반하지 않습니다.",
+                  "badgeImages": null,
+                  "badges": {
+                    "grade": null,
+                    "prefix": null,
+                    "discount": null
+                  },
+                  "productClassName": "",
+                  "productGroups": null,
+                  "productState": {
+                    "state": "예약하기",
+                    "color": "green"
+                  },
+                  "countryUnique": "VN",
+                  "visitCities": [
+                    "나트랑"
+                  ],
+                  "listAreaImages": [
+                    {
+                      "type": "MO",
+                      "image": "http://img.modetour.com/eagle/photoimg/1373/bfile/635985764196339652.png"
+                    },
+                    {
+                      "type": "MO",
+                      "image": "http://img.modetour.com/eagle/photoimg/1373/bfile/635985764201059922.jpg"
+                    },
+                    {
+                      "type": "PC",
+                      "image": "http://img.modetour.com/promotion20/etc/live_banner_221125.jpg"
+                    },
+                    {
+                      "type": "PC",
+                      "image": "http://img.modetour.com/promotion20/etc/live_banner_221125.jpg"
+                    }
+                  ],
+                  "listSafetyInfoEachCountry": [
+                    {
+                      "countryName": "베트남",
+                      "blue": "여행유의",
+                      "blueContents": "전지역 전 지역",
+                      "yellow": "",
+                      "yellowContents": "",
+                      "red": "",
+                      "redContents": "",
+                      "emergencyContact": "\r\n대사관 연락처\r\nㅇ 주소 : SQ4, Do Nhuan, Khu Ngaoi Giao Doan, Xuan Tao, Bac Tu Liem, Hanoi, Vietnam\r\nㅇ 대표번호(근무시간 중) : (84) 24-3771-0404\r\nㅇ 긴급연락처(사건사고 등 긴급상황 발생 시, 24시간) : (84) 90-402-6126\r\nㅇ E-mail : korembviet@mofa.go.kr\r\n\r\n호치민총영사관 연락처\r\nㅇ 주소 : 107 Nguyen Du St., Dist 1, Ho Chi Minh city, VietNam \r\nㅇ 대표번호(근무시간 중) : (84) 28-3822-5757\r\nㅇ 긴급연락처(사건사고 등 긴급상황 발생 시, 24시간) : (84) 93-850-0238\r\nㅇ E-mail : hcm02@mofa.go.kr\r\n\r\n주재국 신고\r\nㅇ 범죄신고 : 113\r\nㅇ 화재신고 : 114\r\nㅇ 응급환자(앰뷸런스) : 115\r\nㅇ 하노이 이민국 : 04) 3934-5609\r\nㅇ 하노이 경찰서 : 04) 3942-4244\r\nㅇ Korea Clinic : 04) 3843-7231, 04) 3734-6837\r\nㅇ 베트남-한국 치과 : 04) 3794-0471\r\nㅇ SOS International 병원 : 04) 3934-0555(응급실), 04) 3934-0666(일반진료상담)\r\nㅇ 베트남 국제병원(프랑스 병원) : 04) 3577-1100 \r\nㅇ Family Medical Practice : 04) 3726-5222 (한국인 간호사 및 통역원 상주)\r\n\r\n의료기관 연락처\r\nㅇ 베트남 내에서 응급환자가 생겼을 경우, 115번으로 전화하여 구급차를 부를 수 있으나 거의 대부분의 115번 전화 안내원이 베트남어 구사만 가능하기 때문에 실질적으로 외국인이 이 서비스를 이용하기에는 결코 쉬운 일이 아닙니다.\r\nㅇ 하노이에는 KOICA에서 운영하는 Korea Clinic이 있는데 한국에서 공중보건의가 파견되어 있으며 해당 분야에 대한 간단한 진료를 받을 수 있습니다. 또한 베트남인이 운영하지만 한국어 통역이 제공되는 베트남-한국 병원과 한국인이 운영하는 베트남-한국 치과가 있으며, 베트남-한국 병원의 경우 간단한 야간 응급시스템도 갖추고 있습니다.\r\nㅇ 베트남 현지 병원의 경우 영어를 구사하는 사람을 찾아보기 힘들며 영어를 구사할 수 있는 사람을 만나더라도 질병 관련 용어를 영어로 의사소통하기에는 무리가 있습니다. 진료비(전문의 상담 기준 10만동(약 6.5US$) 내외)는 저렴한 편이지만 신용카드 결제가 어렵고 또한 진료 대기자가 많아 먼저 진료를 받기 위해 간호사나 의사에게 뒷돈을 건네기도 합니다.\r\nㅇ 비교적 높은 의료수준을 갖추고 있으면서 영어가 가능한 병원은 프랑스 병원(영어, 불어)과 SOS International 병원(영어, 일어 등 기타 언어)이 대표적입니다. 프랑스 병원의 주간 전문의 상담은 70US$ 정도이고 응급실 전문의 상담은 90US$ 정도입니다. SOS International 병원의 경우 병원이라기보다는 응급실로 보는 것이 더 적당한데, 기본적인 의료장비는 거의 갖추고 있으나 장기간 입원을 하여야 할 경우는 각 질병마다 전문으로 하는 현지 병원(프랑스 병원 포함)을 연결해 줍니다. 기본적인 전문의 상담의 경우 100US$ 내외입니다. 이 두 병원의 경우 병원비는 현지 병원에 비해 매우 비싸고 한국 병원과 비교하더라도 싼값은 아니며, 병원비를 달러로 계산하거나 신용 카드 결제가 가능합니다.\r\nㅇ 베트남 내 일부 약품(감기약, 지사제 등)은 처방전이 없어도 구입이 가능하나 전문적인 치료약의 경우에는 처방전이 있어야만 구입이 가능합니다. 몸이 아플 경우, 말이 잘 통하지 않는 상태에서 약국 약사의 조언만으로 약을 복용하는 것보다 가능하면 전문의의 진료를 받은 후 처방전을 받아 약을 구입ㆍ복용하는 것이 타국에서의 2차 질병을 예방하는 길이라 생각됩니다.\r\nㅇ 베트남 내 신종플루 감염 환자는 2010. 2월 현재 11,186명(사망 58명)으로, 베트남을 방문하는 외국인의 숫자나 외국을 방문하는 베트남인의 숫자가 그리 많지 않은 점에 비교해 볼 때 신종플루의 감염속도는 비교적 빠르다고 할 수 있습니다. 그리고 전반적인 의료체계가 미비하고 의료 수준이 낮은 편이므로 상당한 주의를 요합니다.\r\n",
+                      "accident": "<div>\r\n<h3 class=“tit“>사건ㆍ사고 현황</h3>\r\n[테러, 인질 등에 대한 상황 및 정세]<br>\r\nㅇ 베트남은 안정적인 정치체제하에서 강력한 공안 조직을 통해 타국에 비해 상대적으로 양호한 치안 상태를 유지하고 있어 내란이나 테러 가능성은 낮은 것으로 평가됩니다.<br><br>\r\n\r\n[범죄 현황 등 치안상태]<br>\r\nㅇ 전반적으로 살인, 강도, 강간 등 강력범죄의 비율은 낮습니다.<br>\r\nㅇ 그러나 휴대폰 날치기, 소매치기 등 절도 범죄 피해가 꾸준히 발생하고 있어  소지품 보관에 각별히 유의할 필요가 있습니다.<br>\r\nㅇ 오토바이를 이용한 가방, 휴대폰 등 날치기 피해가 지속 발생하고 있습니다. 가급적 가방을 도로 반대방향에 두고, 현금은 소액만 소지하며 지갑은 몸 안쪽에 보관하는 것이 좋습니다.<br>\r\nㅇ 특히 베트남에서 여권 분실 시 여권 재발급 외 별도로 출국사증 재발급(약 5일 소요)이 필요하므로 여권 분실에 각별히 유의할 필요가 있습니다.<br>\r\nㅇ 또한 베트남은 마약 복용, 소지, 제조, 매매 등을 엄중히 처벌하므로 마약 복용 등 불법행위를 하지 않아야 합니다.<br>\r\nㅇ 베트남은 성매매 관련, 성매매자도 제재하며 특히 미성년자 성매매는 엄중히 처벌하니 불법행위를 하지 않아야 합니다.<br><br>\r\n\r\n<h3 class=“tit“>자연재해</h3>\r\nㅇ 하노이를 비롯한 북부지역 및 다낭ㆍ후에 ㆍ호이안 등 중부지역은 태풍의 영향권에 있어서 매년 많은 피해가 발생하고 있습니다. 특히 산간오지 및 섬의 경우  수시로 교통두절 현상이 발생하므로 산간오지 및 섬으로 들어갈 경우에는 주의를 요합니다.<br>\r\nㅇ 베트남은 상대적으로 배수시설이 잘 되어 있지 않아서 집중적으로 비가 오게 되면 침수피해가 발생할 수 있으며 차량 통행에 많은 어려움을 겪을 수 있습니다.<br><br>\r\n\r\n<h3 class=“tit“>안전사고</h3>\r\nㅇ 리조트?해변 등에서 물놀이 중 다치거나 익수 사고로 사망하는 안전사고가 종종 발생하고 있습니다. 음주 후에 수영?스쿠버다이빙?스노클링 등은 절대 하시면 안 됩니다.<br>\r\nㅇ 순환기계?신경계 질환이 있는 분 기타 영유아의 물놀이 사고에 각별히 유의하여야 합니다.<br>\r\nㅇ 배를 탈 때에는 반드시 구명복 등 안전 장비를 착용하기 바라며, 장비?기구에 이상이 없는지 확인하기 바라며 바다?호수에 빠질 수 있는 위험한 행동은 삼가야 합니다.<br>\r\nㅇ 물놀이 전 기상 예보를 확인하고 바다에서 물놀이 시에는 기상 변화를 확인하여 갑작스런 날씨 변화에 대비하기 바랍니다.<br><br>\r\n\r\n<h3 class=“tit“>뎅기열 유의</h3>\r\nㅇ 뎅기열은 뎅기 바이러스에 감염된 매개 모기에 물리면 발병하는 질병입니다.<br>\r\nㅇ 뎅기열로 인한 사망 사례도 계절과 상관없이 지속 발생하고 있으니 유의할 필요가 있습니다.<br>\r\nㅇ 모기기피제를 적극 사용하고 외출 시에는 노출 부위를 최소화하기 바랍니다.<br>\r\nㅇ 야외활동 시 모기가 많이 있는 풀숲 및 산속 등은 가급적 방문을 지양하기 바랍니다.<br>\r\nㅇ 뎅기열은 잠복기가 평균 5~7일이고 잠복기 후 발열기가 찾아와 본격적인 증상(고열, 두통, 근육통, 관절통, 식욕부진)이 나타나므로 이런 증상이 있는 경우 바로 종합병원에 내원하여 치료를 받으시기 바랍니다.<br></div>"
+                    }
+                  ],
+                  "representativeProduct": [
+                    {
+                      "itiDetailNo": 0,
+                      "itiServiceCode": null,
+                      "fileNo": 0,
+                      "placeNo": 54875,
+                      "fileCategory": null,
+                      "fileName": "636574119499929540.jpg",
+                      "fileSize": 0,
+                      "filePath": null,
+                      "fileWidth": 0,
+                      "fileHeight": 0,
+                      "fileDes": null,
+                      "used": 0,
+                      "best": 0,
+                      "fileSeq": 0,
+                      "copyright": 0,
+                      "copyrightNo": 0,
+                      "fileNameS": null,
+                      "url": "/eagle/photoimg/54875/bfile/636574119499929540.jpg",
+                      "arrTheme": null
+                    },
+                    {
+                      "itiDetailNo": 0,
+                      "itiServiceCode": null,
+                      "fileNo": 0,
+                      "placeNo": 54875,
+                      "fileCategory": null,
+                      "fileName": "636574119374921027.jpg",
+                      "fileSize": 0,
+                      "filePath": null,
+                      "fileWidth": 0,
+                      "fileHeight": 0,
+                      "fileDes": null,
+                      "used": 0,
+                      "best": 0,
+                      "fileSeq": 0,
+                      "copyright": 0,
+                      "copyrightNo": 0,
+                      "fileNameS": null,
+                      "url": "/eagle/photoimg/54875/bfile/636574119374921027.jpg",
+                      "arrTheme": null
+                    },
+                    {
+                      "itiDetailNo": 0,
+                      "itiServiceCode": null,
+                      "fileNo": 0,
+                      "placeNo": 54875,
+                      "fileCategory": null,
+                      "fileName": "636574119297415748.jpg",
+                      "fileSize": 0,
+                      "filePath": null,
+                      "fileWidth": 0,
+                      "fileHeight": 0,
+                      "fileDes": null,
+                      "used": 0,
+                      "best": 0,
+                      "fileSeq": 0,
+                      "copyright": 0,
+                      "copyrightNo": 0,
+                      "fileNameS": null,
+                      "url": "/eagle/photoimg/54875/bfile/636574119297415748.jpg",
+                      "arrTheme": null
+                    },
+                    {
+                      "itiDetailNo": 0,
+                      "itiServiceCode": null,
+                      "fileNo": 0,
+                      "placeNo": 54875,
+                      "fileCategory": null,
+                      "fileName": "636574119295071802.jpg",
+                      "fileSize": 0,
+                      "filePath": null,
+                      "fileWidth": 0,
+                      "fileHeight": 0,
+                      "fileDes": null,
+                      "used": 0,
+                      "best": 0,
+                      "fileSeq": 0,
+                      "copyright": 0,
+                      "copyrightNo": 0,
+                      "fileNameS": null,
+                      "url": "/eagle/photoimg/54875/bfile/636574119295071802.jpg",
+                      "arrTheme": null
+                    },
+                    {
+                      "itiDetailNo": 0,
+                      "itiServiceCode": null,
+                      "fileNo": 0,
+                      "placeNo": 54875,
+                      "fileCategory": null,
+                      "fileName": "636574119560714898.jpg",
+                      "fileSize": 0,
+                      "filePath": null,
+                      "fileWidth": 0,
+                      "fileHeight": 0,
+                      "fileDes": null,
+                      "used": 0,
+                      "best": 0,
+                      "fileSeq": 0,
+                      "copyright": 0,
+                      "copyrightNo": 0,
+                      "fileNameS": null,
+                      "url": "/eagle/photoimg/54875/bfile/636574119560714898.jpg",
+                      "arrTheme": null
+                    },
+                    {
+                      "itiDetailNo": 0,
+                      "itiServiceCode": null,
+                      "fileNo": 0,
+                      "placeNo": 54875,
+                      "fileCategory": null,
+                      "fileName": "636574119297415748.jpg",
+                      "fileSize": 0,
+                      "filePath": null,
+                      "fileWidth": 0,
+                      "fileHeight": 0,
+                      "fileDes": null,
+                      "used": 0,
+                      "best": 0,
+                      "fileSeq": 0,
+                      "copyright": 0,
+                      "copyrightNo": 0,
+                      "fileNameS": null,
+                      "url": "/eagle/photoimg/54875/bfile/636574119297415748.jpg",
+                      "arrTheme": null
+                    },
+                    {
+                      "itiDetailNo": 4450546543,
+                      "itiServiceCode": "SSC0RM",
+                      "fileNo": 397433,
+                      "placeNo": 54875,
+                      "fileCategory": "0P5001",
+                      "fileName": "636574119499929540.png",
+                      "fileSize": 1263831,
+                      "filePath": null,
+                      "fileWidth": 3062,
+                      "fileHeight": 1290,
+                      "fileDes": null,
+                      "used": 0,
+                      "best": 0,
+                      "fileSeq": 18,
+                      "copyright": 1,
+                      "copyrightNo": 10393,
+                      "fileNameS": null,
+                      "url": "/eagle/photoimg/54875/bfile/636574119499929540.png",
+                      "arrTheme": [
+                        {
+                          "itiDetailNo": 0,
+                          "serialNo": 0,
+                          "fileNo": 397433,
+                          "themeCode": null
+                        }
+                      ]
+                    },
+                    {
+                      "itiDetailNo": 4450546543,
+                      "itiServiceCode": "SSC0RM",
+                      "fileNo": 397433,
+                      "placeNo": 54875,
+                      "fileCategory": "0P5001",
+                      "fileName": "636574119499929540.png",
+                      "fileSize": 1263831,
+                      "filePath": null,
+                      "fileWidth": 3062,
+                      "fileHeight": 1290,
+                      "fileDes": null,
+                      "used": 0,
+                      "best": 0,
+                      "fileSeq": 18,
+                      "copyright": 1,
+                      "copyrightNo": 10393,
+                      "fileNameS": null,
+                      "url": "/eagle/photoimg/54875/bfile/636574119499929540.png",
+                      "arrTheme": [
+                        {
+                          "itiDetailNo": 0,
+                          "serialNo": 0,
+                          "fileNo": 397433,
+                          "themeCode": null
+                        }
+                      ]
+                    },
+                    {
+                      "itiDetailNo": 4450546543,
+                      "itiServiceCode": "SSC0RM",
+                      "fileNo": 470386,
+                      "placeNo": 54875,
+                      "fileCategory": "0P5001",
+                      "fileName": "636574119499929540.png",
+                      "fileSize": 1263831,
+                      "filePath": null,
+                      "fileWidth": 3062,
+                      "fileHeight": 1290,
+                      "fileDes": null,
+                      "used": 0,
+                      "best": 0,
+                      "fileSeq": 18,
+                      "copyright": 1,
+                      "copyrightNo": 10393,
+                      "fileNameS": null,
+                      "url": "/eagle/photoimg/54875/bfile/636574119499929540.png",
+                      "arrTheme": [
+                        {
+                          "itiDetailNo": 0,
+                          "serialNo": 0,
+                          "fileNo": 470386,
+                          "themeCode": null
+                        }
+                      ]
+                    },
+                    {
+                      "itiDetailNo": 4450546543,
+                      "itiServiceCode": "SSC0RM",
+                      "fileNo": 397432,
+                      "placeNo": 54875,
+                      "fileCategory": "0P5001",
+                      "fileName": "636574119498366919.png",
+                      "fileSize": 2491062,
+                      "filePath": null,
+                      "fileWidth": 5760,
+                      "fileHeight": 3840,
+                      "fileDes": null,
+                      "used": 0,
+                      "best": 0,
+                      "fileSeq": 19,
+                      "copyright": 1,
+                      "copyrightNo": 10393,
+                      "fileNameS": null,
+                      "url": "/eagle/photoimg/54875/bfile/636574119498366919.png",
+                      "arrTheme": [
+                        {
+                          "itiDetailNo": 0,
+                          "serialNo": 0,
+                          "fileNo": 397432,
+                          "themeCode": null
+                        }
+                      ]
+                    }
+                  ],
+                  "precautionsPackage": {
+                    "precautions": {
+                      "precautionsHtml": "\n\t\t\t\t\t\t\t<div class=\"iti_caution\" >\n\t\t\t\t\t\t\t\t\t★2025년 1월1일부터 베트남에서 전자담배를 소지하거나 사용시 벌금이나 징역형에 처해질 수 있으며, 특히 공공장소에서의 전자담배 사용은 엄격히 규제됩니다. \r<br />이에 베트남 여행시 전자담배를 소지하지 않도록 유의하시기 바랍니다. (적발시 벌금 1000만동~ 부과 및 11일 구금될 수 있음)\r<br />◐ 호텔에 따라 체크인시 신용카드나 현금으로 데파짓을 받는경우가 있습니다. 이는 호텔 숙박 중 발생할 수 있는 전화비, MINI BAR 또는 혹시나 있을 수 있는 파손 등 개인사용 경비에 대한 보증금 형식으로 사용내역이 없으면 카드데파짓은 자동 취소처리되며 현금데파짓경우 체크아웃시 돌려드리오니 이점 참고바랍니다.  <br />◐ 소지품 분실과 안전사고에 유의하시기 바랍니다. 중요한 귀중품은 항상 휴대용 가방에 소지하시고 여행용가방 또한 잠금처리를 하시어 불미스러운 일이 발생하지 않도록 주의하시기 바랍니다.<br />◐ 베트남의 쇼핑센터, 호텔등에서는 카드결제시 카드수수료가 추가지불 되오니 주의 부탁드립니다.<br />◐ 환전은 US달러로 미리 하셨다가  현지에서 현지통화로 재환전 하시는걸 권해 드리며, 현지 사정상 여행자 수표는 사용 불가합니다.<br />◐ 베트남 출입국시 미화 3.000 달러 이상 소지시는 세관에 신고하여야하며 미신고후 반입/반출 하다가 적발되면 10%의 세금을 부과합니다.\n\t\t\t\t\t\t\t\t</p>\n\t\t\t\t\t\t\t\t<h4 class=\"title\" style=\"display:none;\">단체별 특이사항</h4>\n\t\t\t\t\t\t\t\t<p style=\"display:none;\">\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t</p>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t",
+                      "carefulMakingReservationHtml": "\n\t\t\t\t<div class=\"iti_caution\">\n\t\t\t\t\t<p>\n\t\t\t\t\t\t■ 선발권 관련 규정안내<br>\n\t\t\t\t\t\t① 선발권 특가로 진행되는 요금입니다.<br>\n\t\t\t\t\t\t② 선발권 후 항공요금 상승에 따라 상품가격이 인상될 수 있습니다.<br>\n\t\t\t\t\t\t③ 항공사 규정상 발권 후에는 이름 변경, 여정 변경 시 별도비용이 추가됩니다.<br><br>\n\t\t\t\t\t- 해당 상품은 같은 일정의 상품들과 항공좌석을 공유하므로 타코드 선모객시 조기마감될 수 있습니다.<br>- 여권 상의 영문과 예약 시의 영문이 다를 경우 항공 좌석이 취소될 수 있으며 이에 따른 취소료 또는 추가 차액이 발생할 수 있으니 반드시 예약처에 재확인 하시기 바랍니다.<br>- 기내서비스는 최소 출발 3일전 신청해주세요.<br>- 상품가격은 성인 2인 1실 사용 시 1인 기준입니다.<br />- 아동 No Bed 요금은 성인2인과 같은 방을 사용하며, 엑스트라베드가 제공되지 않는 요금입니다.<br><br><여권 비자 관련 유의사항><br />1. 여권 유효기간은 6개월 이상 남으셔야 합니다.<br />2. 복수 국적자(이중 국적자) 는 베트남 입국시 하나의 여권만 사용 가능합니다. (한국과 베트남의 이중 국적을 가지고 계신 다문화 가정 : 한국 여권만 사용하셔야 하며 15일 이상 체류시에는 반드시 비자를 받으셔야 합니다.)<br />3. 베트남 출입국 관리법(제21조 제2항)은 만 14세 미만 어린이가 부모, 보호자, 위임된 사람 없이 입국하는 경우 입국을 금지 할 수 있도록 규정하고 있습니다.<br />  1) 부모와 함께 여행 시 : 법적 보호자와 함께 여행 중임을 증명하는 영문 가족관계증명서를 반드시 지참하시기 바랍니다 (부모 또는 부모 중 1명만 여행해도 적용)<br />  2) 부모 미 동반 시 : 부 또는 모로부터 받은 위임장 (베트남어 또는 영어 번역 후 공증)과 영문 가족관계증명서를 지참하시기 바랍니다.<br />                           위임장안에는 “미성년자의 부모로부터 여행기간 동안 보호자에게 위탁하는 내용”이 반드시 기재되어 있어야 합니다.<br />  ※ 위의 서류가 없을 시, 입국 거절될 수 있습니다. \n\t\t\t\t\t</p>\n\t\t\t\t</div>\n\t\t\t\t",
+                      "cancellationFeePolicyHtml": "\n\t\t\t\t\t\t\t\t\t<div class=\"tit_area\">여행약관 안내</div>\n\t\t\t\t\t\t\t\t\t<p class=\"con_txt\">\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t이 상품은 <strong class=\"iti_highlight\">특별약관</strong>이 적용됩니다. <br />\n\t\t\t\t\t취소 시 특별약관 취소료규정에 따른 금액이 부가되오니, 규정을 필히 확인해주시기 바랍니다.<br>\n\t\t\t\t\t<strong class=\"iti_highlight\">취소료규정을 제외한 사항들은 국외여행 표준약관이 적용됩니다. 하기의 여행약관 세부내용 보러 가기를 통해 확인해주세요.</strong>\n\t\t\t\t\n\t\t\t\t\t\t\t\t\t</p>\n\t\t\t\t<div class=\"term_info\">\n\t\t\t\t<div class=\"head\"><span>●</span> 여행표준약관</div>\n\t\t\t\t<div class=\"body\">\n\t\t\t\t<a href=\"#\" class=\"go_detail dlg_open\" name=\"dlg_standardterm\">세부내용 보러 가기 &gt;</a>\n\t\t\t\t</div>\n\t\t\t\t<div class=\"head\"><span>●</span> 계약금규정</div>\n\t\t\t\t<div class=\"body\">\n\t\t\t\t<p class=\"explain\">\n\t\t\t\t\t1. 여행 경비가 2,000,000원 미만인 경우<br>\n\t\t\t\t\t- 계약금 : 200,000원<br>\n\t\t\t\t\t단, 여행 경비가 200,000원을 넘지 않을 경우, 전체 여행 경비를 계약금으로 입금해 주셔야 합니다.<br>\n\t\t\t\t\t2. 여행 경비가 2,000,000원 이상인 경우<br>\n\t\t\t\t\t- 계약금 : 여행 경비의 10%<br>\n\t\t\t\t\t&middot; 계약금은 예약일 기준 3일 이내에 입금이 되지 않을 시 당사는 해당 예약을 취소할 수 있습니다.<br/>\n\t\t\t\t\t&middot; 계약금은 항공, 호텔, 현지 사정에 따라 금액이 변동 될수 있으며, 상황에 따라 결제시한이 당겨질 수 있습니다.<br/>\n\t\t\t\t\t&middot; 계약금 결제 이후 취소료 규정 적용 기간에 취소 시 취소 수수료가 계약금 금액 보다 클 시 추가 취소 수수료를 부담하셔야합니다.<br/>\n\t\t\t\t\t&middot; 아래 명시되어 있는 취소료 규정 기간에 예약 시 취소료 금액을 계약금으로 납입하셔야 합니다.<br/>\n\t\t\t\t</p>\n\t\t\t\t</div>\n\t\t\t\t<div class=\"head\"><span>●</span> 여행 취소료 규정</div>\n\t\t\t\t\n\t\t\t\t<p class=\"explain iti_special\"><strong>▶ 인터넷상에서 예약/결제 취소 및 변경은 불가능 하오니, 예약/결제 취소나 여행자정보 변경을 원하시면 반드시 예약담당자에게 연락하여 주시기 바랍니다.</strong></p>\n\t\t\t   <div class=\"body\">\n\t\t\t\t\t<p class=\"explain\">\n\t\t\t\t\t\t▶여행자의 여행계약 해제 요청 시 여행약관에 의거하여 취소료가 부과됩니다◀\r<br />제16조(여행출발 전 계약해제)\r<br /> - 여행개시 30일전까지(  ～30) 통보 시  - 계약금 환급\r<br /> - 여행개시 20일전까지(29～20) 통보 시  - 여행요금의 10% 배상\r<br /> - 여행개시 10일전까지(19～10) 통보 시  - 여행요금의 15% 배상\r<br /> - 여행개시  8일전까지( 9～ 8) 통보 시  - 여행요금의 20% 배상\r<br /> - 여행개시  1일전까지( 7～ 1) 통보 시  - 여행요금의 30% 배상\r<br /> - 여행 당일 통보 시 - 여행요금의 50% 배상\r<br />(※공정거래위원회 고시 제2014-4호 소비자분쟁해결기준에 의한것으로 제15조의 변경사항은 2014년 3월21일 여행상품예약자부터 적용)\r<br /><B><FONT COLOR=RED>▶본 상품은 항공권 '발권' 이후 취소 시 상기 취소료 외에 항공권 취소 수수료 130,000원이 추가로 발생되며 출발 당일 취소시 항공료 전액 환불 불가합니다.(유류세, 택스만 환불 가능) </B></FONT COLOR=RED>\r<br /><B><FONT COLOR=BLUE>*객실 파이널 이후에는 약관상 취소료와 별개로 객실 취소료가 추가로 부과 될 수 있습니다.</FONT COLOR=BLUE></B>\n\t\t\t\t\t</p>\n\t\t\t\t</div>\n\t\t\t\t<div class=\"head\"><span>●</span> 여행 취소 접수 안내</div>\n\t\t\t\t<p class=\"explain\">\n\t\t\t\t\t- 취소는 업무시간 내 접수 시 확인 및 적용이 가능합니다.<br />\n\t\t\t\t\t- 취소수수료 발생일은 영업일 기준으로 산정됩니다.(주말,공휴일 제외)<br />\n\t\t\t\t\t- 업무시간 외 접수한 경우에는 익일(영업일이 아닌 경우 다음 영업일)에 접수한 것으로 간주됩니다.<br />\n\t\t\t\t\t- 업무시간은 월-금 09:00~18:00 (주말,공휴일 제외)<br />\n\t\t\t\t\t(예: 토/일/월 출발 상품은 금요일 업무종료 이후 취소시 당일 취소로 간주됩니다.)<br />\n\t\t\t\t</p>\n\t\t\t\t</div>",
+                      "carefulWhenBookingHtml": "\n\t\t\t\t\t\t\t<div class=\"term_info\">\n\t\t\t\t\t\t\t<div class=\"head\" ><span>●</span> 상품 이용 관련</div>\n\t\t\t\t\t\t\t <div class=\"body\" >\n\t\t\t\t\t\t\t\t<ul class=\"iti_lst\">\n\t\t\t\t\t\t\t\t\t<li>- 반드시 신청전/출발전에 상품 일정표 및 목적지의 여행 정보를 확인하시기 바랍니다.</li>\n\t\t\t\t\t\t\t\t\t<li>- 본 상품은 단체여행을 목적으로 하는 패키지 상품으로 여행자는 여행업자의 여행질서 유지에 적극 협조하여 주셔야 하며 정해진 일정에서 벗어나는 개별일정의 진행은 불가합니다.</li>\n\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"head\">\n\t\t\t\t\t\t\t\t<span>●</span> 건강 정보\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"body\">\n\t\t\t\t\t\t\t\t<ul class=\"iti_lst\">\n\t\t\t\t\t\t\t\t\t<li>- 여행 전, 해외여행 질병정보센터 홈페이지\n\t\t\t\t\t\t\t\t\t\t<a href=\"http://www.cdc.go.kr\" target=\"_blank\">www.cdc.go.kr</a> 에서 여행 목적지에서 유행 중이거나 주의해야 할 질병정보를 확인하시기 바랍니다.\n\t\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"head\">\n\t\t\t\t\t\t\t\t<span>●</span> 해외 안전 여행 정보\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"body\">\n\t\t\t\t\t\t\t\t<ul class=\"iti_lst\">\n\t\t\t\t\t\t\t\t\t<li>- 외교통상부 해외안전여행 홈페이지\n\t\t\t\t\t\t\t\t\t\t<a href=\"http://www.0404.go.kr\" target=\"_blank\">www.0404.go.kr</a> 에서 국가나 지역별 위험수준, 안전대책, 행동지침에 대한 정보를 제공합니다.\n\t\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"head\">\n\t\t\t\t\t\t\t\t<span>●</span> 법정대리인(부모) 동행 없는 미성년자의 여행계약 주의사항\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"body\">\n\t\t\t\t\t\t\t\t<ul class=\"iti_lst\">\n\t\t\t\t\t\t\t\t\t<li>- 20세 미만의 보호자를 동반하지 않은 여행객은 친권자의 동의서가 필요합니다.</li>\n\t\t\t\t\t\t\t\t\t<li>- 만 19세 미만의 미성년자끼리의 여행계약 또는 법정대리인(부모)이 아닌 성인과 동행하는 미성년자의 여행계약은 민법 제5조에 의거하여 법정대리인인 부모 또는 친권자와 체결함을 원칙으로 해야 하고, 당사는 법정대리인의 동의 없는 여행계약의 체결을 거부할 수 있습니다.</li>\n\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t <div class=\"head\" style=\"display:none;\"><span>●</span> 사용 객실 정보</div>\n\t\t\t\t\t\t\t<div class=\"body\" style=\"display:none;\">\n\t\t\t\t\t\t\t\t<ul class=\"iti_lst\">\n\t\t\t\t\t\t\t\t\t <li></li>\n\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t   <div class=\"head\" ><span>●</span> 싱글룸 추가요금</div>\n\t\t\t\t\t\t   <div class=\"body\" >\n\t\t\t\t\t\t\t\t<ul class=\"iti_lst\">\n\t\t\t\t\t\t\t\t\t<li>예약시 문의 부탁드립니다.</li>\n\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"head\" ><span>●</span> 유류 할증료</div>\n\t\t\t\t\t\t\t<div class=\"body\" >\n\t\t\t\t\t\t\t\t<ul class=\"iti_lst\">\n\t\t\t\t\t\t\t\t\t<li>◐ 유류할증료(FUEL SURCHARGE) <br /> 국제유가와 항공사 영업환경을 고려한 국토교통부의 '국제선 항공요금과 유류할증료 확대방안' 에 따라 유류할증료는 예고없이 인상, 인하되고 있습니다. 상품가 출시 시점 유류할증료보다 인상 시, 인상분은 상품가와 별도로 추가입금 하셔야 합니다.<br /><br />◐ 달러/엔/유로화등의 환율이 급격하게 변동될 경우는 추가금액이 발생하거나 상품가 인상이 있을 수 있습니다.</li>\n\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t  <div class=\"head\" style=\"display:none;\"><span>●</span> 선택 추가 경비</div>\n\t\t\t\t\t\t\t  <div class=\"body\" style=\"display:none;\">\n\t\t\t\t\t\t\t\t<ul class=\"iti_lst\">\n\t\t\t\t\t\t\t\t <li></li>\n\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t",
+                      "passportVisaInformationHtml": "<div class=\"term_info\">\n\t\t\t\t<div class=\"head\"><span>●</span> 여권/비자</div>\n\t\t\t\t<div class=\"body\">\n\t\t\t\t<p class=\"explain\">◐ 반드시 유효기간 6개월 이상의 여권을 소지하셔야 합니다.<br />◐ 베트남은 한국국적소지인은 비자면제협정으로 NO-VISA(관광) 15일 동안 체류가능합니다. <br />※ 한국 국적외 다른나라 국적을 가지신 분은 비자필요 여부를 확인해주세요. (ex.중국,미국 국적자 비자필요/일본 무비자 가능)<br />◐ 베트남은 최종 베트남 출국일로부터 최소 30일 경과 후 입국이 가능하시며, 방문후 30일 이내에 재 방문하실 경우에는 반드시 비자를 발급 받으셔야 합니다.<br />[단수비자(1개월) : 약 11만원(접수후 약 10일 소요)] <br />☞ 비자는 개별로 발급 받으셔야 합니다.<br />◐ 복수 국적자(이중 국적자) 는 베트남 입국시 하나의 여권만 사용 가능합니다. <br />(한국과 베트남의 이중 국적을 가지고 계신 다문화 가정 ☞ 한국 여권만 사용하셔야 하며 15일 이상 체류시에는 반드시 비자를 받으셔야 합니다.)<br />◐ 외국/이중국적자 주의사항 : 외국/이중국적자의 해외여행은 도착지국가(경유국가 포함)의 출입국정책이 상이하므로,반드시 여행자본인이 해당국의 대사관에 확인하셔야 합니다. </p>\n\t\t\t\t<p class=\"explain\">※ 여권/비자의 경우 경미한 훼손이라도 출입국시 불이익을 받을 수 있으니, 미리 확인하여 주시기 바랍니다.</p><br />\n\t\t\t\t</div>\n\t\t\t\t<div class=\"head\"><span>●</span> 외국/이중국적자 주의사항</div>\n\t\t\t\t<div class=\"body\">\n\t\t\t\t<p class=\"explain\">외국/이중국적자의 해외여행은 도착지국가(경유국가 포함)의 출입국정책이 상이하므로, 반드시 여행자본인이 해당국의 대사관에 확인하셔야 합니다.</p>\n\t\t\t\t</div>\n\t\t\t\t</div>",
+                      "emergencyContactHtml": "<div class=\"term_info\">\n\t\t\t\t<div class=\"head\"><span>●</span> 국내긴급 연락처</div>\n\t\t\t\t<div class=\"body\">\n\t\t\t\t<ul class=\"iti_lst\">\n\t\t\t\t<li>※ 아래의 연락처는 공항에서 첫만남시 긴급상황이 발생했을 경우에 해당되며<br /><br />상품관련 문의는 예약하신곳(모두투어 상품판매점) 또는 예약센터 (1544-5252)로<br /><br />하시기 바랍니다.<br /><br /><br /><br /><br /><br />주말 : 모두투어 본사 당직자 ☎ 02) 7288-000  (근무시간 : 09:00~18:00)</li>\n\t\t\t\t</ul>\n\t\t\t\t</div>\n\t\t\t\t</div>",
+                      "insuranceInformationHtml": "\n\t\t\t\t\t\t\t\t\t\t<div class=\"head\"  ><span>●</span> 여행자보험</div>\n\t\t\t\t\t\t\t\t\t\t<div class=\"body\"  >\n\t\t\t\t\t\t\t\t\t\t\t<p class=\"explain\">- 보장내용</p>\n\t\t\t\t\t\t\t\t\t\t\t<table class=\"tb_iti_term\">\n\t\t\t\t\t\t\t\t\t\t\t\t<caption>보장내용</caption>\n\t\t\t\t\t\t\t\t\t\t\t\t<colgroup>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<col width=\"8%\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t<col width=\"8%\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t<col width=\"12%\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t<col>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<col width=\"10%\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t<col width=\"10%\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t<col width=\"10%\">\n\t\t\t\t\t\t\t\t\t\t\t\t</colgroup>\n\t\t\t\t\t\t\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<th scope=\"colgroup\" rowspan=\"3\" colspan=\"3\">구분</th>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<th scope=\"col\" rowspan=\"3\">주요 보장내용 및 보장금액</th>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<th scope=\"colgroup\" colspan=\"3\">보상한도</th>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<th scope=\"colgroup\" colspan=\"3\">패키지</th>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<th scope=\"col\">해외패키지<br/>(MD1,4,5)</th>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<th scope=\"col\">해외패키지<br/>(MD2)</th>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<th scope=\"col\" class=\"last\">해외패키지<br/>(MD3)</th>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"rowgroup\" rowspan=\"4\"><strong>상해</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>상해</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>해외여행중상해사망·후유장해</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장내용] 해외여행 중 우연한 사고로 1년이내에 사망하거나 신체상에 후유장해를 입었을 경우</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장금액] 보험가입금액 전액 또는 후유장해 시, 약관 상 장해분류표에서 정한 장해지급률을 보험가입금액에 곱하여 산출한 금액을 지급</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center\">1억원<br>(15세미만, 심신상실자, 심신박약자 해당없음)</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center\">2억원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center last\">3억원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>해외</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>(상해_해외의료기관)해외여행실손의료비</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장내용] 해외여행 중에 입은 상해로 인하여 해외 의료기관에서 의료비 발생 시 보상</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장금액] 보험가입금액 한도로 피보험자가 실제 부담한 의료비</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center\">500만원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center\">1,000만원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center last\">2,000만원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"rowgroup\" rowspan=\"2\"><strong>국내</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>해외여행_기본형 실손의료비(상해급여_국내의료기관)</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장내용] 해외여행 중에 입은 상해로 인하여 국내 의료기관에서 발생한 입원, 통원의 보상금액을 합산하여 보장범위 이내 보상</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t[보장금액] 보장금액 5백만원 (단, 통원의료비는 외래, 처방조제를 통합하여 5만원 한도 적용)<br />\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t* 공제금액 : 입원 20% / 통원 1~2만원 또는 20% 중 큰금액 <br />\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t(참고사항 : 의원, 병원 1만원 / 종합병원, 상급종합 2만원)\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"3\" class=\"center last\">500만원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>해외여행_특약형 실손의료비(상해비급여_국내의료기관)</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장내용] 해외여행 중에 입은 상해로 인하여 국내 의료기관에서 발생한 입원, 통원의 보상금액을 합산하여 보장범위 이내 보상</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t[보장금액] 보장금액 5백만원(단, 통원의료비는 외래, 처방조제를 통합하여 5만원 및 100회 한도) <br />\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t* 공제금액 : 입원 30% / 통원 3만원 또는 30% 중 큰금액\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"3\" class=\"center last\">500만원(연간100회 한)</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"rowgroup\" rowspan=\"4\"><strong>질병</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>질병</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>해외여행중질병사망 및 질병80%이상 고도후유장해</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장내용] 해외여행 중 발생한 질병으로 보험기간 중 또는 보험기간 종료 후 30일 이내에 사망하거나 진단 확정된 질병으로 장해분류표에 따른 후유장해 지급률이 80% 이상에 해당하는 상태가 된 경우</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장금액] 보험가입금액 전액</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center\">1,000만원<br>(15세미만, 79세 6개월이상, 심신상실자, 심신박약자 해당없음)</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center\">1,000만원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center last\">2,000만원<br>(15세미만, 79세 6개월이상, 심신상실자, 심신박약자 해당없음)</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>해외</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>(질병_해외의료기관)해외여행실손의료비</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장내용] 해외여행 중에 입은 질병으로 인하여 해외 의료기관에서 의료비 발생 시 보상</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장금액] 보험가입금액 한도로 피보험자가 실제 부담한 의료비</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center\">500만원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center\">1,000만원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center last\">2,000만원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"rowgroup\" rowspan=\"2\"><strong>국내</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>해외여행_기본형 실손의료비(질병급여_국내의료기관)</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li> [보장내용] 해외여행 중에 입은 질병으로 인하여 국내 의료기관에서 발생한 입원, 통원의 보상금액을 합산하여 보장범위 이내 보상</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t[보장금액] 보장금액 5백만원 (단, 통원의료비는 외래, 처방조제를 통합하여 5만원 한도 적용)<br />\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t* 공제금액 : 입원 20% / 통원 1~2만원 또는 20% 중 큰금액 <br />\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t(참고사항 : 의원, 병원 1만원 / 종합병원, 상급종합 2만원)\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"3\" class=\"center last\">500만원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>해외여행_특약형 실손의료비(질병비급여_국내의료기관)</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장내용] 해외여행 중에 입은 질병으로 인하여 국내 의료기관에서 발생한 입원, 통원의 보상금액을 합산하여 보장범위 이내 보상</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t[보장금액] 보장금액 5백만원(단, 통원의료비는 외래, 처방조제를 통합하여 5만원 및 100회 한도)<br />\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t* 공제금액 : 입원 30% / 통원 3만원 또는 30% 중 큰금액\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"3\" class=\"center last\">500만원 (연간 100회 한)</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td rowspan=\"10\" scope=\"rowgroup\"><strong>그 외</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td rowspan=\"3\" scope=\"row\"><strong>비급여</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>도수, 체외충격파, 증식치료_국내의료기관</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장내용] 해외여행 중에 입은 상해 또는 질병의 치료 목적으로 병원에 입원 또는 통원하여 비급여 도수치료, 체외충격파치료, 증식치료를 받은 경우에 보상</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t[보장금액] 연간 350만원 이내에서 도수치료, 체외충격파치료, 증식치료의 각 치료횟수 합산하여 50회까지 보상<br />\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t* 공제금액 : 1회당 3만원과 보상대상의료비의 30% 중 큰 금액\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"3\" class=\"center last\">350만원 (연간 50회 한)</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>비급여주사료_국내의료기관</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장내용] 해외여행 중에 입은 상해 또는 질병의 치료 목적으로 병원에 입원 또는 통원하여 비급여에 해당하는 주사료를 부담하는 경우에 보상</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t[보장금액] 연간 250만원 이내에서 입원과 통원을 합산하여 50회까지 보상<br />\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t* 공제금액 : 1회당 3만원과 보상대상의료비의 30% 중 큰 금액\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"3\" class=\"center last\">250만원 (연간 50회 한)</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\"><strong>자기공명영상진단_국내의료기관</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장내용] 해외여행 중에 입은 상해 또는 질병의 치료 목적으로 병원에 입원 또는 통원하여 비급여 자기공명영상진단을 받은 경우에 보상</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t[보장금액] 연간 300만원 한도내에서 보상<br />\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t* 공제금액 : 1회당 3만원과 보상대상의료비의 30% 중 큰 금액\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"3\" class=\"center last\">300만원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\" colspan=\"2\"><strong>해외여행중배상책임 (자기부담금 1만원)</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장내용] 해외여행 중에 타인의 신체나 재물에 손해를 가하여 법률상 배상책임을 부담하는 경우 보상한도액 내에서 보상 (공제금액 : 1만원)</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장금액] 피보험자가 피해자에게 지급한 법률상 손해배상금, 손해방지비용, 피보험자가 지급한 소송비용, 변호사보수, 중재, 화해 또는 조정에 관한 비용</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"3\" class=\"center last\">100만원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\" colspan=\"2\"><strong>해외여행중휴대품손해 (분실제외)  (자기부담금 1만원)</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장내용] 해외여행 중에 우연한 사고로 인해 피보험자가 여행중 소유, 사용, 관리하는 휴대품에 입은 손해 보상, 단, 통화, 항공권, 여권 등을 휴대품에 포함되지 않음 (공제금액 : 1만원)</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>[보장금액] 손해액에서 1회의 사고에 대하여 보험증권에 기재된 자기부담금을 공제한 금액을 지급 (단, 1개 또는 1조, 1항에 대하여 20만원 한도 보상) (분실사고는 보상 제외)</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center\">50만원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center\">50만원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center last\">100만원</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\" colspan=\"2\"><strong>해외여행중중대사고구조송환비용</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"4\" class=\"last\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li><strong>[보장내용]</strong></li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>1.해외여행 중 피보험자가 탑승한 항공기나 선박이 행방불명 또는 조난당한 경우</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>2.사고로 인하여 긴급수색구조 등이 필요한 경우</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>3.사망 또는 14일이상 계속 입원한 경우</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>4.계약자, 피보험자 또는 피보험자의 법정상속인이 부담하는 수색구조비용, 구원자 교통비 (2인한도), 숙박비(2인*14일한도), 유해이송비용, 기타제잡비(10만원 한도)를 약관이 정한 바에 따라 보상</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li><strong>[보장금액]</strong></li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>보험기간을 통하여 이 특별약관의 보험가입금액을 한도로 지급</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\" colspan=\"2\"><strong>해외여행중 항공기 및 수하물지연비용</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"4\" class=\"last\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li><strong>[보장내용]</strong></li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>1. 연결항공편이 결항되어 실제 도착시간의 4시간 내에 피보험자에게 대체 항공운송수단이 제공되지 못한 경우</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>2. 항공편이 4시간 이상 출발 지연, 취소되거나 과적에 의해 탑승이 거부되어 4시간 내 대체적인 수단이 제공되지 못하는 경우</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>3. 수화물이 예정된 도착시간으로부터 6시간 이내에 도착하지 못하는 경우</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>4. 수화물이 손실되거나 피보험자가 목적지에 도착한 후 24시간 내 수화물이 피보험자에게 도착하지 못하는 경우</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li><strong>[보장금액]</strong></li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>1. 출발/결항된 항공편에 대해 발생한 합리적으로 필요한 비용</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>2. 보장내용 3의 경우, 비상의복 및 필수품 구입비용</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>3. 보장내용 4의 경우, 의복, 필수품 등에 대해 예정된 도착지에 도착 후 120시간 내에 발생한 비용</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\" colspan=\"2\"><strong>해외여행 중단사고 발생 추가비용</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"4\" class=\"last\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li><strong>[보장내용]</strong></li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>1) 피보험자 및 여행동반 가족이 상해/질병으로 3일 이상 입원한 경우</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>2) 보험기간 내 피보험자의 3촌 이내 친족 또는 여행동반자의 사망</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>3) 지진, 분화, 해일 등의 천재지변</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>4) 전쟁, 외국의 무력행사, 혁명, 내란, 사변, 테러, 폭동</li>\n\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li><strong>[보장금액]</strong></li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>해외여행 중 여행중단 후 귀국으로 인해 기 지불한 항공/선박운임비용을 초과해 추가로 발생하는 항공/선박운임비용 또는 여행중단 후 귀국으로 인해 기 지불한 숙박비용을 초과해 추가로 발생하는 2박 이내의 숙박비용을 가입금액 한도로 보상</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\" colspan=\"2\"><strong>해외여행중 식중독 입원비용</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"4\" class=\"last\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li><strong>[보장내용]</strong></li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>여행 도중 음식물의 섭취로 인해 식중독이 발생하고 그 치료를 직접적인 목적으로 병원/의원에 입원해 치료를 받았을 때, 4일 초과 1일당 보험가입금액을 식중독 입원비로 지급</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li><strong>[보장금액]</strong></li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>최초입원일로부터 3일초과 1일당 보험가입금액을 식중독 입원비로 지급</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td scope=\"row\" colspan=\"2\"><strong>해외여행중 특정전염병 발생금</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"4\" class=\"last\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li><strong>[보장내용]</strong></li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>1. 여행 도중 특정전염병에 감염, 진단받아 치료를 받은 때</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>2. 여행 도중 감염된 특정전염병을 직접원인으로 하여 보험기간 마지막 날로부터 30일 이내에 전염병환자로 진단받아 치료를 받은 경우</li>\n\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst_mt\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li><strong>[보장금액]</strong></li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<li>보험가입금액을 특정전염병발생금으로 지급</li>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t</tbody>\n\t\t\t\t\t\t\t\t\t\t\t</table>\n\t\t\t\t\t\t\t\t\t\t\t<p class=\"explain\">- 본인부담금 안내</p>\n\t\t\t\t\t\t\t\t\t\t\t<table class=\"tb_iti_term\">\n\t\t\t\t\t\t\t\t\t\t\t\t<colgroup>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<col style=\"width:22%\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t<col>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<col style=\"width:10%\">\n\t\t\t\t\t\t\t\t\t\t\t\t</colgroup>\n\t\t\t\t\t\t\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<th scope=\"col\">항목</th>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<th scope=\"col\">본인부담금</th>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<th scope=\"col\">비고</th>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td><strong>해외여행_기본형 실손의료비(국내의료기관)</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td>입원 20% / 통원 1~2만원 또는 20% 중 큰금액 <br />\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t(참고사항 : 의원, 병원 1만원 / 종합병원, 상급종합 2만원)</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center last\">1일, 1회당</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td><strong>해외여행_특약형 실손의료비(국내의료기관)</strong></td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td> 입원 30% / 통원 3만원 또는 30% 중 큰금액 </td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"center last\">1일, 1회당</td>\n\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t\t\t\t\t\t</tbody>\n\t\t\t\t\t\t\t\t\t\t\t\t<tfoot>\n\t\t\t\t\t\t\t\t\t\t\t\t\t<tr><td colspan=\"3\" style=\"border-left:none;border-bottom:none; border-right:none; text-align:left;\">[참고사항] 위에 표기되지 않은 자기부담금은 약관에 따라 보상됩니다.</td></tr>\n\t\t\t\t\t\t\t\t\t\t\t\t</tfoot>\n\t\t\t\t\t\t\t\t\t\t\t</table>\n\t\t\t\t\t\t\t\t\t\t\t<p class=\"explain\">- 확인 및 참고사항</p>\n\t\t\t\t\t\t\t\t\t\t\t<ul class=\"iti_lst\">\n\t\t\t\t\t\t\t\t\t\t\t\t<li>1. 보험 접수는 여행 종료일 다음날부터 3년 이내 접수하셔야 합니다.</li>\n\t\t\t\t\t\t\t\t\t\t\t\t<li>2. 일정 종료 후 보험기간은 개별연장 불가하며 보장기간은 종료일로부터 90일 이내입니다.</li>\n\t\t\t\t\t\t\t\t\t\t\t\t<li>3. 15세 미만과 79세 6개월이상 및 임산부는 보상 불가부분이 있으므로 확인 후 개별 보험 가입을 권장합니다.</li>\n\t\t\t\t\t\t\t\t\t\t\t\t<li>4. 15세 미만자, 심실상실자 또는 심신 박약자의 사망을 보험사고로 한 보험계약은 무효로 합니다. (상법 732조)</li>\n\t\t\t\t\t\t\t\t\t\t\t\t<li>5. 여행자보험은 실손실 보상 보험으로 보상한도 안에서 심사지급 되며 타보험사와 중복 가입시 비례보상됩니다.</li>\n\t\t\t\t\t\t\t\t\t\t\t\t<li>6. 보험금은 보험한도내에서 지급되며 본인부담금 공제 후 지급됩니다.</li>\n\t\t\t\t\t\t\t\t\t\t\t\t<li>7. 진료와 무관한 제비용 (제증명료, 의료보조기구 구입비)이나 입원 및 국내 통원치료시 치과치료, 한방치료에서 발생한 비급여 의료비는 보상되지 않습니다.</li>\n\t\t\t\t\t\t\t\t\t\t\t\t<li>8. 진료기관 방문 시 발생되는 통원비용 및 업무 손실비용 등에 대해서는 보상되지 않습니다.</li>\n\t\t\t\t\t\t\t\t\t\t\t\t<li>9. 교통사고등 국민건강 보험공단의 적용을 받지 못하는 경우 치료비의 40% 이내에서 보상됩니다</li>\n\t\t\t\t\t\t\t\t\t\t\t\t<li>10. 상해사고로 인한 장애 판정은 사고일로부터 6개월 이후 대학병원급의 의료기관에서 후유장애를 진단 받으시길 바랍니다.</li>\n\t\t\t\t\t\t\t\t\t\t\t\t<li>11. 본인 부주의에 의한 휴대품 분실 / 파손 사고 청구시에 대해서는 보상이 불가합니다.</li>\n\t\t\t\t\t\t\t\t\t\t\t\t<li>12. 현금 및 유가증권, 신체보조장구 (치아, 틀니, 콘택트렌즈)는 보상 불가합니다.</li>\n\t\t\t\t\t\t\t\t\t\t\t\t<li>13. 흠. 기스에 의한 파손은 보상 불가합니다.</li>\n\t\t\t\t\t\t\t\t\t\t\t\t<li>14. 여행자 보험은 여행기간내 발생하는 사고에 대해 보장을 해드리며 기존 병력으로 인해 여행기간 중 발생되는 사고에 대해서는 보상하지 않습니다. (ex. 기왕증등)</li>\n\t\t\t\t\t\t\t\t\t\t\t\t<li>15. 자세한 보장내용은 약관을 반드시 참고 하시기 바랍니다.</li>\n\t\t\t\t\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t\t<div class=\"head\"><span>●</span> 영업보증보험</div>\n\t\t\t\t\t\t\t\t\t\t<div class=\"body\">\n\t\t\t\t\t\t\t\t\t\t\t<p class=\"explain\">\n\t\t\t\t\t\t\t\t\t\t\t\t모두투어는 영업보증보험 15억 1천만원(기간: 2026년 02월 18일 ~\n\t\t\t\t\t\t\t\t\t\t\t\t\t2027년 02월 17일)에 가입되어 있습니다.\n\t\t\t\t\t\t\t\t\t\t\t\t<br />\n\t\t\t\t\t\t\t\t\t\t\t   <a href=\"//img.modetour.com/modetour/2026/itinerary/2026_itinerary01.pdf\" target=\"_blank\" title=\"새창\" class=\"go_detail\">자세히 보러 가기 &gt;</a>\n\t\t\t\t\t\t\t\t\t\t\t</p>\n\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t\t<div class=\"head\"><span>●</span> 기획보증보험</div>\n\t\t\t\t\t\t\t\t\t\t<div class=\"body\">\n\t\t\t\t\t\t\t\t\t\t\t<p class=\"explain\">\n\t\t\t\t\t\t\t\t\t\t\t\t모두투어는 기획여행 보증보험 7억원(기간: 2026년 02월 18일 ~\n\t\t\t\t\t\t\t\t\t\t\t\t\t2027년 02월 17일)에 가입되어 있습니다.\n\t\t\t\t\t\t\t\t\t\t\t\t<br />\n\t\t\t\t\t\t\t\t\t\t\t  <a href=\"//img.modetour.com/modetour/2026/itinerary/2026_itinerary02.pdf\" target=\"_blank\" title=\"새창\" class=\"go_detail\">자세히 보러 가기 &gt;</a>\n\t\t\t\t\t\t\t\t\t\t\t</p>\n\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t</div>",
+                      "insuranceInformationMOHtml": "\n\t\t\t\t\t<div style=\"margin:2%\">\n\t\t\t\t\t  <div style=\"padding:3% 0%\">\n\t\t\t\t\t\t<strong style=\"\">\n\t\t\t\t\t\t\t\t\t\t모두투어의 여행보험은<br />\n\t\t\t\t\t\t\t\t\t\t한화손해보험(주) 입니다.\n\t\t\t\t\t\t</strong><br />\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\t\t\t\t해외여행보험은 상기 한화손해보험사의 약관 규정에 근거합니다.\n\t\t\t\t\t\t</p>\n\t\t\t\t\t </div>\n\t\t\t\t\t\t<br />\n\t\t\t\t\t\t<br />\n\t\t\t\t\t\t<strong>보험사별 보험금 청구 및 문의처</strong>\n\t\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t\t\t\t출 발 일 : 2024.05.01~2025.04.30 (전지역)\n\t\t\t\t\t\t</li>\n\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t\t\t\t전화문의 : <a href='tel:02-728-8008'>02-728-8008</a>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t\t\t\t자세한 내용은 모두투어 PC페이지에서 확인 해보시기 바랍니다.\n\t\t\t\t\t\t</li>\n\t\t\t\t\t\t</ul>\n\t\t\t\t   </div>\n\t\t\t\t\t"
+                    },
+                    "precautionsBooking": {
+                      "agreeCncellationPolicyHtml": "\n\t\t\t\t\t\t\t\t<div class=\"l_container\">\n\t\t\t\t\t\t\t\t<div class=\"l_wrap\">\n\t\t\t\t\t\t\t\t<div class=\"l_sec pop_iti_term\">\n\t\t\t\t\t\t\t\t<div class=\"iti_tabs\">\n\t\t\t\t\t\t\t\t<div class=\"tit_area\">여행약관 안내</div>\n\t\t\t\t\t\t\t\t<p class=\"con_txt\">\n\t\t\t\t\t\t\t\t이 상품은 <strong class=\"iti_highlight\">특별약관</strong>이 적용됩니다. <br />\n\t\t\t\t\t\t\t\t취소 시 특별약관 취소료규정에 따른 금액이 부가되오니, 규정을 필히 확인해주시기 바랍니다.<br>\n\t\t\t\t\t\t\t\t<strong class=\"iti_highlight\">취소료규정을 제외한 사항들은 국외여행 표준약관이 적용됩니다. 하기의 여행약관 세부내용 보러 가기를 통해 확인해주세요.</strong>\n\t\t\t\t\t\t\t\t</p>\n\t\t\t\t\t\t\t\t<div class=\"term_info\">\n\t\t\t\t\t\t\t\t<div class=\"head\"><span>●</span> 계약금규정</div>\n\t\t\t\t\t\t\t\t<div class=\"body\">\n\t\t\t\t\t\t\t\t<p class=\"explain\">\n\t\t\t\t\t\t\t\t1. 여행 경비가 2,000,000원 미만인 경우<br>\n\t\t\t\t\t\t\t\t- 계약금 : 200,000원<br>\n\t\t\t\t\t\t\t\t단, 여행 경비가 200,000원을 넘지 않을 경우, 전체 여행 경비를 계약금으로 입금해 주셔야 합니다.<br>\n\t\t\t\t\t\t\t\t2. 여행 경비가 2,000,000원 이상인 경우<br>\n\t\t\t\t\t\t\t\t- 계약금 : 여행 경비의 10%<br>\n\t\t\t\t\t\t\t\t&middot; 계약금 입금이 지연될 경우 예약이 취소될수 있습니다.<br>\n\t\t\t\t\t\t\t\t&middot; 계약금은 항공, 호텔, 현지 사정에 따라 금액이 변동 될수 있으며, 상황에 따라 결제시한이 당겨질수도 있습니다.<br>\n\t\t\t\t\t\t\t\t&middot; 계약금 결제 이후 취소료 규정 적용 기간에 취소 시 취소 수수료가 계약금 금액 보다 클 시 추가 취소 수수료를 부담하셔야합니다.<br>\n\t\t\t\t\t\t\t\t&middot; 취소료 규정 적용 기간에 예약 시 계약금은 취소료 규정 배상 금액 만큼으로 변경 됩니다.<br>\n\t\t\t\t\t\t\t\tex) 여행 개시 8일전 예약 시 : 취소료 부과 금액인  총 상품가격의 20% 를 계약금으로 결제계좌\n\t\t\t\t\t\t\t\t</p>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t<div class=\"head\"><span>●</span> 여행 취소료 규정</div>\n\t\t\t\t\t\t\t\t<div class=\"body\">\n\t\t\t\t\t\t\t\t<p class=\"explain iti_special\"><strong>▶ 인터넷상에서 예약/결제 취소 및 변경은 불가능 하오니, 예약/결제 취소나 여행자정보 변경을 원하시면 반드시 예약담당자에게 연락하여 주시기 바랍니다.</strong></p>\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t<p class=\"explain\">\n\t\t\t\t\t\t\t\t▶여행자의 여행계약 해제 요청 시 여행약관에 의거하여 취소료가 부과됩니다◀\r<br />제16조(여행출발 전 계약해제)\r<br /> - 여행개시 30일전까지(  ～30) 통보 시  - 계약금 환급\r<br /> - 여행개시 20일전까지(29～20) 통보 시  - 여행요금의 10% 배상\r<br /> - 여행개시 10일전까지(19～10) 통보 시  - 여행요금의 15% 배상\r<br /> - 여행개시  8일전까지( 9～ 8) 통보 시  - 여행요금의 20% 배상\r<br /> - 여행개시  1일전까지( 7～ 1) 통보 시  - 여행요금의 30% 배상\r<br /> - 여행 당일 통보 시 - 여행요금의 50% 배상\r<br />(※공정거래위원회 고시 제2014-4호 소비자분쟁해결기준에 의한것으로 제15조의 변경사항은 2014년 3월21일 여행상품예약자부터 적용)\r<br /><B><FONT COLOR=RED>▶본 상품은 항공권 '발권' 이후 취소 시 상기 취소료 외에 항공권 취소 수수료 130,000원이 추가로 발생되며 출발 당일 취소시 항공료 전액 환불 불가합니다.(유류세, 택스만 환불 가능) </B></FONT COLOR=RED>\r<br /><B><FONT COLOR=BLUE>*객실 파이널 이후에는 약관상 취소료와 별개로 객실 취소료가 추가로 부과 될 수 있습니다.</FONT COLOR=BLUE></B>\n\t\t\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t<div class=\"head\"><span>●</span> 최저출발인원 미 충족 시 계약해제</div>\n\t\t\t\t\t\t\t\t<div class=\"body\">\n\t\t\t\t\t\t\t\t<p class=\"explain\">\n\t\t\t\t\t\t\t\t&middot; 당사는 최저행사인원이 충족되지 아니하여 여행계약을 해제하는 경우 여행출발 7일전까지 여행자에게 통지하여야 합니다.<br>\n\t\t\t\t\t\t\t\t&middot; 당사는 여행참가자 수 미달로 전항의 기일내 통지를 하지 아니하고 계약을 해제하는 경우 이미 지급 받은 계약금 환급 외에 다음 각 목의 금액을 여행자에게 배상하여야 합니다.<br>\n\t\t\t\t\t\t\t\t- 여행개시 7일전까지 여행계약 해제 통지시 : 계약금 환급<br>\n\t\t\t\t\t\t\t\t- 여행출발 1일전까지 통지시 : 여행요금의 30%<br>\n\t\t\t\t\t\t\t\t- 여행출발 당일 통지시 : 여행요금의 50%\n\t\t\t\t\t\t\t\t</p>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t<div class=\"head\">● 취소위약금 증빙 제공 및 차액환급 안내</div>\n\t\t\t\t\t\t\t\t<div class=\"body\">\n\t\t\t\t\t\t\t\t<p class=\"explain\">고객님은 상기 취소료에 대해 증빙을 요청할 수 있으며, 취소료 규정과 증빙(인건비 포함)에서 차액이 있는 경우 이를 환급합니다.</p>\n\t\t\t\t\t\t\t\t<p class=\"explain\">\n\t\t\t\t\t\t\t\t증빙제공 및 환급규정<br>\n\t\t\t\t\t\t\t\t고객은 계약 취소와 관련하여 취소수수료(여행사 인건비 포함) 부가 내역에 대한 구체적인 증빙과 설명을 여행사에 요구할 수 있으며, 여행사는 관련 설명과 증빙을 제시하고, 취소수수료 규정과 차액이 있는 경우 이를 환 급합   니  다.\n\t\t\t\t\t\t\t\t</p>\n\t\t\t\t\t\t\t\t<div class=\"time_box\">오늘은 여행개시 <span class=\"iti_special\">146</span> 일 전입니다.</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t",
+                      "overseasTravelTermsConditionsHtml": "\n\t\t\t\t\t\t\t<!-- 국외 여행 약관 -->                            \n\t\t\t\t\t\t\t<div class=\"terms_lst\">\n\t\t\t\t\t\t\t\t<div class=\"term_wrap\">\n\t\t\t\t\t\t\t\t\t<div class=\"term_con con_view\">            \n\t\t\t\t\t\t\t\t\t\t<div class=\"txt_advice2\">\n\t\t\t\t\t\t\t\t\t\t\t<span class=\"tit_g\">이 상품은 <span class=\"stress\">[특별약관]</span> 상품입니다.</span>\n\t\t\t\t\t\t\t\t\t\t\t취소 시 [국외]여행표준약관 제6조 특약에 의한 자체 특별약관이 적용되며, 공정거래위원회 소비자분쟁해결기준 제2018-02호에 우선합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t분쟁해결기준보다 높은 수수료가 부과될 수 있고, 별도의 동의절차를 거치니 필히 규정을 확인해주시기 바랍니다.\n\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t\t<div class=\"txt_advice2\">▶여행자의 여행계약 해제 요청 시 여행약관에 의거하여 취소료가 부과됩니다◀\r<br />제16조(여행출발 전 계약해제)\r<br /> - 여행개시 30일전까지(  ～30) 통보 시  - 계약금 환급\r<br /> - 여행개시 20일전까지(29～20) 통보 시  - 여행요금의 10% 배상\r<br /> - 여행개시 10일전까지(19～10) 통보 시  - 여행요금의 15% 배상\r<br /> - 여행개시  8일전까지( 9～ 8) 통보 시  - 여행요금의 20% 배상\r<br /> - 여행개시  1일전까지( 7～ 1) 통보 시  - 여행요금의 30% 배상\r<br /> - 여행 당일 통보 시 - 여행요금의 50% 배상\r<br />(※공정거래위원회 고시 제2014-4호 소비자분쟁해결기준에 의한것으로 제15조의 변경사항은 2014년 3월21일 여행상품예약자부터 적용)\r<br /><B><FONT COLOR=RED>▶본 상품은 항공권 '발권' 이후 취소 시 상기 취소료 외에 항공권 취소 수수료 130,000원이 추가로 발생되며 출발 당일 취소시 항공료 전액 환불 불가합니다.(유류세, 택스만 환불 가능) </B></FONT COLOR=RED>\r<br /><B><FONT COLOR=BLUE>*객실 파이널 이후에는 약관상 취소료와 별개로 객실 취소료가 추가로 부과 될 수 있습니다.</FONT COLOR=BLUE></B></div>      \n\t\t\t\t\t\t\t\t\t\t<dl>\n\t\t\t\t\t\t\t\t\t\t\t<dd><img src=\"http://img.modetour.com/modetour/2014/itinerary/10021_2.png\" alt=\"공정거래위원회\"/></dd>\n\t\t\t\t\t\t\t\t\t\t\t<dt>제1조(목적)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t이 약관은 (주)모두투어네트워크(이하 “여행사”라 합니다)와 여행자가 체결한 국외여행계약의 세부 이행 및 준수사항을 정함을 목적으로 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\t\t\t\t\t\t\t\t\t\t\t<dt>제2조(용어의 정의)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행의 종류 및 정의, 해외여행수속대행업의 정의는 다음과 같습니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t1. 기획여행 : 여행사가 미리 여행목적지 및 관광일정, 여행자에게 제공될 운송 및 숙식서비스 내용(이하 ‘여행서비스’라 함), 여행요금을 정하여 광고 또는 기타 방법으로 여행자를 모집하여 실시하는 여행.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t2. 희망여행 : 여행자(개인 또는 단체)가 희망하는 여행조건에 따라 여행사가 운송․숙식․관광 등 여행에 관한 전반적인 계획을 수립하여 실시하는 여행.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t3. 해외여행 수속대행(이하 ‘수속대행계약’이라 함) : 여행사가 여행자로부터 소정의 수속대행요금을 받기로 약정하고, 여행자의 위탁에 따라 다음에 열거하는 업무(이하 ‘수속대행업무’라 함)를 대행하는 것.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t1) 사증, 재입국 허가 및 각종 증명서 취득에 관한 수속<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t2) 출입국 수속서류 작성 및 기타 관련업무<br/>\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제3조(여행사와 여행자 의무)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행의 종류 및 정의, 해외여행수속대행업의 정의는 다음과 같다. <br>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행사는 여행자에게 안전하고 만족스러운 여행서비스를 제공하기 위하여 여행알선 및 안내․운송․숙박 등 여행계획의 수립 및 실행과정에서 맡은 바 임무를 충실히 수행하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t② 여행자는 안전하고 즐거운 여행을 위하여 여행자간 화합도모 및 여행사의 여행질서 유지에 적극 협조하여야 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제4조(계약의 구성)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행계약은 여행계약서(붙임)와 여행약관․여행일정표(또는 여행 설명서)를 계약내용으로 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t② 여행계약서에는 여행사의 상호, 소재지 및 관광진흥법 제9조에 따른 보증보험 등의 가입(또는 영업보증금의 예치 현황) 내용이 포함되어야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t③ 여행일정표(또는 여행설명서)에는 여행일자별 여행지와 관광내용․교통수단․쇼핑횟수․숙박장소․식사 등 여행실시일정 및 여행사 제공 서비스 내용과 여행자 유의사항이 포함되어야 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제5조(계약체결의 거절)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행사는 여행자에게 다음 각 호의 1에 해당하는 사유가 있을 경우에는 여행자와의 계약체결을 거절할 수 있습니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t1. 질병, 신체이상 등의 사유로 개별관리가 필요하거나, 단체여행(다른 여행자의 여행에 지장을 초래하는 등)의 원활한 실시에 지장이 있다고 인정되는 경우<br>\n\t\t\t\t\t\t\t\t\t\t\t\t2. 계약서에 명시한 최대행사인원이 초과된 경우<br>\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제6조(특약)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행사와 여행자는 관련법규에 위반되지 않는 범위 내에서 서면(전자문서를 포함한다. 이하 같다)으로 특약을 맺을 수 있습니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t이 경우 여행사는 특약의 내용이 표준약관과 다르고 표준약관보다 우선 적용됨을 여행자에게 설명하고 별도의 확인을 받아야 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제7조(계약서 등 교부 및 안전정보 제공)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행사는 여행자와 여행계약을 체결한 경우 계약서와 약관 및 여행일정표(또는 여행설명서)를 각 1부씩 여행자에게 교부하고, 여행목적지에 관한 안전정보를 제공하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t또한 여행 출발 전 해당 여행지에 대한 안전정보가 변경된 경우에도 변경된 안전정보를 제공하여야 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제8조(계약서 및 약관 등 교부 간주)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t다음 각 호의 경우 여행계약서와 여행약관 및 여행일정표(또는 여행설명서)가 교부된 것으로 간주합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t1. 여행자가 인터넷 등 전자정보망으로 제공된 여행계약서, 약관 및 여행일정표(또는 여행설명서)의 내용에 동의하고 여행계약의 체결을 신청한 데 대해 여행사가 전자정보망 내지 기계적 장치 등을 이용하여 여행자에게 승낙의 의사를 통지한 경우<br>\n\t\t\t\t\t\t\t\t\t\t\t\t2. 여행사가 팩시밀리 등 기계적 장치를 이용하여 제공한 여행계약서, 약관 및 여행일정표(또는 여행설명서)의 내용에 대하여 여행자가 동의하고 여행계약의 체결을 신청하는 서면을 송부한 데 대해 여행사가 전자정보망 내지 기계적 장치 등을 이용하여 여행자에게 승낙의 의사를 통지한 경우\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제9조(여행사의 책임)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행사는 여행 출발시부터 도착시까지 여행사 본인 또는 그 고용인, 현지여행사 또는 그 고용인 등(이하 ‘사용인’이라 함)이 제3조제1항에서 규정한 여행사 임무와 관련하여 여행자에게 고의 또는 과실로 손해를 가한 경우 책임을 집니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제10조(여행요금)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행계약서의 여행요금에는 다음 각 호가 포함됩니다. 다만, 희망여행은 당사자간 합의에 따릅니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t1. 항공기, 선박, 철도 등 이용운송기관의 운임(보통운임기준)<br>\n\t\t\t\t\t\t\t\t\t\t\t\t2. 공항, 역, 부두와 호텔사이 등 송영버스요금<br>\n\t\t\t\t\t\t\t\t\t\t\t\t3. 숙박요금 및 식사요금<br>\n\t\t\t\t\t\t\t\t\t\t\t\t4. 안내자경비<br>\n\t\t\t\t\t\t\t\t\t\t\t\t5. 여행 중 필요한 각종세금<br>\n\t\t\t\t\t\t\t\t\t\t\t\t6. 국내외 공항․항만세<br>\n\t\t\t\t\t\t\t\t\t\t\t\t7. 관광진흥개발기금<br>\n\t\t\t\t\t\t\t\t\t\t\t\t8. 일정표내 관광지 입장료<br>\n\t\t\t\t\t\t\t\t\t\t\t\t9. 기타 개별계약에 따른 비용<br>\n\t\t\t\t\t\t\t\t\t\t\t\t② 제1항에도 불구하고 반드시 현지에서 지불해야 하는 경비가 있는 경우 그 내역과 금액을 여행계약서에 별도로 구분하여 표시하고, 여행사는 그 사유를 안내하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t③ 여행자는 계약 체결시 계약금(여행요금 중 계약금으로 별도 고지된 금액)을 ‘당사’에게 지급하여야 하며, 계약금은 여행요금 또는 손해배상액의 전부 또는 일부로 취급합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t④ 여행자는 제1항의 여행요금 중 계약금을 제외한 잔금을 여행출발 7일전까지 여행사에게 지급하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t⑤ 여행자는 제1항의 여행요금을 당사자가 약정한 바에 따라 카드, 계좌이체 또는 무통장입금 등의 방법으로 지급하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t⑥ 희망여행요금에 여행자 보험료가 포함되는 경우 여행사는 보험회사명, 보상내용 등을 여행자에게 설명하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제11조(여행요금의 변경)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 국외여행을 실시함에 있어서 이용운송․숙박기관에 지급하여야 할 요금이 계약체결시보다 5%이상 증감하거나 여행요금에 적용된 외화환율이 계약체결시보다 2% 이상 증감한 경우 여행사 또는 여행자는 그 증감된 금액 범위 내에서 여행요금의 증감을 상대방에게 청구할 수 있습니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t② 여행사는 제1항의 규정에 따라 여행요금을 증액하였을 때에는 여행 출발일 15일전에 여행자에게 통지하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제12조(여행조건의 변경요건 및 요금 등의 정산)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 계약서 등에 명시된 여행조건은 다음 각 호의 1의 경우에 한하여 변경될 수 있습니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t1. 여행자의 안전과 보호를 위하여 여행자의 요청 또는 현지사정에 의하여 부득이하다고 쌍방이 합의한 경우<br>\n\t\t\t\t\t\t\t\t\t\t\t\t2. 천재지변, 전란, 정부의 명령, 운송‧숙박기관 등의 파업‧휴업 등으로 여행의 목적을 달성할 수 없는 경우 <br>\n\t\t\t\t\t\t\t\t\t\t\t\t② 여행사가 계약서 등에 명시된 여행일정을 변경하는 경우에는 해당 날짜의 일정이 시작되기 전에 여행자의 서면 동의를 받아야 합니다. 이때 서면동의서에는 변경일시, 변경내용, 변경으로 발생하는 비용이 포함되어야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t③ 천재지변, 사고, 납치 등 긴급한 사유가 발생하여 여행자로부터 여행일정 변경 동의를 받기 어렵다고 인정되는 경우에는 제2항에 따른 일정변경 동의서를 받지 아니할 수 있습니다. 다만, 여행사는 사후에 서면으로 그 변경 사유 및 비용 등을 설명하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t④ 제1항의 여행조건 변경 및 제11조의 여행요금 변경으로 인하여 제10조 제1항의 여행요금에 증감이 생기는 경우에는 여행출발 전 변경 분은 여행출발 이전에, 여행 중 변경 분은 여행종료 후 10일 이내에 각각 정산(환급)하여야 합니다. <br>\n\t\t\t\t\t\t\t\t\t\t\t\t⑤ 제1항의 규정에 의하지 아니하고 여행조건이 변경되거나 제16조 내지 제18조의 규정에 의한 계약의 해제․해지로 인하여 손해배상액이 발생한 경우에는 여행출발 전 발생 분은 여행 출발 이전에, 여행 중 발생 분은 여행종료 후 10일 이내에 각각 정산(환급)하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t⑥ 여행자는 여행출발 후 자기의 사정으로 숙박, 식사, 관광 등 여행요금에 포함된 서비스를 제공받지 못한 경우 여행사에게 그에 상응하는 요금의 환급을 청구할 수 없습니다. 다만, 여행이 중도에 종료된 경우에는 제18조에 준하여 처리합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제13조(여행자 지위의 양도)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행자가 개인사정 등으로 여행자의 지위를 양도하기 위해서는 여행사의 승낙을 받아야 합니다. 이때 여행사는 여행자 또는 여행자의 지위를 양도받으려는 자가 양도로 발생하는 비용을 지급할 것을 조건으로 양도를 승낙할 수 있습니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t② 전항의 양도로 발생하는 비용이 있을 경우 여행사는 기한을 정하여 그 비용의 지급을 청구하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t③ 여행사는 계약조건 또는 양도하기 어려운 불가피한 사정 등을 이유로 제1항의 양도를 승낙하지 않을 수 있습니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t④ 제1항의 양도는 여행사가 승낙한 때 효력이 발생합니다. 다만, 여행사가 양도로 인해 발생한 비용의 지급을 조건으로 승낙한 경우에는 정해진 기한 내에 비용이 지급되는 즉시 효력이 발생합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t⑤ 여행자의 지위가 양도되면, 여행계약과 관련한 여행자의 모든 권리 및 의무도 그 지위를 양도 받는 자에게 승계됩니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제14조(여행사의 하자담보 책임)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행자는 여행에 하자가 있는 경우에 여행사에게 하자의 시정 또는 대금의 감액을 청구할 수 있습니다. 다만, 그 시정에 지나치게 많은 비용이 들거나 그 밖에 시정을 합리적으로 기대할 수 없는 경우에는 시정을 청구할 수 없습니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t② 여행자는 시정 청구, 감액 청구를 갈음하여 손해배상을 청구하거나 시정 청구, 감액 청구와 함께 손해배상을 청구 할 수 있습니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t③ 제1항 및 제2항의 권리는 여행기간 중에도 행사할 수 있으며, 여행종료일부터 6개월 내에 행사하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제15조(손해배상)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행사는 현지여행사 등의 고의 또는 과실로 여행자에게 손해를 가한 경우 여행사는 여행자에게 손해를 배상하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t② 여행사의 귀책사유로 여행자의 국외여행에 필요한 사증, 재입국 허가 또는 각종 증명서 등을 취득하지 못하여 여행자의 여행일정에 차질이 생긴 경우 여행사는 여행자로부터 절차대행을 위하여 받은 금액 전부 및 그 금액의 100%상당액을 여행자에게 배상하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t③ 여행사는 항공기, 기차, 선박 등 교통기관의 연발착 또는 교통체증 등으로 인하여 여행자가 입은 손해를 배상하여야 합니다. 다만, 여행사가 고의 또는 과실이 없음을 입증한 때에는 그러하지 아니합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t④ 여행사는 자기나 그 사용인이 여행자의 수하물 수령, 인도, 보관 등에 관하여 주의를 해태(懈怠)하지 아니하였음을 증명하지 아니하면 여행자의 수하물 멸실, 훼손 또는 연착으로 인한 손해를 배상할 책임을 면하지 못합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제16조(여행출발 전 계약해제)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행사 또는 여행자는 여행 출발 전 이 여행계약을 해제할 수 있습니다. 이 경우 발생하는 손해액은 ‘소비자분쟁해결기준’(공정거래위원회 고시)에 따라 배상합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t               \n\t\t\t\t\t\t\t\t\t\t\t\t② 여행사 또는 여행자는 여행출발 전에 다음 각 호의 1에 해당하는 사유가 있는 경우 상대방에게 제1항의 손해배상액을 지급하지 아니하고 이 여행계약을 해제할 수 있습니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t1. 여행사가 해제할 수 있는 경우<br>\n\t\t\t\t\t\t\t\t\t\t\t\t가. 제12조 제1항 제1호 및 제2호 사유의 경우<br>\n\t\t\t\t\t\t\t\t\t\t\t\t나. 여행자가 다른 여행자에게 폐를 끼치거나 여행의 원활한 실시에 현저한 지장이 있다고 인정될 때<br>\n\t\t\t\t\t\t\t\t\t\t\t\t다. 질병 등 여행자의 신체에 이상이 발생하여 여행에의 참가가 불가능한 경우<br>\n\t\t\t\t\t\t\t\t\t\t\t\t라. 여행자가 계약서에 기재된 기일까지 여행요금을 납입하지 아니한 경우<br>\n\t\t\t\t\t\t\t\t\t\t\t\t2. 여행자가 해제할 수 있는 경우<br>\n\t\t\t\t\t\t\t\t\t\t\t\t가. 제12조 제1항 제1호 및 제2호의 사유가 있는 경우<br>\n\t\t\t\t\t\t\t\t\t\t\t\t나. 여행사가 제21조에 따른 공제 또는 보증보험에 가입하지 아니 하였거나 영업보증금을 예치하지 않은 경우<br>\n\t\t\t\t\t\t\t\t\t\t\t\t다. 여행자의 3촌 이내 친족이 사망한 경우<br>\n\t\t\t\t\t\t\t\t\t\t\t\t*당사제출용 증빙서류<br>\n\t\t\t\t\t\t\t\t\t\t\t\t- 친족을 확인 할 수 있는 서류(가족관계증명서 등…)<br>\n\t\t\t\t\t\t\t\t\t\t\t\t- 진단서 또는 사체검안서(사망진단서)<br>\n\t\t\t\t\t\t\t\t\t\t\t\t- 그 밖의 필요서류<br>\n\t\t\t\t\t\t\t\t\t\t\t\t라. 질병 등 여행자의 신체에 이상이 발생하여 여행에의 참가가 불가능한 경우<br>\n\t\t\t\t\t\t\t\t\t\t\t\t*당사제출용 증빙서류<br>\n\t\t\t\t\t\t\t\t\t\t\t\t- 진단서<br>\n\t\t\t\t\t\t\t\t\t\t\t\t- 그 밖의 필요 서류<br>\n\t\t\t\t\t\t\t\t\t\t\t\t마. 배우자 또는 직계존비속이 신체이상으로 3일 이상 병원(의원)에 입원하여 여행 출발 전까지 퇴원이 곤란한 경우 그 배우자 또는 보호자 1인<br>\n\t\t\t\t\t\t\t\t\t\t\t\t*당사제출용 증빙서류<br>\n\t\t\t\t\t\t\t\t\t\t\t\t- 친족을 확인할 수 있는 서류(가족관계증명서 등…)<br>\n\t\t\t\t\t\t\t\t\t\t\t\t- 진단서<br>\n\t\t\t\t\t\t\t\t\t\t\t\t- 그 밖의 필요서류<br>\n\t\t\t\t\t\t\t\t\t\t\t\t바. 여행사의 귀책사유로 계약서 또는 여행일정표(여행설명서)에 기재된 여행일정대로의 여행실시가 불가능해진 경우<br>\n\t\t\t\t\t\t\t\t\t\t\t\t사. 제10조제1항의 규정에 의한 여행요금의 증액으로 인하여 여행 계속이 어렵다고 인정될 경우\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제17조(최저행사인원 미 충족시 계약해제)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행사는 최저행사인원이 충족되지 아니하여 여행계약을 해제하는 경우 여행출발 7일전까지 여행자에게 통지하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t② 여행사가 여행참가자 수 미달로 전항의 기일내 통지를 하지 아니하고 계약을 해제하는 경우 이미 지급받은 계약금 환급 외에 다음 각 목의 1의 금액을 여행자에게 배상하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t가. 여행출발 1일전까지 통지시 : 여행요금의 30%<br>\n\t\t\t\t\t\t\t\t\t\t\t\t나. 여행출발 당일 통지시 : 여행요금의 50%<br>\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제18조(여행출발 후 계약해지)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행사 또는 여행자는 여행출발 후 부득이한 사유가 있는 경우 각 당사자는 여행계약을 해지할 수 있습니다. 다만, 그 사유가 당사자 한쪽의 과실로 인하여 생긴 경우에는 상대방에게 손해를 배상하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t② 제1항에 따라 여행계약이 해지된 경우 귀환운송 의무가 있는 여행사는 여행자를 귀환운송 할 의무가 있습니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t③ 제1항의 계약해지로 인하여 발생하는 추가 비용은 그 해지사유가 어느 당사자의 사정에 속하는 경우에는 그 당사자가 부담하고, 양 당사자 누구의 사정에도 속하지 아니하는 경우에는 각 당사자가 추가 비용의 50%씩을 부담합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t④ 여행자는 여행에 중대한 하자가 있는 경우에 그 시정이 이루어지지 아니하거나 계약의 내용에 따른 이행을 기대할 수 없는 경우에는 계약을 해지할 수 있습니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t⑤ 제4항에 따라 계약이 해지된 경우 여행사는 대금청구권을 상실합니다. 다만, 여행자가 실행된 여행으로 이익을 얻은 경우에는 그 이익을 여행사에게 상환하여야 합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t⑥ 제4항에 따라 계약이 해지된 경우 여행사는 계약의 해지로 인하여 필요하게 된 조치를 할 의무를 지며, 계약상 귀환운송 의무가 있으면 여행자를 귀환 운송하여야 합니다. 이 경우 귀환운송비용은 원칙적으로 여행사가 부담하여야 하나, 상당한 이유가 있는 때에는 여행사는 여행자에게 그 비용의 일부를 청구할 수 있습니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제19조(여행의 시작과 종료)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행의 시작은 탑승수속(선박인 경우 승선수속)을 마친 시점으로 하며, 여행의 종료는 여행자가 입국장 보세구역을 벗어나는 시점으로 합니다. 다만, 계약내용상 국내이동이 있을 경우에는 최초 출발지에서 이용하는 운송수단의 출발시각과 도착시각으로 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제20조(설명의무)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행사는 계약서에 정하여져 있는 중요한 내용 및 그 변경사항을 여행자가 이해할 수 있도록 설명하여야 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제21조(보험가입 등)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행사는 이 여행과 관련하여 여행자에게 손해가 발생한 경우 여행자에게 보험금을 지급하기 위한 보험 또는 공제에 가입하거나 영업보증금을 예치하여야 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제22조(기타사항)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 이 계약에 명시되지 아니한 사항 또는 이 계약의 해석에 관하여 다툼이 있는 경우에는 여행사 또는 여행자가 합의하여 결정하되, 합의가 이루어지지 아니한 경우에는 관계법령 및 일반관례에 따릅니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t\t② 특수지역에의 여행으로서 정당한 사유가 있는 경우에는 이 표준약관의 내용과 달리 정할 수 있습니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\t\t\t\t\t\t\t\t\t\t</dl>\n\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>                            \n\t\t\t\t\t\t\t<!-- //국외 여행 약관 -->",
+                      "domesticTravelTermsConditionsHtml": "\n\t\t\t\t<!-- 국내여행 약관 -->\n\t\t\t\t\t\t\t<div class=\"terms_lst\">\n\t\t\t\t\t\t\t\t<div class=\"term_wrap\">\n\t\t\t\t\t\t\t\t\t<div class=\"term_con con_view\"> <div class=\"txt_advice2\">\n\t\t\t\t\t\t\t\t\t\t\t<span class=\"tit_g\">이 상품은 <span class=\"stress\">[특별약관]</span> 상품입니다.</span>\n\t\t\t\t\t\t\t\t\t\t\t취소 시 [국내]여행표준약관 제6조 특약에 의한 자체 특별약관이 적용되며, 공정거래위원회 소비자분쟁해결기준 제2018-02호에 우선합니다.<br>\n\t\t\t\t\t\t\t\t\t\t\t분쟁해결기준보다 높은 수수료가 부과될 수 있고, 별도의 동의절차를 거치니 필히 규정을 확인해주시기 바랍니다.\n\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t\t<div class=\"txt_advice2\">▶여행자의 여행계약 해제 요청 시 여행약관에 의거하여 취소료가 부과됩니다◀\r<br />제16조(여행출발 전 계약해제)\r<br /> - 여행개시 30일전까지(  ～30) 통보 시  - 계약금 환급\r<br /> - 여행개시 20일전까지(29～20) 통보 시  - 여행요금의 10% 배상\r<br /> - 여행개시 10일전까지(19～10) 통보 시  - 여행요금의 15% 배상\r<br /> - 여행개시  8일전까지( 9～ 8) 통보 시  - 여행요금의 20% 배상\r<br /> - 여행개시  1일전까지( 7～ 1) 통보 시  - 여행요금의 30% 배상\r<br /> - 여행 당일 통보 시 - 여행요금의 50% 배상\r<br />(※공정거래위원회 고시 제2014-4호 소비자분쟁해결기준에 의한것으로 제15조의 변경사항은 2014년 3월21일 여행상품예약자부터 적용)\r<br /><B><FONT COLOR=RED>▶본 상품은 항공권 '발권' 이후 취소 시 상기 취소료 외에 항공권 취소 수수료 130,000원이 추가로 발생되며 출발 당일 취소시 항공료 전액 환불 불가합니다.(유류세, 택스만 환불 가능) </B></FONT COLOR=RED>\r<br /><B><FONT COLOR=BLUE>*객실 파이널 이후에는 약관상 취소료와 별개로 객실 취소료가 추가로 부과 될 수 있습니다.</FONT COLOR=BLUE></B></div>\n\t\t\t\t\t\t\t\t\t\t\t<dl>\n\t\t\t\t\t\t\t\t\t\t\t<dd><img src=\"http://img.modetour.com/modetour/2014/itinerary/10020_2.png\" alt=\"공정거래위원회\"/></dd>\n\t\t\t\t\t\t\t\t\t\t\t<dt>제1조(목적)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>이 약관은 ㈜모두투어네트워크(이하 “여행사”라 합니다)와 여행자가 체결한 국내여행계약의 세부이행 및 준수사항을 정함을 목적으로 합니다.</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제2조(여행의 종류 및 정의)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행의 종류와 정의는 다음과 같습니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t1. 일반모집여행 : 여행사가 수립한 여행조건에 따라 여행자를 모집하여 실시하는 여행.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t2. 희망여행 : 여행자가 희망하는 여행조건에 따라 여행사가 실시하는 여행.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t3. 위탁모집여행 : 여행사가 만든 모집여행상품의 여행자 모집을 타 여행업체에 위탁하여 실시하는 여행.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제3조(여행사와 여행자 의무)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행사는 여행자에게 안전하고 만족스러운 여행서비스를 제공하기 위하여 여행알선 및 안내․운송․숙박 등 여행계획의 수립 및 실행과정에서 맡은 바 임무를 충실히 수행하여야 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t② 여행자는 안전하고 즐거운 여행을 위하여 여행자간 화합도모 및 여행사의 여행질서 유지에 적극 협조하여야 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제4조(계약의 구성)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행계약은 여행계약서(붙임)와 여행약관․여행일정표(또는 여행 설명서)를 계약내용으로 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t② 여행계약서에는 여행사의 상호, 소재지 및 관광진흥법 제9조에 따른 보증보험 등의 가입(또는 영업보증금의 예치 현황) 내용이 포함되어야 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t③ 여행일정표(또는 여행설명서)에는 여행일자별 여행지와 관광내용․교통수단․쇼핑횟수․숙박장소․식사 등 여행실시일정 및 여행사 제공 서비스 내용과 여행자 유의사항이 포함되어야 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제5조(계약체결 거절)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행사는 여행자에게 다음 각 호의 1에 해당하는 사유가 있을 경우에는 여행자와의 계약체결을 거절할 수 있습니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t1. 질병, 신체이상 등의 사유로 개별관리가 필요하거나, 단체여행(다른 여행자의 여행에 지장을 초래하는 등)의 원활한 실시에 지장이 있다고 인정되는 경우<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t2. 계약서에 명시한 최대행사인원이 초과된 경우\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제6조(특약)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행사와 여행자는 관련법규에 위반되지 않는 범위 내에서 서면(전자문서를 포함한다. 이하 같다)으로 특약을 맺을 수 있습니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t이 경우 여행사는 특약의 내용이 표준약관과 다르고 표준약관보다 우선 적용됨을 여행자에게 설명하고 별도의 확인을 받아야 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제7조(계약서 등 교부 및 안전정보 제공)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행사는 여행자와 여행계약을 체결한 경우 계약서와 여행약관, 여행일정표(또는 여행설명서)를 각 1부씩 여행자에게 교부하고, 여행목적지에 관한 안전정보를 제공하여야 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t또한 여행 출발 전 해당 여행지에 대한 안전정보가 변경된 경우에도 변경된 안전정보를 제공하여야 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제8조(계약서 및 약관 등 교부 간주)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t다음 각 호의 경우에는 여행사가 여행자에게 여행계약서와 여행약관 및 여행일정표(또는 여행설명서)가 교부된 것으로 간주합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t1. 여행자가 인터넷 등 전자정보망으로 제공된 여행계약서, 약관 및 여행일정표(또는 여행설명서)의 내용에 동의하고 여행계약의 체결을 신청한 데 대해 여행사가 전자정보망 내지 기계적 장치 등을 이용하여 여행자에게 승낙의 의사를 통지한 경우<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t2. 여행사가 팩시밀리 등 기계적 장치를 이용하여 제공한 여행계약서, 약관 및 여행일정표(또는 여행설명서)의 내용에 대하여 여행자가 동의하고 여행계약의 체결을 신청하는 서면을 송부한 데 대해 여행사가 전자정보망 내지 기계적 장치 등을 이용하여 여행자에게 승낙의 의사를 통지한 경우\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제9조(여행요금)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행계약서의 여행요금에는 다음 각 호가 포함됩니다. 다만, 희망여행은 당사자간 합의에 따릅니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t1. 항공기, 선박, 철도 등 이용운송기관의 운임(보통운임기준)<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t2. 공항, 역, 부두와 호텔사이 등 송영버스요금<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t3. 숙박요금 및 식사요금<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t4. 안내자경비<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t5. 여행 중 필요한 각종 세금<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t6. 국내 공항․항만 이용료<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t7. 일정표내 관광지 입장료<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t8. 기타 개별계약에 따른 비용<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t② 여행자는 계약 체결시 계약금(여행요금 중 계약금으로 별도 고지된 금액)을 ‘당사’에게 지급하여야 하며, 계약금은 여행요금 또는 손해배상액의 전부 또는 일부로 취급합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t③ 여행자는 제1항의 여행요금 중 계약금을 제외한 잔금을 여행출발 전일까지 여행사에게 지급하여야 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t④ 여행자는 제1항의 여행요금을 당사자가 약정한 바에 따라 카드, 계좌이체 또는 무통장입금 등의 방법으로 지급하여야 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t⑤ 희망여행요금에 여행자 보험료가 포함되는 경우 여행사는 보험회사명, 보상내용 등을 여행자에게 설명하여야 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제10조(여행조건의 변경요건 및 요금 등의 정산)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 계약서 등에 명시된 여행조건은 다음 각 호의 1의 경우에 한하여 변경될 수 있습니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t1. 여행자의 안전과 보호를 위하여 여행자의 요청 또는 현지사정에 의하여 부득이하다고 쌍방이 합의한 경우<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t2. 천재지변, 전란, 정부의 명령, 운송‧숙박기관 등의 파업‧휴업 등으로 여행의 목적을 달성할 수 없는 경우<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t② 여행사가 계약서 등에 명시된 여행일정을 변경하는 경우에는 해당 날짜의 일정이 시작되기 전에 여행자의 서면 동의를 받아야 합니다. 이때 서면동의서에는 변경일시, 변경내용, 변경으로 발생하는 비용이 포함되어야 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t③ 천재지변, 사고, 납치 등 긴급한 사유가 발생하여 여행자로부터 여행일정 변경 동의를 받기 어렵다고 인정되는 경우에는 제2항에 따른 일정변경 동의서를 받지 아니할 수 있습니다. 다만, 여행사는 사후에 서면으로 그 변경 사유 및 비용 등을 설명하여야 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t④ 제1항의 여행조건 변경으로 인하여 제9조제1항의 여행요금에 증감이 생기는 경우에는 여행출발 전 변경 분은 여행출발 이전에, 여행 중 변경 분은 여행종료 후 10일 이내에 각각 정산(환급)하여야 합니다. <br/>\n\t\t\t\t\t\t\t\t\t\t\t\t⑤ 제1항의 규정에 의하지 아니하고 여행조건이 변경되거나 제13조 내지 제15조의 규정에 의한 계약의 해제․해지로 인하여 손해배상액이 발생한 경우에는 여행출발 전 발생 분은 여행출발이전에, 여행 중 발생 분은 여행종료 후 10일 이내에 각각 정산(환급)하여야 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t⑥ 여행자는 여행출발 후 자기의 사정으로 숙박, 식사, 관광 등 여행요금에 포함된 서비스를 제공받지 못한 경우 여행사에게 그에 상응하는 요금의 환급을 청구할 수 없습니다. 다만, 여행이 중도에 종료된 경우에는 제15조에 준하여 처리합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제11조(여행자 지위의 양도)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행자가 개인사정 등으로 여행자의 지위를 양도하기 위해서는 여행사의 승낙을 받아야 합니다. 이때 여행사는 여행자 또는 여행자의 지위를 양도받으려는 자가 양도로 발생하는 비용을 지급할 것을 조건으로 양도를 승낙할 수 있습니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t② 전항의 양도로 발생하는 비용이 있을 경우 여행사는 기한을 정하여 그 비용의 지급을 청구하여야 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t③ 여행사는 계약조건 또는 양도하기 어려운 불가피한 사정 등을 이유로 제1항의 양도를 승낙하지 않을 수 있습니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t④ 제1항의 양도는 여행사가 승낙한 때 효력이 발생합니다. 다만, 여행사가 양도로 인해 발생한 비용의 지급을 조건으로 승낙한 경우에는 정해진 기한 내에 비용이 지급되는 즉시 효력이 발생합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t⑤ 여행자의 지위가 양도되면, 여행계약과 관련한 여행자의 모든 권리 및 의무도 그 지위를 양도 받는 자에게 승계됩니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제12조(여행사의 책임)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행자는 여행에 하자가 있는 경우에 여행사에게 하자의 시정 또는 대금의 감액을 청구할 수 있습니다. 다만, 그 시정에 지나치게 많은 비용이 들거나 그 밖에 시정을 합리적으로 기대할 수 없는 경우에는 시정을 청구할 수 없습니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t② 여행자는 시정 청구, 감액 청구를 갈음하여 손해배상을 청구하거나 시정 청구, 감액 청구와 함께 손해배상을 청구 할 수 있습니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t③ 제1항 및 제2항의 권리는 여행기간 중에도 행사할 수 있으며, 여행종료일부터 6개월 내에 행사하여야 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t④ 여행사는 여행 출발시부터 도착시까지 여행사 본인 또는 그 고용인, 현지여행사 또는 그 고용인 등(이하 ‘사용인’이라 함)이 제3조제1항에서 규정한 여행사 임무와 관련하여 여행자에게 고의 또는 과실로 손해를 가한 경우 책임을 집니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t⑤ 여행사는 항공기, 기차, 선박 등 교통기관의 연발착 또는 교통체증 등으로 인하여 여행자가 입은 손해를 배상하여야 합니다. 다만, 여행사가 고의 또는 과실이 없음을 입증한 때에는 그러하지 아니합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t⑥ 여행사는 자기나 그 사용인이 여행자의 수하물 수령․인도․보관 등에 관하여 주의를 해태하지 아니하였음을 증명하지 아니 하는 한 여행자의 수하물 멸실, 훼손 또는 연착으로 인하여 발생한 손해를 배상하여야 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제13조(여행출발 전 계약해제)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행사 또는 여행자는 여행출발전 이 여행계약을 해제할 수 있습니다. 이 경우 발생하는 손해액은 ‘소비자분쟁해결기준’(공정거래위원회 고시)에 따라 배상합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t② 여행사 또는 여행자는 여행출발 전에 다음 각 호의 1에 해당하는 사유가 있는 경우 상대방에게 제1항의 손해배상액을 지급하지 아니하고 이 여행계약을 해제할 수 있습니다.<br/>\n\n\t\t\t\t\t\t\t\t\t\t\t\t1. 여행사가 해제할 수 있는 경우<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t가. 제10조 제1항 제1호 및 제2호 사유의 경우<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t나. 여행자가 다른 여행자에게 폐를 끼치거나 여행의 원활한 실시에 현저한 지장이 있다고 인정될 때<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t다. 질병 등 여행자의 신체에 이상이 발생하여 여행에의 참가가 불가능한 경우<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t라. 여행자가 계약서에 기재된 기일까지 여행요금을 지급하지 아니하는 경우<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t2. 여행자가 해제할 수 있는 경우<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t가. 제10조 제1항 제1호 및 제2호 사유의 경우<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t나. 여행사가 제18조에 따른 공제 또는 보증보험에 가입하지 아니 하였거나 영업보증금을 예치하지 않은 경우<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t다. 여행자의 3촌이내 친족이 사망한 경우<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t라. 질병 등 여행자의 신체에 이상이 발생하여 여행에의 참가가 불가능한 경우<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t마. 배우자 또는 직계존비속이 신체이상으로 3일 이상 병원(의원)에 입원하여 여행 출발시까지 퇴원이 곤란한 경우 그 배우자 또는 보호자 1인<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t바. 여행사의 귀책사유로 계약서에 기재된 여행일정대로의 여행실시가 불가능해진 경우<br/>\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제14조(최저행사인원 미 충족시 계약해제)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행사는 최저행사인원이 충족되지 아니하여 여행계약을 해제하는 경우 당일여행의 경우 여행출발 24시간 이전까지, 1박2일 이상인 경우에는 여행출발 48시간 이전까지 여행자에게 통지하여야 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t② 여행사가 여행참가자 수의 미달로 전항의 기일 내 통지를 하지 아니하고 계약을 해제하는 경우 이미 지급받은 계약금 환급 외에 계약금 100% 상당액을 여행자에게 배상하여야 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제15조(여행출발 후 계약해지)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 여행사 또는 여행자는 여행출발 후 부득이한 사유가 있는 경우 각 당사자는 여행계약을 해지할 수 있습니다. 다만, 그 사유가 당사자 한쪽의 과실로 인하여 생긴 경우에는 상대방에게 손해를 배상하여야 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t② 제1항에 따라 여행계약이 해지된 경우 귀환운송 의무가 있는 여행사는 여행자를 귀환운송 할 의무가 있습니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t③ 제1항의 계약해지로 인하여 발생하는 추가 비용은 그 해지사유가 어느 당사자의 사정에 속하는 경우에는 그 당사자가 부담하고, 양 당사자 누구의 사정에도 속하지 아니하는 경우에는 각 당사자가 추가 비용의 50%씩을 부담합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t④ 여행자는 여행에 중대한 하자가 있는 경우에 그 시정이 이루어지지 아니하거나 계약의 내용에 따른 이행을 기대할 수 없는 경우에는 계약을 해지할 수 있습니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t⑤ 제4항에 따라 계약이 해지된 경우 여행사는 대금청구권을 상실합니다. 다만, 여행자가 실행된 여행으로 이익을 얻은 경우에는 그 이익을 여행사에게 상환하여야 합니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t⑥ 제4항에 따라 계약이 해지된 경우 여행사는 계약의 해지로 인하여 필요하게 된 조치를 할 의무를 지며, 계약상 귀환운송 의무가 있으면 여행자를 귀환운송하여야 합니다. 이 경우 귀환운송비용은 원칙적으로 여행사가 부담하여야 하나, 상당한 이유가 있는 때에는 여행사는 여행자에게 그 비용의 일부를 청구할 수 있습니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제16조(여행의 시작과 종료)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행의 시작은 출발하는 시점부터 시작하며 여행일정이 종료하여 최종목적지에 도착함과 동시에 종료합니다. 다만, 계약 및 일정을 변경할 때에는 예외로 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제17조(설명의무)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행사는 이 계약서에 정하여져 있는 중요한 내용 및 그 변경사항을 여행자가 이해할 수 있도록 설명하여야 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제18조(보험가입 등)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t여행사는 여행과 관련하여 여행자에게 손해가 발생 한 경우 여행자에게 보험금을 지급하기 위한 보험 또는 공제에 가입하거나 영업 보증금을 예치하여야 합니다.\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\n\t\t\t\t\t\t\t\t\t\t\t<dt>제19(기타사항)</dt>\n\t\t\t\t\t\t\t\t\t\t\t<dd>\n\t\t\t\t\t\t\t\t\t\t\t\t① 이 계약에 명시되지 아니한 사항 또는 이 계약의 해석에 관하여 다툼이 있는 경우에는 여행사와 여행자가 합의하여 결정하되, 합의가 이루어지지 아니한 경우에는 관계법령 및 일반관례에 따릅니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t\t② 특수지역에의 여행으로서 정당한 사유가 있는 경우에는 이 표준약관의 내용과 다르게 정할 수 있습니다.<br/>\n\t\t\t\t\t\t\t\t\t\t\t</dd>\n\t\t\t\t\t\t\t\t\t\t</dl>\n\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>                            \n\t\t\t\t\t\t\t<!-- 국내여행 약관 -->\n\t\t\t\t",
+                      "productPriceRemarksHtml": "\n\t\t\t\t\t <div class=\"pop_layer pop_pricenote\" id=\"pop_pricenote\">\n\t\t\t\t\t\t<div class=\"pop_wrap\">\n\t\t\t\t\t\t<div class=\"pop_con\">\n\t\t\t\t\t\t<div class=\"box_pri\">\n\t\t\t\t\t\t<div class=\"total_pri\">\n\t\t\t\t\t\t<span class=\"itm\">총 합계 금액</span>\n\t\t\t\t\t\t<span class=\"pri\"><strong>{{prx_Price2Sum0001}}</strong>원</span>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<ul class=\"lst_expense\">\n\t\t\t\t\t\t<li>\n\t\t\t\t\t\t<span class=\"itm\">여행경비</span>\n\t\t\t\t\t\t<span class=\"pri\"><strong>{{prx_Adult0001}}</strong>원</span>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t\t<li>\n\t\t\t\t\t\t<span class=\"itm\">유류할증료</span>\n\t\t\t\t\t\t<span class=\"pri\"><strong>{{prx_aOil0001}}</strong>원</span>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t\t<li>\n\t\t\t\t\t\t<span class=\"itm\">제세공과금</span>\n\t\t\t\t\t\t<span class=\"pri\"><strong>{{prx_aTax0001}}</strong>원</span>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t\t </ul>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t <p class=\"txt_notice\">\n\t\t\t\t\t\t* 성인 2인 1실 사용시 1인 기준 상품가격<br />&nbsp;&nbsp;&nbsp; ※ 선박상품의 경우 적용기준이 상이할 수 있습니다.<br />\n\t\t\t\t\t\t* 유가 및 환율 변동에 따라 총 상품요금은 변경될 수 있음<br />\n\t\t\t\t\t\t* 항공료 인상 등의 이유로 선발권 하는 경우 상기 유류할증료와 다른 금액이 적용될 수 있음<br />\n\t\t\t\t\t\t* 항공사 요금정책에 따라 여행기간 중 24개월이 도래하는 영유아는 항공료가 추가 부과될 수 있음(별도문의 요망)<br />\n\t\t\t\t\t\t* 항공사 사정에 의해 출발일과 별도로 갑작스런 선발권 진행이 될 수 있습니다.<br /><br />\n\t\t\t\t\t\t\n\t\t\t\t\t\t</p>\n\t\t\t\t\t\t<p class=\"txt_notice\">\n\t\t\t\t\t\t◐&nbsp;1방&nbsp;최대 투숙인원 / 요금규정<BR>- 성인 3명 : 3명 모두 성인 요금 적용 (엑스트라베드 1개 추가)<BR>- 성인 1명 + 아동 1명&nbsp;: 아동은 성인요금의 100% 적용<BR>- 성인 2명 + 아동 1명 : 노베드 원할시 노베드 요금, 엑스트라베드 요청시 엑스트라베드 요금 적용<BR>- 성인 2명 + 아동 2명 : 아동 1명은 무조건 엑스트라 베드 의무사용 (1인 엑스트라베드 적용+1인 노베드 요금 적용)<BR>- 성인 3명+아동 1명: 아동 1명은 노베드 요금 적용<BR>&nbsp;<BR>◐ 베딩 타입과 객실 위치가 체크인 시 결정됩니다. 기본객실은 트윈룸 또는 더블룸이며, 사전 객실 타입 지정은 불가합니다.<BR>\n\t\t\t\t\t\t</p>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t",
+                      "interimDocumentsRefundsHtml": "\n\t\t\t\t<div class=\"pop-layer pop-reserve\" id=\"pop-foreign-special6\" >\n\t\t\t\t\t\t\t<div class=\"pop-wrap\">\n\t\t\t\t\t\t\t\t<div class=\"pop-con\">\n\t\t\t\t\t\t\t\t\t<dl>\n\t\t\t\t\t\t\t\t\t\t<dt>[증빙제공 및 환급규정] </dt>\n\t\t\t\t\t\t\t\t\t\t<dd>고객은 계약 취소와 관련하여 취소수수료(여행사 인건비 포함) 부가 내역에 대한 구체적인 증빙과 설명을 여행사에 요구할 수 있으며, 여행사는 관련 설명과 증빙을 제시하고, 취소수수료 규정과 차액이 있는 경우 이를 환급합니다.\n\t\t\t\t\t\t\t\t\t\t</dd>\n\t\t\t\t\t\t\t\t\t</dl>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t"
+                    }
+                  },
+                  "departureAirlineName": "티웨이항공",
+                  "arrivalAirlineName": "티웨이항공",
+                  "stockType": "01",
+                  "stockNum": "19731170",
+                  "agentInfo": null,
+                  "groupNumber": 102840987,
+                  "groupClassificationCode": "P",
+                  "groupClassification": "패키지",
+                  "groupType": "01",
+                  "groupClassification2": null,
+                  "groupRegionNumber": 10,
+                  "departureDate": "2026-07-17",
+                  "arrivalDate": "2026-07-21",
+                  "productCode": "BVA201",
+                  "airlineName": "티웨이 항공",
+                  "prefix": "",
+                  "productName": "나트랑 자유 5일 (아미아나리조트-디럭스빌라가든뷰)",
+                  "suffix": "",
+                  "prefixName": null,
+                  "sellingPrice_Adult": 1100900,
+                  "sellingPrice_Kid_N": 990810,
+                  "sellingPrice_Kid_E": 1045855,
+                  "sellingPrice_Toddler": 150000,
+                  "sellingPrice_Adult_TotalAmount": 1199900,
+                  "sellingPrice_Kid_N_TotalAmount": 1089810,
+                  "sellingPrice_Kid_E_TotalAmount": 1144855,
+                  "sellingPrice_Toddler_TotalAmount": 150000,
+                  "sellingPrice_Land_TotalAmount": 0,
+                  "sellingPrice_Land": 0,
+                  "incentiveOrNot": "N",
+                  "masterNumber": 0,
+                  "discountRate": 0,
+                  "discountAmount": 0,
+                  "discountCondition": null,
+                  "promotionName": null,
+                  "logoFile": null,
+                  "productPrice_Adult_TotalAmount": 1199900,
+                  "productPrice_Kid_N_TotalAmount": 1089810,
+                  "productPrice_Kid_E_TotalAmount": 1144855,
+                  "productPrice_Toddler_TotalAmount": 150000,
+                  "productPrice_Land_TotalAmount": 0,
+                  "productPrice_Adult": 0,
+                  "productPrice_Kid_N": 0,
+                  "productPrice_Kid_E": 0,
+                  "productPrice_Toddler": 0,
+                  "productPrice_Land": 0,
+                  "fuelSurchargeFee_Adult": 44000,
+                  "fuelSurchargeFee_Kid_N": 44000,
+                  "fuelSurchargeFee_Kid_E": 44000,
+                  "fuelSurchargeFee_Toddler": 0,
+                  "publicFacilitiesTax_Adult": 55000,
+                  "publicFacilitiesTax_Kid_N": 55000,
+                  "publicFacilitiesTax_Kid_E": 55000,
+                  "publicFacilitiesTax_Toddler": 0,
+                  "addFare_SingleRoom": 540000,
+                  "localRequiredExpenseOrNot": "N",
+                  "localRequiredExpense_Call": "$",
+                  "localRequiredExpense": 0,
+                  "localRequiredExpense_Kid": 0,
+                  "localRequiredExpense_Toddler": 0,
+                  "businessAddFare": 0,
+                  "familyFarePromotionUseOrNot": "N",
+                  "adultFeeChargedNumberOfPeople": 0,
+                  "kid_N_FeeChargedNumberOfPeople": 0,
+                  "kid_E_FeeChargedNumberOfPeople": 0,
+                  "toddlerFeeChargedNumberOfPeople": 0,
+                  "adultFreeNumberOfPeople": 0,
+                  "kid_N_FreeNumberOfPeople": 0,
+                  "kid_E_FreeNumberOfPeople": 0,
+                  "toddlerFreeNumberOfPeople": 0,
+                  "addOriginalPriceProcedure": 0,
+                  "cancel": "N",
+                  "affiliateOrNot": "N",
+                  "salesEnd": "N",
+                  "salesEnd_TravelPlanner": "N",
+                  "departureConfirm": "N",
+                  "priceConfirm": "N",
+                  "scheduleConfirm": "N",
+                  "hotelConfirm": "N",
+                  "flightConfirm": "N",
+                  "joinOrNot": null,
+                  "mainOrNot": null,
+                  "eventNumberOfPeople": 0,
+                  "landJoin": 0,
+                  "lnd": 0,
+                  "bookingSeatNumber": "0",
+                  "nameTL": "2026-07-15",
+                  "guideAccompanyNumberOfPeople": 0,
+                  "productCode2": "BVA201TW5M",
+                  "productClass": null,
+                  "earlyBookingDiscount": "N",
+                  "seriesConnected": "Y",
+                  "groupSeatUseOrNot": "N",
+                  "internalSales_AD_OrNot": "N",
+                  "groupBriefKeyword": "#전용해변스노쿨링 #머드스파(유료) #1:1카톡문의 #여행헬프서비스 #현지할인쿠폰 #김해공항할인쿠폰",
+                  "p_GroupNumber": 0,
+                  "eventNumber": 0,
+                  "nightNumber": 3,
+                  "daysNumber": 5,
+                  "travelPeriod": "3박 5일",
+                  "departureFlight": "TW041",
+                  "departureTime": "21:25",
+                  "arrivalFlight": "TW042",
+                  "arrivalTime": "08:20",
+                  "inFlightLogment": 0,
+                  "directFlightOrNot": "Y",
+                  "meetingPlaceCode": "F6",
+                  "meetingPlace2": "<b>공항 도착 후 별도 미팅 없이 바로 출국 수속을 진행할 수 있습니다.</b><br><br><b>김해국제공항 개별수속 (출발 최소 3시간전까지)</b>",
+                  "meetingInfo": null,
+                  "meetingTime": "18:30",
+                  "travelerInsurance": "Y",
+                  "travelerInsuranceResponsibility": " ※ 여행자보험 담당 : [한화손해보험] (보험관련문의만가능)\n\r    Tel)02-728-8008  \n\r   단 만15세 미만의 사망보험금 및 만79세 6개월이상의 질병사망에 대해서는 보험 약관에 따라 보험금이 지급되지 않습니다.\n\r   자세한 세부사항은 홈페이지 하단 여행보험을 참조 바랍니다.",
+                  "includedNote": "<p>왕복항공권, 전 일정 숙박비<br>국내공항세, 현지공항세, 전쟁보험료, 관광진흥기금, 유류할증료, 해외여행자보험</p>",
+                  "unincludedNote": "<p><font color=\"#ff0000\">■ 상기상품은 항공 및 호텔예약이 실시간으로 이루어지므로 예약 후 컴펌여부를 꼭 확인하셔야 합니다. 또한, 그룹항공권 요금을 적용하여 구성된 상품이니 출발일기준 동일항공/동일패턴으로 그룹인원이 충족되지 않았을 경우 추가요금이 발생될수 있으니 이것도 꼭 예약담당자에게 확인해주세요.<br><font color=\"#ff0000\"></font><font color=\"#000000\">&nbsp;<br></font><font color=\"#000000\">개인 여행경비 및 각종 매너팁</font></font></p><p><font color=\"#ff0000\"><font color=\"#000000\">*매너팁은 소비자의 자율적 선택사항으로 지불여부에 따른 불이익은 없습니다.<br>(매너팁 : 식당, 객실 청소원 등 서비스에 대한 단순 감사의 표시로, 소비자(여행자)의 의사에 따라 자율적으로 지불하는 비용)</font></font></p><p><br></p><p>※ 베트남 지역은 파도가 강한 지역으로 해변에서 개별 수영은 삼가주시기 바랍니다. <br>※ 리조트 내 해변에서도 강한 파도와 조류에 유의해주시고 반드시 안전요원의 지시에 따라주시기 바랍니다.</p>",
+                  "noticeNote": "<여권 비자 관련 유의사항>\n1. 여권 유효기간은 6개월 이상 남으셔야 합니다.\n2. 복수 국적자(이중 국적자) 는 베트남 입국시 하나의 여권만 사용 가능합니다. (한국과 베트남의 이중 국적을 가지고 계신 다문화 가정 : 한국 여권만 사용하셔야 하며 15일 이상 체류시에는 반드시 비자를 받으셔야 합니다.)\n3. 베트남 출입국 관리법(제21조 제2항)은 만 14세 미만 어린이가 부모, 보호자, 위임된 사람 없이 입국하는 경우 입국을 금지 할 수 있도록 규정하고 있습니다.\n  1) 부모와 함께 여행 시 : 법적 보호자와 함께 여행 중임을 증명하는 영문 가족관계증명서를 반드시 지참하시기 바랍니다 (부모 또는 부모 중 1명만 여행해도 적용)\n  2) 부모 미 동반 시 : 부 또는 모로부터 받은 위임장 (베트남어 또는 영어 번역 후 공증)과 영문 가족관계증명서를 지참하시기 바랍니다.\n                           위임장안에는 “미성년자의 부모로부터 여행기간 동안 보호자에게 위탁하는 내용”이 반드시 기재되어 있어야 합니다.\n  ※ 위의 서류가 없을 시, 입국 거절될 수 있습니다. ",
+                  "specialEventNote": "",
+                  "generalBonusNote": "",
+                  "shoppingNote": "● 교환 및 환불안내\r\n\r\n입국 시 면세점 구매품 및 해외에서 가져오는 물품 총액이 $800 초과 시 관세가 부과될 수 있습니다. \r\n제품을 개봉하거나 사용하신 후 또는 단순변심에 의한 교환 및 환불은 불가합니다. (단, 물품의 하자로 인한 교환 제외) \r\n환불과정에서 환차손이 발생할 수 있습니다. \r\n\r\n▶ 교환/환불 접수기간 : 여행종료 후 15일 이내, 해외 배송인 경우 상품 수령후 15일 이내 \r\n▶ 교환/환불 가능물품 : 당사에서 안내한 쇼핑장소에서 구매한 물품 (개인적으로 구매한 물품의 교환 및 환불은 대행 불가) \r\n▶ 교환/환불 요청방법 : 예약처에 문의 \r\n▶ 교환/환불 필요서류 : 본인 연락처/통장번호(수취인 본인만 가능), 원본 영수증, 환불 혹은 교환 요청 물품 \r\n▶ 교환/환불 배송비부담 : 고객본인 (물품의 하자로 인한 경우 당사 부담) \r\n▶ 교환/환불 소요기간 : 접수일로부터 30일 이내",
+                  "notesWhenShopping": "",
+                  "addExpenseNote": "",
+                  "specificNote": "★2025년 1월1일부터 베트남에서 전자담배를 소지하거나 사용시 벌금이나 징역형에 처해질 수 있으며, 특히 공공장소에서의 전자담배 사용은 엄격히 규제됩니다. \r\n이에 베트남 여행시 전자담배를 소지하지 않도록 유의하시기 바랍니다. (적발시 벌금 1000만동~ 부과 및 11일 구금될 수 있음)\r\n◐ 호텔에 따라 체크인시 신용카드나 현금으로 데파짓을 받는경우가 있습니다. 이는 호텔 숙박 중 발생할 수 있는 전화비, MINI BAR 또는 혹시나 있을 수 있는 파손 등 개인사용 경비에 대한 보증금 형식으로 사용내역이 없으면 카드데파짓은 자동 취소처리되며 현금데파짓경우 체크아웃시 돌려드리오니 이점 참고바랍니다.  \n◐ 소지품 분실과 안전사고에 유의하시기 바랍니다. 중요한 귀중품은 항상 휴대용 가방에 소지하시고 여행용가방 또한 잠금처리를 하시어 불미스러운 일이 발생하지 않도록 주의하시기 바랍니다.\n◐ 베트남의 쇼핑센터, 호텔등에서는 카드결제시 카드수수료가 추가지불 되오니 주의 부탁드립니다.\n◐ 환전은 US달러로 미리 하셨다가  현지에서 현지통화로 재환전 하시는걸 권해 드리며, 현지 사정상 여행자 수표는 사용 불가합니다.\n◐ 베트남 출입국시 미화 3.000 달러 이상 소지시는 세관에 신고하여야하며 미신고후 반입/반출 하다가 적발되면 10%의 세금을 부과합니다.",
+                  "fareNote": "◐&nbsp;1방&nbsp;최대 투숙인원 / 요금규정<BR>- 성인 3명 : 3명 모두 성인 요금 적용 (엑스트라베드 1개 추가)<BR>- 성인 1명 + 아동 1명&nbsp;: 아동은 성인요금의 100% 적용<BR>- 성인 2명 + 아동 1명 : 노베드 원할시 노베드 요금, 엑스트라베드 요청시 엑스트라베드 요금 적용<BR>- 성인 2명 + 아동 2명 : 아동 1명은 무조건 엑스트라 베드 의무사용 (1인 엑스트라베드 적용+1인 노베드 요금 적용)<BR>- 성인 3명+아동 1명: 아동 1명은 노베드 요금 적용<BR>&nbsp;<BR>◐ 베딩 타입과 객실 위치가 체크인 시 결정됩니다. 기본객실은 트윈룸 또는 더블룸이며, 사전 객실 타입 지정은 불가합니다.<BR>",
+                  "travelRecommendNote": "&#128226; <font color=\"0000FF\"><b>[모두CARE+]</b></font>\r\n모두투어 단독으로 제공되는 프리미엄급 자유여행 혜택입니다.\r\n- 아래 1,2,3번 혜택은 '모두CARE+카카오톡채널' 연결하여 이용 가능합니다.\r\n- 검색창에 vietbenefit 검색 후 원하시는 지역의 채널 친구 추가\r\n- 모두CARE+나트랑 카카오톡채널 : @vietbenefit_ntr\r\n\r\n1. 예약 후 여행 전/여행 중 1:1문의 및 현지투어, 스파 등 예약 가능\r\n2. 비엣베네핏 할인 : 현지 식당,스파,샵,투어 추가 할인 <font color=\"FF0000\"><b><a href=\"https://www.vietbenefit.com/landing-page/1716\" target=\"_blank\">☞혜택 확인하기</a></b></font>\r\n3. 비엣베네핏 헬프 : 문제 발생 시(도난, 병원 등) 24시간 지원되는 헬프서비스<font color=\"FF0000\"><b><a href=\"https://www.vietbenefit.com/landing-page/1715\" target=\"_blank\">☞혜택 확인하기</a></b></font>\r\n4. 김해공항 할인쿠폰 증정 : 공항 내 식당 할인 혜택 <font color=\"FF0000\"><b><a href=\"https://www.modetour.com/promotion/849\" target=\"_blank\">☞혜택 확인하기</a></b></font>\r\n5. 3억원 해외여행자보험 가입",
+                  "passportVisaNote": "◐ 반드시 유효기간 6개월 이상의 여권을 소지하셔야 합니다.\n◐ 베트남은 한국국적소지인은 비자면제협정으로 NO-VISA(관광) 15일 동안 체류가능합니다. \n※ 한국 국적외 다른나라 국적을 가지신 분은 비자필요 여부를 확인해주세요. (ex.중국,미국 국적자 비자필요/일본 무비자 가능)\n◐ 베트남은 최종 베트남 출국일로부터 최소 30일 경과 후 입국이 가능하시며, 방문후 30일 이내에 재 방문하실 경우에는 반드시 비자를 발급 받으셔야 합니다.\n[단수비자(1개월) : 약 11만원(접수후 약 10일 소요)] \n☞ 비자는 개별로 발급 받으셔야 합니다.\n◐ 복수 국적자(이중 국적자) 는 베트남 입국시 하나의 여권만 사용 가능합니다. \n(한국과 베트남의 이중 국적을 가지고 계신 다문화 가정 ☞ 한국 여권만 사용하셔야 하며 15일 이상 체류시에는 반드시 비자를 받으셔야 합니다.)\n◐ 외국/이중국적자 주의사항 : 외국/이중국적자의 해외여행은 도착지국가(경유국가 포함)의 출입국정책이 상이하므로,반드시 여행자본인이 해당국의 대사관에 확인하셔야 합니다. ",
+                  "cancelFeeRegulations": "▶여행자의 여행계약 해제 요청 시 여행약관에 의거하여 취소료가 부과됩니다◀\r\n제16조(여행출발 전 계약해제)\r\n - 여행개시 30일전까지(  ～30) 통보 시  - 계약금 환급\r\n - 여행개시 20일전까지(29～20) 통보 시  - 여행요금의 10% 배상\r\n - 여행개시 10일전까지(19～10) 통보 시  - 여행요금의 15% 배상\r\n - 여행개시  8일전까지( 9～ 8) 통보 시  - 여행요금의 20% 배상\r\n - 여행개시  1일전까지( 7～ 1) 통보 시  - 여행요금의 30% 배상\r\n - 여행 당일 통보 시 - 여행요금의 50% 배상\r\n(※공정거래위원회 고시 제2014-4호 소비자분쟁해결기준에 의한것으로 제15조의 변경사항은 2014년 3월21일 여행상품예약자부터 적용)\r\n<B><FONT COLOR=RED>▶본 상품은 항공권 '발권' 이후 취소 시 상기 취소료 외에 항공권 취소 수수료 130,000원이 추가로 발생되며 출발 당일 취소시 항공료 전액 환불 불가합니다.(유류세, 택스만 환불 가능) </B></FONT COLOR=RED>\r\n<B><FONT COLOR=BLUE>*객실 파이널 이후에는 약관상 취소료와 별개로 객실 취소료가 추가로 부과 될 수 있습니다.</FONT COLOR=BLUE></B>",
+                  "receiverDebitPhone": "",
+                  "localContact": null,
+                  "singleAddFare": "예약시 문의 부탁드립니다.",
+                  "videoInfo": "",
+                  "roomUseConditionNote": "",
+                  "emergencyContact": "※ 아래의 연락처는 공항에서 첫만남시 긴급상황이 발생했을 경우에 해당되며\n\n상품관련 문의는 예약하신곳(모두투어 상품판매점) 또는 예약센터 (1544-5252)로\n\n하시기 바랍니다.\n\n\n\n\n\n주말 : 모두투어 본사 당직자 ☎ 02) 7288-000  (근무시간 : 09:00~18:00)",
+                  "localArrivalTime": "00:40",
+                  "localDepartureTime": "01:40",
+                  "minimumDepartureNumberOfPeople": 2,
+                  "visa": "N",
+                  "fuelSurchargeFeeNote": "◐ 유류할증료(FUEL SURCHARGE) \n 국제유가와 항공사 영업환경을 고려한 국토교통부의 '국제선 항공요금과 유류할증료 확대방안' 에 따라 유류할증료는 예고없이 인상, 인하되고 있습니다. 상품가 출시 시점 유류할증료보다 인상 시, 인상분은 상품가와 별도로 추가입금 하셔야 합니다.\n\n◐ 달러/엔/유로화등의 환율이 급격하게 변동될 경우는 추가금액이 발생하거나 상품가 인상이 있을 수 있습니다.",
+                  "specialTerms": "Y",
+                  "questionAndAnswer": "1.전압에 대해서 알고싶습니다?<BR>220V, 50HZ 이며 한국에서 사용하는 전자제품은 베트남에서도 사용가능합니다.<BR><BR>2.환전은 어떻게 해야하나요?<BR>베트남의 화폐단위 동입니다. 하지만 US 달러와 공용사용되기 때문에 특별히 \"동으\"로 환전하실 필요는 없습니다.<BR>※환율은 1달러당 약 16,000동 정도<BR><BR>3.호텔내 헤어드라이기는 있나요?<BR>모두투어에서 이용하는 대부분에 호텔에는 헤어드라이기를 구비하고 있습니다.<BR><BR>4.미시민권자, 외국인도 비자를 받아야하나요?<BR>한국국적을 가지고 계시면 베트남에서 15일동안 무비자 체류가 가능합니다. 미시민권자는 비자를 발급받아야 하며 그외의 국적을 가지고 계신 분들은 여행자본인이 해당국의 대사관에 확인하셔야 합니다.",
+                  "localEventInfo": "",
+                  "eachCustomerSpecific": null,
+                  "guideConfirmed": "N",
+                  "shoppingTimes": 0,
+                  "coronaSafetyGuaranteeProductOrNot": "N",
+                  "safetyInsuranceIncludedOrNot": "N",
+                  "waterPlaySafetyDisplayOrNot": "Y",
+                  "actualPlaceSafetyGuidelineDisplayOrNot": "Y",
+                  "twoPersonOneRoom": "Y",
+                  "b2C_IncentiveClassification": null,
+                  "navigationRouteImageAddress": null,
+                  "bookingSeatNumber1": 0,
+                  "availableSeatNumber": 36,
+                  "paymentMethodCode": "N",
+                  "combination": "N",
+                  "departureCity": "PUS",
+                  "departureCityName": "김해",
+                  "departureAirportName": "김해",
+                  "arrivalCity": "CXR",
+                  "arrivalCityName": "나트랑",
+                  "koreanDepartureCity": "CXR",
+                  "koreanDepartureCityName": "나트랑",
+                  "koreanArrivalCity": "PUS",
+                  "koreanArrivalCityName": "김해",
+                  "departureFlightDuration": "05:15",
+                  "arrivalFlightDuration": "05:10",
+                  "transportationMethodCode": "01",
+                  "shippingOrNot": "N",
+                  "transportationMethod": "항공",
+                  "finalArrivals": "CXR",
+                  "departureFlight_ArrivalDate": "2026-07-18T00:00:00",
+                  "returnToHomelandFlight_DepartureDate": "2026-07-21T00:00:00",
+                  "departureFlight_TransitCity_ArrivalDate": "0001-01-01T00:00:00",
+                  "departureFlight_TransitCity_ArrivalTime": "     ",
+                  "departureFlight_TransitCity_DepartureTime": "     ",
+                  "departureFlight_TransitCity_TransitFlight_FlightDuration": "     ",
+                  "returnToHomelandFlight_TransitCity_ArrivalDate": "0001-01-01T00:00:00",
+                  "returnToHomelandFlight_TransitCity_ArrivalTime": "     ",
+                  "returnToHomelandFlight_TransitCity_DepartureTime": "     ",
+                  "returnToHomelandFlight_TransitCity_TransitFlight_FlightDuration": "     ",
+                  "departureFlight_TransitCity_FlightName": null,
+                  "returnToHomelandFlight_TransitCity_FlightName": null,
+                  "departureFlight_TransitCity_DepartureDate": "0001-01-01T00:00:00",
+                  "returnToHomelandFlight_TransitCity_DepartureDate": "0001-01-01T00:00:00",
+                  "departureFlight_TransitCityCode": "",
+                  "departureFlight_TransitCityName": null,
+                  "returnToHomelandFlight_TransitCityCode": "",
+                  "returnToHomelandFlight_TransitCityName": null,
+                  "returnToHomelandFlight_TransitArrivalCityCode": "",
+                  "returnToHomelandFlight_TransitArrivalCityName": null,
+                  "codeshare_DepartureFlightName": "",
+                  "codeshare_ArrivalFlightName": "",
+                  "transitDepartureScheduleDisplay": "N",
+                  "transitArrivalScheduleDisplay": "N",
+                  "departureCodeshareCode": "",
+                  "arrivalCodeshareCode": "",
+                  "departureCodeshareName": null,
+                  "arrivalCodeshareName": null,
+                  "region": "01",
+                  "productClassification": "07",
+                  "productClassification2": "08",
+                  "representativeImage": "/eagle/photoimg/54875/rfile/636574119499929540.jpg",
+                  "representativeImagePack": "/eagle/photoimg/54875/rfile/636574119499929540.jpg,!/eagle/photoimg/54875/rfile/636574119374921027.jpg,!/eagle/photoimg/54875/rfile/636574119297415748.jpg,!/eagle/photoimg/54875/rfile/636574119295071802.jpg,!/eagle/photoimg/54875/rfile/636574119560714898.jpg,!/eagle/photoimg/54875/rfile/636574119297415748.jpg",
+                  "representativeImageType": "02",
+                  "representativeCountryName": "베트남",
+                  "travelWarningIncidentAccident": "<div>\r\n<h3 class=\"tit\">사건ㆍ사고 현황</h3>\r\n[테러, 인질 등에 대한 상황 및 정세]<br>\r\nㅇ 베트남은 안정적인 정치체제하에서 강력한 공안 조직을 통해 타국에 비해 상대적으로 양호한 치안 상태를 유지하고 있어 내란이나 테러 가능성은 낮은 것으로 평가됩니다.<br><br>\r\n\r\n[범죄 현황 등 치안상태]<br>\r\nㅇ 전반적으로 살인, 강도, 강간 등 강력범죄의 비율은 낮습니다.<br>\r\nㅇ 그러나 휴대폰 날치기, 소매치기 등 절도 범죄 피해가 꾸준히 발생하고 있어  소지품 보관에 각별히 유의할 필요가 있습니다.<br>\r\nㅇ 오토바이를 이용한 가방, 휴대폰 등 날치기 피해가 지속 발생하고 있습니다. 가급적 가방을 도로 반대방향에 두고, 현금은 소액만 소지하며 지갑은 몸 안쪽에 보관하는 것이 좋습니다.<br>\r\nㅇ 특히 베트남에서 여권 분실 시 여권 재발급 외 별도로 출국사증 재발급(약 5일 소요)이 필요하므로 여권 분실에 각별히 유의할 필요가 있습니다.<br>\r\nㅇ 또한 베트남은 마약 복용, 소지, 제조, 매매 등을 엄중히 처벌하므로 마약 복용 등 불법행위를 하지 않아야 합니다.<br>\r\nㅇ 베트남은 성매매 관련, 성매매자도 제재하며 특히 미성년자 성매매는 엄중히 처벌하니 불법행위를 하지 않아야 합니다.<br><br>\r\n\r\n<h3 class=\"tit\">자연재해</h3>\r\nㅇ 하노이를 비롯한 북부지역 및 다낭ㆍ후에 ㆍ호이안 등 중부지역은 태풍의 영향권에 있어서 매년 많은 피해가 발생하고 있습니다. 특히 산간오지 및 섬의 경우  수시로 교통두절 현상이 발생하므로 산간오지 및 섬으로 들어갈 경우에는 주의를 요합니다.<br>\r\nㅇ 베트남은 상대적으로 배수시설이 잘 되어 있지 않아서 집중적으로 비가 오게 되면 침수피해가 발생할 수 있으며 차량 통행에 많은 어려움을 겪을 수 있습니다.<br><br>\r\n\r\n<h3 class=\"tit\">안전사고</h3>\r\nㅇ 리조트․해변 등에서 물놀이 중 다치거나 익수 사고로 사망하는 안전사고가 종종 발생하고 있습니다. 음주 후에 수영․스쿠버다이빙․스노클링 등은 절대 하시면 안 됩니다.<br>\r\nㅇ 순환기계․신경계 질환이 있는 분 기타 영유아의 물놀이 사고에 각별히 유의하여야 합니다.<br>\r\nㅇ 배를 탈 때에는 반드시 구명복 등 안전 장비를 착용하기 바라며, 장비․기구에 이상이 없는지 확인하기 바라며 바다․호수에 빠질 수 있는 위험한 행동은 삼가야 합니다.<br>\r\nㅇ 물놀이 전 기상 예보를 확인하고 바다에서 물놀이 시에는 기상 변화를 확인하여 갑작스런 날씨 변화에 대비하기 바랍니다.<br><br>\r\n\r\n<h3 class=\"tit\">뎅기열 유의</h3>\r\nㅇ 뎅기열은 뎅기 바이러스에 감염된 매개 모기에 물리면 발병하는 질병입니다.<br>\r\nㅇ 뎅기열로 인한 사망 사례도 계절과 상관없이 지속 발생하고 있으니 유의할 필요가 있습니다.<br>\r\nㅇ 모기기피제를 적극 사용하고 외출 시에는 노출 부위를 최소화하기 바랍니다.<br>\r\nㅇ 야외활동 시 모기가 많이 있는 풀숲 및 산속 등은 가급적 방문을 지양하기 바랍니다.<br>\r\nㅇ 뎅기열은 잠복기가 평균 5~7일이고 잠복기 후 발열기가 찾아와 본격적인 증상(고열, 두통, 근육통, 관절통, 식욕부진)이 나타나므로 이런 증상이 있는 경우 바로 종합병원에 내원하여 치료를 받으시기 바랍니다.<br></div>",
+                  "leader_PTID": 0,
+                  "leaderAccompany": "N",
+                  "leaderConfirm": "N",
+                  "safetyInfoEachCountry": "베트남,!여행유의,!전지역 전 지역,!,!,!,!,!\r\n대사관 연락처\r\nㅇ 주소 : SQ4, Do Nhuan, Khu Ngaoi Giao Doan, Xuan Tao, Bac Tu Liem, Hanoi, Vietnam\r\nㅇ 대표번호(근무시간 중) : (84) 24-3771-0404\r\nㅇ 긴급연락처(사건사고 등 긴급상황 발생 시, 24시간) : (84) 90-402-6126\r\nㅇ E-mail : korembviet@mofa.go.kr\r\n\r\n호치민총영사관 연락처\r\nㅇ 주소 : 107 Nguyen Du St., Dist 1, Ho Chi Minh city, VietNam \r\nㅇ 대표번호(근무시간 중) : (84) 28-3822-5757\r\nㅇ 긴급연락처(사건사고 등 긴급상황 발생 시, 24시간) : (84) 93-850-0238\r\nㅇ E-mail : hcm02@mofa.go.kr\r\n\r\n주재국 신고\r\nㅇ 범죄신고 : 113\r\nㅇ 화재신고 : 114\r\nㅇ 응급환자(앰뷸런스) : 115\r\nㅇ 하노이 이민국 : 04) 3934-5609\r\nㅇ 하노이 경찰서 : 04) 3942-4244\r\nㅇ Korea Clinic : 04) 3843-7231, 04) 3734-6837\r\nㅇ 베트남-한국 치과 : 04) 3794-0471\r\nㅇ SOS International 병원 : 04) 3934-0555(응급실), 04) 3934-0666(일반진료상담)\r\nㅇ 베트남 국제병원(프랑스 병원) : 04) 3577-1100 \r\nㅇ Family Medical Practice : 04) 3726-5222 (한국인 간호사 및 통역원 상주)\r\n\r\n의료기관 연락처\r\nㅇ 베트남 내에서 응급환자가 생겼을 경우, 115번으로 전화하여 구급차를 부를 수 있으나 거의 대부분의 115번 전화 안내원이 베트남어 구사만 가능하기 때문에 실질적으로 외국인이 이 서비스를 이용하기에는 결코 쉬운 일이 아닙니다.\r\nㅇ 하노이에는 KOICA에서 운영하는 Korea Clinic이 있는데 한국에서 공중보건의가 파견되어 있으며 해당 분야에 대한 간단한 진료를 받을 수 있습니다. 또한 베트남인이 운영하지만 한국어 통역이 제공되는 베트남-한국 병원과 한국인이 운영하는 베트남-한국 치과가 있으며, 베트남-한국 병원의 경우 간단한 야간 응급시스템도 갖추고 있습니다.\r\nㅇ 베트남 현지 병원의 경우 영어를 구사하는 사람을 찾아보기 힘들며 영어를 구사할 수 있는 사람을 만나더라도 질병 관련 용어를 영어로 의사소통하기에는 무리가 있습니다. 진료비(전문의 상담 기준 10만동(약 6.5US$) 내외)는 저렴한 편이지만 신용카드 결제가 어렵고 또한 진료 대기자가 많아 먼저 진료를 받기 위해 간호사나 의사에게 뒷돈을 건네기도 합니다.\r\nㅇ 비교적 높은 의료수준을 갖추고 있으면서 영어가 가능한 병원은 프랑스 병원(영어, 불어)과 SOS International 병원(영어, 일어 등 기타 언어)이 대표적입니다. 프랑스 병원의 주간 전문의 상담은 70US$ 정도이고 응급실 전문의 상담은 90US$ 정도입니다. SOS International 병원의 경우 병원이라기보다는 응급실로 보는 것이 더 적당한데, 기본적인 의료장비는 거의 갖추고 있으나 장기간 입원을 하여야 할 경우는 각 질병마다 전문으로 하는 현지 병원(프랑스 병원 포함)을 연결해 줍니다. 기본적인 전문의 상담의 경우 100US$ 내외입니다. 이 두 병원의 경우 병원비는 현지 병원에 비해 매우 비싸고 한국 병원과 비교하더라도 싼값은 아니며, 병원비를 달러로 계산하거나 신용 카드 결제가 가능합니다.\r\nㅇ 베트남 내 일부 약품(감기약, 지사제 등)은 처방전이 없어도 구입이 가능하나 전문적인 치료약의 경우에는 처방전이 있어야만 구입이 가능합니다. 몸이 아플 경우, 말이 잘 통하지 않는 상태에서 약국 약사의 조언만으로 약을 복용하는 것보다 가능하면 전문의의 진료를 받은 후 처방전을 받아 약을 구입ㆍ복용하는 것이 타국에서의 2차 질병을 예방하는 길이라 생각됩니다.\r\nㅇ 베트남 내 신종플루 감염 환자는 2010. 2월 현재 11,186명(사망 58명)으로, 베트남을 방문하는 외국인의 숫자나 외국을 방문하는 베트남인의 숫자가 그리 많지 않은 점에 비교해 볼 때 신종플루의 감염속도는 비교적 빠르다고 할 수 있습니다. 그리고 전반적인 의료체계가 미비하고 의료 수준이 낮은 편이므로 상당한 주의를 요합니다.\r\n,!<div>\r\n<h3 class=“tit“>사건ㆍ사고 현황</h3>\r\n[테러, 인질 등에 대한 상황 및 정세]<br>\r\nㅇ 베트남은 안정적인 정치체제하에서 강력한 공안 조직을 통해 타국에 비해 상대적으로 양호한 치안 상태를 유지하고 있어 내란이나 테러 가능성은 낮은 것으로 평가됩니다.<br><br>\r\n\r\n[범죄 현황 등 치안상태]<br>\r\nㅇ 전반적으로 살인, 강도, 강간 등 강력범죄의 비율은 낮습니다.<br>\r\nㅇ 그러나 휴대폰 날치기, 소매치기 등 절도 범죄 피해가 꾸준히 발생하고 있어  소지품 보관에 각별히 유의할 필요가 있습니다.<br>\r\nㅇ 오토바이를 이용한 가방, 휴대폰 등 날치기 피해가 지속 발생하고 있습니다. 가급적 가방을 도로 반대방향에 두고, 현금은 소액만 소지하며 지갑은 몸 안쪽에 보관하는 것이 좋습니다.<br>\r\nㅇ 특히 베트남에서 여권 분실 시 여권 재발급 외 별도로 출국사증 재발급(약 5일 소요)이 필요하므로 여권 분실에 각별히 유의할 필요가 있습니다.<br>\r\nㅇ 또한 베트남은 마약 복용, 소지, 제조, 매매 등을 엄중히 처벌하므로 마약 복용 등 불법행위를 하지 않아야 합니다.<br>\r\nㅇ 베트남은 성매매 관련, 성매매자도 제재하며 특히 미성년자 성매매는 엄중히 처벌하니 불법행위를 하지 않아야 합니다.<br><br>\r\n\r\n<h3 class=“tit“>자연재해</h3>\r\nㅇ 하노이를 비롯한 북부지역 및 다낭ㆍ후에 ㆍ호이안 등 중부지역은 태풍의 영향권에 있어서 매년 많은 피해가 발생하고 있습니다. 특히 산간오지 및 섬의 경우  수시로 교통두절 현상이 발생하므로 산간오지 및 섬으로 들어갈 경우에는 주의를 요합니다.<br>\r\nㅇ 베트남은 상대적으로 배수시설이 잘 되어 있지 않아서 집중적으로 비가 오게 되면 침수피해가 발생할 수 있으며 차량 통행에 많은 어려움을 겪을 수 있습니다.<br><br>\r\n\r\n<h3 class=“tit“>안전사고</h3>\r\nㅇ 리조트?해변 등에서 물놀이 중 다치거나 익수 사고로 사망하는 안전사고가 종종 발생하고 있습니다. 음주 후에 수영?스쿠버다이빙?스노클링 등은 절대 하시면 안 됩니다.<br>\r\nㅇ 순환기계?신경계 질환이 있는 분 기타 영유아의 물놀이 사고에 각별히 유의하여야 합니다.<br>\r\nㅇ 배를 탈 때에는 반드시 구명복 등 안전 장비를 착용하기 바라며, 장비?기구에 이상이 없는지 확인하기 바라며 바다?호수에 빠질 수 있는 위험한 행동은 삼가야 합니다.<br>\r\nㅇ 물놀이 전 기상 예보를 확인하고 바다에서 물놀이 시에는 기상 변화를 확인하여 갑작스런 날씨 변화에 대비하기 바랍니다.<br><br>\r\n\r\n<h3 class=“tit“>뎅기열 유의</h3>\r\nㅇ 뎅기열은 뎅기 바이러스에 감염된 매개 모기에 물리면 발병하는 질병입니다.<br>\r\nㅇ 뎅기열로 인한 사망 사례도 계절과 상관없이 지속 발생하고 있으니 유의할 필요가 있습니다.<br>\r\nㅇ 모기기피제를 적극 사용하고 외출 시에는 노출 부위를 최소화하기 바랍니다.<br>\r\nㅇ 야외활동 시 모기가 많이 있는 풀숲 및 산속 등은 가급적 방문을 지양하기 바랍니다.<br>\r\nㅇ 뎅기열은 잠복기가 평균 5~7일이고 잠복기 후 발열기가 찾아와 본격적인 증상(고열, 두통, 근육통, 관절통, 식욕부진)이 나타나므로 이런 증상이 있는 경우 바로 종합병원에 내원하여 치료를 받으시기 바랍니다.<br></div>,!http://www.0404.go.kr/imgsrc.mofa?atch_file_id=COUNTRY_86&file_sn=3,@",
+                  "actualPlaceSafetyNoticeWords": "호텔/리조트등 숙박시설의  실내/외 수영장을 포함 모든 부대시설 및 바다/강 등의 외출 물놀이 시\n\r당사가 일정내 표기한 안전수칙을 꼭 지켜주시기 바랍니다.\n\r일정간 자유시간 중 당사가 알선하지 않은 활동과 옵션이용으로 인한 사고발생 시 당사는 책임을 지지 않습니다.",
+                  "accumulationExpectedTourMileage": 11009,
+                  "kid_N_AccumulationExpectedTourMileage": 9908,
+                  "kid_E_AccumulationExpectedTourMileage": 10459,
+                  "land_AccumulationExpectedTourMileage": 0,
+                  "bookingPossibleDate": "2026-07-10",
+                  "businessGuarantee": "Y",
+                  "travelerInsuranceSignUpOrNot": "Y",
+                  "travelerInsuranceContractAmount": "3억원",
+                  "leaderEmployeeIdentifiedNumber": null,
+                  "leaderName": "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ",
+                  "leaderGender": "  ",
+                  "leaderExperience": 0,
+                  "leaderBusinessTripExperience": null,
+                  "leaderQualificationItem": null,
+                  "leaderSelfIntroduction": null,
+                  "leaderPictureDisplayOrNot": null,
+                  "leaderPersonalInfoReleaseAgree": null,
+                  "scheduleVersion": 3,
+                  "otherVersionSeeingPossibleOrNot": 0,
+                  "responsibilityDepartmentName": "영남상품사업부",
+                  "keyword": "베트남,하롱베이,캄보디아,앙코르왓,베캄,베캄 연계,두 나라 여행,씨엠립,하노이,이벤트상품,",
+                  "sendingOrNot": null,
+                  "category1": "동남아",
+                  "category2": "베트남",
+                  "category3": "나트랑",
+                  "confirmWantedContent": "",
+                  "freeScheduleName": "전일정",
+                  "optionalTourOrNot": "N"
+                }
+              },
+              "fulfilledTimeStamp": 1771678574825
+            }
+          },
+          "mutations": {},
+          "provided": {},
+          "subscriptions": {
+            "getPackageGetProductAllInfoById({\"productId\":102840987})": {
+              "RVzn1OuFWOI1VmT_CqCGN": {}
+            }
+          },
+          "config": {
+            "online": true,
+            "focused": true,
+            "middlewareRegistered": true,
+            "refetchOnFocus": false,
+            "refetchOnReconnect": false,
+            "refetchOnMountOrArgChange": false,
+            "keepUnusedDataFor": 60,
+            "reducerPath": "api"
+          }
+        },
+        "allDatePopup": {
+          "isShow": false,
+          "key": ""
+        }
+      }
+    },
+    "__N_SSP": true
+  },
+  "page": "/package/[id]",
+  "query": {
+    "MLoc": "99",
+    "Pnum": "102840987",
+    "Sno": "C117876",
+    "ANO": "81440",
+    "thru": "crs",
+    "id": "102840987"
+  },
+  "buildId": "f8QpJKuah765xgbYFCOUr",
+  "isFallback": false,
+  "gssp": true,
+  "locale": "ko",
+  "locales": [
+    "ko"
+  ],
+  "defaultLocale": "ko",
+  "scriptLoader": []
+}

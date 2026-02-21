@@ -1,0 +1,1 @@
+<script src="/_next/static/f8QpJKuah765xgbYFCOUr/_ssgManifest.js" defer=""></script>
