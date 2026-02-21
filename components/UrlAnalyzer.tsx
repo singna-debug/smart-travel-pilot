@@ -628,7 +628,19 @@ export default function UrlAnalyzer() {
                             {analysisStep}
                         </div>
                     )}
-                    {error && <div className="analyzer-error">{error}</div>}
+                    {error && (
+                        <div className="analyzer-error" style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                            <div>⚠️ {error}</div>
+                            <a
+                                href="/api/debug/diagnostic"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ fontSize: '0.8rem', color: '#ef4444', textDecoration: 'underline' }}
+                            >
+                                환경 진단 도구 실행하기
+                            </a>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -675,7 +687,19 @@ export default function UrlAnalyzer() {
                             {loading ? '분석 중...' : '비교 분석'}
                         </button>
                     </div>
-                    {error && <div className="analyzer-error">{error}</div>}
+                    {error && (
+                        <div className="analyzer-error" style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                            <div>⚠️ {error}</div>
+                            <a
+                                href="/api/debug/diagnostic"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ fontSize: '0.8rem', color: '#ef4444', textDecoration: 'underline' }}
+                            >
+                                환경 진단 도구 실행하기
+                            </a>
+                        </div>
+                    )}
                 </div>
             )}
 
