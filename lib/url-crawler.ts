@@ -364,9 +364,10 @@ export async function analyzeForConfirmation(text: string, url: string, nextData
         prompt += '중요 지침:\n';
         prompt += '1. 이모지 사용 절대 금지: 모든 텍스트에서 이모지를 절대 사용하지 마세요. 깔끔한 텍스트만 사용합니다.\n';
         prompt += '2. 일정표 상세화: 각 일차별 activities는 페이지 내용을 꼼꼼히 읽고 중요한 방문지, 체험 내용을 3-5문장으로 요약하여 작성하세요. 정보가 아코디언(펼치기) 메뉴나 상세 일정 탭 안에 숨어있을 수 있으니 텍스트 전체를 꼼꼼히 분석하세요.\n';
-        prompt += '3. 교통 정보 상세화: transportation 필드에 편명, 출발/도착 시각, 총 소요 시간을 예시 형식에 맞춰 정확히 기입하세요. 항공 정보(HH:MM)가 본문에 반드시 있을 것이니 절대로 누락하지 마세요.\n';
-        prompt += '4. 호텔 정보: 호텔 이름은 가능한 한글 정식 명칭을 사용하세요.\n';
-        prompt += '5. JSON만 반환하세요. 다른 설명 텍스트는 제외하세요.';
+        prompt += '3. 항공 정보 필수상 추출: 본문에서 "항공사", "편명", "출발시간", "도착시간"을 반드시 찾아내세요. 시간은 반드시 HH:MM 형식(예: 09:15, 23:40)으로 추출해야 합니다. 본문 어딘가에 숫자로 된 시각 정보가 반드시 있으니 절대 놓치지 마세요.\n';
+        prompt += '4. 교통 정보 상세화: transportation 필드에 편명, 출발/도착 시각, 총 소요 시간을 예시 형식에 맞춰 정확히 기입하세요.\n';
+        prompt += '5. 호텔 정보: 호텔 이름은 가능한 한글 정식 명칭을 사용하세요.\n';
+        prompt += '6. JSON만 반환하세요. 다른 설명 텍스트는 제외하세요.';
 
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
             method: 'POST',

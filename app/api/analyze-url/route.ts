@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { crawlTravelProduct, formatProductInfo, generateRecommendation, compareProducts } from '@/lib/url-crawler';
+import { crawlTravelProduct, formatProductInfo, generateRecommendation, compareProducts, htmlToText, analyzeForConfirmation, crawlForConfirmation } from '@/lib/url-crawler';
 import type { TravelProductInfo, DetailedProductInfo } from '@/types';
 
 // URL 분석 API (단일 및 다중 URL 지원)
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
         // 단일 URL
         if (url && !urls) {
-            return await analyzeSingleUrl(url);
+            return await analyzeSingleUrl(url, body.html);
         }
 
         // 다중 URL
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 }
 
-async function analyzeSingleUrl(url: string) {
+async function analyzeSingleUrl(url: string, html?: string) {
     // URL 유효성 검사
     try {
         new URL(url);
@@ -49,13 +49,33 @@ async function analyzeSingleUrl(url: string) {
         );
     }
 
-    // 크롤링 실행
-    const productInfo = await crawlTravelProduct(url);
+    let productInfo: DetailedProductInfo | null = null;
+
+    if (html) {
+        console.log('[API] 2단계 모드: 전달된 HTML 분석 시작');
+        const fullText = htmlToText(html);
+
+        let nextData: string | undefined = undefined;
+        const startIdx = html.indexOf('<script id="__NEXT_DATA__"');
+        if (startIdx !== -1) {
+            const jsonStart = html.indexOf('>', startIdx) + 1;
+            const jsonEnd = html.indexOf('</script>', jsonStart);
+            if (jsonStart !== 0 && jsonEnd !== -1) {
+                nextData = html.substring(jsonStart, jsonEnd);
+            }
+        }
+
+        productInfo = await analyzeForConfirmation(fullText, url, nextData);
+    } else {
+        // [1단계 모드] 직접 크롤링
+        console.log('[API] 1단계 모드: 직접 크롤링 시작');
+        productInfo = await crawlTravelProduct(url);
+    }
 
     if (!productInfo) {
         return NextResponse.json({
             success: false,
-            error: 'URL에서 정보를 추출할 수 없습니다. (시간 초과 또는 접근 불가). 잠시 후 다시 시도해주세요.',
+            error: '정보를 추출할 수 없습니다. (시간 초과 또는 분석 오류).',
         });
     }
 
