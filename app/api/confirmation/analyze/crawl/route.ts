@@ -5,16 +5,16 @@ import { htmlToText } from '@/lib/url-crawler';
  * scrapeWithScrapingBeeTiered - 최적화된 수집 로직
  * tier: 1(Interactive), 2(Simple Render), 3(Fast Fetch)
  */
-async function scrapeWithScrapingBeeTiered(url: string, tier: number): Promise<string | null> {
+async function scrapeWithScrapingBeeTiered(url: string, tier: number): Promise<{ html: string | null; error?: string }> {
     const apiKey = process.env.SCRAPINGBEE_API_KEY;
-    if (!apiKey) return null;
+    if (!apiKey) return { html: null, error: 'API_KEY_MISSING' };
 
     try {
         let scrapingBeeUrl = '';
-        let timeout = 7000;
+        let timeout = 7500;
 
         if (tier === 1) {
-            // Tier 1: Interactive (Scroll + Click) - 5.5초로 제한하여 오버헤드 확보
+            // Tier 1: Interactive + Premium Proxy (Modetour 대응)
             const jsScenario = {
                 instructions: [
                     { scroll_to: "bottom" },
@@ -24,16 +24,17 @@ async function scrapeWithScrapingBeeTiered(url: string, tier: number): Promise<s
                     { scroll_to: "bottom" }
                 ]
             };
-            scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=load&timeout=12000&js_scenario=${encodeURIComponent(JSON.stringify(jsScenario))}`;
-            timeout = 5500;
+            // premium_proxy=true 추가
+            scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=load&timeout=15000&premium_proxy=true&js_scenario=${encodeURIComponent(JSON.stringify(jsScenario))}`;
+            timeout = 6500;
         } else if (tier === 2) {
-            // Tier 2: Simple JS Render (No scenario) - 2.5초
-            scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=load&timeout=10000`;
+            // Tier 2: Simple Render + Premium Proxy
+            scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=load&timeout=10000&premium_proxy=true`;
             timeout = 2500;
         } else {
-            // Tier 3: Fast Fetch (No JS) - 0.8초
+            // Tier 3: Fast Fetch (No JS, No Premium)
             scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&timeout=5000`;
-            timeout = 800;
+            timeout = 900;
         }
 
         console.log(`[CrawlAPI] Tier ${tier} 시도: ${url} (Timeout: ${timeout}ms)`);
@@ -44,11 +45,18 @@ async function scrapeWithScrapingBeeTiered(url: string, tier: number): Promise<s
         const response = await fetch(scrapingBeeUrl, { signal: controller.signal });
         clearTimeout(timeoutId);
 
-        if (!response.ok) throw new Error(`Status ${response.status}`);
-        return await response.text();
+        if (!response.ok) {
+            const errTxt = await response.text();
+            console.error(`[CrawlAPI] Tier ${tier} API 오류:`, response.status, errTxt.substring(0, 100));
+            return { html: null, error: `API_ERROR_${response.status}` };
+        }
+
+        const html = await response.text();
+        return { html };
     } catch (e: any) {
-        console.warn(`[CrawlAPI] Tier ${tier} 실패:`, e.name === 'AbortError' ? 'Timeout' : e.message);
-        return null;
+        const errorType = e.name === 'AbortError' ? 'TIMEOUT' : e.message;
+        console.warn(`[CrawlAPI] Tier ${tier} 실패:`, errorType);
+        return { html: null, error: errorType };
     }
 }
 
@@ -56,6 +64,7 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
+    let lastError = '';
     try {
         const { url } = await request.json();
         if (!url) return NextResponse.json({ success: false, error: 'URL이 필요합니다.' }, { status: 400 });
@@ -63,27 +72,31 @@ export async function POST(request: NextRequest) {
         let html: string | null = null;
 
         // 1단계: 정밀 수집 시도
-        html = await scrapeWithScrapingBeeTiered(url, 1);
+        const res1 = await scrapeWithScrapingBeeTiered(url, 1);
+        html = res1.html;
+        if (res1.error) lastError = `Tier1: ${res1.error}`;
 
         // 2단계: 실패 시 간편 렌더링 시도
         if (!html) {
-            html = await scrapeWithScrapingBeeTiered(url, 2);
+            const res2 = await scrapeWithScrapingBeeTiered(url, 2);
+            html = res2.html;
+            if (res2.error) lastError += ` | Tier2: ${res2.error}`;
         }
 
         // 3단계: 실패 시 초고속 수집 시도
         if (!html) {
-            html = await scrapeWithScrapingBeeTiered(url, 3);
+            const res3 = await scrapeWithScrapingBeeTiered(url, 3);
+            html = res3.html;
+            if (res3.error) lastError += ` | Tier3: ${res3.error}`;
         }
 
         if (!html) {
             return NextResponse.json({
                 success: false,
-                error: '데이터 수집 실패 (타임아웃 또는 API 오류).'
+                error: `데이터 수집 실패. (${lastError})`
             });
         }
 
-        // [핵심 최적화] HTML 전체 대신 정제된 텍스트와 NEXT_DATA만 추출하여 반환
-        // 이를 통해 페이로드 크기를 4.5MB 이하(보통 수십KB)로 줄여 Vercel 제한을 회피함
         const cleanedText = htmlToText(html);
 
         let nextData: string | undefined = undefined;
@@ -96,7 +109,7 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        console.log(`[CrawlAPI] 수집 성공 (정제됨): ${cleanedText.length}자, NextData: ${nextData?.length || 0}자`);
+        console.log(`[CrawlAPI] 수집 성공 (정제됨): ${cleanedText.length}자`);
 
         return NextResponse.json({
             success: true,
