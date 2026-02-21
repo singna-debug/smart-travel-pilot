@@ -405,21 +405,20 @@ async function scrapeWithScrapingBee(url: string): Promise<string | null> {
     if (!apiKey) return null;
 
     try {
-        console.log(`[ScrapingBee] 시작: ${url}`);
-
         // 상호작용 시나리오 (스크롤 및 상세 보기 클릭)
-        // 지침 개수를 줄이고 타임아웃을 안전 범위(25s) 내로 조정
+        // 운영 환경(Vercel) 타임아웃을 고려하여 대기 시간을 25초 이내로 최적화
         const jsScenario = {
             instructions: [
                 { scroll_to: "bottom" },
-                { wait: 3000 },
+                { wait: 1500 },
                 { evaluate: "document.querySelectorAll('button, a, div, span').forEach(el => { const txt = el.innerText || ''; if(['상세', '전체', '펼치기', '더보기'].some(w => txt.includes(w))) { try { el.click(); } catch(e){} } })" },
-                { wait: 3000 }
+                { wait: 1500 },
+                { scroll_to: "bottom" }
             ]
         };
 
         const scenarioStr = JSON.stringify(jsScenario);
-        const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=networkidle&timeout=25000&js_scenario=${encodeURIComponent(scenarioStr)}`;
+        const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=networkidle&timeout=20000&js_scenario=${encodeURIComponent(scenarioStr)}`;
 
         const response = await fetch(scrapingBeeUrl);
         if (!response.ok) {
@@ -447,20 +446,26 @@ import { scrapeWithBrowser } from '@/lib/browser-crawler';
  */
 export async function crawlForConfirmation(url: string): Promise<any> {
     console.log(`[ConfirmCrawler] 분석 시작: ${url}`);
+    const isVercel = process.env.VERCEL === '1';
 
     let fullText: string | null = null;
     let nextData: string | undefined = undefined;
 
-    // 1. 브라우저 크롤링 시도 (주로 로컬 Puppeteer)
-    try {
-        fullText = await scrapeWithBrowser(url);
-    } catch (e) {
-        console.log(`[ConfirmCrawler] 브라우저 크롤링 중 에러 발생 (무시하고 다음 단계 진행)`);
+    // 1. 브라우저 크롤링 시도 (Vercel이 아닐 때만 - Puppeteer 호환성 문제)
+    if (!isVercel) {
+        try {
+            console.log('[ConfirmCrawler] 로컬 환경: Browser 크롤링(Puppeteer) 시도');
+            fullText = await scrapeWithBrowser(url);
+        } catch (e) {
+            console.log(`[ConfirmCrawler] 브라우저 크롤링 중 에러 발생 (무시하고 다음 단계 진행)`);
+        }
+    } else {
+        console.log('[ConfirmCrawler] Vercel 환경: Browser 크롤링 건너뜀 (시간 절약)');
     }
 
     // 2. 브라우저 크롤링 실패 시 ScrapingBee 시도 (특히 Vercel 운영 환경에서 필수)
     if (!fullText && process.env.SCRAPINGBEE_API_KEY) {
-        console.log(`[ConfirmCrawler] 브라우저 실패하여 ScrapingBee로 전환...`);
+        console.log(`[ConfirmCrawler] ScrapingBee로 전환...`);
         fullText = await scrapeWithScrapingBee(url);
     }
 
