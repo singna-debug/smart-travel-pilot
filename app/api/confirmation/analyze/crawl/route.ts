@@ -4,36 +4,53 @@ import { scrapeWithBrowser } from '@/lib/browser-crawler';
 /**
  * scrapeWithScrapingBee - lib/url-crawler.ts의 로직을 재사용하되 API 라우트에서 직접 호출
  */
-async function scrapeWithScrapingBee(url: string): Promise<string | null> {
+/**
+ * scrapeWithScrapingBee - 최적화된 수집 로직
+ * tier: 1(Interactive), 2(Simple Render), 3(Fast Fetch)
+ */
+async function scrapeWithScrapingBeeTiered(url: string, tier: number): Promise<string | null> {
     const apiKey = process.env.SCRAPINGBEE_API_KEY;
     if (!apiKey) return null;
 
     try {
-        console.log(`[CrawlAPI] ScrapingBee 시작: ${url}`);
-        const jsScenario = {
-            instructions: [
-                { scroll_to: "bottom" },
-                { wait: 1000 },
-                { evaluate: "document.querySelectorAll('button, a, div, span').forEach(el => { const txt = el.innerText || ''; if(['상세', '전체', '펼치기', '더보기'].some(w => txt.includes(w))) { try { el.click(); } catch(e){} } })" },
-                { wait: 1000 },
-                { scroll_to: "bottom" }
-            ]
-        };
+        let scrapingBeeUrl = '';
+        let timeout = 7000;
 
-        const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=load&timeout=20000&js_scenario=${encodeURIComponent(JSON.stringify(jsScenario))}`;
+        if (tier === 1) {
+            // Tier 1: Interactive (Scroll + Click)
+            const jsScenario = {
+                instructions: [
+                    { scroll_to: "bottom" },
+                    { wait: 1000 },
+                    { evaluate: "document.querySelectorAll('button, a, div, span').forEach(el => { const txt = el.innerText || ''; if(['상세', '전체', '펼치기', '더보기'].some(w => txt.includes(w))) { try { el.click(); } catch(e){} } })" },
+                    { wait: 1000 },
+                    { scroll_to: "bottom" }
+                ]
+            };
+            scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=load&timeout=15000&js_scenario=${encodeURIComponent(JSON.stringify(jsScenario))}`;
+            timeout = 6500;
+        } else if (tier === 2) {
+            // Tier 2: Simple JS Render (No scenario)
+            scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=load&timeout=10000`;
+            timeout = 2500;
+        } else {
+            // Tier 3: Fast Fetch (No JS)
+            scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&timeout=5000`;
+            timeout = 800;
+        }
 
-        // Vercel 10초 타임아웃을 방지하기 위해 9초면 중단하도록 설정
+        console.log(`[CrawlAPI] Tier ${tier} 시도: ${url} (Timeout: ${timeout}ms)`);
+
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 9000);
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
 
         const response = await fetch(scrapingBeeUrl, { signal: controller.signal });
         clearTimeout(timeoutId);
 
         if (!response.ok) throw new Error(`Status ${response.status}`);
-        const html = await response.text();
-        return html;
-    } catch (e) {
-        console.error('[CrawlAPI] ScrapingBee 오류:', e);
+        return await response.text();
+    } catch (e: any) {
+        console.warn(`[CrawlAPI] Tier ${tier} 실패:`, e.name === 'AbortError' ? 'Timeout' : e.message);
         return null;
     }
 }
@@ -46,29 +63,29 @@ export async function POST(request: NextRequest) {
         const { url } = await request.json();
         if (!url) return NextResponse.json({ success: false, error: 'URL이 필요합니다.' }, { status: 400 });
 
-        const isVercel = process.env.VERCEL === '1';
         let html: string | null = null;
 
-        // 1. 브라우저 크롤링 (로컬전용)
-        if (!isVercel) {
-            try {
-                console.log('[CrawlAPI] 로컬: Browser 시도');
-                // scrapeWithBrowser는 htmlToText까지 포함되어 있을 수 있으므로 확인 필요
-                // 여기서는 HTML을 가져오는 것이 목적임
-            } catch (e) { }
-        }
+        // [Tier 1] 정밀 수집 시도 (6.5초)
+        html = await scrapeWithScrapingBeeTiered(url, 1);
 
-        // 2. ScrapingBee (운영/로컬 공용)
+        // [Tier 2] 실패 시 간편 렌더링 시도 (2.5초)
         if (!html) {
-            html = await scrapeWithScrapingBee(url);
+            html = await scrapeWithScrapingBeeTiered(url, 2);
+        }
+
+        // [Tier 3] 실패 시 초고속 수집 시도 (0.8초)
+        if (!html) {
+            html = await scrapeWithScrapingBeeTiered(url, 3);
         }
 
         if (!html) {
-            return NextResponse.json({ success: false, error: '데이터 수집 실패' });
+            return NextResponse.json({
+                success: false,
+                error: '데이터 수집 실패 (타임아웃 또는 API 오류). API 설정과 주소를 확인해주세요.'
+            });
         }
 
-        // HTML에서 텍스트 추출 로직은 url-crawler.ts의 htmlToText를 사용하거나 여기서 간단히 처리
-        // 하지만 NextData 등 복잡한 처리가 필요하므로 raw html을 보낸 후 분석 API에서 처리하도록 함
+        console.log(`[CrawlAPI] 수집 성공: ${html.length}자`);
         return NextResponse.json({ success: true, html });
     } catch (error: any) {
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });

@@ -386,7 +386,17 @@ export default function ConfirmationPage() {
                     </div>
                 )}
                 {analysisError && (
-                    <div className="analysis-status error">⚠️ {analysisError}</div>
+                    <div className="analysis-status error" style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <div>⚠️ {analysisError}</div>
+                        <a
+                            href="/api/debug/diagnostic"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ fontSize: '0.8rem', color: '#ef4444', textDecoration: 'underline' }}
+                        >
+                            환경 진단 도구 실행하기
+                        </a>
+                    </div>
                 )}
                 {analysisResult && (
                     <div className="analysis-status">✅ 분석 완료! 아래 폼에 자동으로 입력되었습니다.</div>
