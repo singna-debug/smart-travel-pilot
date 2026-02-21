@@ -22,6 +22,7 @@ export default function UrlAnalyzer() {
         comparison: string;
     } | null>(null);
     const [error, setError] = useState('');
+    const [analysisStep, setAnalysisStep] = useState('');
 
     // 고객 정보 및 구글 연동 관련 상태
     const [customerName, setCustomerName] = useState('');
@@ -202,13 +203,34 @@ export default function UrlAnalyzer() {
 
         setLoading(true);
         setError('');
+        setAnalysisStep('1단계: 데이터 수집 중... (약 5-10초)');
         setSingleResult(null);
 
         try {
-            const response = await fetch('/api/analyze-url', {
+            // [Step 1] Crawl
+            const crawlRes = await fetch('/api/confirmation/analyze/crawl', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: singleUrl }),
+            });
+            const crawlJson = await crawlRes.json();
+
+            if (!crawlJson.success) {
+                setError(crawlJson.error || '데이터 수집에 실패했습니다.');
+                setLoading(false);
+                return;
+            }
+
+            setAnalysisStep('2단계: AI 분석 중... (약 3-5초)');
+
+            // [Step 2] Analyze
+            const response = await fetch('/api/analyze-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    url: singleUrl,
+                    html: crawlJson.html
+                }),
             });
 
             const data = await response.json();
@@ -235,6 +257,7 @@ export default function UrlAnalyzer() {
             console.error(err);
         } finally {
             setLoading(false);
+            setAnalysisStep('');
         }
     };
 
@@ -596,9 +619,15 @@ export default function UrlAnalyzer() {
                             disabled={loading || !singleUrl.trim()}
                             className="analyzer-button"
                         >
-                            {loading ? '분석 중...' : '분석'}
+                            {loading ? (analysisStep ? analysisStep.split(':')[0] + '...' : '분석 중...') : '분석'}
                         </button>
                     </div>
+                    {loading && analysisStep && (
+                        <div style={{ color: 'var(--accent-primary)', fontSize: '0.85rem', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div className="spinner-small" style={{ width: '14px', height: '14px' }}></div>
+                            {analysisStep}
+                        </div>
+                    )}
                     {error && <div className="analyzer-error">{error}</div>}
                 </div>
             )}

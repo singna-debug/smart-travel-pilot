@@ -13,16 +13,22 @@ async function scrapeWithScrapingBee(url: string): Promise<string | null> {
         const jsScenario = {
             instructions: [
                 { scroll_to: "bottom" },
-                { wait: 1500 },
+                { wait: 1000 },
                 { evaluate: "document.querySelectorAll('button, a, div, span').forEach(el => { const txt = el.innerText || ''; if(['상세', '전체', '펼치기', '더보기'].some(w => txt.includes(w))) { try { el.click(); } catch(e){} } })" },
-                { wait: 1500 },
+                { wait: 1000 },
                 { scroll_to: "bottom" }
             ]
         };
 
-        const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=networkidle&timeout=20000&js_scenario=${encodeURIComponent(JSON.stringify(jsScenario))}`;
+        const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=load&timeout=20000&js_scenario=${encodeURIComponent(JSON.stringify(jsScenario))}`;
 
-        const response = await fetch(scrapingBeeUrl);
+        // Vercel 10초 타임아웃을 방지하기 위해 9초면 중단하도록 설정
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 9000);
+
+        const response = await fetch(scrapingBeeUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
         if (!response.ok) throw new Error(`Status ${response.status}`);
         const html = await response.text();
         return html;
