@@ -314,10 +314,10 @@ async function analyzeForConfirmation(text: string, url: string, nextData?: stri
         prompt += '  "airline": "항공사명",\n';
         prompt += '  "flightCode": "편명 (예: 7C201)",\n';
         prompt += '  "departureAirport": "출발공항",\n';
-        prompt += '  "departureTime": "가는편 출발 시간 (HH:MM) - 본문에 숨겨진 실제 시간을 찾아주세요",\n';
-        prompt += '  "arrivalTime": "가는편 도착 시간 (HH:MM)",\n';
-        prompt += '  "returnDepartureTime": "오는편 출발 시간 (HH:MM)",\n';
-        prompt += '  "returnArrivalTime": "오는편 도착 시간 (HH:MM)",\n';
+        prompt += '  "departureTime": "가는편 출발 시각 (HH:MM) - 본문에서 반드시 찾아주세요",\n';
+        prompt += '  "arrivalTime": "가는편 도착 시각 (HH:MM)",\n';
+        prompt += '  "returnDepartureTime": "오는편 출발 시각 (HH:MM)",\n';
+        prompt += '  "returnArrivalTime": "오는편 도착 시각 (HH:MM)",\n';
         prompt += '  "hotel": {\n';
         prompt += '    "name": "대표 호텔명 (한글 명칭)",\n';
         prompt += '    "englishName": "호텔 영문명",\n';
@@ -364,7 +364,7 @@ async function analyzeForConfirmation(text: string, url: string, nextData?: stri
         prompt += '중요 지침:\n';
         prompt += '1. 이모지 사용 절대 금지: 모든 텍스트에서 이모지를 절대 사용하지 마세요. 깔끔한 텍스트만 사용합니다.\n';
         prompt += '2. 일정표 상세화: 각 일차별 activities는 페이지 내용을 꼼꼼히 읽고 중요한 방문지, 체험 내용을 3-5문장으로 요약하여 작성하세요. 정보가 아코디언(펼치기) 메뉴나 상세 일정 탭 안에 숨어있을 수 있으니 텍스트 전체를 꼼꼼히 분석하세요.\n';
-        prompt += '3. 교통 정보 상세화: transportation 필드에 편명, 출발/도착 시각, 총 소요 시간을 예시 형식에 맞춰 정확히 기입하세요. 항공 일정 섹션이 별도로 존재하는 경우가 많으니 주의깊게 확인하세요.\n';
+        prompt += '3. 교통 정보 상세화: transportation 필드에 편명, 출발/도착 시각, 총 소요 시간을 예시 형식에 맞춰 정확히 기입하세요. 항공 정보(HH:MM)가 본문에 반드시 있을 것이니 절대로 누락하지 마세요.\n';
         prompt += '4. 호텔 정보: 호텔 이름은 가능한 한글 정식 명칭을 사용하세요.\n';
         prompt += '5. JSON만 반환하세요. 다른 설명 텍스트는 제외하세요.';
 
@@ -406,13 +406,31 @@ async function scrapeWithScrapingBee(url: string): Promise<string | null> {
 
     try {
         console.log(`[ScrapingBee] 시작: ${url}`);
-        // render_js=true, wait_browser=networkidle를 사용하여 JS 렌더링 보장
-        const response = await fetch(`https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=networkidle&timeout=25000`);
-        if (!response.ok) throw new Error(`Status ${response.status}`);
+
+        // 상호작용 시나리오 (스크롤 및 상세 보기 클릭)
+        // 지침 개수를 줄이고 타임아웃을 안전 범위(25s) 내로 조정
+        const jsScenario = {
+            instructions: [
+                { scroll_to: "bottom" },
+                { wait: 3000 },
+                { evaluate: "document.querySelectorAll('button, a, div, span').forEach(el => { const txt = el.innerText || ''; if(['상세', '전체', '펼치기', '더보기'].some(w => txt.includes(w))) { try { el.click(); } catch(e){} } })" },
+                { wait: 3000 }
+            ]
+        };
+
+        const scenarioStr = JSON.stringify(jsScenario);
+        const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=networkidle&timeout=25000&js_scenario=${encodeURIComponent(scenarioStr)}`;
+
+        const response = await fetch(scrapingBeeUrl);
+        if (!response.ok) {
+            const errBody = await response.text();
+            console.error(`[ScrapingBee] API 오류 (${response.status}):`, errBody.substring(0, 300));
+            throw new Error(`Status ${response.status}`);
+        }
+
         const html = await response.text();
         console.log(`[ScrapingBee] 완료: ${html.length}자`);
 
-        // HTML 원본에서 텍스트 추출 (기존 로직 재사용)
         return htmlToText(html);
     } catch (e) {
         console.error('[ScrapingBee] 오류:', e);
