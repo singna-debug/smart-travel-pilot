@@ -314,7 +314,7 @@ async function analyzeForConfirmation(text: string, url: string, nextData?: stri
         prompt += '  "airline": "항공사명",\n';
         prompt += '  "flightCode": "편명 (예: 7C201)",\n';
         prompt += '  "departureAirport": "출발공항",\n';
-        prompt += '  "departureTime": "가는편 출발 시간 (HH:MM)",\n';
+        prompt += '  "departureTime": "가는편 출발 시간 (HH:MM) - 본문에 숨겨진 실제 시간을 찾아주세요",\n';
         prompt += '  "arrivalTime": "가는편 도착 시간 (HH:MM)",\n';
         prompt += '  "returnDepartureTime": "오는편 출발 시간 (HH:MM)",\n';
         prompt += '  "returnArrivalTime": "오는편 도착 시간 (HH:MM)",\n';
@@ -363,8 +363,8 @@ async function analyzeForConfirmation(text: string, url: string, nextData?: stri
         prompt += '}\n\n';
         prompt += '중요 지침:\n';
         prompt += '1. 이모지 사용 절대 금지: 모든 텍스트에서 이모지를 절대 사용하지 마세요. 깔끔한 텍스트만 사용합니다.\n';
-        prompt += '2. 일정표 상세화: 각 일차별 activities는 페이지 내용을 꼼꼼히 읽고 중요한 방문지, 체험 내용을 3-5문장으로 요약하여 작성하세요.\n';
-        prompt += '3. 교통 정보 상세화: transportation 필드에 편명, 출발/도착 시각, 총 소요 시간을 예시 형식에 맞춰 정확히 기입하세요.\n';
+        prompt += '2. 일정표 상세화: 각 일차별 activities는 페이지 내용을 꼼꼼히 읽고 중요한 방문지, 체험 내용을 3-5문장으로 요약하여 작성하세요. 정보가 아코디언(펼치기) 메뉴나 상세 일정 탭 안에 숨어있을 수 있으니 텍스트 전체를 꼼꼼히 분석하세요.\n';
+        prompt += '3. 교통 정보 상세화: transportation 필드에 편명, 출발/도착 시각, 총 소요 시간을 예시 형식에 맞춰 정확히 기입하세요. 항공 일정 섹션이 별도로 존재하는 경우가 많으니 주의깊게 확인하세요.\n';
         prompt += '4. 호텔 정보: 호텔 이름은 가능한 한글 정식 명칭을 사용하세요.\n';
         prompt += '5. JSON만 반환하세요. 다른 설명 텍스트는 제외하세요.';
 
@@ -400,6 +400,26 @@ async function analyzeForConfirmation(text: string, url: string, nextData?: stri
     }
 }
 
+async function scrapeWithScrapingBee(url: string): Promise<string | null> {
+    const apiKey = process.env.SCRAPINGBEE_API_KEY;
+    if (!apiKey) return null;
+
+    try {
+        console.log(`[ScrapingBee] 시작: ${url}`);
+        // render_js=true, wait_browser=networkidle를 사용하여 JS 렌더링 보장
+        const response = await fetch(`https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=networkidle&timeout=25000`);
+        if (!response.ok) throw new Error(`Status ${response.status}`);
+        const html = await response.text();
+        console.log(`[ScrapingBee] 완료: ${html.length}자`);
+
+        // HTML 원본에서 텍스트 추출 (기존 로직 재사용)
+        return htmlToText(html);
+    } catch (e) {
+        console.error('[ScrapingBee] 오류:', e);
+        return null;
+    }
+}
+
 import { scrapeWithBrowser } from '@/lib/browser-crawler';
 
 /**
@@ -408,20 +428,32 @@ import { scrapeWithBrowser } from '@/lib/browser-crawler';
  * 다소 지연되더라도 JS 렌더링이 보장되는 브라우저 크롤링을 사용합니다.
  */
 export async function crawlForConfirmation(url: string): Promise<any> {
-    console.log(`[ConfirmCrawler] 브라우저 크롤링 시작: ${url}`);
+    console.log(`[ConfirmCrawler] 분석 시작: ${url}`);
 
-    // JS가 렌더링된 전체 텍스트를 브라우저(Puppeteer)를 통해 추출
-    let fullText = await scrapeWithBrowser(url);
+    let fullText: string | null = null;
+    let nextData: string | undefined = undefined;
 
-    // 만약 브라우저 크롤링 실패 시, fallback으로 기존 빠른 fetch 사용
-    let nextData;
+    // 1. 브라우저 크롤링 시도 (주로 로컬 Puppeteer)
+    try {
+        fullText = await scrapeWithBrowser(url);
+    } catch (e) {
+        console.log(`[ConfirmCrawler] 브라우저 크롤링 중 에러 발생 (무시하고 다음 단계 진행)`);
+    }
+
+    // 2. 브라우저 크롤링 실패 시 ScrapingBee 시도 (특히 Vercel 운영 환경에서 필수)
+    if (!fullText && process.env.SCRAPINGBEE_API_KEY) {
+        console.log(`[ConfirmCrawler] 브라우저 실패하여 ScrapingBee로 전환...`);
+        fullText = await scrapeWithScrapingBee(url);
+    }
+
+    // 3. 모든 고급 옵션 실패 시, fallback으로 기존 빠른 fetch 사용
     if (!fullText) {
-        console.log(`[ConfirmCrawler] 브라우저 크롤링 실패하여 빠른 fetch로 전환`);
+        console.log(`[ConfirmCrawler] 모든 고급 크롤링이 실패하여 일반 fetch로 폴백`);
         const result = await fetchContent(url);
         fullText = result.text;
         nextData = result.nextData;
     } else {
-        // 브라우저가 반환한 전체 텍스트 정리
+        // 추출된 텍스트 정리
         fullText = fullText.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim();
     }
 
@@ -430,7 +462,7 @@ export async function crawlForConfirmation(url: string): Promise<any> {
         result.url = url;
         return result;
     }
-    // 폴백: 기존 크롤러 분석 재사용
+    // 최종 폴객: 일반 파싱
     console.log('[ConfirmCrawler] 확정서 전용 Gemini 분석 실패, 일반 파싱으로 폴백');
     return await crawlTravelProduct(url);
 }

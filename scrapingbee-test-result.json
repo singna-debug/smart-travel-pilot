@@ -1,0 +1,191 @@
+{
+  "title": "나트랑 자유 5일 (아미아나리조트-디럭스빌라가든뷰)",
+  "destination": "베트남 나트랑",
+  "price": "1199900",
+  "departureDate": "2026-07-17",
+  "returnDate": "2026-07-21",
+  "duration": "3박5일",
+  "airline": "티웨이 항공",
+  "flightCode": "TW041/TW042",
+  "departureAirport": "김해",
+  "departureTime": "21:25",
+  "arrivalTime": "00:40",
+  "returnDepartureTime": "01:40",
+  "returnArrivalTime": "08:20",
+  "hotel": {
+    "name": "아미아나 리조트 나트랑",
+    "englishName": "AMIANA Resort Nha trang",
+    "address": "",
+    "checkIn": "",
+    "checkOut": "",
+    "images": [
+      "https://img.modetour.com/eagle/photoimg/54875/bfile/636574119499929540.jpg?resize=y&resize_w=603&resize_h=360&w_h_fill=y"
+    ],
+    "amenities": []
+  },
+  "itinerary": [
+    {
+      "day": "1일차",
+      "date": "2026/07/17(금)",
+      "title": "김해 → 나트랑",
+      "activities": [
+        "김해국제공항 개별수속 (출발 최소 3시간전까지)",
+        "공항 도착 후 별도 미팅 없이 바로 출국 수속을 진행"
+      ],
+      "transportation": "TW041 21:25 출발 -> 00:40 도착 (5시간 15분 소요)",
+      "hotelDetails": {
+        "name": "아미아나 리조트 나트랑",
+        "address": "",
+        "images": [],
+        "amenities": [],
+        "checkIn": "",
+        "checkOut": ""
+      },
+      "meals": {
+        "breakfast": "불포함",
+        "lunch": "불포함",
+        "dinner": "불포함"
+      },
+      "hotel": "아미아나 리조트 나트랑",
+      "dailyNotices": []
+    },
+    {
+      "day": "2일차",
+      "date": "2026/07/18(토)",
+      "title": "나트랑",
+      "activities": [
+        "교통수단 미포함(자유일정진행)",
+        "나트랑 자유시간"
+      ],
+      "transportation": "",
+      "hotelDetails": {
+        "name": "아미아나 리조트 나트랑",
+        "address": "",
+        "images": [],
+        "amenities": [],
+        "checkIn": "",
+        "checkOut": ""
+      },
+      "meals": {
+        "breakfast": "호텔식",
+        "lunch": "불포함",
+        "dinner": "불포함"
+      },
+      "hotel": "아미아나 리조트 나트랑",
+      "dailyNotices": []
+    },
+    {
+      "day": "3일차",
+      "date": "2026/07/19(일)",
+      "title": "나트랑",
+      "activities": [
+        "교통수단 미포함(자유일정진행)",
+        "나트랑 자유시간"
+      ],
+      "transportation": "",
+      "hotelDetails": {
+        "name": "아미아나 리조트 나트랑",
+        "address": "",
+        "images": [],
+        "amenities": [],
+        "checkIn": "",
+        "checkOut": ""
+      },
+      "meals": {
+        "breakfast": "호텔식",
+        "lunch": "불포함",
+        "dinner": "불포함"
+      },
+      "hotel": "아미아나 리조트 나트랑",
+      "dailyNotices": []
+    },
+    {
+      "day": "4일차",
+      "date": "2026/07/20(월)",
+      "title": "숙박",
+      "activities": [
+        "교통수단 미포함(자유일정진행)",
+        "나트랑 자유시간"
+      ],
+      "transportation": "",
+      "hotelDetails": {
+        "name": "",
+        "address": "",
+        "images": [],
+        "amenities": [],
+        "checkIn": "",
+        "checkOut": ""
+      },
+      "meals": {
+        "breakfast": "호텔식",
+        "lunch": "불포함",
+        "dinner": "불포함"
+      },
+      "hotel": "기내박",
+      "dailyNotices": []
+    },
+    {
+      "day": "5일차",
+      "date": "2026/07/21(화)",
+      "title": "김해",
+      "activities": [],
+      "transportation": "TW042 01:40 출발 -> 08:20 도착 (5시간 10분 소요)",
+      "hotelDetails": {
+        "name": "",
+        "address": "",
+        "images": [],
+        "amenities": [],
+        "checkIn": "",
+        "checkOut": ""
+      },
+      "meals": {
+        "breakfast": "기내식(불포함)",
+        "lunch": "불포함",
+        "dinner": "불포함"
+      },
+      "hotel": "",
+      "dailyNotices": []
+    }
+  ],
+  "inclusions": [
+    "왕복항공권",
+    "전 일정 숙박비",
+    "국내공항세",
+    "현지공항세",
+    "전쟁보험료",
+    "관광진흥기금",
+    "유류할증료",
+    "해외여행자보험"
+  ],
+  "exclusions": [
+    "■ 상기상품은 항공 및 호텔예약이 실시간으로 이루어지므로 예약 후 컴펌여부를 꼭 확인하셔야 합니다. 또한, 그룹항공권 요금을 적용하여 구성된 상품이니 출발일기준 동일항공/동일패턴으로 그룹인원이 충족되지 않았을 경우 추가요금이 발생될수 있으니 이것도 꼭 예약담당자에게 확인해주세요.",
+    "개인 여행경비 및 각종 매너팁",
+    "*매너팁은 소비자의 자율적 선택사항으로 지불여부에 따른 불이익은 없습니다.",
+    "(매너팁 : 식당, 객실 청소원 등 서비스에 대한 단순 감사의 표시로, 소비자(여행자)의 의사에 따라 자율적으로 지불하는 비용)"
+  ],
+  "keyPoints": [
+    "전용해변스노쿨링",
+    "머드스파(유료)",
+    "1:1카톡문의",
+    "여행헬프서비스",
+    "현지할인쿠폰",
+    "김해공항할인쿠폰"
+  ],
+  "specialOffers": [
+    "모두투어 단독으로 제공되는 프리미엄급 자유여행 혜택",
+    "예약 후 여행 전/여행 중 1:1문의 및 현지투어, 스파 등 예약 가능",
+    "비엣베네핏 할인 : 현지 식당,스파,샵,투어 추가 할인",
+    "비엣베네핏 헬프 : 문제 발생 시(도난, 병원 등) 24시간 지원되는 헬프서비스",
+    "김해공항 할인쿠폰 증정 : 공항 내 식당 할인 혜택",
+    "3억원 해외여행자보험 가입"
+  ],
+  "features": [],
+  "courses": [],
+  "notices": [
+    "※ 베트남 지역은 파도가 강한 지역으로 해변에서 개별 수영은 삼가주시기 바랍니다.",
+    "※ 리조트 내 해변에서도 강한 파도와 조류에 유의해주시고 반드시 안전요원의 지시에 따라주시기 바랍니다."
+  ],
+  "cancellationPolicy": "",
+  "checklist": [],
+  "url": "https://www.modetour.com/package/102840987?MLoc=99&Pnum=102840987&Sno=C117876&ANO=81440&thru=crs"
+}
