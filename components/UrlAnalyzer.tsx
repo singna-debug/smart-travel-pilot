@@ -19,7 +19,9 @@ export default function UrlAnalyzer() {
     const [singleResult, setSingleResult] = useState<SingleResult | null>(null);
     const [compareResult, setCompareResult] = useState<{
         products: AnalysisResult[];
-        comparison: string;
+        comparison?: string;
+        totalAnalyzed?: number;
+        totalRequested?: number;
     } | null>(null);
     const [error, setError] = useState('');
     const [analysisStep, setAnalysisStep] = useState('');
@@ -203,52 +205,29 @@ export default function UrlAnalyzer() {
 
         setLoading(true);
         setError('');
-        setAnalysisStep('1단계: 데이터 수집 중... (약 5-10초)');
+        setAnalysisStep('분석 중... (약 15-20초)');
         setSingleResult(null);
 
         try {
-            // [Step 1] Crawl
-            const crawlRes = await fetch('/api/confirmation/analyze/crawl', {
+            const response = await fetch('/api/crawl-analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: singleUrl }),
-            });
-            const crawlJson = await crawlRes.json();
-
-            if (!crawlJson.success) {
-                setError(crawlJson.error || '데이터 수집에 실패했습니다.');
-                setLoading(false);
-                return;
-            }
-
-            setAnalysisStep('2단계: AI 분석 중... (약 3-5초)');
-
-            // [Step 2] Analyze
-            const response = await fetch('/api/analyze-url', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    url: singleUrl,
-                    text: crawlJson.text,
-                    nextData: crawlJson.nextData
-                }),
             });
 
             const data = await response.json();
 
             if (data.success) {
-                setSingleResult(data.data);
+                setSingleResult({ raw: data.data, formatted: '', recommendation: '' });
 
-                // 결과에서 폼 자동 채우기 (비어있는 경우에만)
-                const info = data.data.raw;
+                const info = data.data;
                 if (!destination) setDestination(info.destination || '');
                 if (!departureDate) setDepartureDate(info.departureDate || '');
                 if (!duration) setDuration(info.duration || '');
                 if (!interestedProduct) setInterestedProduct(info.title || '');
 
-                // 고객 정보가 입력되어 있으면 자동으로 시트에 저장
                 if (customerName.trim() || customerPhone.trim()) {
-                    setTimeout(() => saveAutomatically(data.data, false), 500);
+                    setTimeout(() => saveAutomatically({ raw: data.data }, false), 500);
                 }
             } else {
                 setError(data.error || '분석에 실패했습니다.');
@@ -271,62 +250,50 @@ export default function UrlAnalyzer() {
 
         setLoading(true);
         setError('');
-        setAnalysisStep('1단계: 각 상품 데이터 수집 중... (약 10초)');
+        setAnalysisStep('비교 분석 중... (약 20-30초)');
         setCompareResult(null);
 
         try {
-            // [Step 1] Crawl all URLs in parallel
-            const crawlResults = await Promise.all(
+            // 각 URL을 병렬로 통합 분석
+            const results = await Promise.all(
                 validUrls.map(async (url) => {
                     try {
-                        const res = await fetch('/api/confirmation/analyze/crawl', {
+                        const res = await fetch('/api/crawl-analyze', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ url }),
                         });
                         const json = await res.json();
-                        return {
-                            url,
-                            text: json.success ? json.text : null,
-                            nextData: json.success ? json.nextData : null
-                        };
+                        return { url, info: json.success ? json.data : null };
                     } catch (e) {
-                        return { url, html: null };
+                        return { url, info: null };
                     }
                 })
             );
 
-            const successfulCrawls = crawlResults.filter(r => r.text !== null);
-            if (successfulCrawls.length < 2) {
-                setError('최소 2개 이상의 상품 정보 수집에 성공해야 비교가 가능합니다.');
+            const successfulResults = results.filter(r => r.info !== null);
+            if (successfulResults.length < 2) {
+                setError('최소 2개 이상의 상품 분석에 성공해야 비교가 가능합니다.');
                 setLoading(false);
                 return;
             }
 
-            setAnalysisStep('2단계: 상품 비교 분석 중... (약 5-8초)');
+            // 비교 결과 구성
+            const products = successfulResults.map((r, i) => ({
+                url: r.url,
+                index: i + 1,
+                raw: r.info,
+                formatted: '',
+            }));
 
-            // [Step 2] Analyze
-            const response = await fetch('/api/analyze-url', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    urls: successfulCrawls.map(c => c.url),
-                    texts: successfulCrawls.map(c => (c as any).text),
-                    nextDatas: successfulCrawls.map(c => (c as any).nextData)
-                }),
+            setCompareResult({
+                products,
+                totalAnalyzed: successfulResults.length,
+                totalRequested: validUrls.length,
             });
 
-            const data = await response.json();
-
-            if (data.success) {
-                setCompareResult(data.data);
-
-                // 고객 정보가 입력되어 있으면 자동으로 시트에 저장
-                if (customerName.trim() || customerPhone.trim()) {
-                    setTimeout(() => saveAutomatically(data.data, true), 500);
-                }
-            } else {
-                setError(data.error || '비교 분석에 실패했습니다.');
+            if (customerName.trim() || customerPhone.trim()) {
+                setTimeout(() => saveAutomatically({ products }, true), 500);
             }
         } catch (err) {
             setError('분석 중 오류가 발생했습니다.');
@@ -846,16 +813,16 @@ export default function UrlAnalyzer() {
                         <div className="result-header">
                             <h4>📊 비교 분석 결과</h4>
                             <div style={{ display: 'flex', gap: '8px' }}>
-                                <button onClick={() => copyToClipboard(compareResult.comparison)} className="action-button">
+                                <button onClick={() => copyToClipboard(compareResult.comparison || '')} className="action-button">
                                     📋 복사
                                 </button>
-                                <button onClick={() => handleGreetingCopy(compareResult.comparison)} className="action-button" style={{ background: 'rgba(0, 212, 170, 0.1)', color: 'var(--accent-primary)', border: '1px solid rgba(0, 212, 170, 0.3)' }}>
+                                <button onClick={() => handleGreetingCopy(compareResult.comparison || '')} className="action-button" style={{ background: 'rgba(0, 212, 170, 0.1)', color: 'var(--accent-primary)', border: '1px solid rgba(0, 212, 170, 0.3)' }}>
                                     ✨ 멘트형 복사
                                 </button>
                             </div>
                         </div>
                         <div className="comparison-content">
-                            {compareResult.comparison.split('\n').map((line, i) => {
+                            {(compareResult.comparison || '').split('\n').map((line, i) => {
                                 if (line.startsWith('####')) {
                                     return <h5 key={i} style={{ color: '#38bdf8', marginTop: '20px', marginBottom: '10px' }}>{line.replace(/^#+\s*/, '')}</h5>;
                                 }

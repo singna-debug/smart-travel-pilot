@@ -107,40 +107,19 @@ export default function ConfirmationPage() {
         setCustomerQuery('');
     };
 
-    // URL 분석 — 확정서 전용 종합 분석 API 사용
+    // URL 분석 — 수집+분석을 한 번에 처리하는 통합 Edge API 사용
     const analyzeUrl = async () => {
         if (!productUrl) return;
         setAnalyzing(true);
         setAnalysisError('');
-        setAnalysisStep('1단계: 데이터 수집 중... (약 5-10초)');
+        setAnalysisStep('분석 중... (약 15-20초)');
         setAnalysisResult(null);
 
         try {
-            // [Step 1] Crawl
-            const crawlRes = await fetch('/api/confirmation/analyze/crawl', {
+            const res = await fetch('/api/crawl-analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: productUrl }),
-            });
-            const crawlJson = await crawlRes.json();
-
-            if (!crawlJson.success) {
-                setAnalysisError(crawlJson.error || '데이터 수집에 실패했습니다.');
-                setAnalyzing(false);
-                return;
-            }
-
-            setAnalysisStep('2단계: AI 분석 중... (약 3-5초)');
-
-            // [Step 2] Analyze
-            const res = await fetch('/api/confirmation/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    url: productUrl,
-                    text: crawlJson.text,
-                    nextData: crawlJson.nextData
-                }),
             });
             const json = await res.json();
 
@@ -172,40 +151,27 @@ export default function ConfirmationPage() {
                 if (raw.hotel?.images?.length) setHotelImages(raw.hotel.images.join('\n'));
                 if (raw.hotel?.amenities?.length) setHotelAmenities(raw.hotel.amenities.join('\n'));
 
-                // Keep the old root-level fallback check just in case
                 if (typeof raw.hotel === 'string' && raw.hotel) setHotelName(raw.hotel);
                 if (raw.hotelAddress && !raw.hotel?.address) setHotelAddress(raw.hotelAddress);
 
                 if (raw.departureDate) setCheckIn(raw.departureDate);
                 if (raw.returnDate) setCheckOut(raw.returnDate);
 
-                // ---- 포함/불포함 ----
                 if (raw.inclusions?.length) setInclusions(raw.inclusions.join('\n'));
                 if (raw.exclusions?.length) setExclusions(raw.exclusions.join('\n'));
-
-                // ---- 취소 규정 ----
                 if (raw.cancellationPolicy) setCancellationPolicy(raw.cancellationPolicy);
+                if (raw.checklist?.length) setChecklist(raw.checklist.join('\n'));
+                if (raw.itinerary?.length) setItinerary(raw.itinerary);
 
-                // ---- 준비물 ----
-                if (raw.checklist?.length) {
-                    setChecklist(raw.checklist.join('\n'));
-                }
-
-                // ---- 일정표 ----
-                if (raw.itinerary?.length) {
-                    setItinerary(raw.itinerary);
-                }
-
-                // ---- 안내사항 (keyPoints + specialOffers + features + notices 합산) ----
                 const noticesParts: string[] = [];
                 if (raw.keyPoints?.length) {
-                    noticesParts.push('📌 핵심 포인트:\n' + raw.keyPoints.map((k: string) => `• ${k}`).join('\n'));
+                    noticesParts.push('핵심 포인트:\n' + raw.keyPoints.map((k: string) => `• ${k}`).join('\n'));
                 }
                 if (raw.specialOffers?.length) {
-                    noticesParts.push('🎁 특전/혜택:\n' + raw.specialOffers.map((s: string) => `• ${s}`).join('\n'));
+                    noticesParts.push('특전/혜택:\n' + raw.specialOffers.map((s: string) => `• ${s}`).join('\n'));
                 }
                 if (raw.features?.length) {
-                    noticesParts.push('✨ 상품 특징:\n' + raw.features.map((f: string) => `• ${f}`).join('\n'));
+                    noticesParts.push('상품 특징:\n' + raw.features.map((f: string) => `• ${f}`).join('\n'));
                 }
                 if (raw.notices?.length) {
                     if (Array.isArray(raw.notices)) {
