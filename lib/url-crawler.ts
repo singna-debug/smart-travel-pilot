@@ -197,7 +197,7 @@ ${cleanBody}`;
 }
 
 async function analyzeWithGemini(text: string, url: string, nextData?: string): Promise<DetailedProductInfo | null> {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
     if (!apiKey) return null;
 
     try {
@@ -242,7 +242,7 @@ ${text.substring(0, 8000)}
  * 확정서 전용 종합 분석 — 페이지 전체 내용에서 일정/식사/호텔/포함사항 등 모두 추출
  */
 export async function analyzeForConfirmation(text: string, url: string, nextData?: string): Promise<any | null> {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
     if (!apiKey) return null;
 
     let preExtractedInclusions = '';
@@ -402,7 +402,7 @@ export async function analyzeForConfirmation(text: string, url: string, nextData
 }
 
 async function scrapeWithScrapingBee(url: string): Promise<string | null> {
-    const apiKey = process.env.SCRAPINGBEE_API_KEY;
+    const apiKey = process.env.SCRAPINGBEE_API_KEY?.trim();
     if (!apiKey) return null;
 
     try {
