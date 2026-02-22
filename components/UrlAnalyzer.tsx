@@ -207,29 +207,10 @@ export default function UrlAnalyzer() {
         setSingleResult(null);
 
         try {
-            // [Step 1] Crawl (Edge Runtime, 30초)
-            const crawlRes = await fetch('/api/confirmation/analyze/crawl', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: singleUrl }),
-            });
-            const crawlJson = await crawlRes.json();
-
-            if (!crawlJson.success) {
-                setError(crawlJson.error || '데이터 수집에 실패했습니다.');
-                setLoading(false);
-                return;
-            }
-
-            // [Step 2] Analyze
             const response = await fetch('/api/analyze-url', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    url: singleUrl,
-                    text: crawlJson.text,
-                    nextData: crawlJson.nextData
-                }),
+                body: JSON.stringify({ url: singleUrl }),
             });
 
             const data = await response.json();
@@ -271,43 +252,10 @@ export default function UrlAnalyzer() {
         setCompareResult(null);
 
         try {
-            // [Step 1] 각 URL 수집 (병렬)
-            const crawlResults = await Promise.all(
-                validUrls.map(async (url) => {
-                    try {
-                        const res = await fetch('/api/confirmation/analyze/crawl', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ url }),
-                        });
-                        const json = await res.json();
-                        return {
-                            url,
-                            text: json.success ? json.text : null,
-                            nextData: json.success ? json.nextData : null
-                        };
-                    } catch (e) {
-                        return { url, text: null, nextData: null };
-                    }
-                })
-            );
-
-            const successfulCrawls = crawlResults.filter(r => r.text !== null);
-            if (successfulCrawls.length < 2) {
-                setError('최소 2개 이상의 상품 정보 수집에 성공해야 비교가 가능합니다.');
-                setLoading(false);
-                return;
-            }
-
-            // [Step 2] 비교 분석
             const response = await fetch('/api/analyze-url', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    urls: successfulCrawls.map(c => c.url),
-                    texts: successfulCrawls.map(c => c.text),
-                    nextDatas: successfulCrawls.map(c => c.nextData)
-                }),
+                body: JSON.stringify({ urls: validUrls }),
             });
 
             const data = await response.json();
