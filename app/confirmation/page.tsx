@@ -121,7 +121,18 @@ export default function ConfirmationPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: productUrl }),
             });
-            const json = await res.json();
+
+            const textResponse = await res.text();
+            let json;
+            try {
+                json = JSON.parse(textResponse);
+            } catch (e) {
+                console.error("Non-JSON response (Confirmation):", textResponse.substring(0, 200));
+                if (textResponse.includes("An error occurred") || textResponse.includes("504") || textResponse.includes("<html")) {
+                    throw new Error("서버 응답 시간(30초)을 초과했습니다. 화면에 보이지 않는 방대한 데이터를 처리 중입니다. 다시 시도해주세요.");
+                }
+                throw new Error("서버 오류가 발생했습니다. (JSON 파싱 실패)");
+            }
 
             if (json.success && json.data) {
                 const raw = json.data;
