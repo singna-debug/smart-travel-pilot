@@ -97,13 +97,15 @@ export default function ConfirmationViewerPage() {
         setExpandedDays(prev => ({ ...prev, [idx]: !prev[idx] }));
     };
 
-    // D-Day 계산
+    // D-Day 계산 (한국 시간 기준)
     const calcDDay = (dateStr: string) => {
         if (!dateStr) return '';
         const target = new Date(dateStr);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const diff = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        // 한국 시간(KST, UTC+9) 기준으로 오늘 날짜 계산
+        const nowKST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+        nowKST.setHours(0, 0, 0, 0);
+        target.setHours(0, 0, 0, 0);
+        const diff = Math.ceil((target.getTime() - nowKST.getTime()) / (1000 * 60 * 60 * 24));
         if (diff === 0) return 'D-Day!';
         if (diff > 0) return `D-${diff}`;
         return `D+${Math.abs(diff)}`;
@@ -156,18 +158,6 @@ export default function ConfirmationViewerPage() {
                     {doc.status}
                 </div>
             </div>
-
-            {/* 상단 공지 배너 */}
-            {doc.notices && (
-                <div className="mc-top-notice">
-                    <span className="nt-icon">🔔</span>
-                    <div className="nt-text">
-                        {doc.notices.split('\n')[0].length > 50
-                            ? doc.notices.substring(0, 50) + '...'
-                            : doc.notices.split('\n')[0]}
-                    </div>
-                </div>
-            )}
 
             {/* 탭 네비게이션 */}
             <div className="mc-tabs">
