@@ -303,8 +303,16 @@ export default function UrlAnalyzer() {
 
     const handleGreetingCopy = (content: string) => {
         const greeting = `${customerName || '고객'}님 문의주신 ${destination || '요청하신'} 일정표입니다.\n\n`;
-        const footer = `\n\n📌 예약 전 확인사항\n상품가는 예약일/출발일에 따라 변동될 수 있습니다.\n항공 좌석은 예약 시점에 다시 확인해야 합니다.\n\n추가로 궁금하신 점이나, 더 비교하고 싶으신 상품이 있으시면 편하게 말씀해주세요.\n감사합니다. 김호기 드림\n\n📞 상담 및 문의\n* 담당자: (주)클럽모두투어 김호기\n* 직통전화: 02-951-9004\n* 휴대폰: 010-9307-9004`;
-        const fullText = greeting + content + footer;
+        const footerTitle = "📌 예약 전 확인사항";
+        const footer = `\n\n${footerTitle}\n상품가는 예약일/출발일에 따라 변동될 수 있습니다.\n항공 좌석은 예약 시점에 다시 확인해야 합니다.\n\n추가로 궁금하신 점이나, 더 비교하고 싶으신 상품이 있으시면 편하게 말씀해주세요.\n감사합니다. 김호기 드림\n\n📞 상담 및 문의\n* 담당자: (주)클럽모두투어 김호기\n* 직통전화: 02-951-9004\n* 휴대폰: 010-9307-9004`;
+
+        // 만약 content 내부에 이미 "예약 전 확인사항" 문구가 있다면 중복 방지를 위해 제거
+        let cleanedContent = content;
+        if (content.includes(footerTitle)) {
+            cleanedContent = content.split(footerTitle)[0].trim();
+        }
+
+        const fullText = greeting + cleanedContent + footer;
         copyToClipboard(fullText);
     };
 
