@@ -79,36 +79,20 @@ export async function GET(request: NextRequest) {
                 if (!cleanJson.startsWith('{')) {
                     cleanJson = Buffer.from(cleanJson, 'base64').toString('utf8');
                 }
+
+                // Aggressive Clean
+                cleanJson = cleanJson.replace(/[\r\n]/g, '');
+
                 credentials = JSON.parse(cleanJson);
                 auth = new google.auth.GoogleAuth({
                     credentials,
-                    scopes: ['https://www.googleapis.com/spreadsheets.readonly'],
+                    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
                 });
                 const sheets = google.sheets({ version: 'v4', auth });
-                const response = await sheets.spreadsheets.get({ spreadsheetId: sheetId });
+                const response = await sheets.spreadsheets.get({ spreadsheetId: sheetId.trim() });
                 diagnostics.connectivity.google_sheets = `OK (Title: ${response.data.properties?.title})`;
             } catch (parsErr: any) {
-                // Try fallback replace if initial parse fails
-                try {
-                    let cleanJson = jsonStr.trim();
-                    if (cleanJson.startsWith('"') && cleanJson.endsWith('"')) {
-                        cleanJson = cleanJson.substring(1, cleanJson.length - 1);
-                    }
-                    if (!cleanJson.startsWith('{')) {
-                        cleanJson = Buffer.from(cleanJson, 'base64').toString('utf8');
-                    }
-                    const fallbackJson = cleanJson.replace(/\\n/g, '\n');
-                    credentials = JSON.parse(fallbackJson);
-                    auth = new google.auth.GoogleAuth({
-                        credentials,
-                        scopes: ['https://www.googleapis.com/spreadsheets.readonly'],
-                    });
-                    const sheets = google.sheets({ version: 'v4', auth });
-                    const response = await sheets.spreadsheets.get({ spreadsheetId: sheetId });
-                    diagnostics.connectivity.google_sheets = `OK via Fallback (Title: ${response.data.properties?.title})`;
-                } catch (e2: any) {
-                    diagnostics.connectivity.google_sheets = `Auth/Fetch Error: ${e2.message}`;
-                }
+                diagnostics.connectivity.google_sheets = `Auth/Fetch Error: ${parsErr.message}`;
             }
         } else {
             diagnostics.connectivity.google_sheets = `Missing Config (SheetID: ${sheetId ? 'OK' : 'No'}, JSON: ${jsonStr ? 'OK' : 'No'})`;
