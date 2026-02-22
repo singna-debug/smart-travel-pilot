@@ -494,3 +494,15 @@
     cursor: pointer;
     font-size: 0.85rem;
 }
+
+/* 모바일 반응형 (관리자 화면) */
+@media (max-width: 768px) {
+  .confirm-admin { padding: 16px; }
+  .confirm-grid { grid-template-columns: 1fr; }
+  .confirm-grid.three-col { grid-template-columns: 1fr; }
+  .itinerary-day-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .itinerary-day-title { width: 100%; }
+  /* 탭 네비게이션이 있다면 줄바꿈 허용 */
+  .mc-tabs { flex-wrap: wrap; }
+  .mc-tab { flex: 1 1 auto; white-space: nowrap; padding: 10px; font-size: 0.85rem; }
+}

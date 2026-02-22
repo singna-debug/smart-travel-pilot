@@ -43,12 +43,14 @@ function htmlToText(html: string): string {
 
 // ── ScrapingBee로 수집 ──
 async function crawl(url: string, apiKey: string): Promise<string | null> {
-    // Attempt 1: JS 렌더링 (시나리오 없음, wait=load, 15초)
+    // Attempt 1: JS 렌더링 (시나리오 포함, 15초)
     try {
-        console.log('[Edge] 수집 시도: JS렌더링 (load)');
-        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=load&timeout=20000`;
+        console.log('[Edge] 수집 시도: JS렌더링 (시나리오 포함)');
+        // 1초 대기 -> 스크롤 -> 1초 대기 -> 스크롤 -> 1초 대기로 동적 콘텐츠 및 상세 일정표 로드 유도
+        const jsScenario = encodeURIComponent('{"instructions":[{"wait":1000},{"scroll_y":2000},{"wait":1000},{"scroll_y":3000},{"wait":1000}]}');
+        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&js_scenario=${jsScenario}&timeout=20000`;
         const controller = new AbortController();
-        const tid = setTimeout(() => controller.abort(), 15000);
+        const tid = setTimeout(() => controller.abort(), 16000);
         const res = await fetch(sbUrl, { signal: controller.signal });
         clearTimeout(tid);
         if (res.ok) {
