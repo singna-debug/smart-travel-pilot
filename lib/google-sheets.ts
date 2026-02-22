@@ -17,7 +17,6 @@ function getGoogleSheetsClient() {
         // 방법 1: JSON 파일 직접 읽기 (가장 안정적)
         const credentialsPath = path.join(process.cwd(), 'google-credentials.json');
         if (fs.existsSync(credentialsPath)) {
-            // console.log('[Google Sheets] JSON 파일 인증 사용:', credentialsPath);
             const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
             auth = new google.auth.GoogleAuth({
                 credentials,
@@ -29,12 +28,10 @@ function getGoogleSheetsClient() {
         if (!auth && process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
             let jsonStr = process.env.GOOGLE_SERVICE_ACCOUNT_JSON.trim();
 
-            // 만약 따옴표로 감싸져 있다면 제거
             if (jsonStr.startsWith('"') && jsonStr.endsWith('"')) {
                 jsonStr = jsonStr.substring(1, jsonStr.length - 1);
             }
 
-            // Base64 디코딩 시도 (만약 JSON이 아니라면)
             if (!jsonStr.startsWith('{')) {
                 try {
                     jsonStr = Buffer.from(jsonStr, 'base64').toString('utf8');
@@ -44,10 +41,9 @@ function getGoogleSheetsClient() {
             }
 
             try {
-                // [Aggressive Clean] 리터럴 줄바꿈(\r, \n)이 JSON 문자열 내부에 포함되어 파싱이 깨지는 경우 방지
-                // 이는 보통 Vercel 환경변수 복사/붙여넣기 시 윈도우 스타일 줄바꿈(CRLF)이 섞여 들어갈 때 발생합니다.
+                // [Extreme Clean] 모든 제어 문자(ASCII 0-31, 127) 제거.
                 const cleanJson = jsonStr
-                    .replace(/[\r\n]/g, '') // 모든 실제 줄바꿈 제거 (문자열 내 \n은 \\n으로 표현되어야 함)
+                    .replace(/[\x00-\x1F\x7F]/g, '')
                     .trim();
 
                 const credentials = JSON.parse(cleanJson);
@@ -57,7 +53,6 @@ function getGoogleSheetsClient() {
                 });
             } catch (e: any) {
                 console.error('[Google Sheets] JSON Parse Error (Env):', e.message);
-                // 혹시라도 \\n 등이 날아갔을 경우를 대비한 2차 시도
                 try {
                     const fallbackJson = jsonStr.replace(/\\n/g, '\n');
                     const credentials = JSON.parse(fallbackJson);
@@ -76,7 +71,6 @@ function getGoogleSheetsClient() {
         }
 
         const sheetsClient = google.sheets({ version: 'v4', auth });
-        // console.log('[Google Sheets] 클라이언트 생성 성공');
         return sheetsClient;
     } catch (error: any) {
         console.error('[Google Sheets] 클라이언트 생성 오류:', error.message);
