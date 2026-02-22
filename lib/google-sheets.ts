@@ -11,6 +11,13 @@ function cleanEnv(key: string): string | undefined {
     return val.replace(/[\x00-\x1F\x7F]/g, '').trim();
 }
 
+// 한국 시간(KST, UTC+9) 반환 헬퍼
+function getKSTDate(): Date {
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    return new Date(utc + 9 * 60 * 60000);
+}
+
 // Google Sheets 클라이언트 초기화
 // 캐시 데이터 전역 변수 (모듈 스코프)
 let cachedConsultations: ConsultationData[] | null = null;
@@ -298,10 +305,10 @@ export async function appendConsultationToSheet(data: ConsultationData): Promise
             return false;
         }
 
-        const currentMonth = format(new Date(), 'yyyy-MM');
+        const currentMonth = format(getKSTDate(), 'yyyy-MM');
         const { title: targetSheet } = await getOrCreateMonthlySheet(sheets, sheetId, currentMonth);
 
-        const timestamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+        const timestamp = format(getKSTDate(), 'yyyy-MM-dd HH:mm:ss');
 
         // 시트에 추가할 행 데이터 (이미지 기준 순서 조정)
         const row = [
