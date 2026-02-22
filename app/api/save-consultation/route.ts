@@ -137,10 +137,10 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // 팔로업일 자동 계산 (상담일로부터 2일 뒤)
-        const now = new Date();
-        const followUpDate = new Date(now);
-        followUpDate.setDate(now.getDate() + 2);
+        // 팔로업일 자동 계산 (상담일로부터 2일 뒤, 한국시간 기준)
+        const kstNow = new Date(new Date().getTime() + 9 * 60 * 60000 + new Date().getTimezoneOffset() * 60000);
+        const followUpDate = new Date(kstNow);
+        followUpDate.setDate(kstNow.getDate() + 2);
         const nextFollowUp = `${followUpDate.getFullYear()}-${String(followUpDate.getMonth() + 1).padStart(2, '0')}-${String(followUpDate.getDate()).padStart(2, '0')}`;
 
         const consultationData: ConsultationData = {
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
                 balance_due_date: '',
                 notice_date: '',
             },
-            timestamp: new Date().toISOString(),
+            timestamp: kstNow.toISOString(),
             visitor_id: 'admin-analyzer',
         };
 

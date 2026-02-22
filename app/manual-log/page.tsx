@@ -106,18 +106,28 @@ export default function ManualLogPage() {
             // URL들을 줄바꿈으로 연결
             const combinedUrls = productUrls.filter(url => url.trim()).join('\n');
 
-            const res = await fetch('/api/manual-log', {
+            const res = await fetch('/api/save-consultation', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...formData,
-                    productUrl: combinedUrls
+                    customerName: formData.name,
+                    customerPhone: formData.phone,
+                    destination: formData.destination,
+                    departureDate: formData.departureDate,
+                    duration: formData.duration,
+                    returnDate: formData.returnDate,
+                    interestedProduct: formData.productName,
+                    productUrl: combinedUrls,
+                    memo: formData.summary,
+                    status: formData.status,
+                    isComparison: false,
+                    analysisData: { raw: { url: combinedUrls, title: formData.productName } }
                 }),
             });
             const result = await res.json();
 
             if (result.success) {
-                alert('✅ 상담 내역이 저장되었습니다! (DB + 구글시트)');
+                alert('✅ 상담 내역이 저장되었습니다!');
                 setFormData({
                     name: '', phone: '', destination: '', departureDate: '', duration: '', returnDate: '', productName: '', status: '상담중', summary: ''
                 });
