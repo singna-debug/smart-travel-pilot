@@ -9,14 +9,19 @@ export async function POST(request: NextRequest) {
     console.log('[API] Analyze URL Request Received');
     try {
         const body = await request.json();
-        const { url, urls, text, nextData, texts, nextDatas } = body;
+        const { url, urls, text, nextData, texts, nextDatas, preAnalyzedData } = body;
 
         // 단일 URL
         if (url && !urls) {
             return await analyzeSingleUrl(url, text, nextData, body.html);
         }
 
-        // 다중 URL
+        // 다중 URL (미리 분석된 데이터가 있는 경우 - Edge API 경유)
+        if (urls && preAnalyzedData && Array.isArray(preAnalyzedData)) {
+            return await processPreAnalyzedMultipleUrls(urls, preAnalyzedData);
+        }
+
+        // 다중 URL (기본 모드)
         if (urls && Array.isArray(urls)) {
             return await analyzeMultipleUrls(urls, texts, nextDatas, body.htmls);
         }
@@ -147,6 +152,41 @@ async function analyzeMultipleUrls(urls: string[], texts?: (string | null)[], ne
 
     if (products.length === 0) {
         return NextResponse.json({ success: false, error: '어떤 URL에서도 정보를 추출할 수 없습니다.' });
+    }
+
+    const comparison = compareProducts(products);
+    const productDetails = successfulResults.map((r, i) => ({
+        url: r.url,
+        index: r.index,
+        raw: r.info,
+        formatted: formatProductInfo(r.info!, i),
+    }));
+
+    return NextResponse.json({
+        success: true,
+        data: {
+            products: productDetails,
+            comparison: comparison,
+            totalAnalyzed: products.length,
+            totalRequested: urls.length,
+        },
+    });
+}
+
+// 미리 분석된 데이터(Edge API 등에서)를 활용한 비교 처리
+async function processPreAnalyzedMultipleUrls(urls: string[], preAnalyzedData: any[]) {
+    if (!urls || urls.length === 0 || !preAnalyzedData || preAnalyzedData.length === 0) {
+        return NextResponse.json({ success: false, error: '유효한 URL 또는 분석 데이터가 없습니다.' }, { status: 400 });
+    }
+
+    const successfulResults = preAnalyzedData
+        .map((info, idx) => ({ url: urls[idx], index: idx + 1, info }))
+        .filter(r => r.info !== null);
+
+    const products: DetailedProductInfo[] = successfulResults.map(r => r.info!);
+
+    if (products.length === 0) {
+        return NextResponse.json({ success: false, error: '분석된 정보가 없습니다.' });
     }
 
     const comparison = compareProducts(products);
