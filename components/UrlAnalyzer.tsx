@@ -19,9 +19,7 @@ export default function UrlAnalyzer() {
     const [singleResult, setSingleResult] = useState<SingleResult | null>(null);
     const [compareResult, setCompareResult] = useState<{
         products: AnalysisResult[];
-        comparison?: string;
-        totalAnalyzed?: number;
-        totalRequested?: number;
+        comparison: string;
     } | null>(null);
     const [error, setError] = useState('');
     const [analysisStep, setAnalysisStep] = useState('');
@@ -205,29 +203,48 @@ export default function UrlAnalyzer() {
 
         setLoading(true);
         setError('');
-        setAnalysisStep('분석 중... (약 15-20초)');
+        setAnalysisStep('분석 중...');
         setSingleResult(null);
 
         try {
-            const response = await fetch('/api/crawl-analyze', {
+            // [Step 1] Crawl (Edge Runtime, 30초)
+            const crawlRes = await fetch('/api/confirmation/analyze/crawl', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: singleUrl }),
+            });
+            const crawlJson = await crawlRes.json();
+
+            if (!crawlJson.success) {
+                setError(crawlJson.error || '데이터 수집에 실패했습니다.');
+                setLoading(false);
+                return;
+            }
+
+            // [Step 2] Analyze
+            const response = await fetch('/api/analyze-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    url: singleUrl,
+                    text: crawlJson.text,
+                    nextData: crawlJson.nextData
+                }),
             });
 
             const data = await response.json();
 
             if (data.success) {
-                setSingleResult({ raw: data.data, formatted: '', recommendation: '' });
+                setSingleResult(data.data);
 
-                const info = data.data;
+                const info = data.data.raw;
                 if (!destination) setDestination(info.destination || '');
                 if (!departureDate) setDepartureDate(info.departureDate || '');
                 if (!duration) setDuration(info.duration || '');
                 if (!interestedProduct) setInterestedProduct(info.title || '');
 
                 if (customerName.trim() || customerPhone.trim()) {
-                    setTimeout(() => saveAutomatically({ raw: data.data }, false), 500);
+                    setTimeout(() => saveAutomatically(data.data, false), 500);
                 }
             } else {
                 setError(data.error || '분석에 실패했습니다.');
@@ -250,50 +267,59 @@ export default function UrlAnalyzer() {
 
         setLoading(true);
         setError('');
-        setAnalysisStep('비교 분석 중... (약 20-30초)');
+        setAnalysisStep('비교 분석 중...');
         setCompareResult(null);
 
         try {
-            // 각 URL을 병렬로 통합 분석
-            const results = await Promise.all(
+            // [Step 1] 각 URL 수집 (병렬)
+            const crawlResults = await Promise.all(
                 validUrls.map(async (url) => {
                     try {
-                        const res = await fetch('/api/crawl-analyze', {
+                        const res = await fetch('/api/confirmation/analyze/crawl', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ url }),
                         });
                         const json = await res.json();
-                        return { url, info: json.success ? json.data : null };
+                        return {
+                            url,
+                            text: json.success ? json.text : null,
+                            nextData: json.success ? json.nextData : null
+                        };
                     } catch (e) {
-                        return { url, info: null };
+                        return { url, text: null, nextData: null };
                     }
                 })
             );
 
-            const successfulResults = results.filter(r => r.info !== null);
-            if (successfulResults.length < 2) {
-                setError('최소 2개 이상의 상품 분석에 성공해야 비교가 가능합니다.');
+            const successfulCrawls = crawlResults.filter(r => r.text !== null);
+            if (successfulCrawls.length < 2) {
+                setError('최소 2개 이상의 상품 정보 수집에 성공해야 비교가 가능합니다.');
                 setLoading(false);
                 return;
             }
 
-            // 비교 결과 구성
-            const products = successfulResults.map((r, i) => ({
-                url: r.url,
-                index: i + 1,
-                raw: r.info,
-                formatted: '',
-            }));
-
-            setCompareResult({
-                products,
-                totalAnalyzed: successfulResults.length,
-                totalRequested: validUrls.length,
+            // [Step 2] 비교 분석
+            const response = await fetch('/api/analyze-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    urls: successfulCrawls.map(c => c.url),
+                    texts: successfulCrawls.map(c => c.text),
+                    nextDatas: successfulCrawls.map(c => c.nextData)
+                }),
             });
 
-            if (customerName.trim() || customerPhone.trim()) {
-                setTimeout(() => saveAutomatically({ products }, true), 500);
+            const data = await response.json();
+
+            if (data.success) {
+                setCompareResult(data.data);
+
+                if (customerName.trim() || customerPhone.trim()) {
+                    setTimeout(() => saveAutomatically(data.data, true), 500);
+                }
+            } else {
+                setError(data.error || '비교 분석에 실패했습니다.');
             }
         } catch (err) {
             setError('분석 중 오류가 발생했습니다.');
@@ -813,16 +839,16 @@ export default function UrlAnalyzer() {
                         <div className="result-header">
                             <h4>📊 비교 분석 결과</h4>
                             <div style={{ display: 'flex', gap: '8px' }}>
-                                <button onClick={() => copyToClipboard(compareResult.comparison || '')} className="action-button">
+                                <button onClick={() => copyToClipboard(compareResult.comparison)} className="action-button">
                                     📋 복사
                                 </button>
-                                <button onClick={() => handleGreetingCopy(compareResult.comparison || '')} className="action-button" style={{ background: 'rgba(0, 212, 170, 0.1)', color: 'var(--accent-primary)', border: '1px solid rgba(0, 212, 170, 0.3)' }}>
+                                <button onClick={() => handleGreetingCopy(compareResult.comparison)} className="action-button" style={{ background: 'rgba(0, 212, 170, 0.1)', color: 'var(--accent-primary)', border: '1px solid rgba(0, 212, 170, 0.3)' }}>
                                     ✨ 멘트형 복사
                                 </button>
                             </div>
                         </div>
                         <div className="comparison-content">
-                            {(compareResult.comparison || '').split('\n').map((line, i) => {
+                            {compareResult.comparison.split('\n').map((line, i) => {
                                 if (line.startsWith('####')) {
                                     return <h5 key={i} style={{ color: '#38bdf8', marginTop: '20px', marginBottom: '10px' }}>{line.replace(/^#+\s*/, '')}</h5>;
                                 }
