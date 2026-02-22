@@ -1,7 +1,34 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import type { ConsultationData, DetailedProductInfo, TravelerInfo, DocumentFile } from '@/types';
+import type { ConsultationData, DetailedProductInfo, TravelerInfo, DocumentFile, SecondaryResearch, MeetingInfo } from '@/types';
+
+// AI 응답에서 객체/배열이 올 수 있으므로 안전하게 문자열로 변환
+function safeStr(val: any): string {
+    if (val === null || val === undefined) return '';
+    if (typeof val === 'string') return val;
+    if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+    if (Array.isArray(val)) {
+        return val.map((item: any) => {
+            if (typeof item === 'string') return item;
+            if (typeof item === 'object' && item !== null) {
+                // {name, description, reason} 같은 구조 → 한 줄로 요약
+                const parts = [];
+                if (item.name) parts.push(item.name);
+                if (item.title) parts.push(item.title);
+                if (item.description) parts.push(item.description);
+                if (item.reason) parts.push(`(${item.reason})`);
+                if (item.content) parts.push(item.content);
+                return parts.length > 0 ? parts.join(' — ') : JSON.stringify(item);
+            }
+            return String(item);
+        }).join('\n');
+    }
+    if (typeof val === 'object') {
+        return Object.entries(val).map(([k, v]) => `${k}: ${safeStr(v)}`).join('\n');
+    }
+    return String(val);
+}
 
 export default function ConfirmationPage() {
     // 고객 검색
@@ -53,9 +80,16 @@ export default function ConfirmationPage() {
     const [checklist, setChecklist] = useState('여권 (유효기간 6개월 이상)\n환전 (현지 화폐)\n여행자 보험');
     const [cancellationPolicy, setCancellationPolicy] = useState('');
     const [itinerary, setItinerary] = useState<any[]>([]); // 일정표 상태 추가
+    const [meetingInfo, setMeetingInfo] = useState<MeetingInfo[]>([]); // 미팅 및 수속 정보
 
     // 파일 업로드
     const [files, setFiles] = useState<DocumentFile[]>([]);
+
+    // 2차 조사
+    const [secondaryResearch, setSecondaryResearch] = useState<SecondaryResearch | null>(null);
+    const [researchLoading, setResearchLoading] = useState(false);
+    const [researchError, setResearchError] = useState('');
+    const [customGuideInputs, setCustomGuideInputs] = useState<string[]>([]);
 
     // 생성 결과
     const [generating, setGenerating] = useState(false);
@@ -173,6 +207,7 @@ export default function ConfirmationPage() {
                 if (raw.cancellationPolicy) setCancellationPolicy(raw.cancellationPolicy);
                 if (raw.checklist?.length) setChecklist(raw.checklist.join('\n'));
                 if (raw.itinerary?.length) setItinerary(raw.itinerary);
+                if (raw.meetingInfo?.length) setMeetingInfo(raw.meetingInfo);
 
                 const noticesParts: string[] = [];
                 if (raw.keyPoints?.length) {
@@ -212,6 +247,13 @@ export default function ConfirmationPage() {
         setTravelers(prev => prev.map((t, idx) => idx === i ? { ...t, [field]: value } : t));
     };
 
+    // 미팅/수속 정보 관리
+    const addMeetingInfo = () => setMeetingInfo(prev => [...prev, { type: '미팅장소', location: '', time: '', description: '', imageUrl: '' }]);
+    const removeMeetingInfo = (i: number) => setMeetingInfo(prev => prev.filter((_, idx) => idx !== i));
+    const updateMeetingInfo = (i: number, field: keyof MeetingInfo, value: string) => {
+        setMeetingInfo(prev => prev.map((m, idx) => idx === i ? { ...m, [field]: value } : m));
+    };
+
     // 파일 핸들러 (로컬 blob URL 사용 — 프로토타입용)
     const handleFileUpload = (type: DocumentFile['type'], label: string, e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -232,6 +274,67 @@ export default function ConfirmationPage() {
     };
 
     const getFileByType = (type: DocumentFile['type']) => files.find(f => f.type === type);
+
+    // 2차 조사 실행
+    const runSecondaryResearch = async () => {
+        if (!destination) {
+            alert('목적지를 먼저 입력해 주세요.');
+            return;
+        }
+        setResearchLoading(true);
+        setResearchError('');
+        try {
+            const res = await fetch('/api/confirmation/secondary-research', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    destination,
+                    airline,
+                    airport: departureAirport,
+                    customGuides: customGuideInputs.filter(g => g.trim()),
+                }),
+            });
+            const json = await res.json();
+            if (json.success) {
+                setSecondaryResearch(json.data);
+            } else {
+                setResearchError(json.error || '2차 조사에 실패했습니다.');
+            }
+        } catch (err: any) {
+            setResearchError(err.message);
+        } finally {
+            setResearchLoading(false);
+        }
+    };
+
+    // 커스텀 가이드 관리
+    const addCustomGuide = () => setCustomGuideInputs(prev => [...prev, '']);
+    const removeCustomGuide = (i: number) => setCustomGuideInputs(prev => prev.filter((_, idx) => idx !== i));
+    const updateCustomGuide = (i: number, val: string) => setCustomGuideInputs(prev => prev.map((g, idx) => idx === i ? val : g));
+
+    // 2차 조사(AI) 데이터 수정 핸들러
+    const updateSRField = (section: string, field: string, value: string) => {
+        setSecondaryResearch((prev: any) => {
+            if (!prev) return prev;
+            return { ...prev, [section]: { ...prev[section], [field]: value } };
+        });
+    };
+    const updateSRLandmark = (index: number, field: string, value: string) => {
+        setSecondaryResearch((prev: any) => {
+            if (!prev || !prev.landmarks) return prev;
+            const newLandmarks = [...prev.landmarks];
+            newLandmarks[index] = { ...newLandmarks[index], [field]: value };
+            return { ...prev, landmarks: newLandmarks };
+        });
+    };
+    const updateSRBaggageArray = (index: number, value: string) => {
+        setSecondaryResearch((prev: any) => {
+            if (!prev || !prev.baggage || !prev.baggage.additionalNotes) return prev;
+            const newArr = [...prev.baggage.additionalNotes];
+            newArr[index] = value;
+            return { ...prev, baggage: { ...prev.baggage, additionalNotes: newArr } };
+        });
+    };
 
     // 확정서 생성
     const generateConfirmation = async () => {
@@ -261,6 +364,7 @@ export default function ConfirmationPage() {
                     amenities: hotelAmenities.split('\n').map(s => s.trim()).filter(Boolean),
                 },
                 itinerary: itinerary, // 상태 값 사용
+                meetingInfo,
                 inclusions: inclusions.split('\n').map(s => s.trim()).filter(Boolean),
                 exclusions: exclusions.split('\n').map(s => s.trim()).filter(Boolean),
                 notices,
@@ -268,6 +372,7 @@ export default function ConfirmationPage() {
                 cancellationPolicy,
                 files,
                 productData: analysisResult,
+                secondaryResearch: secondaryResearch || undefined,
             };
 
             const res = await fetch('/api/confirmation', {
@@ -523,6 +628,42 @@ export default function ConfirmationPage() {
                 </div>
             </div>
 
+            {/* 미팅 및 수속 정보 */}
+            <div className="confirm-section">
+                <div className="confirm-section-title">
+                    <span className="section-icon">🤝</span> 미팅 및 수속 정보
+                </div>
+                {meetingInfo.map((m, i) => (
+                    <div key={i} className="confirm-grid" style={{ marginBottom: '16px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                        <div className="confirm-field">
+                            <label>타입</label>
+                            <select value={m.type} onChange={e => updateMeetingInfo(i, 'type', e.target.value as '미팅장소' | '수속카운터')} className="admin-select" style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem', outline: 'none', background: 'var(--bg-primary)', color: 'inherit' }}>
+                                <option value="미팅장소">미팅장소</option>
+                                <option value="수속카운터">수속카운터</option>
+                            </select>
+                        </div>
+                        <div className="confirm-field">
+                            <label>시간</label>
+                            <input value={m.time} onChange={e => updateMeetingInfo(i, 'time', e.target.value)} placeholder="08:00" />
+                        </div>
+                        <div className="confirm-field" style={{ gridColumn: '1 / -1' }}>
+                            <label>장소/카운터명</label>
+                            <input value={m.location} onChange={e => updateMeetingInfo(i, 'location', e.target.value)} placeholder="인천공항 제1여객터미널 3층 A카운터" />
+                        </div>
+                        <div className="confirm-field" style={{ gridColumn: '1 / -1' }}>
+                            <label>상세 설명</label>
+                            <textarea value={m.description} onChange={e => updateMeetingInfo(i, 'description', e.target.value)} rows={2} placeholder="여권을 지참하고 담당자(김호기: 010-1234-5678)를 찾아주세요." />
+                        </div>
+                        <div className="confirm-field" style={{ gridColumn: '1 / -1' }}>
+                            <label>관련 이미지 URL (선택, 모바일 뷰어 렌더링용)</label>
+                            <input value={m.imageUrl || ''} onChange={e => updateMeetingInfo(i, 'imageUrl', e.target.value)} placeholder="https://..." />
+                        </div>
+                        <button onClick={() => removeMeetingInfo(i)} style={{ gridColumn: '1 / -1', padding: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s' }}>삭제</button>
+                    </div>
+                ))}
+                <button onClick={addMeetingInfo} style={{ width: '100%', padding: '14px', background: 'transparent', border: '1px dashed var(--border-color)', color: 'var(--text-secondary)', borderRadius: '12px', cursor: 'pointer', fontWeight: 600, fontSize: '0.95rem', transition: 'all 0.2s' }}>+ 미팅 및 수속 정보 추가</button>
+            </div>
+
             {/* ⑤ 서류 업로드 */}
             <div className="confirm-section">
                 <div className="confirm-section-title">
@@ -600,7 +741,7 @@ export default function ConfirmationPage() {
                                 <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#6366f1' }}>{day.day || `${idx + 1}일차`}</span>
                                 <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{day.date}</span>
                             </div>
-                            <div style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '6px' }}>{day.title}</div>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1e293b', marginBottom: '6px' }}>{day.title}</div>
                             <div style={{ fontSize: '0.82rem', color: '#475569', whiteSpace: 'pre-wrap' }}>
                                 {Array.isArray(day.activities) ? day.activities.join(' · ') : day.activities}
                             </div>
@@ -628,6 +769,209 @@ export default function ConfirmationPage() {
                         >
                             ✏️ 일정 데이터 직접 수정(JSON)
                         </button>
+                    )}
+                </div>
+            </div>
+
+            {/* ⑧ 2차 조사 시스템 */}
+            <div className="confirm-section">
+                <div className="confirm-section-title">
+                    <span className="section-icon">🔬</span> 2차 조사 (여행 준비 가이드)
+                </div>
+                <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 12px' }}>
+                    분석된 여행지·항공사 정보를 바탕으로 AI가 환전, 로밍, 세관, 관광지 등의 가이드를 자동 생성합니다.
+                </p>
+
+                {/* 커스텀 가이드 입력 */}
+                <div style={{ marginBottom: '16px' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '6px' }}>📝 추가 가이드 요청 (선택)</label>
+                    {customGuideInputs.map((g, i) => (
+                        <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'stretch' }}>
+                            <input
+                                value={g}
+                                onChange={e => updateCustomGuide(i, e.target.value)}
+                                placeholder="예: 빈펄 나트랑 얼굴 인식 등록법"
+                                style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', outline: 'none' }}
+                            />
+                            <button onClick={() => removeCustomGuide(i)} style={{ padding: '0 14px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.9rem' }}>✕</button>
+                        </div>
+                    ))}
+                    <button onClick={addCustomGuide} style={{ padding: '8px 16px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', color: '#475569', marginTop: '2px' }}>+ 가이드 주제 추가</button>
+                </div>
+
+                <button
+                    className="btn-analyze"
+                    onClick={runSecondaryResearch}
+                    disabled={researchLoading || !destination}
+                    style={{
+                        width: '100%',
+                        padding: '16px',
+                        fontSize: '1rem',
+                        fontWeight: 700,
+                        marginBottom: '16px',
+                        borderRadius: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        lineHeight: 1
+                    }}
+                >
+                    {researchLoading ? 'AI 조사 중... (약 10~15초)' : '2차 조사 시작'}
+                </button>
+
+                {researchError && <div className="analysis-status error" style={{ marginBottom: '12px' }}>⚠️ {researchError}</div>}
+                {secondaryResearch && <div className="analysis-status" style={{ marginBottom: '12px' }}>✅ 2차 조사 완료!</div>}
+
+                {/* 항상 보이는 필드 카드들 */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+                    {/* 환전 */}
+                    {secondaryResearch && (
+                        <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
+                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>💱 환전 및 결제 {secondaryResearch.currency?.localCurrency ? `(${safeStr(secondaryResearch.currency.localCurrency)})` : ''}</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>간편 계산법</label>
+                                    <textarea rows={2} value={secondaryResearch.currency?.calculationTip || ''} onChange={e => updateSRField('currency', 'calculationTip', e.target.value)} />
+                                </div>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>환전 팁</label>
+                                    <textarea rows={2} value={secondaryResearch.currency?.exchangeTip || ''} onChange={e => updateSRField('currency', 'exchangeTip', e.target.value)} />
+                                </div>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>팁 문화</label>
+                                    <textarea rows={2} value={secondaryResearch.currency?.tipCulture || ''} onChange={e => updateSRField('currency', 'tipCulture', e.target.value)} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 로밍 */}
+                    {secondaryResearch && (
+                        <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
+                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>📱 로밍·통신</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>통신사 안내문</label>
+                                    <textarea rows={2} value={secondaryResearch.roaming?.carriers || ''} onChange={e => updateSRField('roaming', 'carriers', e.target.value)} />
+                                </div>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>유심/eSIM 추천</label>
+                                    <textarea rows={2} value={secondaryResearch.roaming?.simEsim || ''} onChange={e => updateSRField('roaming', 'simEsim', e.target.value)} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 세관 */}
+                    {secondaryResearch && (
+                        <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
+                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>🛃 입국·세관</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>주요 경고 제목</label>
+                                    <input value={secondaryResearch.customs?.warningTitle || ''} onChange={e => updateSRField('customs', 'warningTitle', e.target.value)} />
+                                </div>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>미성년자 안내</label>
+                                    <textarea rows={2} value={secondaryResearch.customs?.minorEntry || ''} onChange={e => updateSRField('customs', 'minorEntry', e.target.value)} />
+                                </div>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>면세 한도</label>
+                                    <textarea rows={2} value={secondaryResearch.customs?.dutyFree || ''} onChange={e => updateSRField('customs', 'dutyFree', e.target.value)} />
+                                </div>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>여권 유의사항</label>
+                                    <textarea rows={2} value={secondaryResearch.customs?.passportNote || ''} onChange={e => updateSRField('customs', 'passportNote', e.target.value)} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 관광지 */}
+                    {secondaryResearch && (
+                        <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
+                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>🏛️ 관광지 ({secondaryResearch.landmarks?.length || 0}개)</div>
+                            {secondaryResearch.landmarks?.length ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    {secondaryResearch.landmarks.map((lm: any, i: number) => (
+                                        <div key={i} style={{ padding: '16px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: '10px' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                                                <div className="confirm-field" style={{ marginBottom: 0 }}>
+                                                    <label style={{ color: 'var(--text-secondary)' }}>관광지명</label>
+                                                    <input value={lm.name || ''} onChange={e => updateSRLandmark(i, 'name', e.target.value)} />
+                                                </div>
+                                                <div className="confirm-field" style={{ marginBottom: 0 }}>
+                                                    <label style={{ color: 'var(--text-secondary)' }}>현지어/영어명</label>
+                                                    <input value={lm.nameLocal || ''} onChange={e => updateSRLandmark(i, 'nameLocal', e.target.value)} />
+                                                </div>
+                                            </div>
+                                            <div className="confirm-field" style={{ marginBottom: '8px' }}>
+                                                <label style={{ color: 'var(--text-secondary)' }}>1~2줄 핵심 소개</label>
+                                                <textarea rows={2} value={lm.description || ''} onChange={e => updateSRLandmark(i, 'description', e.target.value)} />
+                                            </div>
+                                            <div className="confirm-field">
+                                                <label style={{ color: 'var(--text-secondary)' }}>관광지 사진 URL</label>
+                                                <input value={lm.imageUrl || ''} placeholder="https://..." onChange={e => updateSRLandmark(i, 'imageUrl', e.target.value)} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>조사 후 자동 입력</span>
+                            )}
+                        </div>
+                    )}
+
+                    {/* 수하물 */}
+                    {secondaryResearch && (
+                        <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
+                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>🧳 수하물 규정</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 2fr', gap: '8px' }}>
+                                    <div className="confirm-field" style={{ marginBottom: 0 }}>
+                                        <label style={{ color: 'var(--text-secondary)' }}>위탁수하물 무게</label>
+                                        <input value={secondaryResearch.baggage?.checkedWeight || ''} onChange={e => updateSRField('baggage', 'checkedWeight', e.target.value)} />
+                                    </div>
+                                    <div className="confirm-field" style={{ marginBottom: 0 }}>
+                                        <label style={{ color: 'var(--text-secondary)' }}>위탁 추가 노트</label>
+                                        <input value={secondaryResearch.baggage?.checkedNote || ''} onChange={e => updateSRField('baggage', 'checkedNote', e.target.value)} />
+                                    </div>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 2fr', gap: '8px' }}>
+                                    <div className="confirm-field" style={{ marginBottom: 0 }}>
+                                        <label style={{ color: 'var(--text-secondary)' }}>기내수하물 무게</label>
+                                        <input value={secondaryResearch.baggage?.carryonWeight || ''} onChange={e => updateSRField('baggage', 'carryonWeight', e.target.value)} />
+                                    </div>
+                                    <div className="confirm-field" style={{ marginBottom: 0 }}>
+                                        <label style={{ color: 'var(--text-secondary)' }}>기내 추가 노트</label>
+                                        <input value={secondaryResearch.baggage?.carryonNote || ''} onChange={e => updateSRField('baggage', 'carryonNote', e.target.value)} />
+                                    </div>
+                                </div>
+                                {secondaryResearch.baggage?.additionalNotes?.map((n: string, i: number) => (
+                                    <div key={i} className="confirm-field">
+                                        <label style={{ color: 'var(--text-secondary)' }}>주의사항 {i + 1}</label>
+                                        <input value={n} onChange={e => updateSRBaggageArray(i, e.target.value)} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 커스텀 가이드 */}
+                    {secondaryResearch?.customGuides && secondaryResearch.customGuides.length > 0 && (
+                        <>
+                            {secondaryResearch.customGuides.map((guide, i) => (
+                                <div key={i} style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
+                                    <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>{safeStr(guide.icon)} {safeStr(guide.topic)} ({guide.sections?.length || 0}개 섹션)</div>
+                                    {guide.sections?.map((sec, si) => (
+                                        <div key={si} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                                            • <strong>{safeStr(sec.title)}</strong> [{sec.type}]
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </>
                     )}
                 </div>
             </div>
