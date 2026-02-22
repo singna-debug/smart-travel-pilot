@@ -213,7 +213,17 @@ export default function UrlAnalyzer() {
                 body: JSON.stringify({ url: singleUrl }),
             });
 
-            const data = await response.json();
+            let data;
+            const textResponse = await response.text();
+            try {
+                data = JSON.parse(textResponse);
+            } catch (e) {
+                console.error("Non-JSON response:", textResponse.substring(0, 200));
+                if (textResponse.includes("An error occurred") || textResponse.includes("504") || textResponse.includes("<html")) {
+                    throw new Error("서버 응답 시간(30초)을 초과했습니다. 화면에 보이지 않는 많은 데이터를 처리 중입니다. 다시 시도해주세요.");
+                }
+                throw new Error("서버 오류가 발생했습니다. (JSON 파싱 실패)");
+            }
 
             if (data.success) {
                 setSingleResult(data.data);
@@ -261,7 +271,14 @@ export default function UrlAnalyzer() {
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ url }),
                         });
-                        const json = await res.json();
+                        const textRes = await res.text();
+                        let json;
+                        try {
+                            json = JSON.parse(textRes);
+                        } catch (e) {
+                            console.error("다중 분석 실패 (비JSON):", textRes.substring(0, 100));
+                            return null;
+                        }
                         return json.success ? json.data : null;
                     } catch (e) {
                         return null;
