@@ -498,3 +498,84 @@ body {
     text-align: center;
     color: var(--text-secondary);
 }
+
+/* 반응형 레이아웃 대응 (Mobile) */
+@media (max-width: 1024px) {
+    :root {
+        --sidebar-width: 70px;
+    }
+
+    .sidebar-title,
+    .nav-item span,
+    .sidebar-footer .nav-item span,
+    .external-icon {
+        display: none;
+    }
+
+    .sidebar-header {
+        justify-content: center;
+        padding: 20px 0;
+    }
+
+    .sidebar-nav,
+    .sidebar-footer {
+        padding: 12px 8px;
+    }
+
+    .nav-item {
+        justify-content: center;
+        padding: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        overflow-x: auto;
+    }
+
+    .sidebar-header {
+        padding: 12px 20px;
+        border-bottom: none;
+        border-right: 1px solid var(--border-color);
+    }
+
+    .sidebar-logo {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+
+    .sidebar-nav {
+        flex-direction: row;
+        padding: 8px;
+        overflow-x: auto;
+    }
+
+    .nav-item {
+        padding: 8px 12px;
+        white-space: nowrap;
+    }
+
+    .sidebar-footer {
+        display: none;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .page-title {
+        font-size: 22px;
+    }
+}
