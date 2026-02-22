@@ -41,12 +41,20 @@ export default function ManualConsultationForm() {
         setSuccess(false);
 
         try {
-            const response = await fetch('/api/sheets', {
+            const response = await fetch('/api/save-consultation', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    action: 'add-consultation',
-                    data: form,
+                    customerName: form.customerName,
+                    customerPhone: form.customerPhone,
+                    destination: form.destination,
+                    departureDate: form.departureDate,
+                    interestedProduct: form.productName,
+                    productUrl: form.productUrl, // Backend might need adjustment to handle this directly
+                    memo: form.notes,
+                    status: '상담중',
+                    isComparison: false,
+                    analysisData: { raw: { url: form.productUrl, title: form.productName } } // Dummy for compatibility
                 }),
             });
 
