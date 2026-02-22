@@ -1000,3 +1000,791 @@
         position: absolute;
     }
 }
+
+/* ================================
+   2차 조사 - 프리미엄 가이드북 스타일
+   ================================ */
+
+/* 가이드 헤더 배너 */
+.guide-header-banner {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: #fff;
+    padding: 20px;
+    border-radius: 14px;
+    margin-bottom: 16px;
+}
+
+.guide-header-banner.customs-banner {
+    background: linear-gradient(135deg, #475569, #1e293b);
+}
+
+.guide-header-banner.custom-banner {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+}
+
+.guide-header-label {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 4px;
+}
+
+.guide-header-banner h2 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+/* ── 랜드마크 ── */
+.landmark-hero {
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 12px;
+}
+
+.landmark-hero-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.landmark-hero-info {
+    padding: 16px;
+}
+
+.landmark-hero-info h3 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin: 0 0 4px;
+    color: #1e293b;
+}
+
+.landmark-local,
+.landmark-local-sm {
+    font-size: 0.75rem;
+    color: #64748b;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.landmark-hero-info p {
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.landmark-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.landmark-card {
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+}
+
+.landmark-card-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.landmark-card-body {
+    padding: 10px 12px;
+}
+
+.landmark-card-body h4 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin: 0 0 2px;
+    color: #1e293b;
+}
+
+.landmark-card-body p {
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.4;
+    margin: 4px 0 0;
+}
+
+/* ── 세관 ── */
+.customs-warning-card {
+    background: #fef2f2;
+    border: 2px solid #fca5a5;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.cw-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.customs-warning-card h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #dc2626;
+    margin: 0 0 8px;
+}
+
+.customs-warning-card p {
+    font-size: 0.82rem;
+    color: #7f1d1d;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.customs-info-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.ci-header {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.customs-info-card p {
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.customs-dual-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.customs-mini-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.cm-header {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.customs-mini-card p {
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* ── 수하물 ── */
+.baggage-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.baggage-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 18px 14px;
+    text-align: center;
+}
+
+.baggage-card.checked {
+    border-top: 3px solid #3b82f6;
+}
+
+.baggage-card.carryon {
+    border-top: 3px solid #10b981;
+}
+
+.bag-icon {
+    font-size: 1.8rem;
+    margin-bottom: 6px;
+}
+
+.bag-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.baggage-card .bag-weight {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.baggage-card .bag-weight-desc {
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1.4;
+    color: #1e293b;
+    margin: 8px 0;
+    word-break: keep-all;
+}
+
+.baggage-card p {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.baggage-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.baggage-note-item {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.78rem;
+    color: #475569;
+}
+
+/* ── 환전 ── */
+.currency-tip-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.currency-tip-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.currency-tip-card.highlight {
+    background: linear-gradient(135deg, #dbeafe, #eff6ff);
+    border-color: #93c5fd;
+}
+
+.ct-emoji {
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+}
+
+.ct-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 6px;
+}
+
+.currency-tip-card p {
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* ── 환전 계산기 ── */
+.mc-calc-widget {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 20px;
+    color: #fff;
+}
+
+.mc-calc-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    opacity: 0.9;
+}
+
+.mc-calc-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mc-calc-row label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    min-width: 70px;
+    opacity: 0.9;
+}
+
+.mc-calc-input {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    outline: none;
+}
+
+.mc-calc-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.mc-calc-arrow {
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 6px 0;
+    opacity: 0.7;
+}
+
+.mc-calc-result {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    font-size: 1.3rem;
+    font-weight: 800;
+    text-align: right;
+}
+
+.mc-calc-rate {
+    text-align: center;
+    font-size: 0.68rem;
+    opacity: 0.5;
+    margin-top: 10px;
+}
+
+/* ── 가이드 카드 (범용) ── */
+.mc-guide-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mc-guide-item {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.mc-guide-item strong {
+    display: block;
+    font-size: 0.85rem;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.mc-guide-item p {
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* ── 미팅 및 수속 안내 ── */
+.meeting-cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.meeting-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.meeting-card-img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.meeting-card-body {
+    padding: 16px;
+    position: relative;
+}
+
+.meeting-type-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 12px;
+
+}
+
+.meeting-type-badge.meeting {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.meeting-type-badge.counter {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.meeting-time-loc {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.meeting-time {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0ea5e9;
+    background: #f0f9ff;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.meeting-loc {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.meeting-desc {
+    font-size: 0.85rem;
+    color: #475569;
+    line-height: 1.5;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* ── 로밍·통신 ── */
+.mc-roaming-grid {
+    display: flex;
+    flex-direction: column;
+}
+
+.mc-roaming-header-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #1e3a8a;
+    background: #eff6ff;
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+}
+
+.roaming-option-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.roaming-opt-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.r-opt-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: #3b82f6;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.r-opt-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.r-opt-body strong {
+    font-size: 0.9rem;
+    color: #1e293b;
+}
+
+.r-opt-body span {
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+/* ── 커스텀 가이드 서브섹션 ── */
+.custom-sub-section {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.css-title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #0369a1;
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e0f2fe;
+}
+
+/* Steps */
+.css-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.css-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.css-step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.css-step-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.css-step-detail {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+/* Table */
+.css-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.css-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+}
+
+.css-table th {
+    background: #f0f9ff;
+    color: #0369a1;
+    font-weight: 700;
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 2px solid #bae6fd;
+    white-space: nowrap;
+}
+
+.css-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #475569;
+    vertical-align: top;
+}
+
+.css-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* List */
+.css-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.css-list li {
+    font-size: 0.82rem;
+    color: #475569;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 3px solid #3b82f6;
+}
+
+/* Text */
+.css-text {
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.6;
+    padding: 10px 12px;
+    background: #fffbeb;
+    border-radius: 8px;
+    border-left: 3px solid #f59e0b;
+    white-space: pre-wrap;
+}
+
+/* Route */
+.css-route {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 6px;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.css-route-badge {
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.css-route-arrow {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin: 0 2px;
+}
+
+/* 빈 가이드 */
+.mc-empty-guide {
+    text-align: center;
+    padding: 50px 20px;
+    color: #64748b;
+}
+
+.mc-empty-guide p {
+    margin: 6px 0;
+}
+
+/* 탭 스크롤 */
+.mc-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.mc-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── 가이드 아코디언 컴포넌트 ── */
+.guide-accordion {
+    padding: 0 !important;
+    overflow: hidden;
+    margin-bottom: 14px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.guide-accordion.open {
+    padding-bottom: 8px !important;
+}
+
+.ga-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 14px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.guide-accordion.open .ga-header {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.ga-title {
+    display: flex;
+    align-items: center;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #1e293b;
+    gap: 8px;
+}
+
+.sec-icon-svg {
+    color: #3b82f6;
+    flex-shrink: 0;
+}
+
+.ga-chevron {
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+}
+
+.ga-content {
+    padding: 16px 20px;
+    background: #fff;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* ── 컨테이너 ── */
+.mc-guide-container {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 20px;
+}

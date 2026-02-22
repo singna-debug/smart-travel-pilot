@@ -84,6 +84,8 @@ export async function POST(request: NextRequest) {
             cancellationPolicy: body.cancellationPolicy || '',
             files: body.files || [],
             productData: body.productData,
+            secondaryResearch: body.secondaryResearch || undefined,
+            meetingInfo: body.meetingInfo || [],
         };
 
         confirmationStore.set(id, doc);

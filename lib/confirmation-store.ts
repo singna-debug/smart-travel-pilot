@@ -4,7 +4,9 @@ import type { ConfirmationDocument } from '@/types';
  * 확정서 데이터 인메모리 저장소
  * 프로토타입용. 프로덕션에서는 Supabase 또는 Google Sheets로 교체.
  */
-const store = new Map<string, ConfirmationDocument>();
+const globalForStore = globalThis as unknown as { confirmationStoreMap: Map<string, ConfirmationDocument> };
+const store = globalForStore.confirmationStoreMap || new Map<string, ConfirmationDocument>();
+if (process.env.NODE_ENV !== 'production') globalForStore.confirmationStoreMap = store;
 
 /** 데모 확정서 (서버 재시작 시에도 항상 존재) */
 const DEMO_DOC: ConfirmationDocument = {

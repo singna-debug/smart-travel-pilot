@@ -122,7 +122,8 @@ async function analyze(text: string, url: string, nextData: string | undefined, 
     prompt += '  "keyPoints": ["핵심 포인트 5~7개"],\n';
     prompt += '  "notices": ["유의사항"],\n';
     prompt += '  "cancellationPolicy": "취소/환불 규정",\n';
-    prompt += '  "checklist": ["준비물"]\n';
+    prompt += '  "checklist": ["준비물"],\n';
+    prompt += '  "meetingInfo": [{ "type": "미팅장소", "location": "장소명", "time": "미팅시간", "description": "상세설명", "imageUrl": "관련 이미지 URL" }]\n';
     prompt += '}\n\n';
     prompt += '중요: 1. 이모지 절대 금지 2. 항공시간 HH:MM 필수 3. JSON만 반환';
 
