@@ -207,7 +207,7 @@ export default function UrlAnalyzer() {
         setSingleResult(null);
 
         try {
-            const response = await fetch('/api/crawl-analyze', {
+            const response = await fetch('/api/analyze-url', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: singleUrl }),
@@ -262,49 +262,22 @@ export default function UrlAnalyzer() {
         setCompareResult(null);
 
         try {
-            // [Step 1] 각 URL을 Edge API로 정밀 수집 및 분석 (병렬)
-            const analysisResults = await Promise.all(
-                validUrls.map(async (url) => {
-                    try {
-                        const res = await fetch('/api/crawl-analyze', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ url }),
-                        });
-                        const textRes = await res.text();
-                        let json;
-                        try {
-                            json = JSON.parse(textRes);
-                        } catch (e) {
-                            console.error("다중 분석 실패 (비JSON):", textRes.substring(0, 100));
-                            return null;
-                        }
-                        return json.success ? json.data : null;
-                    } catch (e) {
-                        return null;
-                    }
-                })
-            );
-
-            const successfulAnalyses = analysisResults.filter(r => r !== null);
-            if (successfulAnalyses.length < 2) {
-                setError('최소 2개 이상의 상품 정보 분석에 성공해야 비교가 가능합니다.');
-                setLoading(false);
-                return;
-            }
-
-            // 비교 결과는 첫 번째 데이터를 기준으로 하거나 전체 데이터를 병합하여 사용
-            // 기존 다중 URL 비교 로직을 유지하면서, 결과를 조합합니다.
             const response = await fetch('/api/analyze-url', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    urls: validUrls,
-                    preAnalyzedData: successfulAnalyses // 서버에서 이 데이터를 바탕으로 비교를 수행할 수 있음 (선택적)
-                }),
+                body: JSON.stringify({ urls: validUrls }),
             });
-
-            const data = await response.json();
+            const textResponse = await response.text();
+            let data;
+            try {
+                data = JSON.parse(textResponse);
+            } catch (e) {
+                console.error("Non-JSON response:", textResponse.substring(0, 200));
+                if (textResponse.includes("An error occurred") || textResponse.includes("504") || textResponse.includes("<html")) {
+                    throw new Error("서버 응답 시간(30초)을 초과했습니다. 다시 시도해주세요.");
+                }
+                throw new Error("서버 오류가 발생했습니다. (JSON 파싱 실패)");
+            }
 
             if (data.success) {
                 setCompareResult(data.data);
