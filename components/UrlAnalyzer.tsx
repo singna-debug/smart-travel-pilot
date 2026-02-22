@@ -240,8 +240,8 @@ export default function UrlAnalyzer() {
             } else {
                 setError(data.error || '분석에 실패했습니다.');
             }
-        } catch (err) {
-            setError('분석 중 오류가 발생했습니다.');
+        } catch (err: any) {
+            setError(err.message || '분석 중 오류가 발생했습니다.');
             console.error(err);
         } finally {
             setLoading(false);
@@ -288,8 +288,8 @@ export default function UrlAnalyzer() {
             } else {
                 setError(data.error || '비교 분석에 실패했습니다.');
             }
-        } catch (err) {
-            setError('분석 중 오류가 발생했습니다.');
+        } catch (err: any) {
+            setError(err.message || '비교 분석 중 오류가 발생했습니다.');
             console.error(err);
         } finally {
             setLoading(false);

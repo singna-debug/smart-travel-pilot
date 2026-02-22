@@ -48,9 +48,9 @@ async function crawl(url: string, apiKey: string): Promise<string | null> {
         console.log('[Edge] 수집 시도: JS렌더링 (시나리오 포함)');
         // 충분한 시간을 두고 넉넉하게 스크롤하여 모든 동적 콘텐츠/상세일정표를 로딩
         const jsScenario = encodeURIComponent('{"instructions":[{"wait":2000},{"scroll_y":2000},{"wait":1500},{"scroll_y":4000},{"wait":1500},{"scroll_y":6000}]}');
-        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&js_scenario=${jsScenario}&timeout=18000`;
+        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&js_scenario=${jsScenario}&timeout=12000`;
         const controller = new AbortController();
-        const tid = setTimeout(() => controller.abort(), 16000); // Edge 최대 30초 내에서 16초를 수집에, 나머지 14초를 Gemini에 할당
+        const tid = setTimeout(() => controller.abort(), 12000); // 12초 수집, 나머지 18초 Gemini 할당 (Vercel 30초 한도 대응)
         const res = await fetch(sbUrl, { signal: controller.signal });
         clearTimeout(tid);
         if (res.ok) {
