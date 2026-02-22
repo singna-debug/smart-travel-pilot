@@ -15,7 +15,7 @@ const debugLog = (msg: string) => {
 };
 
 // Gemini AI 초기화
-const apiKey = process.env.GEMINI_API_KEY || '';
+const apiKey = (process.env.GEMINI_API_KEY || '').replace(/[\x00-\x1F\x7F]/g, '').trim();
 if (!apiKey) {
     console.error('[AI Engine] GEMINI_API_KEY가 설정되지 않았습니다!');
 }

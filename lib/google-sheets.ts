@@ -4,6 +4,13 @@ import { format } from 'date-fns';
 import path from 'path';
 import fs from 'fs';
 
+// 환경변수에서 보이지 않는 제어 문자(\r, \n 등)를 제거하는 헬퍼
+function cleanEnv(key: string): string | undefined {
+    const val = process.env[key];
+    if (!val) return undefined;
+    return val.replace(/[\x00-\x1F\x7F]/g, '').trim();
+}
+
 // Google Sheets 클라이언트 초기화
 // 캐시 데이터 전역 변수 (모듈 스코프)
 let cachedConsultations: ConsultationData[] | null = null;
@@ -128,7 +135,7 @@ async function getSheetTitles(sheets: any, spreadsheetId: string) {
 export async function getMonthSheetGid(month?: string): Promise<number> {
     try {
         const sheets = getGoogleSheetsClient();
-        const sheetId = process.env.GOOGLE_SHEET_ID?.trim();
+        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
         if (!sheetId) return 0;
 
         const targetMonth = month || format(new Date(), 'yyyy-MM');
@@ -258,7 +265,7 @@ async function applyDropdownValidation(sheets: any, spreadsheetId: string, sheet
 export async function preCreateMonthlySheets(year?: string): Promise<boolean> {
     try {
         const sheets = getGoogleSheetsClient();
-        const sheetId = process.env.GOOGLE_SHEET_ID;
+        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
         if (!sheetId) return false;
 
         const targetYear = year || format(new Date(), 'yyyy');
@@ -284,7 +291,7 @@ export async function preCreateMonthlySheets(year?: string): Promise<boolean> {
 export async function appendConsultationToSheet(data: ConsultationData): Promise<boolean> {
     try {
         const sheets = getGoogleSheetsClient();
-        const sheetId = process.env.GOOGLE_SHEET_ID;
+        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
 
         if (!sheetId) {
             console.error('GOOGLE_SHEET_ID가 설정되지 않았습니다.');
@@ -340,7 +347,7 @@ export async function appendConsultationToSheet(data: ConsultationData): Promise
 export async function upsertConsultationToSheet(data: ConsultationData): Promise<boolean> {
     try {
         const sheets = getGoogleSheetsClient();
-        const sheetId = process.env.GOOGLE_SHEET_ID;
+        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
 
         if (!sheetId) {
             console.error('GOOGLE_SHEET_ID가 설정되지 않았습니다.');
@@ -480,7 +487,7 @@ export async function upsertConsultationToSheet(data: ConsultationData): Promise
 export async function initializeSheetHeaders(): Promise<boolean> {
     try {
         const sheets = getGoogleSheetsClient();
-        const sheetId = process.env.GOOGLE_SHEET_ID;
+        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
 
         if (!sheetId) {
             console.error('❌ GOOGLE_SHEET_ID가 설정되지 않았습니다.');
@@ -588,7 +595,7 @@ export async function appendMessageToSheet(visitorId: string, sender: 'user' | '
 export async function getConsultationHistory(customerPhone: string): Promise<ConsultationData[]> {
     try {
         const sheets = getGoogleSheetsClient();
-        const sheetId = process.env.GOOGLE_SHEET_ID;
+        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
 
         if (!sheetId) return [];
 
@@ -664,7 +671,7 @@ export async function getAllConsultations(forceRefresh = false): Promise<Consult
         }
 
         const sheets = getGoogleSheetsClient();
-        const sheetId = process.env.GOOGLE_SHEET_ID;
+        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
 
         if (!sheetId) {
             return [];
@@ -771,7 +778,7 @@ export async function getAllMessages(): Promise<any[]> {
 export async function deleteConsultationFromSheet(rowIndex: number, sheetName?: string): Promise<boolean> {
     try {
         const sheets = getGoogleSheetsClient();
-        const sheetId = process.env.GOOGLE_SHEET_ID;
+        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
 
         if (!sheetId) {
             console.error('GOOGLE_SHEET_ID가 설정되지 않았습니다.');
@@ -818,7 +825,7 @@ export async function deleteConsultationFromSheet(rowIndex: number, sheetName?: 
 export async function updateConsultationStatus(rowIndex: number, status: string, sheetName?: string): Promise<boolean> {
     try {
         const sheets = getGoogleSheetsClient();
-        const sheetId = process.env.GOOGLE_SHEET_ID;
+        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
 
         if (!sheetId) {
             console.error('GOOGLE_SHEET_ID가 설정되지 않았습니다.');
