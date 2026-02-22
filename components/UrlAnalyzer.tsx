@@ -207,7 +207,7 @@ export default function UrlAnalyzer() {
         setSingleResult(null);
 
         try {
-            const response = await fetch('/api/analyze-url', {
+            const response = await fetch('/api/crawl-analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: singleUrl }),
@@ -252,10 +252,39 @@ export default function UrlAnalyzer() {
         setCompareResult(null);
 
         try {
+            // [Step 1] 각 URL을 Edge API로 정밀 수집 및 분석 (병렬)
+            const analysisResults = await Promise.all(
+                validUrls.map(async (url) => {
+                    try {
+                        const res = await fetch('/api/crawl-analyze', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url }),
+                        });
+                        const json = await res.json();
+                        return json.success ? json.data : null;
+                    } catch (e) {
+                        return null;
+                    }
+                })
+            );
+
+            const successfulAnalyses = analysisResults.filter(r => r !== null);
+            if (successfulAnalyses.length < 2) {
+                setError('최소 2개 이상의 상품 정보 분석에 성공해야 비교가 가능합니다.');
+                setLoading(false);
+                return;
+            }
+
+            // 비교 결과는 첫 번째 데이터를 기준으로 하거나 전체 데이터를 병합하여 사용
+            // 기존 다중 URL 비교 로직을 유지하면서, 결과를 조합합니다.
             const response = await fetch('/api/analyze-url', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ urls: validUrls }),
+                body: JSON.stringify({
+                    urls: validUrls,
+                    preAnalyzedData: successfulAnalyses // 서버에서 이 데이터를 바탕으로 비교를 수행할 수 있음 (선택적)
+                }),
             });
 
             const data = await response.json();
@@ -277,6 +306,7 @@ export default function UrlAnalyzer() {
             setAnalysisStep('');
         }
     };
+
 
     const addUrlField = () => {
         if (multiUrls.length < 5) {
