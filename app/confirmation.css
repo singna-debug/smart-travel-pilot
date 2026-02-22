@@ -389,7 +389,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ì¸ì› ì¹´ìš´í„° */
@@ -428,7 +430,7 @@
 .share-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0, 0, 0, 0.7);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -491,18 +493,30 @@
     border-radius: 8px;
     padding: 10px 20px;
     color: var(--text-primary);
-    cursor: pointer;
     font-size: 0.85rem;
 }
 
-/* ¸ğ¹ÙÀÏ ¹İÀÀÇü (°ü¸®ÀÚ È­¸é) */
+/* ëª¨ë°”ì¼ ë°˜ì‘í˜• (ê´€ë¦¬ì í™”ë©´) */
 @media (max-width: 768px) {
-  .confirm-admin { padding: 16px; }
-  .confirm-grid { grid-template-columns: 1fr; }
-  .confirm-grid.three-col { grid-template-columns: 1fr; }
-  .itinerary-day-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .itinerary-day-title { width: 100%; }
-  /* ÅÇ ³×ºñ°ÔÀÌ¼ÇÀÌ ÀÖ´Ù¸é ÁÙ¹Ù²Ş Çã¿ë */
-  .mc-tabs { flex-wrap: wrap; }
-  .mc-tab { flex: 1 1 auto; white-space: nowrap; padding: 10px; font-size: 0.85rem; }
+    .confirm-admin {
+        padding: 16px;
+    }
+
+    .confirm-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .confirm-grid.three-col {
+        grid-template-columns: 1fr;
+    }
+
+    .itinerary-day-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .itinerary-day-title {
+        width: 100%;
+    }
 }
