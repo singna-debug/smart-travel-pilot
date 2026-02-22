@@ -5,8 +5,9 @@ export const dynamic = 'force-dynamic';
 
 function maskKey(key: string | undefined) {
     if (!key) return 'Missing';
-    if (key.length < 8) return 'Short Key';
-    return key.substring(0, 4) + '****' + key.substring(key.length - 4);
+    const cleanKey = key.trim().replace(/[\x00-\x1F\x7F]/g, '');
+    if (cleanKey.length < 8) return 'Short Key';
+    return cleanKey.substring(0, 4) + '****' + cleanKey.substring(cleanKey.length - 4);
 }
 
 export async function GET(request: NextRequest) {
@@ -31,8 +32,9 @@ export async function GET(request: NextRequest) {
 
     // Check ScrapingBee Connectivity
     try {
-        if (process.env.SCRAPINGBEE_API_KEY) {
-            const res = await fetch(`https://app.scrapingbee.com/api/v1/?api_key=${process.env.SCRAPINGBEE_API_KEY}&url=https://httpbin.org/get`, {
+        const sbKey = process.env.SCRAPINGBEE_API_KEY?.trim().replace(/[\x00-\x1F\x7F]/g, '');
+        if (sbKey) {
+            const res = await fetch(`https://app.scrapingbee.com/api/v1/?api_key=${sbKey}&url=https://httpbin.org/get`, {
                 signal: AbortSignal.timeout(5000)
             });
             const data = await res.json();
@@ -46,8 +48,9 @@ export async function GET(request: NextRequest) {
 
     // Check Gemini Connectivity
     try {
-        if (process.env.GEMINI_API_KEY) {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+        const gemKey = process.env.GEMINI_API_KEY?.trim().replace(/[\x00-\x1F\x7F]/g, '');
+        if (gemKey) {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${gemKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contents: [{ parts: [{ text: 'hi' }] }] }),
@@ -63,10 +66,11 @@ export async function GET(request: NextRequest) {
 
     // Check Google Sheets Connectivity
     try {
-        const sheetId = process.env.GOOGLE_SHEET_ID;
+        const sheetIdRaw = process.env.GOOGLE_SHEET_ID;
         const jsonStr = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
 
-        if (sheetId && jsonStr) {
+        if (sheetIdRaw && jsonStr) {
+            const sheetId = sheetIdRaw.trim().replace(/[\x00-\x1F\x7F]/g, '');
             // we use the logic from google-sheets.ts but inlined or imported
             // to avoid circular dependency if any, we'll do a simple check
             let auth;
@@ -80,8 +84,8 @@ export async function GET(request: NextRequest) {
                     cleanJson = Buffer.from(cleanJson, 'base64').toString('utf8');
                 }
 
-                // Aggressive Clean
-                cleanJson = cleanJson.replace(/[\r\n]/g, '');
+                // Extreme Clean (Sync with lib/google-sheets.ts)
+                cleanJson = cleanJson.replace(/[\x00-\x1F\x7F]/g, '');
 
                 credentials = JSON.parse(cleanJson);
                 auth = new google.auth.GoogleAuth({
@@ -89,13 +93,13 @@ export async function GET(request: NextRequest) {
                     scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
                 });
                 const sheets = google.sheets({ version: 'v4', auth });
-                const response = await sheets.spreadsheets.get({ spreadsheetId: sheetId.trim() });
+                const response = await sheets.spreadsheets.get({ spreadsheetId: sheetId });
                 diagnostics.connectivity.google_sheets = `OK (Title: ${response.data.properties?.title})`;
             } catch (parsErr: any) {
                 diagnostics.connectivity.google_sheets = `Auth/Fetch Error: ${parsErr.message}`;
             }
         } else {
-            diagnostics.connectivity.google_sheets = `Missing Config (SheetID: ${sheetId ? 'OK' : 'No'}, JSON: ${jsonStr ? 'OK' : 'No'})`;
+            diagnostics.connectivity.google_sheets = `Missing Config (SheetID: ${sheetIdRaw ? 'OK' : 'No'}, JSON: ${jsonStr ? 'OK' : 'No'})`;
         }
     } catch (e: any) {
         diagnostics.connectivity.google_sheets = `Critical Error: ${e.message}`;
