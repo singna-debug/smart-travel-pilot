@@ -760,7 +760,7 @@ export default function UrlAnalyzer() {
                             <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
                                 <span className="info-label" style={{ color: '#94a3b8', fontSize: '0.9rem', display: 'block', marginBottom: '4px' }}>💰 가격</span>
                                 <span className="info-value price" style={{ color: '#38bdf8', fontWeight: 'bold', fontSize: '1.1rem' }}>
-                                    {singleResult.raw.price ? (singleResult.raw.price.endsWith('원') ? singleResult.raw.price : `${singleResult.raw.price}원`) : '가격 정보 없음'}
+                                    {singleResult.raw.price ? (String(singleResult.raw.price).endsWith('원') ? singleResult.raw.price : `${singleResult.raw.price}원`) : '가격 정보 없음'}
                                 </span>
                             </div>
                             <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
@@ -784,11 +784,11 @@ export default function UrlAnalyzer() {
                             </div>
                         </div>
 
-                        {(singleResult.raw.keyPoints && singleResult.raw.keyPoints.length > 0) && (
+                        {(Array.isArray(singleResult.raw.keyPoints) && singleResult.raw.keyPoints.length > 0) && (
                             <div className="product-section" style={{ marginBottom: '16px', background: '#1e293b', padding: '16px', borderRadius: '12px' }}>
                                 <h5 style={{ color: '#cbd5e1', fontSize: '1rem', fontWeight: '600', marginBottom: '12px' }}>💡 상품 포인트</h5>
                                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                    {singleResult.raw.keyPoints.slice(0, 5).map((item, i) => (
+                                    {singleResult.raw.keyPoints.slice(0, 5).map((item: any, i: number) => (
                                         <li key={i} style={{ marginBottom: '8px', paddingLeft: '14px', borderLeft: '2px solid #38bdf8', color: '#cbd5e1', fontSize: '0.95rem' }}>
                                             {item}
                                         </li>
@@ -797,11 +797,11 @@ export default function UrlAnalyzer() {
                             </div>
                         )}
 
-                        {(singleResult.raw.features && singleResult.raw.features.length > 0) && (
+                        {(Array.isArray(singleResult.raw.features) && singleResult.raw.features.length > 0) && (
                             <div className="product-section" style={{ marginBottom: '16px' }}>
                                 <h5 style={{ color: '#cbd5e1', fontSize: '1rem', fontWeight: '600', marginBottom: '8px' }}>✨ 특징</h5>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                    {singleResult.raw.features.map((item, i) => (
+                                    {singleResult.raw.features.map((item: any, i: number) => (
                                         <span key={i} style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', padding: '4px 10px', borderRadius: '20px', fontSize: '0.9rem' }}>
                                             {item}
                                         </span>
@@ -851,7 +851,7 @@ export default function UrlAnalyzer() {
                             </div>
                         </div>
                         <div className="comparison-content">
-                            {compareResult.comparison.split('\n').map((line, i) => {
+                            {String(compareResult.comparison).split('\n').map((line, i) => {
                                 if (line.startsWith('####')) {
                                     return <h5 key={i} style={{ color: '#38bdf8', marginTop: '20px', marginBottom: '10px' }}>{line.replace(/^#+\s*/, '')}</h5>;
                                 }
