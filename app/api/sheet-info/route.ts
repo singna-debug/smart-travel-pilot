@@ -4,7 +4,7 @@ import { getMonthSheetGid } from '@/lib/google-sheets';
 
 export async function GET() {
     try {
-        const sheetId = process.env.GOOGLE_SHEET_ID;
+        const sheetId = process.env.GOOGLE_SHEET_ID?.trim();
         const gid = await getMonthSheetGid();
 
         const url = gid

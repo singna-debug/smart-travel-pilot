@@ -44,16 +44,20 @@ function getGoogleSheetsClient() {
             }
 
             try {
-                // 환경변수에서 로드할 때는 이미 JSON 파서가 이스케이프 문자(\n 등)를 비정상적으로 다룰 수 있으므로
-                // 직접 replace를 하지 않고 parse 결과에 맡깁니다.
-                const credentials = JSON.parse(jsonStr);
+                // [Aggressive Clean] 리터럴 줄바꿈(\r, \n)이 JSON 문자열 내부에 포함되어 파싱이 깨지는 경우 방지
+                // 이는 보통 Vercel 환경변수 복사/붙여넣기 시 윈도우 스타일 줄바꿈(CRLF)이 섞여 들어갈 때 발생합니다.
+                const cleanJson = jsonStr
+                    .replace(/[\r\n]/g, '') // 모든 실제 줄바꿈 제거 (문자열 내 \n은 \\n으로 표현되어야 함)
+                    .trim();
+
+                const credentials = JSON.parse(cleanJson);
                 auth = new google.auth.GoogleAuth({
                     credentials,
                     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
                 });
             } catch (e: any) {
                 console.error('[Google Sheets] JSON Parse Error (Env):', e.message);
-                // 혹시라도 \n이 그대로 들어있는 경우를 대비한 최후의 수단
+                // 혹시라도 \\n 등이 날아갔을 경우를 대비한 2차 시도
                 try {
                     const fallbackJson = jsonStr.replace(/\\n/g, '\n');
                     const credentials = JSON.parse(fallbackJson);
@@ -62,7 +66,7 @@ function getGoogleSheetsClient() {
                         scopes: ['https://www.googleapis.com/auth/spreadsheets'],
                     });
                 } catch (e2) {
-                    throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON 파싱 실패');
+                    throw new Error(`GOOGLE_SERVICE_ACCOUNT_JSON 파싱 실패: ${e.message}`);
                 }
             }
         }
@@ -130,7 +134,7 @@ async function getSheetTitles(sheets: any, spreadsheetId: string) {
 export async function getMonthSheetGid(month?: string): Promise<number> {
     try {
         const sheets = getGoogleSheetsClient();
-        const sheetId = process.env.GOOGLE_SHEET_ID;
+        const sheetId = process.env.GOOGLE_SHEET_ID?.trim();
         if (!sheetId) return 0;
 
         const targetMonth = month || format(new Date(), 'yyyy-MM');
