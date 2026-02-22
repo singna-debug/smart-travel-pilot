@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         let formattedPhone = formatPhone(String(customerPhone || ''));
         let phone = formattedPhone ? `'${formattedPhone}` : '';
         let productName = formInterestedProduct || '';
-        let url = '';
+        let url = body.productUrl || ''; // 수동 입력 URL 우선
         let destination = formDestination || '';
         let departureDate = formDepartureDate || '';
         let duration = formDuration || '';

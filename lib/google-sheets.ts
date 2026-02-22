@@ -34,18 +34,37 @@ function getGoogleSheetsClient() {
                 jsonStr = jsonStr.substring(1, jsonStr.length - 1);
             }
 
-            // 리터럴 \n 및 \" 처리 (Vercel 환경변수 등에서 발생 가능)
-            jsonStr = jsonStr.replace(/\\n/g, '\n').replace(/\\"/g, '"');
-
+            // Base64 디코딩 시도 (만약 JSON이 아니라면)
             if (!jsonStr.startsWith('{')) {
-                jsonStr = Buffer.from(jsonStr, 'base64').toString('utf8');
+                try {
+                    jsonStr = Buffer.from(jsonStr, 'base64').toString('utf8');
+                } catch (e) {
+                    console.error('[Google Sheets] Base64 decoding failed');
+                }
             }
 
-            const credentials = JSON.parse(jsonStr);
-            auth = new google.auth.GoogleAuth({
-                credentials,
-                scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-            });
+            try {
+                // 환경변수에서 로드할 때는 이미 JSON 파서가 이스케이프 문자(\n 등)를 비정상적으로 다룰 수 있으므로
+                // 직접 replace를 하지 않고 parse 결과에 맡깁니다.
+                const credentials = JSON.parse(jsonStr);
+                auth = new google.auth.GoogleAuth({
+                    credentials,
+                    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+                });
+            } catch (e: any) {
+                console.error('[Google Sheets] JSON Parse Error (Env):', e.message);
+                // 혹시라도 \n이 그대로 들어있는 경우를 대비한 최후의 수단
+                try {
+                    const fallbackJson = jsonStr.replace(/\\n/g, '\n');
+                    const credentials = JSON.parse(fallbackJson);
+                    auth = new google.auth.GoogleAuth({
+                        credentials,
+                        scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+                    });
+                } catch (e2) {
+                    throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON 파싱 실패');
+                }
+            }
         }
 
         if (!auth) {
