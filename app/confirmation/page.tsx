@@ -96,6 +96,21 @@ export default function ConfirmationPage() {
     const [generatedId, setGeneratedId] = useState('');
     const [showShareModal, setShowShareModal] = useState(false);
 
+    // 여행자 명단 변경 시 인원수 자동 계산
+    useEffect(() => {
+        let adults = 0;
+        let children = 0;
+        let infants = 0;
+        travelers.forEach(t => {
+            if (t.type === 'adult') adults++;
+            else if (t.type === 'child') children++;
+            else if (t.type === 'infant') infants++;
+        });
+        setAdultCount(adults);
+        setChildCount(children);
+        setInfantCount(infants);
+    }, [travelers]);
+
     // 고객 검색 외부 클릭 감지
     useEffect(() => {
         const handler = (e: MouseEvent) => {
