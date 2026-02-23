@@ -177,10 +177,11 @@ const PinchZoomModal = ({ src, onClose, footer }: { src: string, onClose: () => 
                 backgroundColor: 'rgba(0,0,0,0.9)',
                 position: 'fixed',
                 top: 0, left: 0, right: 0, bottom: 0,
+                inset: 0,
                 margin: '0 auto',
                 width: '100%',
                 maxWidth: '480px',
-                height: '100dvh',
+                height: '100%',
                 borderRadius: '0' // 모달은 전체 화면 느낌으로 (단 너비만 제한)
             }}
         >
