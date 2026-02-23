@@ -1341,19 +1341,21 @@
 .mc-calc-row {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .mc-calc-row label {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 800;
-    width: 80px;
+    width: 65px;
     opacity: 0.85;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .mc-calc-input {
     flex: 1;
+    min-width: 0;
     padding: 12px 14px;
     border-radius: 10px;
     border: none;
@@ -1362,6 +1364,7 @@
     background: rgba(255, 255, 255, 0.2);
     color: #fff;
     outline: none;
+    text-align: right;
 }
 
 .mc-calc-input::placeholder {
@@ -1377,12 +1380,16 @@
 
 .mc-calc-result {
     flex: 1;
+    min-width: 0;
     padding: 12px 14px;
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.15);
     font-size: 1.3rem;
     font-weight: 800;
     text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 .mc-calc-rate {
@@ -1396,8 +1403,10 @@
 }
 
 .mc-calc-arrow-float {
-    align-self: center;
-    background: rgba(255, 255, 255, 0.15);
+    align-self: flex-start;
+    margin-left: 75px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
     width: 32px;
     height: 32px;
@@ -1406,8 +1415,10 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s;
-    margin: -4px 0;
+    margin-top: -6px;
+    margin-bottom: -6px;
     z-index: 2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .mc-calc-arrow-float:active {
