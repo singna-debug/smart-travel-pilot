@@ -483,7 +483,7 @@ export default function ConfirmationViewerPage() {
         <div className="mobile-confirm">
             {/* 상단 헤더 */}
             <div className="mc-header">
-                <div className="mc-brand">CLUBMODE TRAVEL <span style={{ fontSize: '10px', opacity: 0.5 }}>v1.5-FIX</span></div>
+                <div className="mc-brand">CLUBMODE TRAVEL</div>
                 <h1>{doc.trip.productName || '여행 확정서'}</h1>
                 <div className="mc-subtitle">{doc.trip.destination}</div>
                 <div className="mc-status-badge">
@@ -1382,7 +1382,7 @@ export default function ConfirmationViewerPage() {
                 <PinchZoomModal
                     src={viewerFile.url}
                     onClose={() => setViewerFile(null)}
-                    isPdf={!isImageFile(viewerFile.url)}
+                    isPdf={!isImageFile(viewerFile.url, viewerFile.name)}
                     footer={(
                         <button
                             className="mcv-download-btn"
