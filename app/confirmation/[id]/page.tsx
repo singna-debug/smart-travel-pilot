@@ -1312,6 +1312,26 @@ export default function ConfirmationViewerPage() {
 
             {/* 미팅 안내 이미지 모달 */}
             {selectedImage && <PinchZoomModal src={selectedImage} onClose={() => setSelectedImage(null)} />}
+            {/* 서류 뷰어 모달 */}
+            {viewerFile && (
+                <div className="mc-viewer-overlay" onClick={() => setViewerFile(null)}>
+                    <div className="mc-viewer-header">
+                        <div className="mcv-title">{viewerFile.label || viewerFile.name}</div>
+                        <button className="mcv-close" onClick={() => setViewerFile(null)}>✕</button>
+                    </div>
+                    <div className="mc-viewer-content" onClick={e => e.stopPropagation()}>
+                        <PinchZoomModal src={viewerFile.url} onClose={() => setViewerFile(null)} />
+                    </div>
+                    <div className="mc-viewer-footer" onClick={e => e.stopPropagation()}>
+                        <button
+                            className="mcv-download-btn"
+                            onClick={() => handleFileDownload(viewerFile.url, viewerFile.name)}
+                        >
+                            ⬇ 원본 파일 저장
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
