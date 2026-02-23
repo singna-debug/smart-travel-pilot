@@ -301,6 +301,23 @@ export default function ConfirmationViewerPage() {
             .finally(() => setRateLoading(false));
     }, [doc]);
 
+    // 브라우저 탭 타이틀 동적 변경
+    useEffect(() => {
+        if (!doc) return;
+        const customerName = doc.customer?.name || '고객';
+        const destination = doc.trip?.destination || '여행지';
+        const totalTravelers = doc.trip?.travelers?.length || 1;
+        const otherCount = totalTravelers - 1;
+
+        let titleStr = `여행 확정서 - ${customerName}`;
+        if (otherCount > 0) {
+            titleStr += ` 외 ${otherCount}명`;
+        }
+        titleStr += `_${destination}`;
+
+        document.title = titleStr;
+    }, [doc]);
+
     // 로컬스토리지에서 체크리스트 복원
     useEffect(() => {
         try {
