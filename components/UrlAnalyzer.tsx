@@ -392,14 +392,14 @@ export default function UrlAnalyzer() {
             border: '1px solid var(--border-color)',
             boxShadow: 'var(--shadow-lg)'
         }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <div className="analyzer-header-mobile">
                 <div>
                     <h4 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '1.2rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         📋 고객 상담 정보 등록
                     </h4>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: '6px 0 0 0' }}>입력한 정보는 분석 결과와 함께 구글 시트에 자동 저장됩니다.</p>
                 </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div className="analyzer-header-buttons" style={{ display: 'flex', gap: '10px' }}>
                     <button
                         onClick={handleGoogleContactsClick}
                         disabled={isGoogleLoading}

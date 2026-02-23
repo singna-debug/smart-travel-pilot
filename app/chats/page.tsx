@@ -542,8 +542,8 @@ export default function ChatsPage() {
                                                     <div style={{ fontWeight: 500, color: '#fff', marginBottom: '2px' }}>
                                                         {chat.visitorName}
                                                     </div>
-                                                    <div style={{ fontSize: '12px', color: '#9ca3af' }}>
-                                                        {chat.destination && <span style={{ marginRight: '8px' }}>📍 {chat.destination}</span>}
+                                                    <div style={{ fontSize: '12px', color: '#9ca3af', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                        {chat.destination && <span>📍 {chat.destination}</span>}
                                                         {chat.departureDate && <span>📅 {chat.departureDate}</span>}
                                                     </div>
                                                 </div>

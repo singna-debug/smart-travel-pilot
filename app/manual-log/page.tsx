@@ -149,7 +149,7 @@ export default function ManualLogPage() {
             <p className="page-subtitle">전화/방문 상담 내역을 시트에 기록합니다.</p>
 
             <form onSubmit={handleSubmit} className="log-form">
-                <div className="form-row">
+                <div className="analyzer-form-grid-3">
                     <div className="form-group">
                         <label>고객명 *</label>
                         <input type="text" name="name" value={formData.name} onChange={handleChange} required placeholder="홍길동" />
@@ -164,7 +164,7 @@ export default function ManualLogPage() {
                     </div>
                 </div>
 
-                <div className="form-row">
+                <div className="analyzer-form-grid-4">
                     <div className="form-group">
                         <label>출발일</label>
                         <input type="text" name="departureDate" value={formData.departureDate} onChange={handleChange} placeholder="20250209" />
@@ -238,9 +238,9 @@ export default function ManualLogPage() {
                     flex-direction: column; 
                     gap: 20px; 
                 }
-                .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+                .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
                 .form-group label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
-                .form-row { display: flex; gap: 16px; }
+                /* analyzer-form-grid CSS 클래스는 url-analyzer.css에서 불러옴 */
                 
                 input, select, textarea { 
                     background: var(--bg-tertiary); 
