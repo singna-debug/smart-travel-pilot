@@ -10,9 +10,9 @@ import "./mobile-confirmation.css";
 import ClientLayoutWrapper from "./ClientLayoutWrapper";
 
 export const metadata: Metadata = {
-  title: "Smart Travel Pilot - Admin Dashboard",
-  description: "Travel Consultation Management System",
-  keywords: ["Travel", "Admin", "Dashboard", "KakaoTalk"],
+  title: "CLUBMODE TRAVEL - Dashboard",
+  description: "Travel Consultation & Confirmation Management System",
+  keywords: ["Travel", "Clubmode", "Dashboard", "Confirmation"],
 };
 
 export default function RootLayout({
