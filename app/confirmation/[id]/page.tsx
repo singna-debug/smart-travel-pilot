@@ -101,7 +101,7 @@ const GuideAccordion = ({
     );
 };
 
-const PinchZoomModal = ({ src, onClose }: { src: string, onClose: () => void }) => {
+const PinchZoomModal = ({ src, onClose, footer }: { src: string, onClose: () => void, footer?: React.ReactNode }) => {
     const [scale, setScale] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const imageRef = useRef<HTMLImageElement>(null);
@@ -240,6 +240,23 @@ const PinchZoomModal = ({ src, onClose }: { src: string, onClose: () => void }) 
                     }}
                     draggable={false}
                 />
+                {footer && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            bottom: '0',
+                            left: 0,
+                            right: 0,
+                            padding: '24px',
+                            textAlign: 'center',
+                            zIndex: 101,
+                            pointerEvents: 'auto'
+                        }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {footer}
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -369,6 +386,7 @@ export default function ConfirmationViewerPage() {
     };
 
     const handleFileAction = (file: any) => {
+        console.log('File Action Triggered:', file);
         if (isImageFile(file.url)) {
             setViewerFile(file);
         } else {
