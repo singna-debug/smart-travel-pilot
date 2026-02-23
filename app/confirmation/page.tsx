@@ -816,7 +816,7 @@ export default function ConfirmationPage() {
                         lineHeight: 1
                     }}
                 >
-                    {researchLoading ? 'AI 조사 중... (약 10~15초)' : '2차 조사 시작'}
+                    {researchLoading ? 'AI 조사 중... (약 10~15초)' : '2차 조사하기'}
                 </button>
 
                 {researchError && <div className="analysis-status error" style={{ marginBottom: '12px' }}>⚠️ {researchError}</div>}
@@ -1001,4 +1001,4 @@ export default function ConfirmationPage() {
     );
 }
 
-// Force Vercel Redeploy - Timestamp: 2026-02-23T04:26:02+09:00
+// Force Vercel Redeploy - Timestamp: 2026-02-23T12:55:00+09:00
