@@ -429,7 +429,7 @@ export default function ConfirmationViewerPage() {
 
     const handleFileAction = (file: any) => {
         // [DIAGNOSTIC] 사용자 제보: JPG인데 새창으로 뜨고 안 보인다는 현상 확인용
-        // alert(`DEBUG: Action for ${file.name}\nIs Image: ${isImageFile(file.url)}\nURL: ${file.url}`);
+        alert(`DEBUG: Action for ${file.name}\nIs Image: ${isImageFile(file.url)}\nURL: ${file.url}`);
         setViewerFile(file);
     };
 
