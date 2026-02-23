@@ -183,7 +183,8 @@ const PinchZoomModal = ({ src, onClose, footer }: { src: string, onClose: () => 
                 margin: '0 auto',
                 width: '100%',
                 maxWidth: '480px',
-                height: '100%',
+                height: '100vh',
+                height: '100dvh',
                 borderRadius: '0' // 모달은 전체 화면 느낌으로 (단 너비만 제한)
             }}
         >
@@ -251,10 +252,10 @@ const PinchZoomModal = ({ src, onClose, footer }: { src: string, onClose: () => 
                         setImgError(true);
                     }}
                     style={{
-                        display: imgLoading || imgError ? 'none' : 'block',
                         maxWidth: '100%',
                         maxHeight: '100%',
                         objectFit: 'contain',
+                        opacity: imgLoading || imgError ? 0 : 1,
                         transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
                         transition: isDragging.current || initialDistance.current ? 'none' : 'transform 0.15s ease-out',
                         willChange: 'transform'
@@ -845,13 +846,20 @@ export default function ConfirmationViewerPage() {
                             {doc.files && doc.files.length > 0 ? (
                                 <div className="mc-file-list">
                                     {doc.files.map(f => (
-                                        <div
+                                        <button
                                             key={f.id}
                                             onClick={() => handleFileAction(f)}
                                             className="mc-file-btn"
-                                            role="button"
-                                            tabIndex={0}
-                                            style={{ cursor: 'pointer', userSelect: 'none', WebkitTapHighlightColor: 'transparent' }}
+                                            style={{
+                                                cursor: 'pointer',
+                                                userSelect: 'none',
+                                                WebkitTapHighlightColor: 'transparent',
+                                                border: 'none',
+                                                background: 'none',
+                                                textAlign: 'left',
+                                                padding: 0,
+                                                width: '100%'
+                                            }}
                                         >
                                             <span className="file-icon">
                                                 {f.type === 'boarding_pass' ? '🎫' :
@@ -863,7 +871,7 @@ export default function ConfirmationViewerPage() {
                                                 <div className="file-desc">{f.name}</div>
                                             </div>
                                             <span className="file-view-btn">보기</span>
-                                        </div>
+                                        </button>
                                     ))}
                                 </div>
                             ) : (
