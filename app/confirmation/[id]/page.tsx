@@ -262,6 +262,7 @@ export default function ConfirmationViewerPage() {
     const [rateLoading, setRateLoading] = useState(false);
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [viewerFile, setViewerFile] = useState<any>(null); // {url: string, name: string}
 
     const toggleSection = (sec: string) => {
         setExpandedSections(prev => ({ ...prev, [sec]: !prev[sec] }));
@@ -359,6 +360,20 @@ export default function ConfirmationViewerPage() {
         } else {
             navigator.clipboard.writeText(url);
             alert('링크가 복사되었습니다!');
+        }
+    };
+
+    const isImageFile = (url: string) => {
+        const ext = url.split('?')[0].split('.').pop()?.toLowerCase();
+        return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext || '');
+    };
+
+    const handleFileAction = (file: any) => {
+        if (isImageFile(file.url)) {
+            setViewerFile(file);
+        } else {
+            // PDF 등 다른 파일은 새 창에서 열기 (브라우저 뷰어 활용)
+            window.open(file.url, '_blank');
         }
     };
 
@@ -787,7 +802,7 @@ export default function ConfirmationViewerPage() {
                                     {doc.files.map(f => (
                                         <div
                                             key={f.id}
-                                            onClick={() => handleFileDownload(f.url, f.label || f.name)}
+                                            onClick={() => handleFileAction(f)}
                                             className="mc-file-btn"
                                             style={{ cursor: 'pointer' }}
                                         >
@@ -800,7 +815,7 @@ export default function ConfirmationViewerPage() {
                                                 <div className="file-name">{f.label || f.name}</div>
                                                 <div className="file-desc">{f.name}</div>
                                             </div>
-                                            <span className="file-download">⬇</span>
+                                            <span className="file-view-btn">보기</span>
                                         </div>
                                     ))}
                                 </div>
