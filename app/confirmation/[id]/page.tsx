@@ -104,6 +104,8 @@ const GuideAccordion = ({
 const PinchZoomModal = ({ src, onClose, footer }: { src: string, onClose: () => void, footer?: React.ReactNode }) => {
     const [scale, setScale] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [imgLoading, setImgLoading] = useState(true);
+    const [imgError, setImgError] = useState(false);
     const imageRef = useRef<HTMLImageElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -227,11 +229,29 @@ const PinchZoomModal = ({ src, onClose, footer }: { src: string, onClose: () => 
                 >
                     ✕
                 </button>
+
+                {imgLoading && !imgError && (
+                    <div style={{ color: '#fff', fontSize: '0.9rem', opacity: 0.7 }}>이미지 불러오는 중...</div>
+                )}
+                {imgError && (
+                    <div style={{ textAlign: 'center', color: '#fff', padding: '20px' }}>
+                        <div style={{ fontSize: '2rem', marginBottom: '10px' }}>⚠️</div>
+                        <div style={{ fontSize: '0.9rem' }}>이미지를 불러올 수 없습니다.</div>
+                        <div style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '8px', wordBreak: 'break-all', maxWidth: '80vw' }}>{src}</div>
+                    </div>
+                )}
+
                 <img
                     ref={imageRef}
                     src={src}
                     alt="Expanded View"
+                    onLoad={() => setImgLoading(false)}
+                    onError={() => {
+                        setImgLoading(false);
+                        setImgError(true);
+                    }}
                     style={{
+                        display: imgLoading || imgError ? 'none' : 'block',
                         maxWidth: '100%',
                         maxHeight: '100%',
                         objectFit: 'contain',
@@ -829,7 +849,9 @@ export default function ConfirmationViewerPage() {
                                             key={f.id}
                                             onClick={() => handleFileAction(f)}
                                             className="mc-file-btn"
-                                            style={{ cursor: 'pointer' }}
+                                            role="button"
+                                            tabIndex={0}
+                                            style={{ cursor: 'pointer', userSelect: 'none', WebkitTapHighlightColor: 'transparent' }}
                                         >
                                             <span className="file-icon">
                                                 {f.type === 'boarding_pass' ? '🎫' :
