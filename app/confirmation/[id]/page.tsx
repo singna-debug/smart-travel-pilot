@@ -362,6 +362,27 @@ export default function ConfirmationViewerPage() {
         }
     };
 
+    const handleFileDownload = async (fileUrl: string, fileName: string) => {
+        try {
+            // 모바일에선 단순히 a 태그 download 속성만으론 부족할 때가 많음 (특히 In-App Browser)
+            // 직접 fetch 후 Blob으로 만들어 저장 유도
+            const response = await fetch(fileUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (e) {
+            console.error('Download failed:', e);
+            // 실패 시 새 탭으로 여는 폴백
+            window.open(fileUrl, '_blank');
+        }
+    };
+
     if (loading) {
         return (
             <div className="mobile-confirm">
@@ -764,12 +785,11 @@ export default function ConfirmationViewerPage() {
                             {doc.files && doc.files.length > 0 ? (
                                 <div className="mc-file-list">
                                     {doc.files.map(f => (
-                                        <a
+                                        <div
                                             key={f.id}
-                                            href={f.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                            onClick={() => handleFileDownload(f.url, f.label || f.name)}
                                             className="mc-file-btn"
+                                            style={{ cursor: 'pointer' }}
                                         >
                                             <span className="file-icon">
                                                 {f.type === 'boarding_pass' ? '🎫' :
@@ -781,7 +801,7 @@ export default function ConfirmationViewerPage() {
                                                 <div className="file-desc">{f.name}</div>
                                             </div>
                                             <span className="file-download">⬇</span>
-                                        </a>
+                                        </div>
                                     ))}
                                 </div>
                             ) : (
