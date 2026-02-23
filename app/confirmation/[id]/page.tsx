@@ -101,7 +101,7 @@ const GuideAccordion = ({
     );
 };
 
-const PinchZoomModal = ({ src, onClose, footer }: { src: string, onClose: () => void, footer?: React.ReactNode }) => {
+const PinchZoomModal = ({ src, onClose, footer, isPdf }: { src: string, onClose: () => void, footer?: React.ReactNode, isPdf?: boolean }) => {
     const [scale, setScale] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [imgLoading, setImgLoading] = useState(true);
@@ -184,7 +184,6 @@ const PinchZoomModal = ({ src, onClose, footer }: { src: string, onClose: () => 
                 width: '100%',
                 maxWidth: '480px',
                 height: '100vh',
-                height: '100dvh',
                 borderRadius: '0',
                 overflow: 'hidden'
             }}
@@ -1368,11 +1367,12 @@ export default function ConfirmationViewerPage() {
 
             {/* 미팅 안내 이미지 모달 */}
             {selectedImage && <PinchZoomModal src={selectedImage} onClose={() => setSelectedImage(null)} />}
-            {/* 서류 뷰어 모달 (이미지인 경우 PinchZoomModal 활용) */}
-            {viewerFile && isImageFile(viewerFile.url) && (
+            {/* 서류 뷰어 모달 (전체 화면 통합 뷰어) */}
+            {viewerFile && (
                 <PinchZoomModal
                     src={viewerFile.url}
                     onClose={() => setViewerFile(null)}
+                    isPdf={!isImageFile(viewerFile.url)}
                     footer={(
                         <button
                             className="mcv-download-btn"
