@@ -506,8 +506,8 @@ body {
     }
 
     .sidebar-title,
-    .nav-item span,
-    .sidebar-footer .nav-item span,
+    .nav-item .nav-label,
+    .sidebar-footer .nav-item .nav-label,
     .external-icon {
         display: none;
     }

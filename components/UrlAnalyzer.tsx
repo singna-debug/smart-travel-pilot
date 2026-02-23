@@ -456,7 +456,7 @@ export default function UrlAnalyzer() {
             </div>
 
             {/* Row 1: 고객명, 연락처, 여행지 */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+            <div className="analyzer-form-grid-3">
                 <div className="form-group">
                     <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '600', marginBottom: '8px' }}>고객명 *</label>
                     <input
@@ -493,7 +493,7 @@ export default function UrlAnalyzer() {
             </div>
 
             {/* Row 2: 출발일, 기간, 귀국일, 상담 상태 */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1.2fr 1fr', gap: '20px', marginBottom: '20px' }}>
+            <div className="analyzer-form-grid-4">
                 <div className="form-group">
                     <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '600', marginBottom: '8px' }}>출발일</label>
                     <input
@@ -612,7 +612,7 @@ export default function UrlAnalyzer() {
                 <div className="analyzer-input-section">
                     <h3 className="section-title">📦 여행 상품 URL 분석</h3>
                     <p className="section-desc">상품 URL을 입력하면 가격, 포함사항, 일정 등을 자동으로 추출하고 상담 멘트를 생성합니다.</p>
-                    <div className="analyzer-input-wrapper">
+                    <div className="analyzer-input-wrapper" style={{ flexWrap: 'wrap' }}>
                         <input
                             type="url"
                             value={singleUrl}

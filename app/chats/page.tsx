@@ -464,144 +464,148 @@ export default function ChatsPage() {
                     </div>
                 ) : (
                     <div style={{ backgroundColor: '#111827', borderRadius: '8px', overflow: 'hidden' }}>
-                        {/* 헤더 */}
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: '40px 100px 1fr 90px 130px 90px 50px',
-                            padding: '12px 16px',
-                            backgroundColor: '#1f2937',
-                            fontWeight: 600,
-                            fontSize: '13px',
-                            color: '#9ca3af',
-                            gap: '16px',
-                        }}>
-                            <div>
-                                <input
-                                    type="checkbox"
-                                    checked={selectedIds.size === filteredChats.length && filteredChats.length > 0}
-                                    onChange={toggleSelectAll}
-                                    style={{ cursor: 'pointer' }}
-                                />
-                            </div>
-                            <div>상담일자</div>
-                            <div>고객 정보</div>
-                            <div>상태</div>
-                            <div>상태 변경</div>
-                            <div>최근 활동</div>
-                            <div>시트</div>
-                        </div>
-
-                        {/* 목록 */}
-                        {filteredChats.map((chat) => (
-                            <div
-                                key={chat.id}
-                                style={{
+                        <div style={{ overflowX: 'auto' }}>
+                            <div style={{ minWidth: '800px' }}>
+                                {/* 헤더 */}
+                                <div style={{
                                     display: 'grid',
                                     gridTemplateColumns: '40px 100px 1fr 90px 130px 90px 50px',
-                                    padding: '16px',
-                                    borderBottom: '1px solid #374151',
-                                    alignItems: 'center',
-                                    backgroundColor: selectedIds.has(chat.id) ? '#37415150' : '#111827',
-                                    transition: 'background-color 0.2s',
+                                    padding: '12px 16px',
+                                    backgroundColor: '#1f2937',
+                                    fontWeight: 600,
+                                    fontSize: '13px',
+                                    color: '#9ca3af',
                                     gap: '16px',
-                                }}
-                            >
-                                {/* 체크박스 */}
-                                <div>
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedIds.has(chat.id)}
-                                        onChange={() => toggleSelect(chat.id)}
-                                        style={{ cursor: 'pointer' }}
-                                    />
+                                }}>
+                                    <div>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedIds.size === filteredChats.length && filteredChats.length > 0}
+                                            onChange={toggleSelectAll}
+                                            style={{ cursor: 'pointer' }}
+                                        />
+                                    </div>
+                                    <div>상담일자</div>
+                                    <div>고객 정보</div>
+                                    <div>상태</div>
+                                    <div>상태 변경</div>
+                                    <div>최근 활동</div>
+                                    <div>시트</div>
                                 </div>
 
-                                {/* 상담일자 */}
-                                <div style={{ fontSize: '13px', color: '#9ca3af', fontWeight: 500 }}>
-                                    {formatDateOnly(chat.lastMessageAt)}
-                                </div>
-
-                                {/* 고객 정보 */}
-                                <Link href={`/chats/${chat.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        <div style={{
-                                            width: '36px',
-                                            height: '36px',
-                                            borderRadius: '50%',
-                                            backgroundColor: '#374151',
-                                            display: 'flex',
+                                {/* 목록 */}
+                                {filteredChats.map((chat) => (
+                                    <div
+                                        key={chat.id}
+                                        style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: '40px 100px 1fr 90px 130px 90px 50px',
+                                            padding: '16px',
+                                            borderBottom: '1px solid #374151',
                                             alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontSize: '16px',
-                                        }}>
-                                            👤
-                                        </div>
+                                            backgroundColor: selectedIds.has(chat.id) ? '#37415150' : '#111827',
+                                            transition: 'background-color 0.2s',
+                                            gap: '16px',
+                                        }}
+                                    >
+                                        {/* 체크박스 */}
                                         <div>
-                                            <div style={{ fontWeight: 500, color: '#fff', marginBottom: '2px' }}>
-                                                {chat.visitorName}
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedIds.has(chat.id)}
+                                                onChange={() => toggleSelect(chat.id)}
+                                                style={{ cursor: 'pointer' }}
+                                            />
+                                        </div>
+
+                                        {/* 상담일자 */}
+                                        <div style={{ fontSize: '13px', color: '#9ca3af', fontWeight: 500 }}>
+                                            {formatDateOnly(chat.lastMessageAt)}
+                                        </div>
+
+                                        {/* 고객 정보 */}
+                                        <Link href={`/chats/${chat.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                <div style={{
+                                                    width: '36px',
+                                                    height: '36px',
+                                                    borderRadius: '50%',
+                                                    backgroundColor: '#374151',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    fontSize: '16px',
+                                                }}>
+                                                    👤
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: 500, color: '#fff', marginBottom: '2px' }}>
+                                                        {chat.visitorName}
+                                                    </div>
+                                                    <div style={{ fontSize: '12px', color: '#9ca3af' }}>
+                                                        {chat.destination && <span style={{ marginRight: '8px' }}>📍 {chat.destination}</span>}
+                                                        {chat.departureDate && <span>📅 {chat.departureDate}</span>}
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div style={{ fontSize: '12px', color: '#9ca3af' }}>
-                                                {chat.destination && <span style={{ marginRight: '8px' }}>📍 {chat.destination}</span>}
-                                                {chat.departureDate && <span>📅 {chat.departureDate}</span>}
-                                            </div>
+                                        </Link>
+
+                                        {/* 상태 배지 */}
+                                        <div>
+                                            <span style={getStatusStyle(chat.status)}>
+                                                {chat.status}
+                                            </span>
+                                        </div>
+
+                                        {/* 상태 변경 드롭다운 */}
+                                        <div>
+                                            <select
+                                                value={chat.status}
+                                                onChange={(e) => handleStatusChange(chat, e.target.value)}
+                                                disabled={updating === chat.id}
+                                                style={{
+                                                    padding: '6px 8px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid #374151',
+                                                    fontSize: '12px',
+                                                    cursor: 'pointer',
+                                                    backgroundColor: updating === chat.id ? '#374151' : '#1f2937',
+                                                    color: '#fff',
+                                                    width: '100%',
+                                                }}
+                                            >
+                                                {STATUS_OPTIONS.map(s => (
+                                                    <option key={s} value={s}>{s}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        {/* 최근 활동 */}
+                                        <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                                            {formatTime(chat.lastMessageAt)}
+                                        </div>
+
+                                        {/* 시트 링크 */}
+                                        <div>
+                                            <button
+                                                onClick={(e) => openGoogleSheet(e, chat.sheetRowIndex, chat.sheetName, chat.sheetGid)}
+                                                title={`Google Sheets (${chat.sheetName || '기본'})에서 보기`}
+                                                style={{
+                                                    padding: '6px 8px',
+                                                    border: '1px solid #374151',
+                                                    borderRadius: '4px',
+                                                    backgroundColor: '#1f2937',
+                                                    cursor: 'pointer',
+                                                    fontSize: '14px',
+                                                }}
+                                            >
+                                                📊
+                                            </button>
                                         </div>
                                     </div>
-                                </Link>
-
-                                {/* 상태 배지 */}
-                                <div>
-                                    <span style={getStatusStyle(chat.status)}>
-                                        {chat.status}
-                                    </span>
-                                </div>
-
-                                {/* 상태 변경 드롭다운 */}
-                                <div>
-                                    <select
-                                        value={chat.status}
-                                        onChange={(e) => handleStatusChange(chat, e.target.value)}
-                                        disabled={updating === chat.id}
-                                        style={{
-                                            padding: '6px 8px',
-                                            borderRadius: '4px',
-                                            border: '1px solid #374151',
-                                            fontSize: '12px',
-                                            cursor: 'pointer',
-                                            backgroundColor: updating === chat.id ? '#374151' : '#1f2937',
-                                            color: '#fff',
-                                            width: '100%',
-                                        }}
-                                    >
-                                        {STATUS_OPTIONS.map(s => (
-                                            <option key={s} value={s}>{s}</option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                {/* 최근 활동 */}
-                                <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                                    {formatTime(chat.lastMessageAt)}
-                                </div>
-
-                                {/* 시트 링크 */}
-                                <div>
-                                    <button
-                                        onClick={(e) => openGoogleSheet(e, chat.sheetRowIndex, chat.sheetName, chat.sheetGid)}
-                                        title={`Google Sheets (${chat.sheetName || '기본'})에서 보기`}
-                                        style={{
-                                            padding: '6px 8px',
-                                            border: '1px solid #374151',
-                                            borderRadius: '4px',
-                                            backgroundColor: '#1f2937',
-                                            cursor: 'pointer',
-                                            fontSize: '14px',
-                                        }}
-                                    >
-                                        📊
-                                    </button>
-                                </div>
+                                ))}
                             </div>
-                        ))}
+                        </div>
                     </div>
                 )}
 
