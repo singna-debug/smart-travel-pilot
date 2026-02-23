@@ -32,10 +32,10 @@ export async function GET(request: NextRequest) {
         }
 
         // 확정서 목록
-        const list = confirmationStore.list()
-            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        const list = await confirmationStore.list();
+        const sortedList = [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-        return NextResponse.json({ success: true, data: list });
+        return NextResponse.json({ success: true, data: sortedList });
     } catch (error: any) {
         console.error('[Confirmation API] GET Error:', error.message);
         return NextResponse.json(
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
             meetingInfo: body.meetingInfo || [],
         };
 
-        confirmationStore.set(id, doc);
+        await confirmationStore.set(id, doc);
 
         console.log(`[Confirmation] Created: ${id}`);
         return NextResponse.json({ success: true, data: doc });

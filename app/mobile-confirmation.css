@@ -609,21 +609,29 @@
 /* 탭 아이콘 & 배지 */
 .mc-tab {
     flex: 1 1 auto;
-    /* 탭 줄바꿈시 적절한 너비 배분 */
     min-width: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 4px;
     padding: 12px 6px;
-    /* 모바일에 맞게 패딩 약간 조정 */
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 500;
     color: #94a3b8;
     white-space: nowrap;
     cursor: pointer;
     border-bottom: 3px solid transparent;
-    transition: all 0.2s;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mc-tab.active {
+    color: #0f172a;
+    font-weight: 800;
+    border-bottom: 3px solid #1e293b;
+    background: #fff;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 10;
 }
 
 .mch-amenities {
@@ -1324,9 +1332,10 @@
 
 .mc-calc-title {
     font-size: 0.9rem;
-    font-weight: 700;
-    margin-bottom: 14px;
-    opacity: 0.9;
+    font-weight: 800;
+    margin-bottom: 16px;
+    opacity: 0.95;
+    text-align: center;
 }
 
 .mc-calc-row {
@@ -1336,10 +1345,11 @@
 }
 
 .mc-calc-row label {
-    font-size: 0.82rem;
-    font-weight: 700;
-    min-width: 70px;
-    opacity: 0.9;
+    font-size: 0.8rem;
+    font-weight: 800;
+    width: 80px;
+    opacity: 0.85;
+    white-space: nowrap;
 }
 
 .mc-calc-input {
@@ -1377,9 +1387,39 @@
 
 .mc-calc-rate {
     text-align: center;
-    font-size: 0.68rem;
-    opacity: 0.5;
-    margin-top: 10px;
+    font-size: 0.72rem;
+    opacity: 0.6;
+    margin-top: 14px;
+    font-size: 0.7rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 10px;
+}
+
+.mc-calc-arrow-float {
+    align-self: center;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: -4px 0;
+    z-index: 2;
+}
+
+.mc-calc-arrow-float:active {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0.95);
+}
+
+.mc-calc-sublabel {
+    font-size: 0.65rem;
+    opacity: 0.7;
+    margin-left: 2px;
+    font-weight: 400;
 }
 
 /* ── 가이드 카드 (범용) ── */

@@ -357,7 +357,7 @@ export default function ConfirmationViewerPage() {
         return (
             <div className="mobile-confirm">
                 <div className="mc-header">
-                    <div className="mc-brand">SMART TRAVEL PILOT</div>
+                    <div className="mc-brand">CLUBMODE TRAVEL</div>
                     <h1>확정서를 찾을 수 없습니다</h1>
                 </div>
                 <div className="mc-empty-notice">{error || '잘못된 링크입니다.'}</div>
@@ -374,7 +374,7 @@ export default function ConfirmationViewerPage() {
         <div className="mobile-confirm">
             {/* 상단 헤더 */}
             <div className="mc-header">
-                <div className="mc-brand">SMART TRAVEL PILOT</div>
+                <div className="mc-brand">CLUBMODE TRAVEL</div>
                 <h1>{doc.trip.productName || '여행 확정서'}</h1>
                 <div className="mc-subtitle">{doc.trip.destination}</div>
                 <div className="mc-status-badge">
@@ -528,18 +528,29 @@ export default function ConfirmationViewerPage() {
                                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="8" width="16" height="12" rx="2" ry="2"></rect><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                         </div>
                                         <div className="bag-label">위탁 수하물</div>
-                                        <div className="bag-weight-desc" style={{ fontSize: '1.4rem', color: '#1e293b' }}>
-                                            {safeStr(doc.secondaryResearch.baggage.checkedWeight).match(/\d+kg/)?.[0] || safeStr(doc.secondaryResearch.baggage.checkedWeight).replace(/^.*?(\d+kg).*$/, '$1') || '확인 필요'}
+                                        <div className="bag-weight">
+                                            {(() => {
+                                                const weight = safeStr(doc.secondaryResearch.baggage.checkedWeight);
+                                                const match = weight.match(/\d+(\.\d+)?/);
+                                                return match ? `${match[0]}kg` : (weight || '확인 필요');
+                                            })()}
                                         </div>
                                         <p>{safeStr(doc.secondaryResearch.baggage.checkedNote)}</p>
                                     </div>
                                     <div className="baggage-card carryon">
                                         <div className="bag-icon">
-                                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                <rect x="4" y="8" width="16" height="12" rx="2" ry="2"></rect>
+                                                <path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            </svg>
                                         </div>
                                         <div className="bag-label">기내 수하물</div>
-                                        <div className="bag-weight-desc" style={{ fontSize: '1.4rem', color: '#1e293b' }}>
-                                            {safeStr(doc.secondaryResearch.baggage.carryonWeight).match(/\d+kg/)?.[0] || safeStr(doc.secondaryResearch.baggage.carryonWeight).replace(/^.*?(\d+kg).*$/, '$1') || '확인 필요'}
+                                        <div className="bag-weight">
+                                            {(() => {
+                                                const weight = safeStr(doc.secondaryResearch.baggage.carryonWeight);
+                                                const match = weight.match(/\d+(\.\d+)?/);
+                                                return match ? `${match[0]}kg` : (weight || '확인 필요');
+                                            })()}
                                         </div>
                                         <p>{safeStr(doc.secondaryResearch.baggage.carryonNote)}</p>
                                     </div>
@@ -1040,7 +1051,7 @@ export default function ConfirmationViewerPage() {
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> 통신 환경 안내
                                     </div>
                                     <p className="mc-roaming-subtitle" style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '14px', lineHeight: 1.5 }}>
-                                        베트남 나트랑은 주요 관광지와 리조트 내에서 사용이 원활합니다. 출국 전 <strong>데이터 로밍 차단</strong> 또는 <strong>로밍 요금제 신청</strong>이 필수입니다.
+                                        베트남 {safeStr(doc.trip.destination).split(' ').pop()}은(는) 주요 관광지와 리조트 내에서 사용이 원활합니다. 출국 전 <strong>데이터 로밍 차단</strong> 또는 <strong>로밍 요금제 신청</strong>이 필수입니다.
                                     </p>
                                     <div className="roaming-option-cards">
                                         <div className="roaming-opt-card" style={{ flexDirection: 'column' }}>
