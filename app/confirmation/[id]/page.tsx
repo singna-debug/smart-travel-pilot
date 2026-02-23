@@ -184,7 +184,9 @@ const PinchZoomModal = ({ src, onClose, footer }: { src: string, onClose: () => 
                 width: '100%',
                 maxWidth: '480px',
                 height: '100vh',
-                borderRadius: '0' // 모달은 전체 화면 느낌으로 (단 너비만 제한)
+                height: '100dvh',
+                borderRadius: '0',
+                overflow: 'hidden'
             }}
         >
             <div
