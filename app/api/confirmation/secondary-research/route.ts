@@ -74,8 +74,8 @@ export async function POST(request: NextRequest) {
     }
   ],
   "baggage": {
-    "checkedWeight": "${airline || '해당 항공사'} 위탁수하물 무게제한 (예: 15kg, 23kg)",
-    "carryonWeight": "기내수하물 무게제한 (예: 7kg, 10kg)",
+    "checkedWeight": "${airline || '해당 항공사'} 위탁수하물 무게제한. 불필요한 설명 없이 숫자+kg 형식으로만 작성 (예: 15kg, 23kg)",
+    "carryonWeight": "기내수하물 무게제한. 불필요한 설명 없이 숫자+kg 형식으로만 작성 (예: 7kg, 10kg)",
     "checkedNote": "위탁수하물 크기 제한, 개수 제한 등 상세",
     "carryonNote": "기내수하물 크기 제한 (3변의 합 등), 액체류 규정",
     "additionalNotes": ["추가 주의사항 1 (예: 보조배터리 기내만)", "추가 주의사항 2"]
