@@ -415,11 +415,21 @@ export default function ConfirmationViewerPage() {
     };
 
     const isImageFile = (url: string) => {
-        const ext = url.split('?')[0].split('.').pop()?.toLowerCase();
-        return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext || '');
+        if (!url) return false;
+        const lowerUrl = url.toLowerCase();
+        // 확장자로 판단
+        const extMatch = lowerUrl.split('?')[0].match(/\.([^.]+)$/);
+        const ext = extMatch ? extMatch[1] : '';
+        const isImgExt = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'heic', 'heif'].includes(ext);
+        // URL에 특정 키워드가 포함된 경우도 이미지로 간주 (Supabase 등)
+        const hasImgKeyword = lowerUrl.includes('image') || lowerUrl.includes('img') || lowerUrl.includes('.jpg') || lowerUrl.includes('.jpeg') || lowerUrl.includes('.png');
+
+        return isImgExt || hasImgKeyword;
     };
 
     const handleFileAction = (file: any) => {
+        // [DIAGNOSTIC] 사용자 제보: JPG인데 새창으로 뜨고 안 보인다는 현상 확인용
+        // alert(`DEBUG: Action for ${file.name}\nIs Image: ${isImageFile(file.url)}\nURL: ${file.url}`);
         setViewerFile(file);
     };
 
@@ -473,7 +483,7 @@ export default function ConfirmationViewerPage() {
         <div className="mobile-confirm">
             {/* 상단 헤더 */}
             <div className="mc-header">
-                <div className="mc-brand">CLUBMODE TRAVEL</div>
+                <div className="mc-brand">CLUBMODE TRAVEL <span style={{ fontSize: '10px', opacity: 0.5 }}>v1.5-FIX</span></div>
                 <h1>{doc.trip.productName || '여행 확정서'}</h1>
                 <div className="mc-subtitle">{doc.trip.destination}</div>
                 <div className="mc-status-badge">
