@@ -506,8 +506,7 @@ body {
     }
 
     .sidebar-title,
-    .nav-item .nav-label,
-    .sidebar-footer .nav-item .nav-label,
+    .nav-item .nav-icon,
     .external-icon {
         display: none;
     }
@@ -559,11 +558,15 @@ body {
         flex-direction: row;
         padding: 8px;
         overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        /* Smooth scroll on iOS */
     }
 
     .nav-item {
-        padding: 8px 12px;
+        padding: 8px 16px;
         white-space: nowrap;
+        flex: 0 0 auto;
     }
 
     .sidebar-footer {
