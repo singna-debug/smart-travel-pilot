@@ -235,7 +235,7 @@ const PinchZoomModal = ({ src, onClose, footer }: { src: string, onClose: () => 
                         maxHeight: '100%',
                         objectFit: 'contain',
                         transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-                        transition: isDragging.current || initialDistance.current ? 'none' : 'transform 0.2s ease-out',
+                        transition: isDragging.current || initialDistance.current ? 'none' : 'transform 0.15s ease-out',
                         willChange: 'transform'
                     }}
                     draggable={false}
@@ -386,11 +386,18 @@ export default function ConfirmationViewerPage() {
     };
 
     const handleFileAction = (file: any) => {
+        // [DEBUG] 모바일 진단용
+        // alert(`File Action: ${file.name}, type: ${isImageFile(file.url) ? 'IMAGE' : 'NOT_IMAGE'}`);
+
         if (isImageFile(file.url)) {
             setViewerFile(file);
         } else {
-            // PDF 등 다른 파일은 새 창에서 열기 (브라우저 뷰어 활용)
-            window.open(file.url, '_blank');
+            // PDF 등의 파일은 브라우저 뷰어 활용
+            const win = window.open(file.url, '_blank');
+            if (!win || win.closed || typeof win.closed === 'undefined') {
+                // 팝업 차단된 경우 현재 창에서 열기
+                window.location.href = file.url;
+            }
         }
     };
 
@@ -410,8 +417,8 @@ export default function ConfirmationViewerPage() {
             window.URL.revokeObjectURL(url);
         } catch (e) {
             console.error('Download failed:', e);
-            // 실패 시 새 탭으로 여는 폴백
-            window.open(fileUrl, '_blank');
+            // alert('다운로드 실패, 브라우저 뷰어로 전환합니다.');
+            window.location.href = fileUrl;
         }
     };
 
