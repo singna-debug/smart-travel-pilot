@@ -531,8 +531,10 @@ export default function ConfirmationViewerPage() {
                                         <div className="bag-weight">
                                             {(() => {
                                                 const weight = safeStr(doc.secondaryResearch.baggage.checkedWeight);
-                                                const match = weight.match(/(\d+(?:\.\d+)?)\s*(?:kg|키로|k|KG|K)/i) || weight.match(/(\d+(?:\.\d+)?)/);
-                                                return match ? `${match[1]}kg` : (weight || '확인 필요');
+                                                const match = weight.match(/(\d+(?:\.\d+)?)\s*(?:kg|키로|k|KG|K)/i);
+                                                if (match) return `${match[1]}kg`;
+                                                if (/^\d+(?:\.\d+)?$/.test(weight.trim())) return `${weight.trim()}kg`;
+                                                return (weight || '확인 필요');
                                             })()}
                                         </div>
                                         <p>{safeStr(doc.secondaryResearch.baggage.checkedNote)}</p>
@@ -548,8 +550,10 @@ export default function ConfirmationViewerPage() {
                                         <div className="bag-weight">
                                             {(() => {
                                                 const weight = safeStr(doc.secondaryResearch.baggage.carryonWeight);
-                                                const match = weight.match(/(\d+(?:\.\d+)?)\s*(?:kg|키로|k|KG|K)/i) || weight.match(/(\d+(?:\.\d+)?)/);
-                                                return match ? `${match[1]}kg` : (weight || '확인 필요');
+                                                const match = weight.match(/(\d+(?:\.\d+)?)\s*(?:kg|키로|k|KG|K)/i);
+                                                if (match) return `${match[1]}kg`;
+                                                if (/^\d+(?:\.\d+)?$/.test(weight.trim())) return `${weight.trim()}kg`;
+                                                return (weight || '확인 필요');
                                             })()}
                                         </div>
                                         <p>{safeStr(doc.secondaryResearch.baggage.carryonNote)}</p>

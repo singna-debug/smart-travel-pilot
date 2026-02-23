@@ -74,10 +74,10 @@ export async function POST(request: NextRequest) {
     }
   ],
   "baggage": {
-    "checkedWeight": "${airline || '해당 항공사'} 위탁수하물 무게제한. 불필요한 설명 없이 숫자+kg 형식으로만 작성 (예: 15kg, 23kg)",
-    "carryonWeight": "기내수하물 무게제한. 불필요한 설명 없이 숫자+kg 형식으로만 작성 (예: 7kg, 10kg)",
-    "checkedNote": "위탁수하물 크기 제한, 개수 제한 등 상세",
-    "carryonNote": "기내수하물 크기 제한 (3변의 합 등), 액체류 규정",
+    "checkedWeight": "${airline || '해당 항공사'} 위탁수하물 무게제한 (예: 15kg, 23kg). 개수(1개 등)는 포함하지 말고 오직 무게와 단위만 작성하세요.",
+    "carryonWeight": "기내수하물 무게제한 (예: 7kg, 10kg). 개수는 포함하지 말고 오직 무게와 단위만 작성하세요.",
+    "checkedNote": "위탁수하물 크기 및 개수 제한 상세 (예: 1개 무료, 세변의 합 등)",
+    "carryonNote": "기내수하물 크기 제한 및 액체류 규정 상세",
     "additionalNotes": ["추가 주의사항 1 (예: 보조배터리 기내만)", "추가 주의사항 2"]
   },
   "customGuides": [${customGuidesJson ? customGuidesJson : ''}]
@@ -117,14 +117,22 @@ ${customGuides && customGuides.length > 0 ? `\n커스텀 가이드 요청 주제
         }
 
         // 기본값 보장
-        if (!research.customGuides) research.customGuides = [];
-        if (!Array.isArray(research.landmarks)) research.landmarks = [];
+        if (!research.currency) research.currency = { localCurrency: '', currencySymbol: '', calculationTip: '', exchangeTip: '', tipCulture: '' };
+        if (!research.roaming) research.roaming = { carriers: '', simEsim: '' };
+        if (!research.customs) research.customs = { warningTitle: '', warningContent: '', minorEntry: '', dutyFree: '', passportNote: '' };
         if (!research.baggage || typeof research.baggage === 'string') {
             research.baggage = {
                 checkedWeight: typeof research.baggage === 'string' ? research.baggage : '확인 필요',
                 carryonWeight: '확인 필요',
                 checkedNote: '', carryonNote: '', additionalNotes: []
             };
+        } else {
+            // 필드별 누락 방지
+            research.baggage.checkedWeight = research.baggage.checkedWeight || '확인 필요';
+            research.baggage.carryonWeight = research.baggage.carryonWeight || '확인 필요';
+            research.baggage.checkedNote = research.baggage.checkedNote || '';
+            research.baggage.carryonNote = research.baggage.carryonNote || '';
+            research.baggage.additionalNotes = research.baggage.additionalNotes || [];
         }
         if (!research.currency.currencySymbol) research.currency.currencySymbol = '';
 
