@@ -593,8 +593,12 @@
 /* 탭 네비게이션 */
 .mc-tabs {
     display: flex;
-    flex-wrap: wrap;
-    /* 모바일에서 탭이 많을 때 줄바꿈 허용 */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
     background: #fff;
     border-bottom: 1px solid #e2e8f0;
     position: sticky;
@@ -608,8 +612,8 @@
 
 /* 탭 아이콘 & 배지 */
 .mc-tab {
-    flex: 1 1 auto;
-    min-width: 60px;
+    flex: 0 0 auto;
+    min-width: 70px;
     display: flex;
     justify-content: center;
     align-items: center;
