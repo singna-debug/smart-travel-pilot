@@ -18,7 +18,7 @@ export async function GET(
 ) {
     try {
         const { id } = await params;
-        const doc = confirmationStore.get(id);
+        const doc = await confirmationStore.get(id);
 
         if (!doc) {
             return NextResponse.json(
@@ -46,7 +46,7 @@ export async function PUT(
 ) {
     try {
         const { id } = await params;
-        const existing = confirmationStore.get(id);
+        const existing = await confirmationStore.get(id);
 
         if (!existing) {
             return NextResponse.json(
@@ -64,7 +64,7 @@ export async function PUT(
             updatedAt: new Date().toISOString(),
         };
 
-        confirmationStore.set(id, updated);
+        await confirmationStore.set(id, updated);
 
         return NextResponse.json({ success: true, data: updated });
     } catch (error: any) {
