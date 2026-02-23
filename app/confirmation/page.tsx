@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { supabase } from '@/lib/supabase';
 import type { ConsultationData, DetailedProductInfo, TravelerInfo, DocumentFile, SecondaryResearch, MeetingInfo } from '@/types';
 
 // AI 응답에서 객체/배열이 올 수 있으므로 안전하게 문자열로 변환
@@ -84,6 +85,7 @@ export default function ConfirmationPage() {
 
     // 파일 업로드
     const [files, setFiles] = useState<DocumentFile[]>([]);
+    const [uploading, setUploading] = useState<string | null>(null); // 업로드 중인 파일 타입
 
     // 2차 조사
     const [secondaryResearch, setSecondaryResearch] = useState<SecondaryResearch | null>(null);
@@ -269,23 +271,55 @@ export default function ConfirmationPage() {
         setMeetingInfo(prev => prev.map((m, idx) => idx === i ? { ...m, [field]: value } : m));
     };
 
-    // 파일 핸들러 (로컬 blob URL 사용 — 프로토타입용)
-    const handleFileUpload = (type: DocumentFile['type'], label: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    // 파일 핸들러 (Supabase Storage 사용)
+    const handleFileUpload = async (type: DocumentFile['type'], label: string, e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
-        const blobUrl = URL.createObjectURL(file);
-        const newFile: DocumentFile = {
-            id: `file-${Date.now()}`,
-            name: file.name,
-            type,
-            label,
-            url: blobUrl,
-            uploadedAt: new Date().toISOString(),
-        };
-        setFiles(prev => {
-            const filtered = prev.filter(f => f.type !== type);
-            return [...filtered, newFile];
-        });
+        if (!file || !supabase) return;
+
+        setUploading(type);
+        try {
+            // 파일명 중복 방지를 위한 타임스탬프 조합
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+            const filePath = `confirmations/${fileName}`;
+
+            // Supabase Storage 업로드
+            const { data, error } = await supabase.storage
+                .from('confirmations')
+                .upload(filePath, file);
+
+            if (error) {
+                if (error.message.includes('bucket not found')) {
+                    alert('Supabase Storage에 "confirmations" 버킷이 없습니다. 버킷을 먼저 생성해 주세요.');
+                } else {
+                    alert(`업로드 실패: ${error.message}`);
+                }
+                return;
+            }
+
+            // 공용 URL 가져오기
+            const { data: { publicUrl } } = supabase.storage
+                .from('confirmations')
+                .getPublicUrl(filePath);
+
+            const newFile: DocumentFile = {
+                id: `file-${Date.now()}`,
+                name: file.name,
+                type,
+                label,
+                url: publicUrl,
+                uploadedAt: new Date().toISOString(),
+            };
+
+            setFiles(prev => {
+                const filtered = prev.filter(f => f.type !== type);
+                return [...filtered, newFile];
+            });
+        } catch (err: any) {
+            alert(`오류 발생: ${err.message}`);
+        } finally {
+            setUploading(null);
+        }
     };
 
     const getFileByType = (type: DocumentFile['type']) => files.find(f => f.type === type);
@@ -692,15 +726,17 @@ export default function ConfirmationPage() {
                         { type: 'other' as const, label: '기타 서류', icon: '📄' },
                     ].map(slot => {
                         const uploaded = getFileByType(slot.type);
+                        const isUploading = uploading === slot.type;
                         return (
-                            <div key={slot.type} className={`file-upload-slot ${uploaded ? 'uploaded' : ''}`}>
-                                <div className="slot-icon">{slot.icon}</div>
-                                <div className="slot-label">{slot.label}</div>
-                                {uploaded && <div className="slot-filename">{uploaded.name}</div>}
+                            <div key={slot.type} className={`file-upload-slot ${uploaded ? 'uploaded' : ''} ${isUploading ? 'uploading' : ''}`}>
+                                <div className="slot-icon">{isUploading ? '⌛' : slot.icon}</div>
+                                <div className="slot-label">{isUploading ? '업로드 중...' : slot.label}</div>
+                                {uploaded && !isUploading && <div className="slot-filename">{uploaded.name}</div>}
                                 <input
                                     type="file"
                                     accept=".pdf,.jpg,.jpeg,.png"
                                     onChange={e => handleFileUpload(slot.type, slot.label, e)}
+                                    disabled={isUploading}
                                 />
                             </div>
                         );
