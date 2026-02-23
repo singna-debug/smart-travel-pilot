@@ -231,37 +231,49 @@ const PinchZoomModal = ({ src, onClose, footer, isPdf }: { src: string, onClose:
                     ✕
                 </button>
 
-                {imgLoading && !imgError && (
-                    <div style={{ color: '#fff', fontSize: '0.9rem', opacity: 0.7 }}>이미지 불러오는 중...</div>
-                )}
-                {imgError && (
-                    <div style={{ textAlign: 'center', color: '#fff', padding: '20px' }}>
-                        <div style={{ fontSize: '2rem', marginBottom: '10px' }}>⚠️</div>
-                        <div style={{ fontSize: '0.9rem' }}>이미지를 불러올 수 없습니다.</div>
-                        <div style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '8px', wordBreak: 'break-all', maxWidth: '80vw' }}>{src}</div>
+                {isPdf ? (
+                    <div style={{ width: '100%', height: '100%', paddingTop: '60px' }}>
+                        <iframe
+                            src={src}
+                            style={{ width: '100%', height: '100%', border: 'none', background: '#fff' }}
+                            title="Document Viewer"
+                        />
                     </div>
-                )}
+                ) : (
+                    <>
+                        {imgLoading && !imgError && (
+                            <div style={{ color: '#fff', fontSize: '0.9rem', opacity: 0.7 }}>이미지 불러오는 중...</div>
+                        )}
+                        {imgError && (
+                            <div style={{ textAlign: 'center', color: '#fff', padding: '20px' }}>
+                                <div style={{ fontSize: '2rem', marginBottom: '10px' }}>⚠️</div>
+                                <div style={{ fontSize: '0.9rem' }}>이미지를 불러올 수 없습니다.</div>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '8px', wordBreak: 'break-all', maxWidth: '80vw' }}>{src}</div>
+                            </div>
+                        )}
 
-                <img
-                    ref={imageRef}
-                    src={src}
-                    alt="Expanded View"
-                    onLoad={() => setImgLoading(false)}
-                    onError={() => {
-                        setImgLoading(false);
-                        setImgError(true);
-                    }}
-                    style={{
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                        objectFit: 'contain',
-                        opacity: imgLoading || imgError ? 0 : 1,
-                        transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-                        transition: isDragging.current || initialDistance.current ? 'none' : 'transform 0.15s ease-out',
-                        willChange: 'transform'
-                    }}
-                    draggable={false}
-                />
+                        <img
+                            ref={imageRef}
+                            src={src}
+                            alt="Expanded View"
+                            onLoad={() => setImgLoading(false)}
+                            onError={() => {
+                                setImgLoading(false);
+                                setImgError(true);
+                            }}
+                            style={{
+                                maxWidth: '100%',
+                                maxHeight: '100%',
+                                objectFit: 'contain',
+                                opacity: imgLoading || imgError ? 0 : 1,
+                                transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+                                transition: isDragging.current || initialDistance.current ? 'none' : 'transform 0.15s ease-out',
+                                willChange: 'transform'
+                            }}
+                            draggable={false}
+                        />
+                    </>
+                )}
                 {footer && (
                     <div
                         style={{
@@ -408,19 +420,7 @@ export default function ConfirmationViewerPage() {
     };
 
     const handleFileAction = (file: any) => {
-        // [DEBUG] 모바일 진단용
-        // alert(`File Action: ${file.name}, type: ${isImageFile(file.url) ? 'IMAGE' : 'NOT_IMAGE'}`);
-
-        if (isImageFile(file.url)) {
-            setViewerFile(file);
-        } else {
-            // PDF 등의 파일은 브라우저 뷰어 활용
-            const win = window.open(file.url, '_blank');
-            if (!win || win.closed || typeof win.closed === 'undefined') {
-                // 팝업 차단된 경우 현재 창에서 열기
-                window.location.href = file.url;
-            }
-        }
+        setViewerFile(file);
     };
 
     const handleFileDownload = async (fileUrl: string, fileName: string) => {
