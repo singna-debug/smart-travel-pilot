@@ -85,6 +85,7 @@
     cursor: pointer;
     white-space: nowrap;
     transition: opacity 0.2s;
+    box-sizing: border-box;
 }
 
 .analyzer-button:hover {
@@ -256,7 +257,12 @@
 
 @media (max-width: 768px) {
     .url-analyzer {
-        padding: 16px;
+        padding: 0;
+    }
+
+    .analyzer-input-section,
+    .customer-info-section {
+        padding: 20px !important;
     }
 
     .analyzer-header-mobile {
@@ -310,10 +316,12 @@
     .analyzer-input-wrapper {
         flex-direction: column;
         width: 100%;
+        box-sizing: border-box;
     }
 
     .analyzer-button {
         width: 100%;
         padding: 12px;
+        box-sizing: border-box;
     }
 }

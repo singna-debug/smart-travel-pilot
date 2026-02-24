@@ -254,6 +254,12 @@ export default function ManualLogPage() {
                 input::placeholder, textarea::placeholder { color: var(--text-muted); }
                 .readonly-input { background: var(--bg-secondary); color: var(--text-secondary); cursor: not-allowed; }
                 
+                @media (max-width: 768px) {
+                    .manual-log-page { padding: 16px; min-width: 100%; box-sizing: border-box; }
+                    .log-form { padding: 20px; box-sizing: border-box; }
+                    input, select, textarea { box-sizing: border-box; max-width: 100%; }
+                }
+                
                 .url-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
                 .url-row input { flex: 1; }
                 .url-add-btn, .url-remove-btn {
