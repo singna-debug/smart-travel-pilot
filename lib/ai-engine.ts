@@ -20,7 +20,8 @@ if (!apiKey) {
     console.error('[AI Engine] GEMINI_API_KEY가 설정되지 않았습니다!');
 }
 const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' }); // 2026년 사용 가능한 모델 (로그상 성공 확인)
+const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.0-flash';
+const model = genAI.getGenerativeModel({ model: modelName }); // 환경변수에서 모델명을 가져옴
 
 // 대화 컨텍스트 (메모리)
 const conversationContexts = new Map<string, {
