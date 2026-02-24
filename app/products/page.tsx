@@ -339,6 +339,17 @@ export default function ProductsPage() {
                 .desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; height: 40px; overflow: hidden; }
                 .card-actions { display: flex; justify-content: space-between; font-size: 13px; }
                 .delete-btn { color: #ef4444; background: none; border: none; cursor: pointer; }
+                
+                @media (max-width: 768px) {
+                    .products-page { padding: 0; min-width: 100%; box-sizing: border-box; }
+                    .analysis-section, .extra-section { padding: 16px; border-radius: 12px; margin-bottom: 16px; }
+                    .url-input-row { flex-direction: column; align-items: stretch; gap: 12px; }
+                    .url-input, .analyze-btn { width: 100%; box-sizing: border-box; }
+                    .analyze-btn { margin-top: 4px; }
+                    .form-row { flex-direction: column; gap: 12px; }
+                    input, textarea { box-sizing: border-box; max-width: 100%; }
+                    .product-grid { grid-template-columns: 1fr; }
+                }
             `}</style>
         </div>
     );
