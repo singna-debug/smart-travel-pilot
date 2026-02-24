@@ -7,7 +7,8 @@ export const maxDuration = 30;
 
 const apiKey = (process.env.GEMINI_API_KEY || '').replace(/[\x00-\x1F\x7F]/g, '').trim();
 const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.0-flash';
+const model = genAI.getGenerativeModel({ model: modelName });
 
 export async function POST(request: NextRequest) {
     try {

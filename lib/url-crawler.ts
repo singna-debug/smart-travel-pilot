@@ -201,7 +201,8 @@ async function analyzeWithGemini(text: string, url: string, nextData?: string): 
     if (!apiKey) return null;
 
     try {
-        console.log('[Gemini] AI 분석 시작...');
+        const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.0-flash';
+        console.log(`[Gemini] AI 분석 시작... (모델: ${modelName})`);
         const prompt = `다음 여행 상품 페이지에서 정보를 추출하여 JSON으로 반환하세요.
 URL: ${url}
 ${nextData ? `--- [중요: NEXT_JS_DATA (JSON 데이터)] ---\n${nextData.substring(0, 25000)}\n` : ''}
@@ -222,7 +223,7 @@ ${text.substring(0, 8000)}
   "exclusions": ["불포함 사항을 간결하게 요약. 예: '가이드팁 1인 90유로', '매너 팁', '개인 경비', '여행자보험' 등"]
 }`;
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1 } })
@@ -369,7 +370,8 @@ export async function analyzeForConfirmation(text: string, url: string, nextData
         prompt += '5. 호텔 정보: 호텔 이름은 가능한 한글 정식 명칭을 사용하세요.\n';
         prompt += '6. JSON만 반환하세요. 다른 설명 텍스트는 제외하세요.';
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+        const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.0-flash';
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
