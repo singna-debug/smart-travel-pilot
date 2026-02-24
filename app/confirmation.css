@@ -524,15 +524,30 @@
 /* 모바일 반응형 (관리자 화면) */
 @media (max-width: 768px) {
     .confirm-admin {
-        padding: 16px;
+        padding: 0 !important;
+    }
+
+    .confirm-section {
+        padding: 16px !important;
+    }
+
+    .analyze-url-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px;
+    }
+
+    .analyze-url-row .btn-analyze {
+        width: 100% !important;
+        margin-top: 4px;
     }
 
     .confirm-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
 
     .confirm-grid.three-col {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
 
     .itinerary-day-header {

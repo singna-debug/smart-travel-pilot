@@ -341,14 +341,14 @@ export default function ProductsPage() {
                 .delete-btn { color: #ef4444; background: none; border: none; cursor: pointer; }
                 
                 @media (max-width: 768px) {
-                    .products-page { padding: 0; min-width: 100%; box-sizing: border-box; }
-                    .analysis-section, .extra-section { padding: 16px; border-radius: 12px; margin-bottom: 16px; }
-                    .url-input-row { flex-direction: column; align-items: stretch; gap: 12px; }
-                    .url-input, .analyze-btn { width: 100%; box-sizing: border-box; }
+                    .products-page { padding: 0 !important; min-width: 100%; box-sizing: border-box; }
+                    .analysis-section, .extra-section { padding: 16px !important; border-radius: 12px; margin-bottom: 16px; min-width: 0; }
+                    .url-input-row { flex-direction: column !important; align-items: stretch !important; gap: 12px; display: flex !important; }
+                    .url-input, .analyze-btn { width: 100% !important; box-sizing: border-box; }
                     .analyze-btn { margin-top: 4px; }
-                    .form-row { flex-direction: column; gap: 12px; }
-                    input, textarea { box-sizing: border-box; max-width: 100%; }
-                    .product-grid { grid-template-columns: 1fr; }
+                    .form-row { flex-direction: column !important; gap: 12px; display: flex !important; }
+                    input, textarea { box-sizing: border-box; max-width: 100% !important; width: 100% !important; }
+                    .product-grid { grid-template-columns: 1fr !important; }
                 }
             `}</style>
         </div>
