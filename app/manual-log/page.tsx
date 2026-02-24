@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import GoogleContactsPicker from '@/components/GoogleContactsPicker';
 
 export default function ManualLogPage() {
     const [formData, setFormData] = useState({
@@ -149,6 +150,13 @@ export default function ManualLogPage() {
             <p className="page-subtitle">전화/방문 상담 내역을 시트에 기록합니다.</p>
 
             <form onSubmit={handleSubmit} className="log-form">
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-10px' }}>
+                    <GoogleContactsPicker
+                        onSelectContact={(name, phone) => {
+                            setFormData(prev => ({ ...prev, name, phone: formatPhoneNumber(phone) }));
+                        }}
+                    />
+                </div>
                 <div className="analyzer-form-grid-3">
                     <div className="form-group">
                         <label>고객명 *</label>
