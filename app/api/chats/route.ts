@@ -138,6 +138,7 @@ export async function GET(request: NextRequest) {
             productName: c.trip.product_name,
             departureDate: c.trip.departure_date,
             status: c.automation.status,
+            isBotEnabled: c.is_bot_enabled !== false,
             lastMessage: c.summary || '시트 기록됨',
             lastMessageAt: c.timestamp ? new Date(c.timestamp).toISOString() : new Date().toISOString(),
             messageCount: 1,

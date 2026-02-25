@@ -102,6 +102,8 @@ async function getSheetTitles(sheets: any, spreadsheetId: string) {
 
         let consultationsSheet = 'Sheet1';
         let consultationsGid = 0;
+        let messagesSheet = 'Messages';
+        let messagesGid = 0;
 
         // 월별 시트 목록 및 GID 매핑
         const monthlySheets: string[] = [];
@@ -121,6 +123,11 @@ async function getSheetTitles(sheets: any, spreadsheetId: string) {
                 consultationsSheet = title;
                 consultationsGid = gid;
             }
+
+            if (title === 'Messages' || title === '대화내역' || title === '메시지') {
+                messagesSheet = title;
+                messagesGid = gid;
+            }
         });
 
         // 월별 시트가 있으면 가장 최신 달을 기본 상담 시트로 설정
@@ -130,7 +137,7 @@ async function getSheetTitles(sheets: any, spreadsheetId: string) {
             consultationsGid = monthGids[consultationsSheet] || 0;
         }
 
-        return { consultationsSheet, consultationsGid, monthlySheets, monthGids, sheetList };
+        return { consultationsSheet, consultationsGid, messagesSheet, messagesGid, monthlySheets, monthGids, sheetList };
     } catch (e) {
         return { consultationsSheet: 'Sheet1', consultationsGid: 0, monthlySheets: [], monthGids: {}, sheetList: [] };
     }
@@ -148,7 +155,7 @@ export async function getMonthSheetGid(month?: string): Promise<number> {
         const targetMonth = month || format(new Date(), 'yyyy-MM');
         const { monthGids } = await getSheetTitles(sheets, sheetId);
 
-        return monthGids[targetMonth] || 0;
+        return (monthGids as Record<string, number>)[targetMonth] || 0;
     } catch (error) {
         return 0;
     }
@@ -516,9 +523,28 @@ export async function initializeSheetHeaders(): Promise<boolean> {
         // 12개월 시트 생성
         await preCreateMonthlySheets();
 
-        const { consultationsSheet, consultationsGid, monthlySheets, monthGids } = await getSheetTitles(sheets, sheetId);
+        const { consultationsSheet, consultationsGid, messagesSheet, messagesGid, monthlySheets, monthGids } = await getSheetTitles(sheets, sheetId);
 
-        // 상담 요약 업데이트 (이미 위에서 생성되었을 수 있으나 헤더 보장 위해 호출)
+        // Messages 시트가 없으면 생성
+        let targetMessagesSheet = messagesSheet;
+        if (!messagesGid) {
+            console.log('➕ Messages 시트 생성 중...');
+            try {
+                const addSheetResponse = await sheets.spreadsheets.batchUpdate({
+                    spreadsheetId: sheetId,
+                    requestBody: {
+                        requests: [{
+                            addSheet: { properties: { title: 'Messages' } }
+                        }]
+                    }
+                });
+                targetMessagesSheet = 'Messages';
+            } catch (e) {
+                console.error('Messages 시트 생성 실패 (이미 존재할 수 있음)');
+            }
+        }
+
+        // 상담 요약 업데이트
         await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
             range: `${consultationsSheet}!A1:O1`,
@@ -526,13 +552,22 @@ export async function initializeSheetHeaders(): Promise<boolean> {
             requestBody: { values: [consultationHeaders] },
         });
 
+        // 메시지 로그 업데이트
+        await sheets.spreadsheets.values.update({
+            spreadsheetId: sheetId,
+            range: `${targetMessagesSheet}!A1:D1`,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: { values: [messageHeaders] },
+        });
+
         // 모든 시트에 드롭다운 적용
         const dropdownRequests: any[] = [];
         const gidsToUpdate = new Set<number>();
         if (consultationsGid) gidsToUpdate.add(consultationsGid);
-        monthlySheets.forEach((m) => {
-            if (monthGids[m]) gidsToUpdate.add(monthGids[m]);
-        });
+        for (const m of monthlySheets) {
+            const gid = (monthGids as Record<string, number>)[m];
+            if (gid !== undefined) gidsToUpdate.add(gid);
+        }
 
         for (const gid of gidsToUpdate) {
             dropdownRequests.push({
@@ -588,7 +623,23 @@ export async function initializeSheetHeaders(): Promise<boolean> {
  */
 export async function appendMessageToSheet(visitorId: string, sender: 'user' | 'assistant', content: string): Promise<boolean> {
     try {
-        // 메시지 로그 기록 기능이 필요 없으면 여기서 바로 true 리턴하거나 로직 제거
+        const sheets = getGoogleSheetsClient();
+        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
+        if (!sheetId) return false;
+
+        const { messagesSheet } = await getSheetTitles(sheets, sheetId);
+        const timestamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+
+        await sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: `${messagesSheet}!A:D`,
+            valueInputOption: 'USER_ENTERED',
+            insertDataOption: 'INSERT_ROWS',
+            requestBody: {
+                values: [[timestamp, visitorId, sender, content]]
+            }
+        });
+
         return true;
     } catch (error) {
         console.error('메시지 시트 기록 오류:', error);
@@ -769,7 +820,36 @@ export async function getAllConsultations(forceRefresh = false): Promise<Consult
  * 특정 사용자의 대화 내역 전체를 조회합니다 (시트 기반).
  */
 export async function getMessagesByVisitorId(visitorId: string): Promise<any[]> {
-    return [];
+    try {
+        const sheets = getGoogleSheetsClient();
+        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
+        if (!sheetId) return [];
+
+        const { messagesSheet } = await getSheetTitles(sheets, sheetId);
+
+        const response = await sheets.spreadsheets.values.get({
+            spreadsheetId: sheetId,
+            range: `${messagesSheet}!A:D`,
+        });
+
+        const rows = response.data.values;
+        if (!rows || rows.length <= 1) return [];
+
+        // 헤더 제외하고 visitorId로 필터링
+        const filtered = rows.slice(1)
+            .filter(row => row[1] === visitorId)
+            .map(row => ({
+                timestamp: row[0],
+                visitorId: row[1],
+                role: row[2], // 'user' or 'assistant'
+                content: row[3]
+            }));
+
+        return filtered;
+    } catch (error) {
+        console.error('메시지 조회 오류:', error);
+        return [];
+    }
 }
 
 /**

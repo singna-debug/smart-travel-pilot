@@ -109,14 +109,103 @@ async function processBackgroundTask(body: KakaoSkillRequest, callbackUrl: strin
 
     log(`[Background] Start for ${visitorId}`);
 
-    // 1. 사용자 메시지 기록
+    // 1. 사용자 메시지 기록 및 콜백 URL 저장
     messageStore.addMessage(visitorId, 'user', userMessage);
+
     try {
         const { appendMessageToSheet } = await import('@/lib/google-sheets');
         appendMessageToSheet(visitorId, 'user', userMessage).catch(e => log(`[Sheet Log Error] ${e.message}`));
+
+        if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+            const { supabase } = await import('@/lib/supabase');
+            if (supabase) {
+                // 1. 콜백 URL 기록
+                await supabase.from('consultations').upsert({
+                    visitor_id: visitorId,
+                    last_callback_url: callbackUrl,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'visitor_id' });
+
+                // 2. 메시지 로그 기록 (User)
+                await supabase.from('message_logs').insert({
+                    visitor_id: visitorId,
+                    role: 'user',
+                    content: userMessage
+                });
+
+                // 3. AI 자동 분석 및 시트 동기화 (백그라운드)
+                const { syncConsultationWithAI } = await import('@/lib/consultation-manager');
+                syncConsultationWithAI(visitorId).catch(e => console.error(`[Auto Sync Error] ${e}`));
+            }
+        }
     } catch (e) { }
 
-    // 2. AI 응답 생성
+    // 2. 챗봇 활성화 상태 확인 (기본적으로 수동 모드 지향)
+    let isBotEnabled = false; // 기본값 false로 변경 (수동 모드)
+    try {
+        if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+            const { supabase } = await import('@/lib/supabase');
+            if (supabase) {
+                const { data } = await supabase
+                    .from('consultations')
+                    .select('is_bot_enabled')
+                    .eq('visitor_id', visitorId)
+                    .single();
+
+                // 데이터가 있고 명시적으로 true인 경우에만 활성화
+                if (data && data.is_bot_enabled === true) {
+                    isBotEnabled = true;
+                }
+            }
+        }
+    } catch (e) {
+        log(`[Bot Status Check Error] ${e}`);
+    }
+
+    if (!isBotEnabled) {
+        log(`[Background] Bot is DISABLED for ${visitorId}. Sending 1:1 chat guide.`);
+
+        // 1:1 채팅 이동 버튼 포함 응답
+        const channelId = (process.env.KAKAO_CHANNEL_ID || '').replace('@', '');
+        const chatUrl = channelId ? `http://pf.kakao.com/${channelId}/chat` : null;
+
+        const responseBody = {
+            version: "2.0",
+            template: {
+                outputs: [
+                    {
+                        simpleText: {
+                            text: "안녕하세요! 상담원에게 메시지가 전달되었습니다. 잠시만 기다려주시면 직접 답변해 드릴게요. 😊"
+                        }
+                    },
+                    {
+                        basicCard: {
+                            title: "상담원 대화 안내",
+                            description: "빠른 1:1 대화를 원하시면 아래 버튼을 눌러주세요.",
+                            buttons: chatUrl ? [{
+                                action: "webLink",
+                                label: "1:1 채팅하기",
+                                webLinkUrl: chatUrl
+                            }] : []
+                        }
+                    }
+                ]
+            }
+        };
+
+        try {
+            await fetch(callbackUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(responseBody)
+            });
+        } catch (e) {
+            log(`[Bot-Off Callback Error] ${e}`);
+        }
+        return;
+    }
+
+    // 3. AI 응답 생성
     log(`[Background] Generating AI response...`);
     let responseMessage: string;
     let consultationData: any;

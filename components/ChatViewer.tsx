@@ -25,6 +25,7 @@ interface ChatSession {
         nextFollowup: string;
     };
     messages: Message[];
+    is_bot_enabled?: boolean;
     sheetRowIndex?: number;
     summary?: string;
 }
@@ -37,6 +38,10 @@ export default function ChatViewer({ chatId }: ChatViewerProps) {
     const [session, setSession] = useState<ChatSession | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [inputMessage, setInputMessage] = useState('');
+    const [sending, setSending] = useState(false);
+    const [toggling, setToggling] = useState(false);
+    const [summarizing, setSummarizing] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -66,6 +71,82 @@ export default function ChatViewer({ chatId }: ChatViewerProps) {
             console.error(err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const toggleBot = async (enabled: boolean) => {
+        if (toggling) return;
+        setToggling(true);
+        try {
+            const response = await fetch(`/api/chats/${chatId}/bot-toggle`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enabled }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                setSession(prev => prev ? { ...prev, is_bot_enabled: enabled } : null);
+            }
+        } catch (err) {
+            console.error('Toggle Error:', err);
+        } finally {
+            setToggling(false);
+        }
+    };
+
+    const sendMessage = async () => {
+        if (!inputMessage.trim() || sending) return;
+        setSending(true);
+        try {
+            const response = await fetch(`/api/chats/${chatId}/messages`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: inputMessage }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                // UI 즉시 반영을 위해 로컬 상태 업데이트
+                const newMessage: Message = {
+                    id: `temp-${Date.now()}`,
+                    role: 'assistant',
+                    content: inputMessage,
+                    timestamp: new Date().toISOString()
+                };
+                setSession(prev => prev ? {
+                    ...prev,
+                    messages: [...prev.messages, newMessage]
+                } : null);
+                setInputMessage('');
+            } else {
+                alert('메시지 전송 실패: ' + data.error);
+            }
+        } catch (err) {
+            console.error('Send Error:', err);
+            alert('메시지 전송 중 오류가 발생했습니다.');
+        } finally {
+            setSending(false);
+        }
+    };
+
+    const summarizeChat = async () => {
+        if (summarizing) return;
+        setSummarizing(true);
+        try {
+            const response = await fetch(`/api/chats/${chatId}/summarize`, {
+                method: 'POST'
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert('AI 분석 및 시트 저장이 완료되었습니다!');
+                fetchSession(); // 최신 정보로 갱신
+            } else {
+                alert('분석 실패: ' + data.error);
+            }
+        } catch (err) {
+            console.error('Summarize Error:', err);
+            alert('분석 중 오류가 발생했습니다.');
+        } finally {
+            setSummarizing(false);
         }
     };
 
@@ -103,14 +184,22 @@ export default function ChatViewer({ chatId }: ChatViewerProps) {
                 <div className="chat-viewer-header">
                     <div className="viewer-title">
                         <a href="/chats" className="back-button">← 뒤로</a>
-                        <h2>{session.visitorName}님 상담 내역</h2>
+                        <h2>{session.visitorName}님 상담</h2>
                     </div>
                     <div className="viewer-actions">
+                        <div className="bot-control">
+                            <span>모드</span>
+                            <div className="bot-toggle" onClick={() => !toggling && toggleBot(!session.is_bot_enabled)}>
+                                <div className={`toggle-option ${session.is_bot_enabled !== false ? 'active bot' : ''}`}>
+                                    🤖 챗봇
+                                </div>
+                                <div className={`toggle-option ${session.is_bot_enabled === false ? 'active admin' : ''}`}>
+                                    👤 상담원
+                                </div>
+                            </div>
+                        </div>
                         <button onClick={openGoogleSheet} className="action-button">
                             📊 시트
-                        </button>
-                        <button onClick={fetchSession} className="action-button">
-                            🔄 새로고침
                         </button>
                     </div>
                 </div>
@@ -139,6 +228,29 @@ export default function ChatViewer({ chatId }: ChatViewerProps) {
                         ))
                     )}
                     <div ref={messagesEndRef} />
+                </div>
+
+                <div className="chat-input-area">
+                    <textarea
+                        className="chat-message-input"
+                        placeholder="고객에게 보낼 메시지를 입력하세요..."
+                        rows={1}
+                        value={inputMessage}
+                        onChange={(e) => setInputMessage(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                sendMessage();
+                            }
+                        }}
+                    />
+                    <button
+                        className="send-message-button"
+                        onClick={sendMessage}
+                        disabled={!inputMessage.trim() || sending}
+                    >
+                        {sending ? '...' : '전송'}
+                    </button>
                 </div>
 
                 <div className="realtime-indicator">
@@ -195,15 +307,15 @@ export default function ChatViewer({ chatId }: ChatViewerProps) {
                     <div className="info-list">
                         <div className="info-row">
                             <span className="info-label">잔금 기한</span>
-                            <span className="info-value">{session.automationDates.balanceDueDate || '-'}</span>
+                            <span className="info-value">{session.automationDates?.balanceDueDate || '-'}</span>
                         </div>
                         <div className="info-row">
                             <span className="info-label">안내 발송</span>
-                            <span className="info-value">{session.automationDates.noticeDate || '-'}</span>
+                            <span className="info-value">{session.automationDates?.noticeDate || '-'}</span>
                         </div>
                         <div className="info-row">
                             <span className="info-label">팔로업</span>
-                            <span className="info-value">{session.automationDates.nextFollowup || '-'}</span>
+                            <span className="info-value">{session.automationDates?.nextFollowup || '-'}</span>
                         </div>
                     </div>
                 </div>
