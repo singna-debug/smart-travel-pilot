@@ -275,3 +275,125 @@
     flex-direction: column;
     gap: 12px;
 }
+
+/* Bot Control & Manual Input */
+.bot-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #374151;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.bot-toggle {
+    display: flex;
+    background-color: #111827;
+    border-radius: 16px;
+    padding: 2px;
+    cursor: pointer;
+    border: 1px solid #4b5563;
+}
+
+.toggle-option {
+    padding: 6px 12px;
+    border-radius: 14px;
+    transition: all 0.2s;
+}
+
+.toggle-option.active.bot {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.toggle-option.active.admin {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.chat-input-area {
+    padding: 16px 24px;
+    background-color: #1f2937;
+    border-top: 1px solid #374151;
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.chat-message-input {
+    flex: 1;
+    background-color: #111827;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #fff;
+    resize: none;
+    font-size: 14px;
+    line-height: 1.5;
+    max-height: 150px;
+}
+
+.chat-message-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.send-message-button {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+.send-message-button:hover {
+    background-color: #2563eb;
+}
+
+.send-message-button:disabled {
+    background-color: #374151;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+.summarize-button {
+    width: 100%;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.summarize-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    filter: brightness(1.1);
+}
+
+.summarize-button:active {
+    transform: translateY(0);
+}
+
+.summarize-button:disabled {
+    background: #4b5563;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    opacity: 0.7;
+}

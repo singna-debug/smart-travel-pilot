@@ -219,6 +219,70 @@ ${formatProductInfo(crawledData)}
 }
 
 /**
+ * 대화 내역 전체를 분석하여 상담 정보를 추출합니다 (수동 요약용)
+ */
+export async function extractConsultationData(
+    history: { role: string; content: string }[]
+): Promise<Partial<ConsultationData>> {
+    const historyText = history.map(h => `${h.role === 'user' ? '고객' : '상담원'}: ${h.content}`).join('\n');
+
+    const extractionPrompt = `
+당신은 여행 상담 내역 전문가입니다. 아래 대화 내역에서 필요한 정보를 추출하여 JSON 형식으로만 응답하세요.
+
+[추출할 정보]
+1. destination: 목적지 (예: 일본, 싱가포르)
+2. date: 출발일 (YYYY-MM-DD 형식 권장)
+3. people: 인원수 (숫자와 명)
+4. budget: 예산 (만원 단위 또는 전체 금액)
+5. name: 고객 성함
+6. phone: 전화번호 (010-XXXX-XXXX 형식)
+7. status: 상담단계 (상담중, 견적제공, 예약확정, 결제완료, 상담완료, 취소/보류 중 하나)
+8. summary: 대화 내용의 핵심 요약 (매우 간결하게)
+
+[대화 내역]
+${historyText}
+
+[주의사항]
+- 대화에서 명확히 확인되지 않은 정보는 null로 표시하세요.
+- 오직 JSON 형식으로만 답변하세요. 마크다운 기호 없이 순수 JSON만 보내세요.
+`;
+
+    try {
+        const result = await model.generateContent(extractionPrompt);
+        let text = result.response.text().trim();
+
+        // 마크다운 코드 블록 제거
+        text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+
+        const extracted = JSON.parse(text);
+
+        // ConsultationData 형식에 맞게 변환
+        return {
+            customer: {
+                name: extracted.name || '미정',
+                phone: extracted.phone || '미정'
+            },
+            trip: {
+                destination: extracted.destination || '',
+                product_name: '',
+                departure_date: extracted.date || '',
+                url: ''
+            },
+            automation: {
+                status: extracted.status || '상담중',
+                balance_due_date: '미정',
+                notice_date: '미정',
+                next_followup: calculateAutomationDates(getTodayString()).next_followup,
+            },
+            summary: extracted.summary || '상담 요약 없음'
+        };
+    } catch (e) {
+        console.error('[AI Engine] Extraction Error:', e);
+        return {};
+    }
+}
+
+/**
  * 대화 초기화
  */
 export function resetConversation(userId: string): void {

@@ -14,7 +14,7 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
  * -- 상담 요약 테이블
  * CREATE TABLE IF NOT EXISTS consultations (
  *   id BIGSERIAL PRIMARY KEY,
- *   visitor_id TEXT NOT NULL,
+ *   visitor_id TEXT NOT NULL UNIQUE,
  *   customer_name TEXT,
  *   customer_phone TEXT,
  *   destination TEXT,
@@ -26,8 +26,16 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
  *   notice_date TEXT,
  *   next_followup TEXT,
  *   summary TEXT,
- *   created_at TIMESTAMPTZ DEFAULT NOW()
+ *   is_bot_enabled BOOLEAN DEFAULT TRUE,
+ *   last_callback_url TEXT,
+ *   created_at TIMESTAMPTZ DEFAULT NOW(),
+ *   updated_at TIMESTAMPTZ DEFAULT NOW()
  * );
+ * 
+ * -- 기존 테이블에 컬럼 추가 (이미 테이블이 있는 경우)
+ * -- ALTER TABLE consultations ADD COLUMN IF NOT EXISTS is_bot_enabled BOOLEAN DEFAULT TRUE;
+ * -- ALTER TABLE consultations ADD COLUMN IF NOT EXISTS last_callback_url TEXT;
+ * -- ALTER TABLE consultations ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
  * 
  * -- 메시지 로그 테이블
  * CREATE TABLE IF NOT EXISTS message_logs (

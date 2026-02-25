@@ -69,6 +69,7 @@ export async function GET(
                 departureDate: dbData.departure_date,
                 productUrl: dbData.url,
                 status: dbData.status,
+                is_bot_enabled: dbData.is_bot_enabled !== false, // 기본값 true
                 automationDates: {
                     balanceDueDate: dbData.balance_due_date,
                     noticeDate: dbData.notice_date,
@@ -93,6 +94,7 @@ export async function GET(
                 departureDate: sheetData.trip.departure_date,
                 productUrl: sheetData.trip.url,
                 status: sheetData.automation.status,
+                is_bot_enabled: true, // 시트 데이터만 있는 경우 기본은 챗봇 활성
                 automationDates: {
                     balanceDueDate: sheetData.automation.balance_due_date,
                     noticeDate: sheetData.automation.notice_date,
