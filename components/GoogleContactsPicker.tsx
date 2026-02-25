@@ -99,53 +99,76 @@ export default function GoogleContactsPicker({ onSelectContact }: GoogleContacts
     };
 
     const fetchContactsData = async (accessToken: string) => {
-        // 최대 1000명 가져오기 (필요시 페이지네이션 구현 가능)
-        const url = 'https://people.googleapis.com/v1/people/me/connections?personFields=names,phoneNumbers,photos&pageSize=1000';
+        let allConnections: any[] = [];
+        let nextPageToken = '';
+        let hasMore = true;
 
-        const res = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                Accept: 'application/json',
-            }
-        });
+        try {
+            while (hasMore) {
+                const url = `https://people.googleapis.com/v1/people/me/connections?personFields=names,phoneNumbers,photos&pageSize=1000${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
 
-        if (!res.ok) {
-            throw new Error(`Google API Error (${res.status})`);
-        }
-
-        const data = await res.json();
-
-        if (!data.connections || data.connections.length === 0) {
-            setErrorMsg('저장된 연락처가 없습니다.');
-            setIsLoading(false);
-            setContacts([]);
-            return;
-        }
-
-        const parsedContacts: Contact[] = [];
-
-        data.connections.forEach((person: any) => {
-            const name = person.names?.[0]?.displayName;
-            const phone = person.phoneNumbers?.[0]?.value || person.phoneNumbers?.[0]?.canonicalForm;
-            const photoUrl = person.photos?.[0]?.url;
-
-            // 이름과 전화번호가 모두 있는 사람만 필터링
-            if (name && phone) {
-                parsedContacts.push({
-                    id: person.resourceName,
-                    name,
-                    phone: formatKoreanPhone(phone),
-                    photoUrl
+                const res = await fetch(url, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        Accept: 'application/json',
+                    }
                 });
+
+                if (!res.ok) {
+                    throw new Error(`Google API Error (${res.status})`);
+                }
+
+                const data = await res.json();
+
+                if (data.connections) {
+                    allConnections = [...allConnections, ...data.connections];
+                }
+
+                nextPageToken = data.nextPageToken || '';
+                hasMore = !!nextPageToken;
+
+                // 너무 많은 요청을 방지하기 위해 최대 20페이지(20,000명) 정도로 제한 (안전장치)
+                if (allConnections.length > 20000) {
+                    hasMore = false;
+                }
             }
-        });
 
-        // 가나다 순 정렬
-        parsedContacts.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+            if (allConnections.length === 0) {
+                setErrorMsg('저장된 연락처가 없습니다.');
+                setIsLoading(false);
+                setContacts([]);
+                return;
+            }
 
-        setContacts(parsedContacts);
-        setIsModalOpen(true);
-        setIsLoading(false);
+            const parsedContacts: Contact[] = [];
+
+            allConnections.forEach((person: any) => {
+                const name = person.names?.[0]?.displayName;
+                const phone = person.phoneNumbers?.[0]?.value || person.phoneNumbers?.[0]?.canonicalForm;
+                const photoUrl = person.photos?.[0]?.url;
+
+                // 이름과 전화번호가 모두 있는 사람만 필터링
+                if (name && phone) {
+                    parsedContacts.push({
+                        id: person.resourceName,
+                        name,
+                        phone: formatKoreanPhone(phone),
+                        photoUrl
+                    });
+                }
+            });
+
+            // 가나다 순 정렬
+            parsedContacts.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+
+            setContacts(parsedContacts);
+            setIsModalOpen(true);
+            setIsLoading(false);
+
+        } catch (err: any) {
+            setErrorMsg('연락처를 불러오는 중 오류가 발생했습니다: ' + err.message);
+            setIsLoading(false);
+        }
     };
 
     const formatKoreanPhone = (phone: string) => {
