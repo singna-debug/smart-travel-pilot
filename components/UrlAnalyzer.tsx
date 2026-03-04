@@ -41,9 +41,24 @@ export default function UrlAnalyzer() {
     useEffect(() => {
         if (departureDate && duration) {
             try {
+                // 노이즈 제거 ([CONTENT], undefined 등)
+                const cleanDuration = duration.replace(/\[CONTENT\]|undefined|NULL/gi, '').trim();
+                if (!cleanDuration) return;
+
                 // 숫자만 추출 (20250209 or 2025-02-09 등 처리)
                 const isHyphenated = departureDate.includes('-');
-                const cleanedDate = departureDate.replace(/[^0-9]/g, '');
+                let cleanedDate = departureDate.replace(/[^0-9]/g, '');
+
+                // 만약 연도가 없고 월/일만 있다면 (예: 2월 3일 -> 23 -> 20260203 추론)
+                if (cleanedDate.length >= 2 && cleanedDate.length < 8) {
+                    const now = new Date();
+                    const currentYear = now.getFullYear();
+                    if (cleanedDate.length === 2) { // 2일? -> 현재월
+                        cleanedDate = `${currentYear}${String(now.getMonth() + 1).padStart(2, '0')}${cleanedDate.padStart(2, '0')}`;
+                    } else if (cleanedDate.length === 3 || cleanedDate.length === 4) { // 203 or 0203
+                        cleanedDate = `${currentYear}${cleanedDate.padStart(4, '0')}`;
+                    }
+                }
 
                 if (cleanedDate.length >= 8) {
                     const year = parseInt(cleanedDate.substring(0, 4));
@@ -51,16 +66,23 @@ export default function UrlAnalyzer() {
                     const day = parseInt(cleanedDate.substring(6, 8));
                     const date = new Date(year, month, day);
 
-                    // "2박3일", "3일", "3D" 등에서 마지막 숫자 추출 (일수)
-                    const daysMatch = duration.match(/(\d+)일/) || duration.match(/(\d+)\s*일/) || duration.match(/(\d+)\s*D/i);
+                    if (isNaN(date.getTime())) return;
+
+                    // "2박 3일", "3일", "3D", "3DAYS" 등에서 마지막 숫자 추출 (일수)
+                    const daysMatch = cleanDuration.match(/(\d+)\s*일/) || cleanDuration.match(/(\d+)\s*D/i);
                     let totalDays = 0;
 
                     if (daysMatch) {
                         totalDays = parseInt(daysMatch[1]);
                     } else {
                         // "3박" 같은 패턴 처리 (보통 박+1 = 일)
-                        const nightMatch = duration.match(/(\d+)박/);
+                        const nightMatch = cleanDuration.match(/(\d+)\s*박/);
                         if (nightMatch) totalDays = parseInt(nightMatch[1]) + 1;
+                        else {
+                            // 단순 숫자만 있는 경우 (3 -> 3일로 간주)
+                            const justNumMatch = cleanDuration.match(/^(\d+)$/);
+                            if (justNumMatch) totalDays = parseInt(justNumMatch[1]);
+                        }
                     }
 
                     if (totalDays > 0) {
