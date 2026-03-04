@@ -334,6 +334,7 @@ export async function appendConsultationToSheet(data: ConsultationData): Promise
             data.automation.balance_due_date,   // M: 잔금기한
             data.automation.notice_date,        // N: 안내발송일
             data.source || '카카오톡',           // O: 유입경로 (기본값 카카오톡)
+            data.visitor_id || '',              // P: visitor_id
         ];
 
         await sheets.spreadsheets.values.append({
@@ -398,11 +399,16 @@ export async function upsertConsultationToSheet(data: ConsultationData): Promise
 
             for (let i = rows.length - 1; i >= 1; i--) {
                 const row = rows[i];
+                const rowVisitorId = (row[15] || '').trim(); // P열: visitor_id
                 const rowName = (row[1] || '').trim();
                 const rowPhone = (row[2] || '').replace(/[^0-9]/g, '');
 
                 let matched = false;
-                if (targetPhone && targetPhone.length > 5 && rowPhone === targetPhone) matched = true;
+                // 1순위: visitor_id 일치
+                if (data.visitor_id && rowVisitorId === data.visitor_id) matched = true;
+                // 2순위: 연락처 일치
+                else if (targetPhone && targetPhone.length > 5 && rowPhone === targetPhone) matched = true;
+                // 3순위: 성함 일치 (연락처가 없을 때만)
                 else if (data.customer.name !== '미정' && rowName === data.customer.name && (!targetPhone || targetPhone.length <= 5)) matched = true;
 
                 if (matched) {
@@ -450,6 +456,7 @@ export async function upsertConsultationToSheet(data: ConsultationData): Promise
             data.automation.balance_due_date,   // M: 잔금기한
             data.automation.notice_date,        // N: 안내발송일
             data.source || '카카오톡',           // O: 유입경로
+            data.visitor_id || '',              // P: visitor_id
         ];
 
         // 2. 행 삭제

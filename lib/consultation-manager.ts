@@ -6,7 +6,7 @@ import { ConsultationData } from '@/types';
 /**
  * 대화 내역을 분석하여 정보를 추출하고 Supabase와 구글 시트를 자동으로 업데이트합니다.
  */
-export async function syncConsultationWithAI(visitorId: string): Promise<boolean> {
+export async function syncConsultationWithAI(visitorId: string, nickname?: string): Promise<boolean> {
     try {
         if (!supabase) {
             console.error('[Sync] Supabase client not initialized');
@@ -37,7 +37,7 @@ export async function syncConsultationWithAI(visitorId: string): Promise<boolean
             .from('consultations')
             .upsert({
                 visitor_id: visitorId,
-                customer_name: extractedData.customer?.name,
+                customer_name: `[K] ${((extractedData.customer?.name === '미정' && nickname) ? nickname : extractedData.customer?.name || '손님')}`,
                 customer_phone: extractedData.customer?.phone,
                 destination: extractedData.trip?.destination,
                 departure_date: extractedData.trip?.departure_date,
@@ -54,7 +54,10 @@ export async function syncConsultationWithAI(visitorId: string): Promise<boolean
         // 4. 구글 시트 업서트
         const sheetData: ConsultationData = {
             visitor_id: visitorId,
-            customer: extractedData.customer!,
+            customer: {
+                ...extractedData.customer!,
+                name: `[K] ${((extractedData.customer?.name === '미정' && nickname) ? nickname : extractedData.customer?.name || '손님')}`
+            },
             trip: extractedData.trip!,
             automation: extractedData.automation!,
             summary: extractedData.summary!,
