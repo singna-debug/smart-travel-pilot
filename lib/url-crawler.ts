@@ -230,6 +230,11 @@ ${text.substring(0, 8000)}
         });
 
         const data = await response.json();
+        if (!data.candidates || !data.candidates[0]?.content?.parts[0]?.text) {
+            console.error('[Gemini] 응답 형식이 올바르지 않거나 결과가 없습니다:', JSON.stringify(data));
+            return null;
+        }
+
         const resText = data.candidates[0].content.parts[0].text;
         const jsonStr = resText.replace(/```json\s*|\s*```/g, '').trim();
         return JSON.parse(jsonStr);
@@ -498,13 +503,53 @@ function fallbackParse(text: string): DetailedProductInfo {
 }
 
 export async function crawlTravelProduct(url: string): Promise<DetailedProductInfo> {
-    const { text, nextData } = await fetchContent(url);
-    const aiResult = await analyzeWithGemini(text, url, nextData);
+    console.log(`[Crawler] 분석 시작: ${url}`);
+    const isVercel = process.env.VERCEL === '1';
 
-    if (aiResult && aiResult.isProduct) {
-        return refineData(aiResult, text, url, nextData);
+    let fullText: string | null = null;
+    let nextData: string | undefined = undefined;
+
+    // 1. 브라우저 크롤링 시도 (Vercel이 아닐 때만 - Puppeteer 호환성 문제)
+    if (!isVercel) {
+        try {
+            console.log('[Crawler] 로컬 환경: Browser 크롤링(Puppeteer) 시도');
+            fullText = await scrapeWithBrowser(url);
+        } catch (e) {
+            console.log(`[Crawler] 브라우저 크롤링 중 에러 발생 (무시하고 다음 단계 진행)`);
+        }
+    } else {
+        console.log('[Crawler] Vercel 환경: Browser 크롤링 건너뜀 (시간 절약)');
     }
-    return refineData(fallbackParse(text), text, url, nextData);
+
+    // 2. 브라우저 크롤링 실패 시 ScrapingBee 시도 (특히 Vercel 운영 환경에서 필수)
+    if (!fullText && process.env.SCRAPINGBEE_API_KEY) {
+        console.log(`[Crawler] ScrapingBee로 전환...`);
+        fullText = await scrapeWithScrapingBee(url);
+    }
+
+    // 3. 모든 고급 옵션 실패 시, fallback으로 기존 빠른 fetch 사용
+    if (!fullText) {
+        console.log(`[Crawler] 모든 고급 크롤링이 실패하여 일반 fetch로 폴백`);
+        const result = await fetchContent(url);
+        fullText = result.text;
+        nextData = result.nextData;
+    } else {
+        // 추출된 텍스트 정리
+        fullText = fullText.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim();
+    }
+
+    console.log(`[Crawler] AI 분석 시작... (데이터 길이: ${fullText.length})`);
+    const aiResult = await analyzeWithGemini(fullText, url, nextData);
+
+    if (aiResult) {
+        console.log(`[Crawler] AI 분석 결과 수신 성공: ${aiResult.title}`);
+        if (aiResult.isProduct) {
+            return refineData(aiResult, fullText, url, nextData);
+        }
+    } else {
+        console.error('[Crawler] AI 분석 결과가 null입니다.');
+    }
+    return refineData(fallbackParse(fullText), fullText, url, nextData);
 }
 
 function formatDateString(dateStr: string): string {
