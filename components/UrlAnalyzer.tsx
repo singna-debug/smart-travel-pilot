@@ -42,62 +42,76 @@ export default function UrlAnalyzer() {
         if (departureDate && duration) {
             try {
                 // 노이즈 제거 ([CONTENT], undefined 등)
-                const cleanDuration = duration.replace(/\[CONTENT\]|undefined|NULL/gi, '').trim();
+                const cleanDuration = duration.replace(/\[CONTENT\]|\[CONTENT BODY\]|====|METADATA|undefined|NULL/gi, '').trim();
                 if (!cleanDuration) return;
 
-                // 숫자만 추출 (20250209 or 2025-02-09 등 처리)
                 const isHyphenated = departureDate.includes('-');
                 let cleanedDate = departureDate.replace(/[^0-9]/g, '');
 
-                // 만약 연도가 없고 월/일만 있다면 (예: 2월 3일 -> 23 -> 20260203 추론)
-                if (cleanedDate.length >= 2 && cleanedDate.length < 8) {
+                let targetYear: number;
+                let targetMonth: number;
+                let targetDay: number;
+
+                // "2월 3일" 처럼 월/일이 명시된 경우 추출
+                const mdMatch = departureDate.match(/(\d+)\s*월\s*(\d+)\s*일/);
+                if (mdMatch) {
                     const now = new Date();
-                    const currentYear = now.getFullYear();
+                    targetYear = now.getFullYear();
+                    targetMonth = parseInt(mdMatch[1]) - 1;
+                    targetDay = parseInt(mdMatch[2]);
+                } else if (cleanedDate.length >= 8) {
+                    targetYear = parseInt(cleanedDate.substring(0, 4));
+                    targetMonth = parseInt(cleanedDate.substring(4, 6)) - 1;
+                    targetDay = parseInt(cleanedDate.substring(6, 8));
+                } else if (cleanedDate.length >= 2 && cleanedDate.length < 8) {
+                    const now = new Date();
+                    targetYear = now.getFullYear();
                     if (cleanedDate.length === 2) { // 2일? -> 현재월
-                        cleanedDate = `${currentYear}${String(now.getMonth() + 1).padStart(2, '0')}${cleanedDate.padStart(2, '0')}`;
+                        targetMonth = now.getMonth();
+                        targetDay = parseInt(cleanedDate);
                     } else if (cleanedDate.length === 3 || cleanedDate.length === 4) { // 203 or 0203
-                        cleanedDate = `${currentYear}${cleanedDate.padStart(4, '0')}`;
+                        const val = cleanedDate.padStart(4, '0');
+                        targetMonth = parseInt(val.substring(0, 2)) - 1;
+                        targetDay = parseInt(val.substring(2, 4));
+                    } else {
+                        return;
+                    }
+                } else {
+                    return;
+                }
+
+                const date = new Date(targetYear, targetMonth, targetDay);
+                if (isNaN(date.getTime())) return;
+
+                // "2박 3일", "3일", "3D", "3DAYS" 등에서 마지막 숫자 추출 (일수)
+                const daysMatch = cleanDuration.match(/(\d+)\s*일/) || cleanDuration.match(/(\d+)\s*D/i);
+                let totalDays = 0;
+
+                if (daysMatch) {
+                    totalDays = parseInt(daysMatch[1]);
+                } else {
+                    // "3박" 같은 패턴 처리 (보통 박+1 = 일)
+                    const nightMatch = cleanDuration.match(/(\d+)\s*박/);
+                    if (nightMatch) totalDays = parseInt(nightMatch[1]) + 1;
+                    else {
+                        // 단순 숫자만 있는 경우 (3 -> 3일로 간주)
+                        const justNumMatch = cleanDuration.match(/^(\d+)$/);
+                        if (justNumMatch) totalDays = parseInt(justNumMatch[1]);
                     }
                 }
 
-                if (cleanedDate.length >= 8) {
-                    const year = parseInt(cleanedDate.substring(0, 4));
-                    const month = parseInt(cleanedDate.substring(4, 6)) - 1;
-                    const day = parseInt(cleanedDate.substring(6, 8));
-                    const date = new Date(year, month, day);
+                if (totalDays > 0) {
+                    // 3일 일정이면 출발일(1일차) + 2일
+                    date.setDate(date.getDate() + (totalDays - 1));
 
-                    if (isNaN(date.getTime())) return;
+                    const rYear = date.getFullYear();
+                    const rMonth = String(date.getMonth() + 1).padStart(2, '0');
+                    const rDay = String(date.getDate()).padStart(2, '0');
 
-                    // "2박 3일", "3일", "3D", "3DAYS" 등에서 마지막 숫자 추출 (일수)
-                    const daysMatch = cleanDuration.match(/(\d+)\s*일/) || cleanDuration.match(/(\d+)\s*D/i);
-                    let totalDays = 0;
-
-                    if (daysMatch) {
-                        totalDays = parseInt(daysMatch[1]);
+                    if (isHyphenated) {
+                        setReturnDate(`${rYear}-${rMonth}-${rDay}`);
                     } else {
-                        // "3박" 같은 패턴 처리 (보통 박+1 = 일)
-                        const nightMatch = cleanDuration.match(/(\d+)\s*박/);
-                        if (nightMatch) totalDays = parseInt(nightMatch[1]) + 1;
-                        else {
-                            // 단순 숫자만 있는 경우 (3 -> 3일로 간주)
-                            const justNumMatch = cleanDuration.match(/^(\d+)$/);
-                            if (justNumMatch) totalDays = parseInt(justNumMatch[1]);
-                        }
-                    }
-
-                    if (totalDays > 0) {
-                        // 3일 일정이면 출발일(1일차) + 2일
-                        date.setDate(date.getDate() + (totalDays - 1));
-
-                        const rYear = date.getFullYear();
-                        const rMonth = String(date.getMonth() + 1).padStart(2, '0');
-                        const rDay = String(date.getDate()).padStart(2, '0');
-
-                        if (isHyphenated) {
-                            setReturnDate(`${rYear}-${rMonth}-${rDay}`);
-                        } else {
-                            setReturnDate(`${rYear}${rMonth}${rDay}`);
-                        }
+                        setReturnDate(`${rYear}${rMonth}${rDay}`);
                     }
                 }
             } catch (e) {
