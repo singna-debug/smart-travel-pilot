@@ -687,45 +687,51 @@ function formatDurationString(durationStr: string): string {
 function refineData(info: DetailedProductInfo, originalText: string, url: string, nextData?: string): DetailedProductInfo {
     const refined = { ...info };
 
+    // 메타데이터 값에서 따옴표 제거 헬퍼
+    const stripQuotes = (s: string) => s.replace(/^"|"$/g, '').trim();
+
     // [강력 보완] Title 보정
     if (!refined.title || refined.title.length < 5 || refined.title.includes('undefined') || refined.title.includes('상품상세')) {
-        const titleMatch = originalText.match(/TARGET_TITLE: (.*)/);
-        if (titleMatch && titleMatch[1].trim() && titleMatch[1].trim() !== 'undefined') {
-            refined.title = titleMatch[1].trim();
+        const titleMatch = originalText.match(/TARGET_TITLE:\s*"?([^"\n]*)"?/);
+        if (titleMatch && stripQuotes(titleMatch[1]) && stripQuotes(titleMatch[1]) !== 'undefined') {
+            refined.title = stripQuotes(titleMatch[1]);
         } else {
-            const ogMatch = originalText.match(/OG_TITLE: (.*)/);
-            if (ogMatch && ogMatch[1].trim() && ogMatch[1].trim() !== 'undefined') refined.title = ogMatch[1].trim();
+            const ogMatch = originalText.match(/OG_TITLE:\s*"?([^"\n]*)"?/);
+            if (ogMatch && stripQuotes(ogMatch[1]) && stripQuotes(ogMatch[1]) !== 'undefined') refined.title = stripQuotes(ogMatch[1]);
             else {
-                const classMatch = originalText.match(/CLASS_TITLE: (.*)/);
-                if (classMatch && classMatch[1].trim()) refined.title = classMatch[1].trim();
+                const classMatch = originalText.match(/CLASS_TITLE:\s*"?([^"\n]*)"?/);
+                if (classMatch && stripQuotes(classMatch[1])) refined.title = stripQuotes(classMatch[1]);
             }
         }
     }
 
     // [강력 보완] Price 보정
     let rawPrice = String(refined.price || '');
-    const metadataPrice = originalText.match(/TARGET_PRICE: (.*)/);
-    if (metadataPrice && metadataPrice[1].trim() && metadataPrice[1].trim() !== 'undefined' && metadataPrice[1].trim() !== '0') {
-        const mPrice = metadataPrice[1].trim();
-        // 만약 AI가 가격을 못 가져왔거나, 메타데이터 가격이 더 크다면 메타데이터 신뢰
-        if (!rawPrice || rawPrice === '0' || parseInt(mPrice, 10) > parseInt(rawPrice.replace(/[^0-9]/g, '') || '0', 10)) {
-            rawPrice = mPrice;
+    const metadataPrice = originalText.match(/TARGET_PRICE:\s*"?([^"\n]*)"?/);
+    if (metadataPrice) {
+        const mPrice = stripQuotes(metadataPrice[1]).replace(/[^0-9]/g, '');
+        if (mPrice && mPrice !== '0') {
+            // 만약 AI가 가격을 못 가져왔거나, 메타데이터 가격이 더 크다면 메타데이터 신뢰
+            const currentPriceNum = parseInt(rawPrice.replace(/[^0-9]/g, '') || '0', 10);
+            if (!rawPrice || rawPrice === '0' || parseInt(mPrice, 10) > currentPriceNum) {
+                rawPrice = mPrice;
+            }
         }
     }
 
     // [강력 보완] 항공사 보정
     if (!refined.airline || refined.airline.length < 2) {
-        const metadataAirline = originalText.match(/TARGET_AIRLINE: (.*)/);
-        if (metadataAirline && metadataAirline[1].trim()) {
-            refined.airline = metadataAirline[1].trim();
+        const metadataAirline = originalText.match(/TARGET_AIRLINE:\s*"?([^"\n]*)"?/);
+        if (metadataAirline && stripQuotes(metadataAirline[1]).length >= 2) {
+            refined.airline = stripQuotes(metadataAirline[1]);
         }
     }
 
     // [강력 보완] 출발공항 보정
     if (!refined.departureAirport || refined.departureAirport === '인천') {
-        const metadataAirport = originalText.match(/TARGET_DEPARTURE_AIRPORT: (.*)/);
-        if (metadataAirport && metadataAirport[1].trim() && metadataAirport[1].trim() !== 'undefined') {
-            refined.departureAirport = metadataAirport[1].trim();
+        const metadataAirport = originalText.match(/TARGET_DEPARTURE_AIRPORT:\s*"?([^"\n]*)"?/);
+        if (metadataAirport && stripQuotes(metadataAirport[1]) && stripQuotes(metadataAirport[1]) !== 'undefined') {
+            refined.departureAirport = stripQuotes(metadataAirport[1]);
         }
     }
 
@@ -744,9 +750,9 @@ function refineData(info: DetailedProductInfo, originalText: string, url: string
     refined.airline = airline;
 
     // 카테고리/기간 절대 보정: AI 텍스트 예측보다 원본 메타데이터/JSON 추출값을 무조건 1순위로 신뢰
-    const durationMatch = originalText.match(/TARGET_DURATION:\s*(.+)/);
-    let rawDuration = (durationMatch && durationMatch[1].trim() && durationMatch[1].trim() !== 'undefined' && durationMatch[1].trim() !== '\"\"')
-        ? durationMatch[1].trim()
+    const durationMatch = originalText.match(/TARGET_DURATION:\s*"?([^"\n]*)"?/);
+    let rawDuration = (durationMatch && stripQuotes(durationMatch[1]) && stripQuotes(durationMatch[1]) !== 'undefined')
+        ? stripQuotes(durationMatch[1])
         : String(refined.duration || '');
 
     // 포맷팅 적용
