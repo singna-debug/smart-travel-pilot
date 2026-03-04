@@ -72,9 +72,9 @@ export async function fetchContent(url: string): Promise<{ text: string, nextDat
         const { html } = await quickFetch(url);
 
         // 2. HTML을 텍스트로 변환 (메타데이터 포함)
-        const text = htmlToText(html);
+        const text = htmlToText(html, url);
 
-        // HTML 원본에서 __NEXT_DATA__ 추출
+        // HTML 원본에서 __NEXT_DATA__ 추출 (이미 htmlToText에서 썼을 수도 있지만 명시적으로 추출)
         const nextDataMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i);
         const nextData = nextDataMatch ? nextDataMatch[1].trim() : undefined;
 
@@ -90,7 +90,7 @@ export async function fetchContent(url: string): Promise<{ text: string, nextDat
     }
 }
 
-export function htmlToText(html: string): string {
+export function htmlToText(html: string, url: string): string {
     // 메타데이터 추출
     let pageTitle = '';
     const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
@@ -138,41 +138,69 @@ export function htmlToText(html: string): string {
         }
     }
 
+    let targetAirline = '';
+    let targetDepartureAirport = '';
+
     // [강력 보완] NEXT_DATA (ModeTour 등 SPA 프레임워크 렌더링 데이터) 직접 파싱
     const startIdx = html.indexOf('<script id="__NEXT_DATA__"');
     if (startIdx !== -1) {
         const jsonStart = html.indexOf('>', startIdx) + 1;
         const jsonEnd = html.indexOf('</script>', jsonStart);
         if (jsonStart !== 0 && jsonEnd !== -1) {
-            const nextDataStr = html.substring(jsonStart, jsonEnd);
             try {
                 const nextDataStr = html.substring(jsonStart, jsonEnd);
                 const nextDataObj = JSON.parse(nextDataStr);
 
-                const urlProductNoMatch = html.match(/package\/(\d+)/);
+                const urlProductNoMatch = url.match(/package\/(\d+)/) || url.match(/goodsNo=(\d+)/);
                 const targetProductNo = urlProductNoMatch ? urlProductNoMatch[1] : '';
 
+                // 동적 재귀 탐색 (API 응답구조가 브라우저/서버에 따라 달라지는 것에 대응)
                 function extractVal(obj: any, key: string, targetId?: string): any {
                     if (!obj || typeof obj !== 'object') return null;
-                    if (targetId && obj.productNo && String(obj.productNo) !== targetId) return null;
-                    if (key in obj && obj[key]) return obj[key];
+
+                    // 만약 특정 ID를 찾는 중이고, 이 객체에 그 ID가 있다면 매칭 확인
+                    const currentId = obj.productNo || obj.goodsNo || obj.prd_nm_no || obj.itemNo || obj.goods_no;
+                    if (targetId && currentId && String(currentId) !== targetId) return null;
+
+                    if (key in obj && obj[key] && typeof obj[key] !== 'object') {
+                        return obj[key];
+                    }
+
+                    let highestVal: any = null;
                     for (const k in obj) {
                         const res = extractVal(obj[k], key, targetId);
-                        if (res) return res;
+                        if (res) {
+                            if (key.toLowerCase().includes('price') || key.toLowerCase().includes('amount')) {
+                                const numRes = parseInt(String(res).replace(/[^0-9]/g, ''), 10);
+                                const numHighest = highestVal ? parseInt(String(highestVal).replace(/[^0-9]/g, ''), 10) : 0;
+                                if (numRes > numHighest) highestVal = res;
+                            } else {
+                                return res;
+                            }
+                        }
                     }
-                    return null;
+                    return highestVal;
                 }
 
                 const nextPrice = extractVal(nextDataObj, 'productPrice_Adult', targetProductNo)
                     || extractVal(nextDataObj, 'salePrice', targetProductNo)
-                    || extractVal(nextDataObj, 'price', targetProductNo);
+                    || extractVal(nextDataObj, 'price', targetProductNo)
+                    || extractVal(nextDataObj, 'totalAmount', targetProductNo)
+                    || extractVal(nextDataObj, 'adultPrice', targetProductNo);
+
                 if (nextPrice) targetPrice = String(nextPrice).replace(/[^0-9]/g, '');
 
                 const nextAirline = extractVal(nextDataObj, 'airlineName', targetProductNo)
-                    || extractVal(nextDataObj, 'airline_nm', targetProductNo);
-                if (nextAirline) {
-                    pageTitle += `\nEXTRACTED_AIRLINE: ${nextAirline}`;
-                }
+                    || extractVal(nextDataObj, 'airline_nm', targetProductNo)
+                    || extractVal(nextDataObj, 'carrierNm', targetProductNo)
+                    || extractVal(nextDataObj, 'airline', targetProductNo);
+                if (nextAirline) targetAirline = String(nextAirline);
+
+                const nextAirport = extractVal(nextDataObj, 'departureAirportName', targetProductNo)
+                    || extractVal(nextDataObj, 'dep_airport_nm', targetProductNo)
+                    || extractVal(nextDataObj, 'start_city_nm', targetProductNo)
+                    || extractVal(nextDataObj, 'depCityName', targetProductNo);
+                if (nextAirport) targetDepartureAirport = String(nextAirport);
 
                 const nextDuration = extractVal(nextDataObj, 'duration', targetProductNo)
                     || extractVal(nextDataObj, 'itinerary_period', targetProductNo)
@@ -180,10 +208,10 @@ export function htmlToText(html: string): string {
                 if (nextDuration) targetDuration = String(nextDuration);
 
                 const nextTitle = extractVal(nextDataObj, 'goodsName', targetProductNo)
-                    || extractVal(nextDataObj, 'productName', targetProductNo);
+                    || extractVal(nextDataObj, 'productName', targetProductNo)
+                    || extractVal(nextDataObj, 'title', targetProductNo);
                 if (nextTitle) targetTitle = String(nextTitle);
 
-                pageTitle += `\n[NEXT_JS_DATA]\n${nextDataStr.substring(0, 30000)}`;
             } catch (e) {
                 console.error('[Crawler] __NEXT_DATA__ 파싱 오류:', e);
             }
@@ -221,6 +249,8 @@ CLASS_TITLE: ${classTitle}
 TARGET_TITLE: ${targetTitle}
 TARGET_PRICE: ${targetPrice}
 TARGET_DURATION: ${targetDuration}
+TARGET_AIRLINE: ${targetAirline}
+TARGET_DEPARTURE_AIRPORT: ${targetDepartureAirport}
 [CONTENT]
 ${cleanBody}`;
 }
@@ -234,23 +264,24 @@ async function analyzeWithGemini(text: string, url: string, nextData?: string): 
         console.log(`[Gemini] AI 분석 시작... (모델: ${modelName})`);
         const prompt = `다음 여행 상품 페이지에서 정보를 추출하여 JSON으로 반환하세요.
 URL: ${url}
-${nextData ? `--- [중요: NEXT_JS_DATA (JSON 데이터)] ---\n${nextData.substring(0, 25000)}\n` : ''}
-전체 페이지 내용:
-${text.substring(0, 25000)}
+${nextData ? `--- [중요: NEXT_JS_DATA (JSON 데이터 참조용)] ---\n${nextData.substring(0, 15000)}\n` : ''}
 
 반환 형식:
 {
   "isProduct": true,
   "title": "METADATA 섹션의 TARGET_TITLE 또는 PAGE_TITLE 중 더 구체적인 것을 그대로 추출 (상품명 전체)",
   "destination": "목적지 (국가+도시)",
-  "price": "METADATA 섹션의 TARGET_PRICE 값을 우선적으로 사용하세요 (숫자만 추출). 없으면 텍스트에서 가장 대표적인 성인 1인 가격을 찾으세요.",
+  "price": "METADATA 섹션의 TARGET_PRICE 값을 최우선적으로 사용하세요 (숫자만 추출). 없으면 텍스트에서 성인 1인 가격을 찾으세요.",
   "departureDate": "출발일 (YYYY-MM-DD 형식 권장)",
-  "airline": "항공사 (티웨이, 제주항공, 대한항공 등 텍스트에서 명시된 것 추출)",
-  "duration": "METADATA 섹션의 TARGET_DURATION 값을 최우선으로 사용하세요. 없으면 내용에서 'X박 Y일' 또는 'X일' 패턴을 찾으세요. (예: 3박5일)",
-  "departureAirport": "출발공항 (청주, 인천, 부산, 대구 등 명시된 것 추출. 없으면 인천으로 추정하지 말고 텍스트에서 찾으세요)",
-  "keyPoints": ["상품의 핵심 특징과 매력 포인트를 5~7개 항목으로 요약. 상품명, 일정, 포함 투어, 식사, 호텔 등을 분석하여 깔끔하고 간결한 한국어 문장으로 작성. 예시: '나트랑 여행은 이걸로 끝! 100% 휴양 만족', '2024년 8월 신규 오픈! 한국인 전용 해적 호핑투어', '나트랑 명물! 머드 온천 체험으로 피로 해소', '현지만의 특별한 간식 3종 제공(코코넛 커피, 반미, 반깐)'"],
-  "exclusions": ["불포함 사항을 간결하게 요약. 예: '가이드팁 1인 90유로', '매너 팁', '개인 경비', '여행자보험' 등"]
-}`;
+  "airline": "METADATA 섹션의 TARGET_AIRLINE을 최우선으로 사용하세요. 없으면 항공사(티웨이, 제주항공 등) 추출.",
+  "duration": "METADATA 섹션의 TARGET_DURATION 값을 최우선으로 사용하세요. 없으면 'X박 Y일' 패턴을 찾으세요.",
+  "departureAirport": "METADATA 섹션의 TARGET_DEPARTURE_AIRPORT를 최우선으로 사용하세요. 없으면 텍스트에서 '인천', '부산', '대구' 등 출발지 추출.",
+  "keyPoints": ["상품의 핵심 특징 5~7개 요약"],
+  "exclusions": ["불포함 사항 요약"]
+}
+
+입력 텍스트:
+${text.substring(0, 20000)}`;
 
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
             method: 'POST',
@@ -467,7 +498,7 @@ async function scrapeWithScrapingBee(url: string): Promise<string | null> {
         const html = await response.text();
         console.log(`[ScrapingBee] 완료: ${html.length}자`);
 
-        return htmlToText(html);
+        return htmlToText(html, url);
     } catch (e) {
         console.error('[ScrapingBee] 오류:', e);
         return null;
@@ -638,16 +669,34 @@ function refineData(info: DetailedProductInfo, originalText: string, url: string
         }
     }
 
-    // [강력 보완] Price 보정 및 포맷팅 (콤마 추가)
+    // [강력 보완] Price 보정
     let rawPrice = String(refined.price || '');
-    if (!rawPrice || rawPrice === '0' || rawPrice === '0원' || rawPrice === 'null' || !/\d/.test(rawPrice)) {
-        const priceMatch = originalText.match(/TARGET_PRICE: (.*)/);
-        if (priceMatch && priceMatch[1].trim() && priceMatch[1].trim() !== 'undefined' && priceMatch[1].trim() !== '0') {
-            rawPrice = priceMatch[1].trim();
+    const metadataPrice = originalText.match(/TARGET_PRICE: (.*)/);
+    if (metadataPrice && metadataPrice[1].trim() && metadataPrice[1].trim() !== 'undefined' && metadataPrice[1].trim() !== '0') {
+        const mPrice = metadataPrice[1].trim();
+        // 만약 AI가 가격을 못 가져왔거나, 메타데이터 가격이 더 크다면 메타데이터 신뢰
+        if (!rawPrice || rawPrice === '0' || parseInt(mPrice, 10) > parseInt(rawPrice.replace(/[^0-9]/g, '') || '0', 10)) {
+            rawPrice = mPrice;
         }
     }
 
-    // 숫자 부분만 추출하여 콤마 포맷팅
+    // [강력 보완] 항공사 보정
+    if (!refined.airline || refined.airline.length < 2) {
+        const metadataAirline = originalText.match(/TARGET_AIRLINE: (.*)/);
+        if (metadataAirline && metadataAirline[1].trim()) {
+            refined.airline = metadataAirline[1].trim();
+        }
+    }
+
+    // [강력 보완] 출발공항 보정
+    if (!refined.departureAirport || refined.departureAirport === '인천') {
+        const metadataAirport = originalText.match(/TARGET_DEPARTURE_AIRPORT: (.*)/);
+        if (metadataAirport && metadataAirport[1].trim() && metadataAirport[1].trim() !== 'undefined') {
+            refined.departureAirport = metadataAirport[1].trim();
+        }
+    }
+
+    // 숫자 부분만 추출하여 콤마 포맷팅 (Price)
     const digits = rawPrice.replace(/[^0-9]/g, '');
     if (digits && parseInt(digits, 10) > 1000) {
         refined.price = parseInt(digits, 10).toLocaleString() + '원';
