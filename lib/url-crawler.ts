@@ -151,7 +151,7 @@ export function htmlToText(html: string, url: string): string {
                 const nextDataStr = html.substring(jsonStart, jsonEnd);
                 const nextDataObj = JSON.parse(nextDataStr);
 
-                const urlProductNoMatch = url.match(/package\/(\d+)/) || url.match(/goodsNo=(\d+)/);
+                const urlProductNoMatch = url.match(/package\/(\d+)/) || url.match(/goodsNo=(\d+)/) || url.match(/Pnum=(\d+)/);
                 const targetProductNo = urlProductNoMatch ? urlProductNoMatch[1] : '';
 
                 // 동적 재귀 탐색 (API 응답구조가 브라우저/서버에 따라 달라지는 것에 대응)
@@ -159,7 +159,7 @@ export function htmlToText(html: string, url: string): string {
                     if (!obj || typeof obj !== 'object') return null;
 
                     // 만약 특정 ID를 찾는 중이고, 이 객체에 그 ID가 있다면 매칭 확인
-                    const currentId = obj.productNo || obj.goodsNo || obj.prd_nm_no || obj.itemNo || obj.goods_no;
+                    const currentId = obj.productNo || obj.goodsNo || obj.prd_nm_no || obj.itemNo || obj.goods_no || obj.pnum;
                     if (targetId && currentId && String(currentId) !== targetId) return null;
 
                     if (key in obj && obj[key] && typeof obj[key] !== 'object') {
@@ -182,15 +182,19 @@ export function htmlToText(html: string, url: string): string {
                     return highestVal;
                 }
 
-                const nextPrice = extractVal(nextDataObj, 'productPrice_Adult', targetProductNo)
+                const nextPrice = extractVal(nextDataObj, 'sellingPriceAdultTotalAmount', targetProductNo)
+                    || extractVal(nextDataObj, 'productPrice_Adult', targetProductNo)
                     || extractVal(nextDataObj, 'salePrice', targetProductNo)
+                    || extractVal(nextDataObj, 'sellingPrice', targetProductNo)
                     || extractVal(nextDataObj, 'price', targetProductNo)
                     || extractVal(nextDataObj, 'totalAmount', targetProductNo)
                     || extractVal(nextDataObj, 'adultPrice', targetProductNo);
 
                 if (nextPrice) targetPrice = String(nextPrice).replace(/[^0-9]/g, '');
 
-                const nextAirline = extractVal(nextDataObj, 'airlineName', targetProductNo)
+                const nextAirline = extractVal(nextDataObj, 'transportName', targetProductNo)
+                    || extractVal(nextDataObj, 'airlineName', targetProductNo)
+                    || extractVal(nextDataObj, 'airLineName', targetProductNo)
                     || extractVal(nextDataObj, 'airline_nm', targetProductNo)
                     || extractVal(nextDataObj, 'carrierNm', targetProductNo)
                     || extractVal(nextDataObj, 'airline', targetProductNo);
