@@ -135,7 +135,7 @@ async function processBackgroundTask(body: KakaoSkillRequest, callbackUrl: strin
 
                 // 3. AI 자동 분석 및 시트 동기화 (백그라운드)
                 const { syncConsultationWithAI } = await import('@/lib/consultation-manager');
-                syncConsultationWithAI(visitorId).catch(e => console.error(`[Auto Sync Error] ${e}`));
+                syncConsultationWithAI(visitorId, nickname || '').catch(e => console.error(`[Auto Sync Error] ${e}`));
             }
         }
     } catch (e) { }
