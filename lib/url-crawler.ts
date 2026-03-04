@@ -151,25 +151,28 @@ export function htmlToText(html: string, url: string): string {
                 const nextDataStr = html.substring(jsonStart, jsonEnd);
                 const nextDataObj = JSON.parse(nextDataStr);
 
-                const urlProductNoMatch = url.match(/package\/(\d+)/) || url.match(/goodsNo=(\d+)/) || url.match(/Pnum=(\d+)/);
+                const urlProductNoMatch = url.match(/package\/(\d+)/i) || url.match(/goodsNo=(\d+)/i) || url.match(/Pnum=(\d+)/i);
                 const targetProductNo = urlProductNoMatch ? urlProductNoMatch[1] : '';
 
                 // 동적 재귀 탐색 (API 응답구조가 브라우저/서버에 따라 달라지는 것에 대응)
                 function extractVal(obj: any, key: string, targetId?: string): any {
                     if (!obj || typeof obj !== 'object') return null;
 
-                    // 만약 특정 ID를 찾는 중이고, 이 객체에 그 ID가 있다면 매칭 확인
-                    const currentId = obj.productNo || obj.goodsNo || obj.prd_nm_no || obj.itemNo || obj.goods_no || obj.pnum;
+                    // 1. 만약 특정 ID를 찾는 중이라면, 해당 노드가 그 ID를 직접 가졌는지 확인
+                    const currentId = obj.productNo || obj.goodsNo || obj.prd_nm_no || obj.itemNo || obj.goods_no || obj.pnum || obj.Pnum || obj.groupNumber;
+
+                    // 만약 이 객체가 다른 상품의 정보를 담고 있다면 건너뜀 (매칭 필터링)
                     if (targetId && currentId && String(currentId) !== targetId) return null;
 
-                    if (key in obj && obj[key] && typeof obj[key] !== 'object') {
+                    // 현재 객체에서 키를 찾음
+                    if (key in obj && obj[key] !== null && obj[key] !== undefined && typeof obj[key] !== 'object') {
                         return obj[key];
                     }
 
                     let highestVal: any = null;
                     for (const k in obj) {
                         const res = extractVal(obj[k], key, targetId);
-                        if (res) {
+                        if (res !== null && res !== undefined) {
                             if (key.toLowerCase().includes('price') || key.toLowerCase().includes('amount')) {
                                 const numRes = parseInt(String(res).replace(/[^0-9]/g, ''), 10);
                                 const numHighest = highestVal ? parseInt(String(highestVal).replace(/[^0-9]/g, ''), 10) : 0;
@@ -182,38 +185,48 @@ export function htmlToText(html: string, url: string): string {
                     return highestVal;
                 }
 
-                const nextPrice = extractVal(nextDataObj, 'sellingPriceAdultTotalAmount', targetProductNo)
-                    || extractVal(nextDataObj, 'productPrice_Adult', targetProductNo)
-                    || extractVal(nextDataObj, 'salePrice', targetProductNo)
-                    || extractVal(nextDataObj, 'sellingPrice', targetProductNo)
-                    || extractVal(nextDataObj, 'price', targetProductNo)
-                    || extractVal(nextDataObj, 'totalAmount', targetProductNo)
-                    || extractVal(nextDataObj, 'adultPrice', targetProductNo);
+                // [강력 보완] ID 기반 추출 시도 후 실패 시 ID 없이 전역 시도 (백업)
+                function extractValRobust(obj: any, key: string, targetId?: string): any {
+                    let res = extractVal(obj, key, targetId);
+                    if (!res && targetId) {
+                        // ID 매칭 없이 전체 트리에서 첫 번째로 발견되는 유효값 추출
+                        res = extractVal(obj, key);
+                    }
+                    return res;
+                }
+
+                const nextPrice = extractValRobust(nextDataObj, 'sellingPriceAdultTotalAmount', targetProductNo)
+                    || extractValRobust(nextDataObj, 'productPrice_Adult', targetProductNo)
+                    || extractValRobust(nextDataObj, 'salePrice', targetProductNo)
+                    || extractValRobust(nextDataObj, 'sellingPrice', targetProductNo)
+                    || extractValRobust(nextDataObj, 'price', targetProductNo)
+                    || extractValRobust(nextDataObj, 'totalAmount', targetProductNo)
+                    || extractValRobust(nextDataObj, 'adultPrice', targetProductNo);
 
                 if (nextPrice) targetPrice = String(nextPrice).replace(/[^0-9]/g, '');
 
-                const nextAirline = extractVal(nextDataObj, 'transportName', targetProductNo)
-                    || extractVal(nextDataObj, 'airlineName', targetProductNo)
-                    || extractVal(nextDataObj, 'airLineName', targetProductNo)
-                    || extractVal(nextDataObj, 'airline_nm', targetProductNo)
-                    || extractVal(nextDataObj, 'carrierNm', targetProductNo)
-                    || extractVal(nextDataObj, 'airline', targetProductNo);
+                const nextAirline = extractValRobust(nextDataObj, 'transportName', targetProductNo)
+                    || extractValRobust(nextDataObj, 'airlineName', targetProductNo)
+                    || extractValRobust(nextDataObj, 'airLineName', targetProductNo)
+                    || extractValRobust(nextDataObj, 'airline_nm', targetProductNo)
+                    || extractValRobust(nextDataObj, 'carrierNm', targetProductNo)
+                    || extractValRobust(nextDataObj, 'airline', targetProductNo);
                 if (nextAirline) targetAirline = String(nextAirline);
 
-                const nextAirport = extractVal(nextDataObj, 'departureAirportName', targetProductNo)
-                    || extractVal(nextDataObj, 'dep_airport_nm', targetProductNo)
-                    || extractVal(nextDataObj, 'start_city_nm', targetProductNo)
-                    || extractVal(nextDataObj, 'depCityName', targetProductNo);
+                const nextAirport = extractValRobust(nextDataObj, 'departureAirportName', targetProductNo)
+                    || extractValRobust(nextDataObj, 'dep_airport_nm', targetProductNo)
+                    || extractValRobust(nextDataObj, 'start_city_nm', targetProductNo)
+                    || extractValRobust(nextDataObj, 'depCityName', targetProductNo);
                 if (nextAirport) targetDepartureAirport = String(nextAirport);
 
-                const nextDuration = extractVal(nextDataObj, 'duration', targetProductNo)
-                    || extractVal(nextDataObj, 'itinerary_period', targetProductNo)
-                    || extractVal(nextDataObj, 'travelPeriod', targetProductNo);
+                const nextDuration = extractValRobust(nextDataObj, 'duration', targetProductNo)
+                    || extractValRobust(nextDataObj, 'itinerary_period', targetProductNo)
+                    || extractValRobust(nextDataObj, 'travelPeriod', targetProductNo);
                 if (nextDuration) targetDuration = String(nextDuration);
 
-                const nextTitle = extractVal(nextDataObj, 'goodsName', targetProductNo)
-                    || extractVal(nextDataObj, 'productName', targetProductNo)
-                    || extractVal(nextDataObj, 'title', targetProductNo);
+                const nextTitle = extractValRobust(nextDataObj, 'goodsName', targetProductNo)
+                    || extractValRobust(nextDataObj, 'productName', targetProductNo)
+                    || extractValRobust(nextDataObj, 'title', targetProductNo);
                 if (nextTitle) targetTitle = String(nextTitle);
 
             } catch (e) {
@@ -259,17 +272,19 @@ export function htmlToText(html: string, url: string): string {
         .trim()
         .substring(0, 50000);
 
-    return `[METADATA]
+    return `==== TARGET METADATA START ====
 PAGE_TITLE: "${finalTitle}"
 OG_TITLE: "${ogTitle}"
 BODY_TITLE: "${bodyTitle}"
 CLASS_TITLE: "${classTitle}"
-TARGET_TITLE: "${targetTitle}"
+TARGET_TITLE: "${targetTitle || finalTitle}"
 TARGET_PRICE: "${targetPrice}"
 TARGET_DURATION: "${targetDuration}"
 TARGET_AIRLINE: "${targetAirline}"
 TARGET_DEPARTURE_AIRPORT: "${targetDepartureAirport}"
-[CONTENT]
+==== TARGET METADATA END ====
+
+[CONTENT BODY]
 ${cleanBody}`;
 }
 
