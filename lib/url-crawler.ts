@@ -116,13 +116,26 @@ export function htmlToText(html: string): string {
 
     let targetPrice = '';
     // productPrice_Adult_TotalAmount, productPrice_Adult, SalePrice, GoodsPrice 등 다양한 키 대응
-    const jsonPriceMatch = html.match(/["'](?:Price|SalePrice|goodsPrice|GoodsPrice|ProductPrice_Adult|Price_Adult|productPrice_Adult_TotalAmount)["']\s*[:=]\s*["']?(\d+)["']?/i);
+    const jsonPriceMatch = html.match(/["'](?:Price|SalePrice|goodsPrice|GoodsPrice|ProductPrice_Adult|Price_Adult|productPrice_Adult_TotalAmount|price_adult)["']\s*[:=]\s*["']?(\d+)["']?/i);
     if (jsonPriceMatch) targetPrice = jsonPriceMatch[1];
+
+    // [추가] 텍스트 내 가격 패턴 (예: 1,290,000원) - JSON 실패 시 대비
+    if (!targetPrice) {
+        const textPriceMatch = html.match(/[\s>]([0-9]{1,3}(?:,[0-9]{3})+)원/);
+        if (textPriceMatch) targetPrice = textPriceMatch[1].replace(/,/g, '');
+    }
 
     let targetDuration = '';
     const durationMatch = html.match(/(\d+)\s*박\s*(\d+)\s*일/);
     if (durationMatch) {
         targetDuration = `${durationMatch[1]}박${durationMatch[2]}일`;
+    } else {
+        // [보완] "X일" 패턴만 있는 경우 (3일 -> 2박3일 추정)
+        const onlyDayMatch = html.match(/[\s>]([1-9])\s*일[\s<]/);
+        if (onlyDayMatch) {
+            const days = parseInt(onlyDayMatch[1], 10);
+            targetDuration = `${days - 1}박${days}일`;
+        }
     }
 
     // [강력 보완] NEXT_DATA (ModeTour 등 SPA 프레임워크 렌더링 데이터) 직접 파싱
@@ -207,18 +220,18 @@ async function analyzeWithGemini(text: string, url: string, nextData?: string): 
 URL: ${url}
 ${nextData ? `--- [중요: NEXT_JS_DATA (JSON 데이터)] ---\n${nextData.substring(0, 25000)}\n` : ''}
 전체 페이지 내용:
-${text.substring(0, 8000)}
+${text.substring(0, 25000)}
 
 반환 형식:
 {
   "isProduct": true,
   "title": "METADATA 섹션의 TARGET_TITLE 또는 PAGE_TITLE 중 더 구체적인 것을 그대로 추출 (상품명 전체)",
   "destination": "목적지 (국가+도시)",
-  "price": "METADATA 섹션의 TARGET_PRICE 값을 우선적으로 사용하세요 (숫자만 추출).",
-  "departureDate": "출발일",
-  "airline": "항공사 (티웨이, 제주항공 등)",
-  "duration": "METADATA 섹션의 TARGET_DURATION 값을 최우선으로 사용하세요. 없으면 내용에서 'X박 Y일' 패턴을 찾으세요. (예: 3박5일)",
-  "departureAirport": "출발공항 (청주, 인천 등)",
+  "price": "METADATA 섹션의 TARGET_PRICE 값을 우선적으로 사용하세요 (숫자만 추출). 없으면 텍스트에서 가장 대표적인 성인 1인 가격을 찾으세요.",
+  "departureDate": "출발일 (YYYY-MM-DD 형식 권장)",
+  "airline": "항공사 (티웨이, 제주항공, 대한항공 등 텍스트에서 명시된 것 추출)",
+  "duration": "METADATA 섹션의 TARGET_DURATION 값을 최우선으로 사용하세요. 없으면 내용에서 'X박 Y일' 또는 'X일' 패턴을 찾으세요. (예: 3박5일)",
+  "departureAirport": "출발공항 (청주, 인천, 부산, 대구 등 명시된 것 추출. 없으면 인천으로 추정하지 말고 텍스트에서 찾으세요)",
   "keyPoints": ["상품의 핵심 특징과 매력 포인트를 5~7개 항목으로 요약. 상품명, 일정, 포함 투어, 식사, 호텔 등을 분석하여 깔끔하고 간결한 한국어 문장으로 작성. 예시: '나트랑 여행은 이걸로 끝! 100% 휴양 만족', '2024년 8월 신규 오픈! 한국인 전용 해적 호핑투어', '나트랑 명물! 머드 온천 체험으로 피로 해소', '현지만의 특별한 간식 3종 제공(코코넛 커피, 반미, 반깐)'"],
   "exclusions": ["불포함 사항을 간결하게 요약. 예: '가이드팁 1인 90유로', '매너 팁', '개인 경비', '여행자보험' 등"]
 }`;
@@ -567,15 +580,22 @@ function formatDateString(dateStr: string): string {
 }
 
 function formatDurationString(durationStr: string): string {
-    if (!durationStr || durationStr.trim() === '미정') return durationStr;
-    let str = durationStr.trim();
+    if (!durationStr || durationStr.trim() === '미정' || durationStr === '""') return '미정';
+    let str = durationStr.trim().replace(/"/g, '');
+
+    // 이미 X박Y일 형태면 유지
+    if (/^\d+박\d+일$/.test(str)) return str;
+
     const boxDayMatch = str.match(/(\d+)\s*박\s*(\d+)\s*일?/);
     if (boxDayMatch) return `${boxDayMatch[1]}박${boxDayMatch[2]}일`;
-    const onlyDayMatch = str.match(/^(\d+)\s*일$/);
+
+    const onlyDayMatch = str.match(/(\d+)\s*일$/);
     if (onlyDayMatch) {
         const days = parseInt(onlyDayMatch[1], 10);
         if (days > 1) return `${days - 1}박${days}일`;
+        if (days === 1) return `당일`;
     }
+
     const onlyBoxMatch = str.match(/^(\d+)\s*박$/);
     if (onlyBoxMatch) {
         const nights = parseInt(onlyBoxMatch[1], 10);
