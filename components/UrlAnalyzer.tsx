@@ -573,7 +573,7 @@ export default function UrlAnalyzer() {
                         value={returnDate}
                         onChange={(e) => setReturnDate(e.target.value)}
                         className="analyzer-input"
-                        style={{ width: '100%', background: 'rgba(255, 255, 255, 0.03)', color: 'var(--text-muted)' }}
+                        style={{ width: '100%', background: 'rgba(255, 255, 255, 0.05)', color: '#ffffff', fontWeight: '500' }}
                         readOnly
                     />
                 </div>
