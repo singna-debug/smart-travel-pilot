@@ -149,7 +149,7 @@ export function htmlToText(html: string): string {
                 const nextDataStr = html.substring(jsonStart, jsonEnd);
                 const nextDataObj = JSON.parse(nextDataStr);
 
-                const urlProductNoMatch = urlString.match(/package\/(\d+)/);
+                const urlProductNoMatch = url.match(/package\/(\d+)/);
                 const targetProductNo = urlProductNoMatch ? urlProductNoMatch[1] : '';
 
                 function extractVal(obj: any, key: string, targetId?: string): any {
@@ -171,7 +171,7 @@ export function htmlToText(html: string): string {
                 const nextAirline = extractVal(nextDataObj, 'airlineName', targetProductNo)
                     || extractVal(nextDataObj, 'airline_nm', targetProductNo);
                 if (nextAirline) {
-                    fullText += `\nEXTRACTED_AIRLINE: ${nextAirline}`;
+                    text += `\nEXTRACTED_AIRLINE: ${nextAirline}`;
                 }
 
                 const nextDuration = extractVal(nextDataObj, 'duration', targetProductNo)
@@ -183,7 +183,7 @@ export function htmlToText(html: string): string {
                     || extractVal(nextDataObj, 'productName', targetProductNo);
                 if (nextTitle) targetTitle = String(nextTitle);
 
-                fullText = nextDataStr.substring(0, 30000);
+                text += `\n[NEXT_JS_DATA]\n${nextDataStr.substring(0, 30000)}`;
             } catch (e) {
                 console.error('[Crawler] __NEXT_DATA__ 파싱 오류:', e);
             }
