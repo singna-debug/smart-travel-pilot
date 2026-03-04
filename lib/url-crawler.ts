@@ -222,6 +222,20 @@ export function htmlToText(html: string, url: string): string {
         }
     }
 
+    // [추가] 정밀 추출 실패 시 최후의 수단: HTML 전체에서 정규식으로 직접 찾기 (JSON 구조가 깨진 경우 대비)
+    if (!targetPrice || targetPrice === '0') {
+        const altPriceMatch = html.match(/["'](?:sellingPriceAdultTotalAmount|totalAmount|adultPrice|salePrice)["']\s*:\s*(\d+)/);
+        if (altPriceMatch) targetPrice = altPriceMatch[1];
+    }
+    if (!targetAirline) {
+        const altAirlineMatch = html.match(/["'](?:transportName|airlineName|carrierNm)["']\s*:\s*["']([^"']+)["']/);
+        if (altAirlineMatch) targetAirline = altAirlineMatch[1];
+    }
+    if (!targetDepartureAirport) {
+        const altAirportMatch = html.match(/["'](?:departureCityName|depCityName|start_city_nm)["']\s*:\s*["']([^"']+)["']/);
+        if (altAirportMatch) targetDepartureAirport = altAirportMatch[1];
+    }
+
     // PAGE_TITLE 보강
     let finalTitle = pageTitle;
     if ((pageTitle.includes('모두투어') || pageTitle.includes('상품상세') || pageTitle.includes('undefined')) &&
@@ -246,15 +260,15 @@ export function htmlToText(html: string, url: string): string {
         .substring(0, 50000);
 
     return `[METADATA]
-PAGE_TITLE: ${finalTitle}
-OG_TITLE: ${ogTitle}
-BODY_TITLE: ${bodyTitle}
-CLASS_TITLE: ${classTitle}
-TARGET_TITLE: ${targetTitle}
-TARGET_PRICE: ${targetPrice}
-TARGET_DURATION: ${targetDuration}
-TARGET_AIRLINE: ${targetAirline}
-TARGET_DEPARTURE_AIRPORT: ${targetDepartureAirport}
+PAGE_TITLE: "${finalTitle}"
+OG_TITLE: "${ogTitle}"
+BODY_TITLE: "${bodyTitle}"
+CLASS_TITLE: "${classTitle}"
+TARGET_TITLE: "${targetTitle}"
+TARGET_PRICE: "${targetPrice}"
+TARGET_DURATION: "${targetDuration}"
+TARGET_AIRLINE: "${targetAirline}"
+TARGET_DEPARTURE_AIRPORT: "${targetDepartureAirport}"
 [CONTENT]
 ${cleanBody}`;
 }
