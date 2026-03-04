@@ -41,25 +41,39 @@ export default function UrlAnalyzer() {
     useEffect(() => {
         if (departureDate && duration) {
             try {
-                // 숫자만 추출 (20250209 or 2025.02.09 등 처리)
+                // 숫자만 추출 (20250209 or 2025-02-09 등 처리)
+                const isHyphenated = departureDate.includes('-');
                 const cleanedDate = departureDate.replace(/[^0-9]/g, '');
+
                 if (cleanedDate.length >= 8) {
                     const year = parseInt(cleanedDate.substring(0, 4));
                     const month = parseInt(cleanedDate.substring(4, 6)) - 1;
                     const day = parseInt(cleanedDate.substring(6, 8));
                     const date = new Date(year, month, day);
 
-                    // "3박5일" 또는 "5일" 등에서 마지막 숫자 추출
-                    const daysMatch = duration.match(/(\d+)일/);
-                    if (daysMatch) {
-                        const totalDays = parseInt(daysMatch[1]);
-                        if (!isNaN(totalDays)) {
-                            // 5일 일정이면 출발일(1일차) + 4일
-                            date.setDate(date.getDate() + (totalDays - 1));
+                    // "2박3일", "3일", "3D" 등에서 마지막 숫자 추출 (일수)
+                    const daysMatch = duration.match(/(\d+)일/) || duration.match(/(\d+)\s*일/) || duration.match(/(\d+)\s*D/i);
+                    let totalDays = 0;
 
-                            const rYear = date.getFullYear();
-                            const rMonth = String(date.getMonth() + 1).padStart(2, '0');
-                            const rDay = String(date.getDate()).padStart(2, '0');
+                    if (daysMatch) {
+                        totalDays = parseInt(daysMatch[1]);
+                    } else {
+                        // "3박" 같은 패턴 처리 (보통 박+1 = 일)
+                        const nightMatch = duration.match(/(\d+)박/);
+                        if (nightMatch) totalDays = parseInt(nightMatch[1]) + 1;
+                    }
+
+                    if (totalDays > 0) {
+                        // 3일 일정이면 출발일(1일차) + 2일
+                        date.setDate(date.getDate() + (totalDays - 1));
+
+                        const rYear = date.getFullYear();
+                        const rMonth = String(date.getMonth() + 1).padStart(2, '0');
+                        const rDay = String(date.getDate()).padStart(2, '0');
+
+                        if (isHyphenated) {
+                            setReturnDate(`${rYear}-${rMonth}-${rDay}`);
+                        } else {
                             setReturnDate(`${rYear}${rMonth}${rDay}`);
                         }
                     }
