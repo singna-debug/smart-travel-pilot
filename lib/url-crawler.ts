@@ -146,28 +146,44 @@ export function htmlToText(html: string): string {
         if (jsonStart !== 0 && jsonEnd !== -1) {
             const nextDataStr = html.substring(jsonStart, jsonEnd);
             try {
-                const nextData = JSON.parse(nextDataStr);
+                const nextDataStr = html.substring(jsonStart, jsonEnd);
+                const nextDataObj = JSON.parse(nextDataStr);
 
-                // 동적 재귀 탐색 (API 응답구조가 브라우저/서버에 따라 달라지는 것에 대응)
-                function extractVal(obj: any, key: string): any {
+                const urlProductNoMatch = url.match(/package\/(\d+)/);
+                const targetProductNo = urlProductNoMatch ? urlProductNoMatch[1] : '';
+
+                function extractVal(obj: any, key: string, targetId?: string): any {
                     if (!obj || typeof obj !== 'object') return null;
+                    if (targetId && obj.productNo && String(obj.productNo) !== targetId) return null;
                     if (key in obj && obj[key]) return obj[key];
                     for (const k in obj) {
-                        const res = extractVal(obj[k], key);
+                        const res = extractVal(obj[k], key, targetId);
                         if (res) return res;
                     }
                     return null;
                 }
 
-                const foundPeriod = extractVal(nextData, 'travelPeriod');
-                if (foundPeriod) targetDuration = String(foundPeriod);
+                const nextPrice = extractVal(nextDataObj, 'productPrice_Adult', targetProductNo)
+                    || extractVal(nextDataObj, 'salePrice', targetProductNo)
+                    || extractVal(nextDataObj, 'price', targetProductNo);
+                if (nextPrice) targetPrice = String(nextPrice).replace(/[^0-9]/g, '');
 
-                const foundName = extractVal(nextData, 'goodsName') || extractVal(nextData, 'productName');
-                if (foundName) targetTitle = String(foundName);
+                const nextAirline = extractVal(nextDataObj, 'airlineName', targetProductNo)
+                    || extractVal(nextDataObj, 'airline_nm', targetProductNo);
+                if (nextAirline) {
+                    text += `\nEXTRACTED_AIRLINE: ${nextAirline}`;
+                }
 
-                const foundPrice = extractVal(nextData, 'salePrice') || extractVal(nextData, 'price');
-                if (foundPrice) targetPrice = String(foundPrice).replace(/[^0-9]/g, '');
+                const nextDuration = extractVal(nextDataObj, 'duration', targetProductNo)
+                    || extractVal(nextDataObj, 'itinerary_period', targetProductNo)
+                    || extractVal(nextDataObj, 'travelPeriod', targetProductNo);
+                if (nextDuration) targetDuration = String(nextDuration);
 
+                const nextTitle = extractVal(nextDataObj, 'goodsName', targetProductNo)
+                    || extractVal(nextDataObj, 'productName', targetProductNo);
+                if (nextTitle) targetTitle = String(nextTitle);
+
+                nextData = nextDataStr.substring(0, 30000);
             } catch (e) {
                 console.error('[Crawler] __NEXT_DATA__ 파싱 오류:', e);
             }
