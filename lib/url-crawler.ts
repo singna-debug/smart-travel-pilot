@@ -143,11 +143,15 @@ async function fetchModeTourNative(url: string): Promise<any> {
                 .filter(p => p.length > 2 && p.length < 40)
                 .slice(0, 8);
 
+            // 가격 콤마 포맷팅
+            const rawPrice = String(d.sellingPriceAdultTotalAmount || '');
+            const formattedPrice = rawPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
             return {
                 isProduct: true,
                 title: cleanTitle,
                 destination: destination,
-                price: String(d.sellingPriceAdultTotalAmount || ''),
+                price: formattedPrice,
                 departureDate: d.departureDate,
                 airline: d.transportName || '',
                 duration: duration,
@@ -1110,13 +1114,10 @@ export function formatProductInfo(info: DetailedProductInfo, index?: number): st
     let p = String(info.price || '');
     // 숫자로만 된 경우 '원' 붙임 (refineData에서 이미 처리되지만 안전장치)
     const digits = p.replace(/[^0-9]/g, '');
-    if (digits && !p.includes(',')) {
-        p = parseInt(digits, 10).toLocaleString() + '원';
-    }
-
     let r = index !== undefined ? `${index + 1}. ${info.title}\n\n` : `${info.title}\n\n`;
-    r += `* 가격 : ${p}\n`;
-    r += `* 출발일 : ${info.departureDate || '미정'}\n`;
+    const priceWithComma = String(info.price || '').replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    r += `* 가격 : ${priceWithComma}원\n`;
+    r += `* 출발일 : ${info.departureDate || '-'}\n`;
     r += `* 출발공항 : ${info.departureAirport || '인천'}\n`;
     r += `* 항공 : ${info.airline || '-'}\n`;
     r += `* 지역 : ${info.destination || '-'}\n`;
