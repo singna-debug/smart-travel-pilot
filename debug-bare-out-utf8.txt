@@ -1,0 +1,5 @@
+﻿[dotenv@17.3.1] injecting env (16) from .env.local -- tip: ?뵍 encrypt with Dotenvx: https://dotenvx.com
+Testing Bare ScrapingBee...
+Time taken: 5.249s
+Contains 799,000: false
+Contains ?쒖＜??났: false
