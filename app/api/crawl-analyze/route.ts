@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'edge';
 
 // ── htmlToText (Edge 호환) ──
-function htmlToText(html: string): string {
+function htmlToText(html: string, url: string): { text: string, nextData?: string } {
     let pageTitle = '';
     const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
     if (titleMatch) pageTitle = titleMatch[1].trim();
@@ -36,46 +36,48 @@ function htmlToText(html: string): string {
     const durationMatch = html.match(/(\d+)\s*박\s*(\d+)\s*일/);
     if (durationMatch) targetDuration = `${durationMatch[1]}박${durationMatch[2]}일`;
 
+    let targetDepartureDate = '';
+    const visibleDateMatch = visibleText.match(/(?:출발일?|일정)\s*[:\-]?\s*(\d{4}[-.]\d{2}[-.]\d{2})/);
+    if (visibleDateMatch) {
+        targetDepartureDate = visibleDateMatch[1].replace(/\./g, '-');
+    }
+
+    let nextData: string | undefined = undefined;
+    const startIdx = html.indexOf('<script id="__NEXT_DATA__"');
+    if (startIdx !== -1) {
+        const jsonStart = html.indexOf('>', startIdx) + 1;
+        const jsonEnd = html.indexOf('</script>', jsonStart);
+        if (jsonStart !== 0 && jsonEnd !== -1) {
+            nextData = html.substring(jsonStart, jsonEnd);
+        }
+    }
+
     const cleanBody = visibleText.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim().substring(0, 50000);
 
-    return `[METADATA]
-PAGE_TITLE: ${pageTitle}
-TARGET_PRICE: ${targetPrice}
-TARGET_DURATION: ${targetDuration}
-TARGET_AIRLINE: ${targetAirline}
-TARGET_DEPARTURE_AIRPORT: ${targetDepartureAirport}
-[CONTENT]
+    const formattedText = `==== TARGET METADATA START ====
+PAGE_TITLE: "${pageTitle}"
+TARGET_PRICE: "${targetPrice}"
+TARGET_DURATION: "${targetDuration}"
+TARGET_AIRLINE: "${targetAirline}"
+TARGET_DEPARTURE_AIRPORT: "${targetDepartureAirport}"
+TARGET_DEPARTURE_DATE: "${targetDepartureDate}"
+==== TARGET METADATA END ====
+[CONTENT BODY]
 ${cleanBody}`;
+
+    return { text: formattedText, nextData };
 }
 
 // ── ScrapingBee로 수집 ──
 async function crawl(url: string, apiKey: string): Promise<string | null> {
-    // Attempt 1: SSR HTML 먼저 시도 (__NEXT_DATA__ 확보를 위해)
+    // Attempt 1: JS 렌더링 최우선 시도 (단, 대기 시간을 최소화하여 속도 확보)
     try {
-        console.log('[Edge] 수집 시도: SSR HTML (render_js=false)');
-        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&timeout=10000`;
+        console.log('[Edge] 수집 시도: JS렌더링 (빠른 대기)');
+        const jsScenario = encodeURIComponent('{"instructions":[{"wait":1000},{"scroll_y":2000},{"wait":500},{"scroll_y":5000}]}');
+        // wait을 2000으로 줄여서 속도 대폭 개선
+        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait=2000&js_scenario=${jsScenario}&timeout=15000`;
         const controller = new AbortController();
-        const tid = setTimeout(() => controller.abort(), 10000);
-        const res = await fetch(sbUrl, { signal: controller.signal });
-        clearTimeout(tid);
-        if (res.ok) {
-            const html = await res.text();
-            if (html.length > 1000 && html.includes('<') && !html.startsWith('{')) {
-                console.log(`[Edge] SSR 수집 성공: ${html.length}자`);
-                return html;
-            }
-        }
-    } catch (e: any) {
-        console.warn('[Edge] Attempt 1 실패:', e.name === 'AbortError' ? 'TIMEOUT' : e.message);
-    }
-
-    // Attempt 2: JS 렌더링 (동적 콘텐츠 필요 시, 12초)
-    try {
-        console.log('[Edge] 수집 시도: JS렌더링');
-        const jsScenario = encodeURIComponent('{"instructions":[{"wait":2000},{"scroll_y":2000},{"wait":1500},{"scroll_y":4000},{"wait":1500},{"scroll_y":6000}]}');
-        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=networkidle2&js_scenario=${jsScenario}&timeout=12000`;
-        const controller = new AbortController();
-        const tid = setTimeout(() => controller.abort(), 12000);
+        const tid = setTimeout(() => controller.abort(), 15000);
         const res = await fetch(sbUrl, { signal: controller.signal });
         clearTimeout(tid);
         if (res.ok) {
@@ -86,10 +88,73 @@ async function crawl(url: string, apiKey: string): Promise<string | null> {
             }
         }
     } catch (e: any) {
-        console.warn('[Edge] Attempt 2 실패:', e.name === 'AbortError' ? 'TIMEOUT' : e.message);
+        console.warn('[Edge] Attempt 1 (JS) 실패:', e.name === 'AbortError' ? 'TIMEOUT' : e.message);
+    }
+
+    // Attempt 2: SSR HTML (JS 렌더링 실패 시 최후 수단)
+    try {
+        console.log('[Edge] 수집 시도: SSR HTML (render_js=false)');
+        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&timeout=8000`;
+        const controller = new AbortController();
+        const tid = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch(sbUrl, { signal: controller.signal });
+        clearTimeout(tid);
+        if (res.ok) {
+            const html = await res.text();
+            if (html.length > 1000 && html.includes('<') && !html.startsWith('{')) {
+                console.log(`[Edge] SSR 수집 성공: ${html.length}자`);
+                return html;
+            }
+        }
+    } catch (e: any) {
+        console.warn('[Edge] Attempt 2 (SSR) 실패:', e.name === 'AbortError' ? 'TIMEOUT' : e.message);
     }
 
     return null;
+}
+
+function analyzeWithRegex(text: string, url: string): any {
+    const fallback: any = {
+        isProduct: true,
+        title: '',
+        destination: '',
+        price: '',
+        departureDate: '',
+        duration: '',
+        airline: '',
+        departureAirport: '',
+        hotel: '',
+        features: [],
+        courses: [],
+        specialOffers: [],
+        inclusions: [],
+        exclusions: [],
+        itinerary: [],
+        keyPoints: [],
+        hashtags: '',
+        hasNoOption: false,
+        hasFreeSchedule: false,
+        url: url
+    };
+
+    const stripQuotes = (s: string) => s.replace(/^"|"$/g, '').trim();
+    const extractMatch = (regex: RegExp) => {
+        const match = text.match(regex);
+        return match ? stripQuotes(match[1]) : '';
+    };
+
+    fallback.title = extractMatch(/TARGET_TITLE:\s*"?([^"\n]*)"?/);
+    if (!fallback.title || fallback.title === 'undefined') {
+        fallback.title = extractMatch(/PAGE_TITLE:\s*"?([^"\n]*)"?/);
+    }
+
+    fallback.price = extractMatch(/TARGET_PRICE:\s*"?([^"\n]*)"?/);
+    fallback.duration = extractMatch(/TARGET_DURATION:\s*"?([^"\n]*)"?/);
+    fallback.airline = extractMatch(/TARGET_AIRLINE:\s*"?([^"\n]*)"?/);
+    fallback.departureAirport = extractMatch(/TARGET_DEPARTURE_AIRPORT:\s*"?([^"\n]*)"?/);
+    fallback.departureDate = extractMatch(/TARGET_DEPARTURE_DATE:\s*"?([^"\n]*)"?/);
+
+    return fallback;
 }
 
 // ── Gemini로 분석 ──
@@ -97,41 +162,26 @@ async function analyze(text: string, url: string, nextData: string | undefined, 
     const safeText = text.replace(/`/g, "'").substring(0, 40000);
     const safeNextData = nextData ? nextData.replace(/`/g, "'").substring(0, 40000) : '';
 
-    let prompt = '당신은 여행 상품 웹페이지 전문 분석가입니다.\n';
-    prompt += '아래 여행 상품 페이지의 전체 내용을 분석하여, 모바일 여행 확정서에 필요한 모든 정보를 빠짐없이 추출하세요.\n\n';
-    prompt += 'URL: ' + url + '\n\n';
+    let prompt = `다음 여행 상품 페이지에서 정보를 추출하여 JSON으로 반환하세요.
+URL: ${url}
+${safeNextData ? `--- [중요: NEXT_JS_DATA (JSON 데이터 참조용)] ---\n${safeNextData.substring(0, 15000)}\n` : ''}
 
-    if (safeNextData) {
-        prompt += '--- [NEXT_JS_DATA] ---\n' + safeNextData + '\n';
-    }
-    prompt += '--- [페이지 전체 내용] ---\n' + safeText + '\n--- [끝] ---\n\n';
+반환 형식:
+{
+  "isProduct": true,
+  "title": "METADATA 섹션의 TARGET_TITLE 또는 PAGE_TITLE 중 더 구체적인 것을 그대로 추출 (상품명 전체)",
+  "destination": "목적지 (국가+도시)",
+  "price": "METADATA 섹션의 TARGET_PRICE 값을 최우선적으로 사용하세요 (숫자만 추출). 없으면 텍스트에서 성인 1인 가격을 찾으세요.",
+  "departureDate": "출발일 (YYYY-MM-DD 형식 권장)",
+  "airline": "METADATA 섹션의 TARGET_AIRLINE을 최우선으로 사용하세요. 없으면 항공사(티웨이, 제주항공 등) 추출.",
+  "duration": "METADATA 섹션의 TARGET_DURATION 값을 최우선으로 사용하세요. 없으면 'X박 Y일' 패턴을 찾으세요.",
+  "departureAirport": "METADATA 섹션의 TARGET_DEPARTURE_AIRPORT를 최우선으로 사용하세요. 없으면 텍스트에서 '인천', '부산', '대구' 등 출발지 추출.",
+  "keyPoints": ["상품의 핵심 특징 5~7개 요약"],
+  "exclusions": ["불포함 사항 요약"]
+}
 
-    prompt += '아래 JSON 형식으로 반환하세요. 페이지에 정보가 없으면 빈 문자열이나 빈 배열로 두세요.\n\n';
-    prompt += '{\n';
-    prompt += '  "title": "METADATA 섹션의 PAGE_TITLE을 우선적으로 사용 (상품명 전체)",\n';
-    prompt += '  "destination": "목적지 (국가+도시)",\n';
-    prompt += '  "price": "METADATA 섹션의 TARGET_PRICE 값을 최우선적으로 사용하세요 (숫자만)",\n';
-    prompt += '  "departureDate": "출발일 (YYYY-MM-DD 또는 원본 텍스트)",\n';
-    prompt += '  "returnDate": "귀국일 (YYYY-MM-DD 또는 원본 텍스트)",\n';
-    prompt += '  "duration": "METADATA 섹션의 TARGET_DURATION 값을 최우선적으로 사용하세요 (예: 3박5일)",\n';
-    prompt += '  "airline": "METADATA 섹션의 TARGET_AIRLINE 값을 최우선적으로 사용하세요",\n';
-    prompt += '  "flightCode": "편명 (예: 7C201)",\n';
-    prompt += '  "departureAirport": "METADATA 섹션의 TARGET_DEPARTURE_AIRPORT 값을 최우선적으로 사용하세요",\n';
-    prompt += '  "departureTime": "가는편 출발 시각 (HH:MM)",\n';
-    prompt += '  "arrivalTime": "가는편 도착 시각 (HH:MM)",\n';
-    prompt += '  "returnDepartureTime": "오는편 출발 시각 (HH:MM)",\n';
-    prompt += '  "returnArrivalTime": "오는편 도착 시각 (HH:MM)",\n';
-    prompt += '  "hotel": { "name": "호텔명", "englishName": "영문명", "address": "주소", "checkIn": "14:00", "checkOut": "12:00", "images": [], "amenities": [] },\n';
-    prompt += '  "itinerary": [{ "day": "1일차", "date": "", "title": "일정 제목", "activities": ["활동 3-5개"], "transportation": "편명 출발->도착", "meals": { "breakfast": "", "lunch": "", "dinner": "" }, "hotel": "호텔명", "dailyNotices": [] }],\n';
-    prompt += '  "inclusions": ["포함사항"],\n';
-    prompt += '  "exclusions": ["불포함사항"],\n';
-    prompt += '  "keyPoints": ["핵심 포인트 5~7개"],\n';
-    prompt += '  "notices": ["유의사항"],\n';
-    prompt += '  "cancellationPolicy": "취소/환불 규정",\n';
-    prompt += '  "checklist": ["준비물"],\n';
-    prompt += '  "meetingInfo": [{ "type": "미팅장소", "location": "장소명", "time": "미팅시간", "description": "상세설명", "imageUrl": "관련 이미지 URL" }]\n';
-    prompt += '}\n\n';
-    prompt += '중요: 1. 이모지 절대 금지 2. 항공시간 HH:MM 필수 3. JSON만 반환';
+입력 텍스트:
+${safeText.substring(0, 30000)}`;
 
     try {
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
@@ -144,14 +194,22 @@ async function analyze(text: string, url: string, nextData: string | undefined, 
         });
 
         const data = await res.json();
-        if (!data.candidates?.[0]?.content?.parts?.[0]?.text) return null;
+
+        if (data.error && data.error.code === 429) {
+            console.warn('[Edge] AI Rate Limit 발생, 정규식으로 복구합니다.');
+            return analyzeWithRegex(text, url);
+        }
+
+        if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+            return analyzeWithRegex(text, url);
+        }
 
         const resText = data.candidates[0].content.parts[0].text;
         const jsonStr = resText.replace(/```json\s*|\s*```/g, '').trim();
         return JSON.parse(jsonStr);
     } catch (e) {
-        console.error('[Gemini] 분석 오류:', e);
-        return null;
+        console.error('[Gemini] 분석 오류, 정규식으로 복구:', e);
+        return analyzeWithRegex(text, url);
     }
 }
 
@@ -173,16 +231,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. 텍스트 정제
-        const cleanedText = htmlToText(html);
-        let nextData: string | undefined = undefined;
-        const startIdx = html.indexOf('<script id="__NEXT_DATA__"');
-        if (startIdx !== -1) {
-            const jsonStart = html.indexOf('>', startIdx) + 1;
-            const jsonEnd = html.indexOf('</script>', jsonStart);
-            if (jsonStart !== 0 && jsonEnd !== -1) {
-                nextData = html.substring(jsonStart, jsonEnd);
-            }
-        }
+        const { text: cleanedText, nextData } = htmlToText(html, url);
 
         // 3. AI 분석
         const result = await analyze(cleanedText, url, nextData, geminiKey);
