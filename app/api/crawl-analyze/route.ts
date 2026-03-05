@@ -321,7 +321,16 @@ export async function POST(request: NextRequest) {
             const nativeResult = await fetchModeTourNative(url);
             if (nativeResult) {
                 console.log('[Edge] ModeTour Native 분석 성공');
-                return NextResponse.json({ success: true, data: nativeResult });
+                const formatted = `[${nativeResult.title}]\n\n* 가격 : ${nativeResult.price}원\n* 출발일 : ${nativeResult.departureDate}\n* 항공 : ${nativeResult.airline}\n* 지역 : ${nativeResult.destination}\n* 기간 : ${nativeResult.duration}\n\n[상품 포인트]\n${nativeResult.keyPoints.map((p: string) => `- ${p}`).join('\n')}`;
+
+                return NextResponse.json({
+                    success: true,
+                    data: {
+                        raw: nativeResult,
+                        formatted: formatted,
+                        recommendation: ''
+                    }
+                });
             }
         }
 
@@ -341,7 +350,16 @@ export async function POST(request: NextRequest) {
         }
 
         result.url = url;
-        return NextResponse.json({ success: true, data: result });
+        const formattedText = `[${result.title}]\n\n* 가격 : ${result.price}원\n* 지역 : ${result.destination}\n* 기간 : ${result.duration}\n\n[상품 포인트]\n${result.keyPoints ? result.keyPoints.map((p: string) => `- ${p}`).join('\n') : ''}`;
+
+        return NextResponse.json({
+            success: true,
+            data: {
+                raw: result,
+                formatted: formattedText,
+                recommendation: ''
+            }
+        });
     } catch (error: any) {
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
