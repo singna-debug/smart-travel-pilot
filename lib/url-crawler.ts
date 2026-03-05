@@ -505,37 +505,63 @@ async function scrapeWithScrapingBee(url: string): Promise<string | null> {
     const apiKey = process.env.SCRAPINGBEE_API_KEY?.trim();
     if (!apiKey) return null;
 
+    // [전략 1] SSR HTML 먼저 시도 (NextJS의 __NEXT_DATA__ 태그를 확보하기 위함)
+    // JS 렌더링 없이 빠르게 가져오면 __NEXT_DATA__에 모든 데이터가 있음
     try {
-        // 상호작용 시나리오 (스크롤 및 상세 보기 클릭)
-        // 운영 환경(Vercel) 타임아웃을 고려하여 대기 시간을 25초 이내로 최적화
+        console.log('[ScrapingBee] 전략 1: SSR HTML (render_js=false)');
+        const ssrUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&timeout=15000`;
+        const response = await fetch(ssrUrl);
+        if (response.ok) {
+            const html = await response.text();
+            // 유효한 HTML인지 확인 (에러 JSON이 올 수 있음)
+            if (html.length > 1000 && html.includes('<') && !html.startsWith('{')) {
+                console.log(`[ScrapingBee] SSR 성공: ${html.length}자`);
+                // __NEXT_DATA__가 있으면 이것만으로 충분
+                if (html.includes('__NEXT_DATA__')) {
+                    console.log('[ScrapingBee] __NEXT_DATA__ 발견! SSR 데이터 사용');
+                    return htmlToText(html, url);
+                }
+                // __NEXT_DATA__가 없어도 유효한 HTML이면 사용
+                console.log('[ScrapingBee] SSR HTML 사용 (__NEXT_DATA__ 없음)');
+                return htmlToText(html, url);
+            }
+        }
+    } catch (e: any) {
+        console.warn('[ScrapingBee] 전략 1 실패:', e.message);
+    }
+
+    // [전략 2] JS 렌더링 (동적 콘텐츠가 필요한 경우)
+    try {
+        console.log('[ScrapingBee] 전략 2: JS 렌더링');
         const jsScenario = {
             instructions: [
-                { scroll_to: "bottom" },
+                { scroll_y: 3000 },
                 { wait: 1500 },
                 { evaluate: "document.querySelectorAll('button, a, div, span').forEach(el => { const txt = el.innerText || ''; if(['상세', '전체', '펼치기', '더보기'].some(w => txt.includes(w))) { try { el.click(); } catch(e){} } })" },
                 { wait: 1500 },
-                { scroll_to: "bottom" }
+                { scroll_y: 6000 }
             ]
         };
 
         const scenarioStr = JSON.stringify(jsScenario);
-        const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=networkidle&timeout=20000&js_scenario=${encodeURIComponent(scenarioStr)}`;
+        const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=networkidle2&timeout=20000&js_scenario=${encodeURIComponent(scenarioStr)}`;
 
         const response = await fetch(scrapingBeeUrl);
-        if (!response.ok) {
-            const errBody = await response.text();
-            console.error(`[ScrapingBee] API 오류 (${response.status}):`, errBody.substring(0, 300));
-            throw new Error(`Status ${response.status}`);
+        if (response.ok) {
+            const html = await response.text();
+            if (html.length > 1000 && html.includes('<') && !html.startsWith('{')) {
+                console.log(`[ScrapingBee] JS 렌더링 성공: ${html.length}자`);
+                return htmlToText(html, url);
+            } else {
+                console.warn('[ScrapingBee] JS 렌더링 응답이 유효하지 않음:', html.substring(0, 200));
+            }
         }
-
-        const html = await response.text();
-        console.log(`[ScrapingBee] 완료: ${html.length}자`);
-
-        return htmlToText(html, url);
-    } catch (e) {
-        console.error('[ScrapingBee] 오류:', e);
-        return null;
+    } catch (e: any) {
+        console.warn('[ScrapingBee] 전략 2 실패:', e.message);
     }
+
+    console.error('[ScrapingBee] 모든 전략 실패');
+    return null;
 }
 
 import { scrapeWithBrowser } from '@/lib/browser-crawler';

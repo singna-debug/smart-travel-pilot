@@ -43,20 +43,18 @@ function htmlToText(html: string): string {
 
 // ── ScrapingBee로 수집 ──
 async function crawl(url: string, apiKey: string): Promise<string | null> {
-    // Attempt 1: JS 렌더링 (시나리오 포함, 24초)
+    // Attempt 1: SSR HTML 먼저 시도 (__NEXT_DATA__ 확보를 위해)
     try {
-        console.log('[Edge] 수집 시도: JS렌더링 (시나리오 포함)');
-        // 충분한 시간을 두고 넉넉하게 스크롤하여 모든 동적 콘텐츠/상세일정표를 로딩
-        const jsScenario = encodeURIComponent('{"instructions":[{"wait":2000},{"scroll_y":2000},{"wait":1500},{"scroll_y":4000},{"wait":1500},{"scroll_y":6000}]}');
-        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&js_scenario=${jsScenario}&timeout=12000`;
+        console.log('[Edge] 수집 시도: SSR HTML (render_js=false)');
+        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&timeout=10000`;
         const controller = new AbortController();
-        const tid = setTimeout(() => controller.abort(), 12000); // 12초 수집, 나머지 18초 Gemini 할당 (Vercel 30초 한도 대응)
+        const tid = setTimeout(() => controller.abort(), 10000);
         const res = await fetch(sbUrl, { signal: controller.signal });
         clearTimeout(tid);
         if (res.ok) {
             const html = await res.text();
-            if (html.length > 1000) {
-                console.log(`[Edge] 수집 성공: ${html.length}자`);
+            if (html.length > 1000 && html.includes('<') && !html.startsWith('{')) {
+                console.log(`[Edge] SSR 수집 성공: ${html.length}자`);
                 return html;
             }
         }
@@ -64,18 +62,19 @@ async function crawl(url: string, apiKey: string): Promise<string | null> {
         console.warn('[Edge] Attempt 1 실패:', e.name === 'AbortError' ? 'TIMEOUT' : e.message);
     }
 
-    // Attempt 2: JS 없이 직접 수집 (5초)
+    // Attempt 2: JS 렌더링 (동적 콘텐츠 필요 시, 12초)
     try {
-        console.log('[Edge] 수집 시도: 직접 수집');
-        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&timeout=8000`;
+        console.log('[Edge] 수집 시도: JS렌더링');
+        const jsScenario = encodeURIComponent('{"instructions":[{"wait":2000},{"scroll_y":2000},{"wait":1500},{"scroll_y":4000},{"wait":1500},{"scroll_y":6000}]}');
+        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=networkidle2&js_scenario=${jsScenario}&timeout=12000`;
         const controller = new AbortController();
-        const tid = setTimeout(() => controller.abort(), 5000);
+        const tid = setTimeout(() => controller.abort(), 12000);
         const res = await fetch(sbUrl, { signal: controller.signal });
         clearTimeout(tid);
         if (res.ok) {
             const html = await res.text();
-            if (html.length > 500) {
-                console.log(`[Edge] 직접 수집 성공: ${html.length}자`);
+            if (html.length > 1000 && html.includes('<') && !html.startsWith('{')) {
+                console.log(`[Edge] JS 렌더링 수집 성공: ${html.length}자`);
                 return html;
             }
         }
