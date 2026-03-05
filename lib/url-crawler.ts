@@ -249,6 +249,34 @@ export function htmlToText(html: string, url: string): string {
         if (altAirportMatch) targetDepartureAirport = altAirportMatch[1];
     }
 
+    // [추가] JS 렌더링 후 DOM 가시 텍스트에서 직접 추출 (한국어 패턴)
+    // Script/style 제거한 텍스트에서 검색
+    const visibleText = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ');
+
+    if (!targetPrice || targetPrice === '0') {
+        // 성인 가격 패턴: "성인 799,000원" 또는 "799,000 원" 등
+        const visiblePriceMatch = visibleText.match(/(\d{1,3}(?:,\d{3})+)\s*원/);
+        if (visiblePriceMatch) {
+            targetPrice = visiblePriceMatch[1].replace(/,/g, '');
+            console.log(`[Crawler] 가시 텍스트에서 가격 추출: ${targetPrice}`);
+        }
+    }
+    if (!targetAirline) {
+        const visibleAirlineMatch = visibleText.match(/(제주항공|대한항공|아시아나항공|아시아나|진에어|티웨이항공|티웨이|이스타항공|이스타|에어서울|에어부산|에어프레미아|피치항공|스쿠트|비엣젯|필리핀항공|싱가포르항공|타이항공|ANA|JAL)/);
+        if (visibleAirlineMatch) {
+            targetAirline = visibleAirlineMatch[1];
+            console.log(`[Crawler] 가시 텍스트에서 항공사 추출: ${targetAirline}`);
+        }
+    }
+    if (!targetDepartureAirport) {
+        // 출발지 패턴: "인천출발", "인천 출발", "인천공항" 등
+        const visibleAirportMatch = visibleText.match(/(인천|김포|부산|대구|청주|광주|제주|무안)\s*(?:출발|공항|국제공항)/);
+        if (visibleAirportMatch) {
+            targetDepartureAirport = visibleAirportMatch[1];
+            console.log(`[Crawler] 가시 텍스트에서 출발공항 추출: ${targetDepartureAirport}`);
+        }
+    }
+
     // PAGE_TITLE 보강
     let finalTitle = pageTitle;
     if ((pageTitle.includes('모두투어') || pageTitle.includes('상품상세') || pageTitle.includes('undefined')) &&
@@ -505,59 +533,80 @@ async function scrapeWithScrapingBee(url: string): Promise<string | null> {
     const apiKey = process.env.SCRAPINGBEE_API_KEY?.trim();
     if (!apiKey) return null;
 
-    // [전략 1] SSR HTML 먼저 시도 (NextJS의 __NEXT_DATA__ 태그를 확보하기 위함)
-    // JS 렌더링 없이 빠르게 가져오면 __NEXT_DATA__에 모든 데이터가 있음
+    // SSR __NEXT_DATA__ 에는 상품명/출발일만 있고 가격/항공은 없음
+    // JS 렌더링 후에야 가격/항공/출발공항이 DOM에 포함됨
+    // 따라서 JS 렌더링을 우선하고, SSR은 __NEXT_DATA__ 보조 데이터로만 활용
+
+    let ssrNextData: string | undefined;
+
+    // [전략 1-보조] SSR에서 __NEXT_DATA__ 추출 (출발일/상품명 확보용, 빠름)
     try {
-        console.log('[ScrapingBee] 전략 1: SSR HTML (render_js=false)');
-        const ssrUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&timeout=15000`;
+        console.log('[ScrapingBee] SSR에서 __NEXT_DATA__ 보조 추출 시도');
+        const ssrUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&timeout=10000`;
         const response = await fetch(ssrUrl);
         if (response.ok) {
             const html = await response.text();
-            // 유효한 HTML인지 확인 (에러 JSON이 올 수 있음)
             if (html.length > 1000 && html.includes('<') && !html.startsWith('{')) {
-                console.log(`[ScrapingBee] SSR 성공: ${html.length}자`);
-                // __NEXT_DATA__가 있으면 이것만으로 충분
-                if (html.includes('__NEXT_DATA__')) {
-                    console.log('[ScrapingBee] __NEXT_DATA__ 발견! SSR 데이터 사용');
-                    return htmlToText(html, url);
+                const ndStart = html.indexOf('<script id="__NEXT_DATA__"');
+                if (ndStart !== -1) {
+                    const jsonStart = html.indexOf('>', ndStart) + 1;
+                    const jsonEnd = html.indexOf('</script>', jsonStart);
+                    if (jsonStart > 0 && jsonEnd !== -1) {
+                        ssrNextData = html.substring(jsonStart, jsonEnd);
+                        console.log(`[ScrapingBee] SSR __NEXT_DATA__ 확보: ${ssrNextData.length}자`);
+                    }
                 }
-                // __NEXT_DATA__가 없어도 유효한 HTML이면 사용
-                console.log('[ScrapingBee] SSR HTML 사용 (__NEXT_DATA__ 없음)');
-                return htmlToText(html, url);
             }
         }
     } catch (e: any) {
-        console.warn('[ScrapingBee] 전략 1 실패:', e.message);
+        console.warn('[ScrapingBee] SSR 보조 추출 실패 (무시):', e.message);
     }
 
-    // [전략 2] JS 렌더링 (동적 콘텐츠가 필요한 경우)
+    // [전략 2-메인] JS 렌더링 (가격/항공/출발공항이 포함된 완전한 페이지)
     try {
-        console.log('[ScrapingBee] 전략 2: JS 렌더링');
+        console.log('[ScrapingBee] JS 렌더링 시도 (메인 전략)');
         const jsScenario = {
             instructions: [
                 { scroll_y: 3000 },
-                { wait: 1500 },
+                { wait: 2000 },
                 { evaluate: "document.querySelectorAll('button, a, div, span').forEach(el => { const txt = el.innerText || ''; if(['상세', '전체', '펼치기', '더보기'].some(w => txt.includes(w))) { try { el.click(); } catch(e){} } })" },
                 { wait: 1500 },
-                { scroll_y: 6000 }
+                { scroll_y: 6000 },
+                { wait: 1000 }
             ]
         };
 
         const scenarioStr = JSON.stringify(jsScenario);
-        const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=networkidle2&timeout=20000&js_scenario=${encodeURIComponent(scenarioStr)}`;
+        const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait_browser=networkidle2&timeout=25000&js_scenario=${encodeURIComponent(scenarioStr)}`;
 
         const response = await fetch(scrapingBeeUrl);
         if (response.ok) {
             const html = await response.text();
             if (html.length > 1000 && html.includes('<') && !html.startsWith('{')) {
                 console.log(`[ScrapingBee] JS 렌더링 성공: ${html.length}자`);
-                return htmlToText(html, url);
+
+                // SSR __NEXT_DATA__를 JS 렌더링 HTML에 주입 (없을 수 있으므로)
+                let enrichedHtml = html;
+                if (ssrNextData && !html.includes('__NEXT_DATA__')) {
+                    enrichedHtml = html.replace('</body>', `<script id="__NEXT_DATA__" type="application/json">${ssrNextData}</script></body>`);
+                    console.log('[ScrapingBee] SSR __NEXT_DATA__를 JS HTML에 주입 완료');
+                }
+
+                return htmlToText(enrichedHtml, url);
             } else {
                 console.warn('[ScrapingBee] JS 렌더링 응답이 유효하지 않음:', html.substring(0, 200));
             }
         }
     } catch (e: any) {
-        console.warn('[ScrapingBee] 전략 2 실패:', e.message);
+        console.warn('[ScrapingBee] JS 렌더링 실패:', e.message);
+    }
+
+    // [전략 3-폴백] SSR HTML 사용 (JS 렌더링 실패 시)
+    if (ssrNextData) {
+        console.log('[ScrapingBee] JS 실패 → SSR __NEXT_DATA__로 폴백');
+        // 최소한의 HTML 구조 생성
+        const minimalHtml = `<html><body><script id="__NEXT_DATA__" type="application/json">${ssrNextData}</script></body></html>`;
+        return htmlToText(minimalHtml, url);
     }
 
     console.error('[ScrapingBee] 모든 전략 실패');
