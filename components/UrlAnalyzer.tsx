@@ -811,7 +811,14 @@ export default function UrlAnalyzer() {
                             <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
                                 <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>💰 가격</span>
                                 <span className="info-value price" style={{ color: '#38bdf8', fontWeight: '800', fontSize: '1.2rem' }}>
-                                    {singleResult.raw.price ? (String(singleResult.raw.price).endsWith('원') ? singleResult.raw.price : `${singleResult.raw.price}원`) : '가격 정보 없음'}
+                                    {singleResult.raw.price ? (
+                                        (() => {
+                                            const p = String(singleResult.raw.price);
+                                            const digits = p.replace(/[^0-9]/g, '');
+                                            const formatted = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                            return formatted + '원';
+                                        })()
+                                    ) : '가격 정보 없음'}
                                 </span>
                             </div>
                             <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>

@@ -80,13 +80,17 @@ async function fetchModeTourNative(url: string): Promise<any> {
     };
 
     try {
-        console.log(`[Edge ModeTour] Fetching product info for: ${productNo}`);
+        console.log(`[Edge ModeTour] Fetching product info for: ${productNo} with 4s timeout`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+
         const [resDetail, resPoints] = await Promise.all([
-            fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`, { headers }),
-            fetch(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}`, { headers })
+            fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`, { headers, signal: controller.signal }),
+            fetch(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}`, { headers, signal: controller.signal })
         ]);
 
         const [dataDetail, dataPoints] = await Promise.all([resDetail.json() as any, resPoints.json() as any]);
+        clearTimeout(timeoutId);
 
         if (dataDetail.isOK && dataDetail.result) {
             const d = dataDetail.result;
@@ -140,11 +144,15 @@ async function fetchModeTourNative(url: string): Promise<any> {
             // 중복 제거 및 정리
             keyPoints = Array.from(new Set(keyPoints)).filter(p => p.length > 2).slice(0, 8);
 
+            // 가격 콤마 포맷팅
+            const rawPrice = String(d.sellingPriceAdultTotalAmount || '');
+            const formattedPrice = rawPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
             return {
                 isProduct: true,
                 title: cleanTitle,
                 destination: destination,
-                price: String(d.sellingPriceAdultTotalAmount || ''),
+                price: formattedPrice,
                 departureDate: d.departureDate,
                 airline: d.transportName || '',
                 duration: duration,
