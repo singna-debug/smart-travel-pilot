@@ -235,32 +235,22 @@ export function htmlToText(html: string, url: string): string {
         }
     }
 
-    // [추가] 정밀 추출 실패 시 최후의 수단: HTML 전체에서 정규식으로 직접 찾기 (JSON 구조가 깨진 경우 대비)
-    if (!targetPrice || targetPrice === '0') {
-        const altPriceMatch = html.match(/["'](?:sellingPriceAdultTotalAmount|totalAmount|adultPrice|salePrice)["']\s*:\s*(\d+)/);
-        if (altPriceMatch) targetPrice = altPriceMatch[1];
-    }
-    if (!targetAirline) {
-        const altAirlineMatch = html.match(/["'](?:transportName|airlineName|carrierNm)["']\s*:\s*["']([^"']+)["']/);
-        if (altAirlineMatch) targetAirline = altAirlineMatch[1];
-    }
-    if (!targetDepartureAirport) {
-        const altAirportMatch = html.match(/["'](?:departureCityName|depCityName|start_city_nm)["']\s*:\s*["']([^"']+)["']/);
-        if (altAirportMatch) targetDepartureAirport = altAirportMatch[1];
-    }
-
-    // [추가] JS 렌더링 후 DOM 가시 텍스트에서 직접 추출 (한국어 패턴)
-    // Script/style 제거한 텍스트에서 검색
+    // [추가] JS 렌더링 후 DOM 가시 텍스트에서 직접 추출 (한국어 패턴) 최우선 적용
+    // Script/style 제거한 텍스트에서 검색 (고객 노출 가격/항공사가 가장 정확함)
     const visibleText = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ');
 
-    if (!targetPrice || targetPrice === '0') {
-        // 성인 가격 패턴: "성인 799,000원" 또는 "799,000 원" 등
-        const visiblePriceMatch = visibleText.match(/(\d{1,3}(?:,\d{3})+)\s*원/);
-        if (visiblePriceMatch) {
-            targetPrice = visiblePriceMatch[1].replace(/,/g, '');
-            console.log(`[Crawler] 가시 텍스트에서 가격 추출: ${targetPrice}`);
+    // 성인 가격 패턴: "성인 799,000원" 또는 "799,000 원" 등
+    const visiblePriceMatch = visibleText.match(/(\d{1,3}(?:,\d{3})+)\s*원/);
+    if (visiblePriceMatch) {
+        const parsedVisiblePrice = visiblePriceMatch[1].replace(/,/g, '');
+        // 기본 JSON에서 추출한 가격이 너무 작거나(ex: 유류할증료 28800), 가시적 텍스트 가격이 더 현실적이면 덮어씌움
+        if (!targetPrice || targetPrice === '0' || parseInt(parsedVisiblePrice, 10) > parseInt(targetPrice, 10)) {
+            targetPrice = parsedVisiblePrice;
+            console.log(`[Crawler] 가시 텍스트에서 가격 추출 (덮어쓰기): ${targetPrice}`);
         }
     }
+
+    // 항공사와 출발 공항도 __NEXT_DATA__ 추출 실패 시 덮어쓰기
     if (!targetAirline) {
         const visibleAirlineMatch = visibleText.match(/(제주항공|대한항공|아시아나항공|아시아나|진에어|티웨이항공|티웨이|이스타항공|이스타|에어서울|에어부산|에어프레미아|피치항공|스쿠트|비엣젯|필리핀항공|싱가포르항공|타이항공|ANA|JAL)/);
         if (visibleAirlineMatch) {
@@ -275,6 +265,21 @@ export function htmlToText(html: string, url: string): string {
             targetDepartureAirport = visibleAirportMatch[1];
             console.log(`[Crawler] 가시 텍스트에서 출발공항 추출: ${targetDepartureAirport}`);
         }
+    }
+
+    // [추가] 가시 텍스트 추출 실패 시 최후의 수단: 백그라운드 JSON 정규식 직접 찾기
+    // 주: 여기에는 유류할증료나 부분 가격이 포함될 위험이 있음
+    if (!targetPrice || targetPrice === '0') {
+        const altPriceMatch = html.match(/["'](?:sellingPriceAdultTotalAmount|totalAmount|adultPrice|salePrice)["']\s*:\s*(\d+)/);
+        if (altPriceMatch) targetPrice = altPriceMatch[1];
+    }
+    if (!targetAirline) {
+        const altAirlineMatch = html.match(/["'](?:transportName|airlineName|carrierNm)["']\s*:\s*["']([^"']+)["']/);
+        if (altAirlineMatch) targetAirline = altAirlineMatch[1];
+    }
+    if (!targetDepartureAirport) {
+        const altAirportMatch = html.match(/["'](?:departureCityName|depCityName|start_city_nm)["']\s*:\s*["']([^"']+)["']/);
+        if (altAirportMatch) targetDepartureAirport = altAirportMatch[1];
     }
 
     // PAGE_TITLE 보강
@@ -300,7 +305,8 @@ export function htmlToText(html: string, url: string): string {
         .trim()
         .substring(0, 50000);
 
-    return `==== TARGET METADATA START ====
+    // [중요] 메타데이터를 가장 먼저 배치해야 텍스트가 잘려도 메타데이터는 유지됨
+    const metadataBlock = `==== TARGET METADATA START ====
 PAGE_TITLE: "${finalTitle}"
 OG_TITLE: "${ogTitle}"
 BODY_TITLE: "${bodyTitle}"
@@ -310,19 +316,25 @@ TARGET_PRICE: "${targetPrice}"
 TARGET_DURATION: "${targetDuration}"
 TARGET_AIRLINE: "${targetAirline}"
 TARGET_DEPARTURE_AIRPORT: "${targetDepartureAirport}"
-==== TARGET METADATA END ====
+==== TARGET METADATA END ====`;
+
+    return `${metadataBlock}
 
 [CONTENT BODY]
 ${cleanBody}`;
 }
 
-async function analyzeWithGemini(text: string, url: string, nextData?: string): Promise<DetailedProductInfo | null> {
+export async function analyzeWithGemini(text: string, url: string, nextData?: string): Promise<DetailedProductInfo | null> {
     const apiKey = process.env.GEMINI_API_KEY?.trim();
     if (!apiKey) return null;
 
     try {
         const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.0-flash';
         console.log(`[Gemini] AI 분석 시작... (모델: ${modelName})`);
+
+        // --- ADDED LOGGING ---
+        console.log(`[Gemini] 입력 텍스트 원본 길이: ${text.length}`);
+
         const prompt = `다음 여행 상품 페이지에서 정보를 추출하여 JSON으로 반환하세요.
 URL: ${url}
 ${nextData ? `--- [중요: NEXT_JS_DATA (JSON 데이터 참조용)] ---\n${nextData.substring(0, 15000)}\n` : ''}
@@ -342,7 +354,12 @@ ${nextData ? `--- [중요: NEXT_JS_DATA (JSON 데이터 참조용)] ---\n${nextD
 }
 
 입력 텍스트:
-${text.substring(0, 20000)}`;
+${text.substring(0, 30000)}`;
+
+        console.log(`[Gemini] 최종 프롬프트 길이: ${prompt.length}`);
+        const fs = require('fs');
+        fs.writeFileSync('debug-gemini-prompt.txt', prompt, 'utf-8');
+        // ---------------------
 
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
             method: 'POST',
@@ -352,17 +369,101 @@ ${text.substring(0, 20000)}`;
 
         const data = await response.json();
         if (!data.candidates || !data.candidates[0]?.content?.parts[0]?.text) {
-            console.error('[Gemini] 응답 형식이 올바르지 않거나 결과가 없습니다:', JSON.stringify(data));
-            return null;
+            console.error('[Gemini] AI 응답에서 텍스트를 찾을 수 없거나 에러가 발생했습니다:', JSON.stringify(data).substring(0, 500));
+            console.log('[Fallback] AI 할당량 초과 또는 에러로 인해 정규식 분석 모드로 전환합니다.');
+            return analyzeWithRegex(text, url);
         }
 
         const resText = data.candidates[0].content.parts[0].text;
-        const jsonStr = resText.replace(/```json\s*|\s*```/g, '').trim();
-        return JSON.parse(jsonStr);
-    } catch (e) {
-        console.error(e);
-        return null;
+        console.log('[Gemini] AI 응답:', resText.substring(0, 150));
+
+        // JSON 파싱 전처리 (마크다운, 주석, 후행 쉼표 제거 등)
+        let jsonStr = resText.replace(/```json\s*/i, '').replace(/```\s*$/, '').trim();
+
+        // 간혹 AI가 응답 끝에 불필요한 텍스트를 붙이는 경우
+        const firstBrace = jsonStr.indexOf('{');
+        const lastBrace = jsonStr.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+            jsonStr = jsonStr.substring(firstBrace, lastBrace + 1);
+        }
+
+        // 후행 쉼표 제거 (Trailing commas)
+        jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+
+        try {
+            return JSON.parse(jsonStr);
+        } catch (parseErr: any) {
+            console.warn('[Gemini] 1차 파싱 실패, 정규식으로 핵심 필드 수동 추출 시도:', parseErr.message);
+            // JSON이 완전히 망가졌을 때 핵심 데이터만 어떻게든 살리는 Fallback
+            const fallback: any = { isProduct: true, features: [], exclusions: [], keyPoints: [] };
+
+            const extractString = (key: string) => {
+                const match = jsonStr.match(new RegExp(`"${key}"\\s*:\\s*"([^"]+)"`));
+                return match ? match[1] : '';
+            };
+
+            fallback.title = extractString('title');
+            fallback.price = extractString('price');
+            fallback.airline = extractString('airline');
+            fallback.departureAirport = extractString('departureAirport');
+            fallback.departureDate = extractString('departureDate');
+            fallback.duration = extractString('duration');
+
+            return fallback;
+        }
+    } catch (e: any) {
+        console.error('[Gemini] 네트워크/시스템 오류 (Rate Limit 등):', e.message);
+        console.log('[Fallback] 정규식을 이용한 자체 분석 모드로 전환합니다.');
+        return analyzeWithRegex(text, url);
     }
+}
+
+/**
+ * [Fallback] Gemini API 호출 실패(Rate Limit 등) 시 정규식으로 직접 메타데이터를 추출하는 함수
+ */
+function analyzeWithRegex(text: string, url: string): DetailedProductInfo {
+    const fallback: DetailedProductInfo = {
+        isProduct: true,
+        title: '',
+        destination: '',
+        price: '',
+        departureDate: '',
+        duration: '',
+        airline: '',
+        departureAirport: '',
+        hotel: '',
+        features: [],
+        courses: [],
+        specialOffers: [],
+        inclusions: [],
+        exclusions: [],
+        itinerary: [],
+        keyPoints: [],
+        hashtags: '',
+        hasNoOption: false,
+        hasFreeSchedule: false,
+        url: url
+    };
+
+    const stripQuotes = (s: string) => s.replace(/^"|"$/g, '').trim();
+
+    const extractMatch = (regex: RegExp) => {
+        const match = text.match(regex);
+        return match ? stripQuotes(match[1]) : '';
+    };
+
+    fallback.title = extractMatch(/TARGET_TITLE:\s*"?([^"\n]*)"?/);
+    if (!fallback.title || fallback.title === 'undefined') {
+        fallback.title = extractMatch(/PAGE_TITLE:\s*"?([^"\n]*)"?/);
+    }
+
+    fallback.price = extractMatch(/TARGET_PRICE:\s*"?([^"\n]*)"?/);
+    fallback.duration = extractMatch(/TARGET_DURATION:\s*"?([^"\n]*)"?/);
+    fallback.airline = extractMatch(/TARGET_AIRLINE:\s*"?([^"\n]*)"?/);
+    fallback.departureAirport = extractMatch(/TARGET_DEPARTURE_AIRPORT:\s*"?([^"\n]*)"?/);
+
+    console.log('[Fallback] 정규식 추출 결과:', JSON.stringify(fallback));
+    return fallback;
 }
 
 /**
@@ -529,7 +630,7 @@ export async function analyzeForConfirmation(text: string, url: string, nextData
     }
 }
 
-async function scrapeWithScrapingBee(url: string): Promise<string | null> {
+export async function scrapeWithScrapingBee(url: string): Promise<string | null> {
     const apiKey = process.env.SCRAPINGBEE_API_KEY?.trim();
     if (!apiKey) return null;
 
@@ -759,7 +860,7 @@ function formatDurationString(durationStr: string): string {
     return str.replace(/\s+/g, '');
 }
 
-function refineData(info: DetailedProductInfo, originalText: string, url: string, nextData?: string): DetailedProductInfo {
+export function refineData(info: DetailedProductInfo, originalText: string, url: string, nextData?: string): DetailedProductInfo {
     const refined = { ...info };
 
     // 메타데이터 값에서 따옴표 제거 헬퍼
