@@ -104,32 +104,57 @@ async function fetchModeTourNative(url: string): Promise<any> {
                 if (days > 1) duration = `${days - 1}박${duration}`;
             }
 
-            // 4. 상품 포인트 파싱 (사용자 요청 항목 반영)
+            // 4. 상품 포인트 파싱 (사용자 요청 항목 반영 및 성의 있는 구성)
             let keyPoints: string[] = [];
 
-            // 제목의 괄호 안 내용에서 포인트 추출 (예: 전일정온천호텔+호텔석식2회+술음료무제한)
+            // A. 제목의 괄호 안 내용에서 핵심 혜택 추출 및 문장화
             if (cleanTitle.includes('(')) {
                 const inner = cleanTitle.substring(cleanTitle.lastIndexOf('(') + 1, cleanTitle.lastIndexOf(')'));
                 const parts = inner.split(/[+\n,]/).filter((s: string) => s.trim().length > 1);
                 parts.forEach((p: string) => {
                     let point = p.trim();
-                    if (point.includes('온천호텔')) point = '전 일정 온천 호텔 숙박';
-                    if (point.includes('석식')) point = '호텔 석식 제공';
-                    if (point.includes('무제한')) point = '술, 음료 무제한 제공';
+                    if (point.includes('온천호텔')) point = '전 일정 엄선된 온천 호텔 숙박';
+                    if (point.includes('석식')) point = '현지 특식이 포함된 호텔 석식 제공';
+                    if (point.includes('무제한')) point = '여행의 즐거움을 더하는 술/음료 무제한 제공';
+                    if (point.includes('특전')) point = `${point} 포함`;
                     keyPoints.push(point);
                 });
             }
 
-            // 기본 포인트 추가
-            keyPoints.push(`자연을 품은 ${cities.split('/')[0] || ''} 여행`);
-            keyPoints.push(`${cities.replace(/\//g, ', ')} 관광`);
+            // B. 지역 및 컨셉 포인트 추가
+            const cityList = d.visitCities && d.visitCities.length > 0 ? d.visitCities : [d.category3 || ''];
+            if (cityList[0]) keyPoints.push(`${cityList.join(', ')} 등 주요 관광지 완벽 일주`);
 
-            if (keyPoints.length < 5 && d.groupBriefKeyword) {
-                const extra = d.groupBriefKeyword.split('#').filter(Boolean).map((s: string) => s.trim());
-                keyPoints = [...keyPoints, ...extra];
+            // C. API의 KeyPointInfo 데이터 활용
+            if (dataPoints && dataPoints.isOK && dataPoints.result && dataPoints.result.length > 0) {
+                dataPoints.result.forEach((p: any) => {
+                    if (p.title && !p.title.includes('이미지') && p.title.length > 2) {
+                        keyPoints.push(p.title);
+                    }
+                });
             }
 
-            keyPoints = Array.from(new Set(keyPoints)).slice(0, 10);
+            // D. 기타 마케팅 포인트 보완
+            if (d.groupBriefKeyword) {
+                const extra = d.groupBriefKeyword.split('#').filter(Boolean).map((s: string) => s.trim());
+                extra.forEach(ex => {
+                    if (ex.length > 2 && !keyPoints.some(kp => kp.includes(ex))) {
+                        keyPoints.push(ex);
+                    }
+                });
+            }
+
+            // E. travelRecommendNote에서 불렛 포인트 추출
+            if (d.travelRecommendNote) {
+                const notes = d.travelRecommendNote.split('\n')
+                    .filter((l: string) => l.includes('*') || l.includes('▶'))
+                    .map((l: string) => l.replace(/[*▶]/g, '').trim())
+                    .filter((l: string) => l.length > 5 && l.length < 30);
+                keyPoints = [...keyPoints, ...notes];
+            }
+
+            // 중복 제거 및 가독성 좋은 순서로 정리 (최대 8개)
+            keyPoints = Array.from(new Set(keyPoints)).filter(p => p.length > 2).slice(0, 8);
 
             return {
                 isProduct: true,
