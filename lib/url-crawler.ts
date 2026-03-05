@@ -103,67 +103,45 @@ async function fetchModeTourNative(url: string): Promise<any> {
                 if (days > 1) duration = `${days - 1}박${duration}`;
             }
 
-            // --- 4. 상품 포인트 추출 (사이트 실제 데이터 기반) ---
-            let rawPointsText = "";
-
-            // A. 제목 특전
-            if (cleanTitle.includes('(')) {
-                rawPointsText += "제목 특전: " + cleanTitle.substring(cleanTitle.lastIndexOf('(') + 1, cleanTitle.lastIndexOf(')')) + "\n";
-            }
-
-            // B. KeyPointInfo (사이트의 '상품 핵심 포인트' 영역)
-            if (dataPoints && dataPoints.isOK && dataPoints.result) {
-                const points = dataPoints.result.map((p: any) => p.title).join(", ");
-                rawPointsText += "핵심 포인트: " + points + "\n";
-            }
-
-            // C. 추천 노트
-            if (d.travelRecommendNote) {
-                rawPointsText += "추천 노트: " + d.travelRecommendNote + "\n";
-            }
-
-            // D. 방문 도시
-            if (d.visitCities) {
-                rawPointsText += "방문 도시: " + d.visitCities.join(", ") + "\n";
-            }
-
-            // AI를 사용하여 실제 데이터 기반으로 포인트 5~7개 정리
+            // --- 4. 상품 포인트 추출 (사이트 실제 데이터 기반 - 고속) ---
             let keyPoints: string[] = [];
-            const apiKey = process.env.GEMINI_API_KEY;
 
-            if (apiKey && rawPointsText.length > 20) {
-                try {
-                    const prompt = `다음은 모두투어 여행 상품의 실제 데이터입니다. 이 데이터를 바탕으로 상품의 핵심 포인트(특전, 일정 특징, 숙박 등)를 5~7개의 불렛 포인트로 정리하세요. 
-내용에 없는 말을 지어내지 말고, 오직 제공된 데이터에 근거하여 작성하세요.
-각 포인트는 15자 이내의 간결한 문장으로 작성하세요. 이모지는 사용하지 마세요.
-
-데이터:
-${rawPointsText}
-
-출력 형식: ["포인트1", "포인트2", ...] (JSON 배열만 출력)`;
-
-                    const aiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                    });
-                    const aiData = await aiRes.json();
-                    const aiText = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (aiText) {
-                        keyPoints = JSON.parse(aiText.replace(/```json\s*|\s*```/g, '').trim());
-                    }
-                } catch (e) {
-                    console.error('[ModeTour Point AI] Error:', e);
-                }
+            // A. 제목 특전 (괄호 안 내용)
+            if (cleanTitle.includes('(')) {
+                const inner = cleanTitle.substring(cleanTitle.lastIndexOf('(') + 1, cleanTitle.lastIndexOf(')'));
+                const parts = inner.split(/[+\n,]/).filter((s: string) => s.trim().length > 1);
+                parts.forEach((p: string) => {
+                    let point = p.trim();
+                    if (point.includes('온천')) point = '전 일정 엄선된 온천 숙박';
+                    if (point.includes('식사') || point.includes('석식')) point = '지역 특식이 포함된 식사 제공';
+                    if (point.includes('특전')) point = `${point} 포함`;
+                    keyPoints.push(point);
+                });
             }
 
-            // Fallback (AI 실패 시)
-            if (keyPoints.length === 0) {
-                keyPoints = [
-                    `${cities.split('/')[0] || ''} 핵심 관광지 일주`,
-                    ...(d.travelRecommendNote || '').split('\n').filter((l: string) => l.includes('*') || l.includes('▶')).map((l: string) => l.replace(/[*▶]/g, '').trim()).slice(0, 5)
-                ];
+            // B. Site KeyPointInfo (사이트의 핵심 포인트 영역 데이터 그대로 사용)
+            if (dataPoints && dataPoints.isOK && dataPoints.result) {
+                const sitePoints = dataPoints.result
+                    .filter((p: any) => p.title && p.title.length > 2 && !p.title.includes('이미지'))
+                    .map((p: any) => p.title.trim());
+                keyPoints = [...keyPoints, ...sitePoints];
             }
+
+            // C. 추천 노트/특징 결합
+            if (d.groupBriefKeyword) {
+                const keywords = d.groupBriefKeyword.split('#').filter(Boolean).map((k: string) => k.trim());
+                keyPoints = [...keyPoints, ...keywords];
+            }
+
+            // D. 방문 도시 기반 포인트
+            if (d.visitCities && d.visitCities.length > 0) {
+                keyPoints.push(`${d.visitCities.join(', ')} 관광 일정`);
+            }
+
+            // 중복 제거 및 퀄리티 정리
+            keyPoints = Array.from(new Set(keyPoints))
+                .filter(p => p.length > 2 && p.length < 40)
+                .slice(0, 8);
 
             return {
                 isProduct: true,
@@ -174,7 +152,7 @@ ${rawPointsText}
                 airline: d.transportName || '',
                 duration: duration,
                 departureAirport: d.departureCityName || '',
-                keyPoints: keyPoints.slice(0, 8),
+                keyPoints: keyPoints,
                 exclusions: d.unincludedNote ? [d.unincludedNote.replace(/<[^>]+>/g, ' ').trim()] : [],
                 url: url
             };
