@@ -1,0 +1,444 @@
+{
+  "props": {
+    "pageProps": {
+      "departureDate": "2026-04-18",
+      "productCode2": "JKP6017CJ3",
+      "productName": "[자연품은큐슈] 후쿠오카/구마모토/유후인/벳부/아소 3일 (전일정온천호텔+호텔석식2회+술음료무제한)",
+      "isHideMainLayout": true,
+      "host": "www.modetour.com",
+      "url": "/package/100634999?MLoc=99&Pnum=100634999&ANO=81440&sno=C117876&thru=",
+      "initialState": {
+        "auth": {},
+        "test": {
+          "testValue": 1
+        },
+        "flight": {
+          "typeTrip": "roundTrip",
+          "selectedRegionType": "overseas"
+        },
+        "uiState": {
+          "isSrcolling": false,
+          "scrollPercentage": 0,
+          "stopScroll": false,
+          "time": "2026-03-04T09:12:03.443Z",
+          "hidden": true,
+          "transparent": true,
+          "backgroundColor": 0,
+          "positionLogo": "all",
+          "tabMainSearchPC": 1,
+          "tabMainSearchMO": "해외여행",
+          "fixed": false,
+          "isHeartIcon": true,
+          "resetSearchPackage": false,
+          "changeWeekCalendar": false,
+          "app": {
+            "version": "v.1.02.7"
+          }
+        },
+        "myPage": {
+          "nickName": "홍길동",
+          "avatar": null,
+          "old": 14,
+          "temporaryMembered": true,
+          "snsMembered": true,
+          "passWordCheck": false,
+          "travelAgent": false,
+          "email": null,
+          "id": null,
+          "totalNewNotifications": 0,
+          "paymentSuccess": false
+        },
+        "searchHistory": {
+          "searchHistoryData": [
+            {
+              "type": "commonSearch",
+              "json": []
+            },
+            {
+              "type": "overseaTravelSearch",
+              "json": []
+            },
+            {
+              "type": "domesticTravelSearch",
+              "json": []
+            },
+            {
+              "type": "flightSearch",
+              "json": []
+            },
+            {
+              "type": "hotelSearch",
+              "json": []
+            },
+            {
+              "type": "localTourSearch",
+              "json": []
+            },
+            {
+              "type": "discountFlightSearch",
+              "json": []
+            }
+          ]
+        },
+        "layout": {
+          "layoutKey": ""
+        },
+        "searchHotel": {
+          "listRecentSearch": [],
+          "dataOverseasRegion": {
+            "nameParent": "일본",
+            "valueParent": "1",
+            "areaKeywordNo": 0,
+            "themeNo": 0,
+            "data": {
+              "name": "일본",
+              "value": "JP",
+              "children": {
+                "name": "오사카",
+                "value": "4EE3F602-7C8A-4E81-B6AD-039B03B377DE"
+              },
+              "endLocation": "오사카"
+            }
+          },
+          "typeSearchHotel": "domestic",
+          "lastSearchQuery": {
+            "searchFrom": "2026-03-19",
+            "searchTo": "2026-03-20",
+            "areaKeywordNo": 0,
+            "domain": "hotel",
+            "type": "overseas",
+            "areaName": "",
+            "regionName": "",
+            "isMap": false,
+            "occupancies": [
+              {
+                "adult": 2,
+                "childs": []
+              }
+            ]
+          },
+          "sort": {
+            "label": "추천순",
+            "value": "RecommendOrder"
+          },
+          "onMap": false,
+          "filtered": [],
+          "pageCurrent": 0,
+          "filterSearch": {},
+          "priceFeeRangeFilter": {
+            "minimum": 0,
+            "maximum": 199999
+          }
+        },
+        "commentPopUp": {
+          "open": false,
+          "type": "REVIEW_COMMENT"
+        },
+        "filteredResultSrarchMain": {
+          "filtered": []
+        },
+        "ProductDetail": {
+          "type": ""
+        },
+        "wishedProductPc": {
+          "comparisonOptions": [],
+          "ListProductToCompare": []
+        },
+        "customerCenter": {
+          "optionsTravelHistory": []
+        },
+        "myTravelReview": {
+          "listTravelReviews": [],
+          "totalReviews": 0
+        },
+        "allWin": {},
+        "event": {
+          "urlIframe": "https://nguyenthanhhoai-se.github.io/events_exhibition/events-desktop/main/main.html",
+          "contentHeight": 40
+        },
+        "dateFuture": {
+          "dateFuture": "2026-03-03T09:12:03.444Z"
+        },
+        "tokenNotLogin": {
+          "tokenNotLogin": "Web0946713251564:5513eefa"
+        },
+        "tourPasVehicle": {
+          "idTourPass": "",
+          "dataCurrentTourPass": {}
+        },
+        "tourPassVehicleFilter": {
+          "regionPopularSelected": [],
+          "categorySelected": [],
+          "keywordSelected": "",
+          "regionIndex": 1,
+          "isReadyToUseSelected": []
+        },
+        "hotel": {
+          "dataCurrentHotel": {}
+        },
+        "package": {
+          "totalPrincipalPrice": 0
+        },
+        "tourMileage": {
+          "familyMileages": [],
+          "isLoading": false
+        },
+        "timeDeal": {
+          "productMasterCode": "",
+          "timeDealDetailResult": {},
+          "isLoading": false
+        },
+        "travelHistory": {
+          "optionsTravelHistory": []
+        },
+        "api": {
+          "queries": {
+            "getPackageGetSimpleProductInfo({\"productNo\":100634999})": {
+              "status": "fulfilled",
+              "endpointName": "getPackageGetSimpleProductInfo",
+              "requestId": "E-Oum-G3MihNcL9315I4v",
+              "originalArgs": {
+                "productNo": 100634999
+              },
+              "startedTimeStamp": 1772669186284,
+              "data": {
+                "result": {
+                  "groupNumber": 100634999,
+                  "productName": "[자연품은큐슈] 후쿠오카/구마모토/유후인/벳부/아소 3일 (전일정온천호텔+호텔석식2회+술음료무제한)",
+                  "productCode": "JKP601",
+                  "productCode2": "JKP6017CJ3",
+                  "departureDate": "2026-04-18",
+                  "cancel": "N",
+                  "promotionInfo": null
+                },
+                "errorMessages": [],
+                "isOK": true
+              },
+              "fulfilledTimeStamp": 1772669186300
+            }
+          },
+          "mutations": {},
+          "provided": {},
+          "subscriptions": {
+            "getPackageGetSimpleProductInfo({\"productNo\":100634999})": {
+              "E-Oum-G3MihNcL9315I4v": {}
+            }
+          },
+          "config": {
+            "online": true,
+            "focused": true,
+            "middlewareRegistered": true,
+            "refetchOnFocus": false,
+            "refetchOnReconnect": false,
+            "refetchOnMountOrArgChange": false,
+            "keepUnusedDataFor": 60,
+            "reducerPath": "api"
+          }
+        },
+        "tripHubApi": {
+          "queries": {},
+          "mutations": {},
+          "provided": {},
+          "subscriptions": {},
+          "config": {
+            "online": true,
+            "focused": true,
+            "middlewareRegistered": true,
+            "refetchOnFocus": false,
+            "refetchOnReconnect": false,
+            "refetchOnMountOrArgChange": false,
+            "keepUnusedDataFor": 60,
+            "reducerPath": "tripHubApi"
+          }
+        },
+        "activityApi": {
+          "queries": {},
+          "mutations": {},
+          "provided": {},
+          "subscriptions": {},
+          "config": {
+            "online": true,
+            "focused": true,
+            "middlewareRegistered": true,
+            "refetchOnFocus": false,
+            "refetchOnReconnect": false,
+            "refetchOnMountOrArgChange": false,
+            "keepUnusedDataFor": 3600,
+            "reducerPath": "activityApi"
+          }
+        },
+        "xcrsFlightApi": {
+          "queries": {},
+          "mutations": {},
+          "provided": {},
+          "subscriptions": {},
+          "config": {
+            "online": true,
+            "focused": true,
+            "middlewareRegistered": true,
+            "refetchOnFocus": false,
+            "refetchOnReconnect": false,
+            "refetchOnMountOrArgChange": false,
+            "keepUnusedDataFor": 3600,
+            "reducerPath": "xcrsFlightApi"
+          }
+        },
+        "b2cFlightApi": {
+          "queries": {},
+          "mutations": {},
+          "provided": {},
+          "subscriptions": {},
+          "config": {
+            "online": true,
+            "focused": true,
+            "middlewareRegistered": true,
+            "refetchOnFocus": false,
+            "refetchOnReconnect": false,
+            "refetchOnMountOrArgChange": false,
+            "keepUnusedDataFor": 3600,
+            "reducerPath": "b2cFlightApi"
+          }
+        },
+        "authApi": {
+          "queries": {},
+          "mutations": {},
+          "provided": {},
+          "subscriptions": {},
+          "config": {
+            "online": true,
+            "focused": true,
+            "middlewareRegistered": true,
+            "refetchOnFocus": false,
+            "refetchOnReconnect": false,
+            "refetchOnMountOrArgChange": false,
+            "keepUnusedDataFor": 3600,
+            "reducerPath": "authApi"
+          }
+        },
+        "allDatePopup": {
+          "isShow": false,
+          "key": ""
+        },
+        "modetourContext": {
+          "webSiteNo": 2,
+          "companyNo": 81202,
+          "deviceType": "DVTPC",
+          "webSiteType": 0,
+          "displayWebSiteNo": 0,
+          "apiKey": "jm9i5RUzKPMPdklHzDKqNzwZYy0IGV5hTyKkCcpxO0IGIgVS+8Z7NnbzbARv5w7Bn90KT13Gq79XZMow6TYvwQ==",
+          "webSite": {
+            "webSiteNo": 2,
+            "domain": "WWW.MODETOUR.COM",
+            "companyNo": 81202,
+            "companyStaffNo": 1148541,
+            "webSiteGroupNo": 101,
+            "webSiteTypeCodeKey": "WS9001",
+            "webSiteSubTypeCodeKey": "WS8001",
+            "webSiteOfferTypeCodeKey": "WS700A",
+            "webSiteName": "(주) 모두투어네트워크",
+            "webSiteNicName": null,
+            "pcDomain": "https://www.modetour.com/",
+            "mobileDomain": "https://m.modetour.com/",
+            "pcDomainDev": "https://www.modetour.dev/",
+            "mobileDomainDev": "https://m.modetour.dev/",
+            "pcDomainStg": "https://www.modetour.dev/",
+            "mobileDomainStg": "https://m.modetour.dev/",
+            "salesOrganizationNo": null,
+            "salesSysUserNo": 2558,
+            "callCenterNumber": "-1544-5252",
+            "callCenterEmail": null,
+            "isPartner": true,
+            "isUseSNS": true,
+            "isUseDefineFooter": true,
+            "isUseReservationBtn": true,
+            "isUseAPI": true,
+            "isOpenPopup": false,
+            "isUseBasicLogo": true,
+            "isUseRequiredLogin": true,
+            "isSaleHomeshopping": false,
+            "isUsePaymentBtn": true,
+            "isSaleHotel": true,
+            "isSaleFlight": false,
+            "isSalePass": false,
+            "isUsePayment": true,
+            "isManagement": true,
+            "isUseModetourAuth": true,
+            "modetourAuthClientId": null,
+            "webSiteIframeTypeCodeKey": null,
+            "cryptoKey": "jm9i5RUzKPMPdklHzDKqN+RjdCwONGc5xonqAmFY3ozmBQJ/CxkAc40uMi0gzmxTsX6ed3i3m8i9xclrghICqw==",
+            "cryptoKeyExpirationDate": null,
+            "apiKey": "jm9i5RUzKPMPdklHzDKqNzwZYy0IGV5hTyKkCcpxO0IGIgVS+8Z7NnbzbARv5w7Bn90KT13Gq79XZMow6TYvwQ==",
+            "apiKeyExpirationDate": null,
+            "csDayInfo": null,
+            "csTimeInfoStart": null,
+            "csTimeInfoEnd": null,
+            "csInfoMemo": null,
+            "sortOrder": 0,
+            "isTest": false,
+            "isUse": true,
+            "asisSiteInfoNo": 0,
+            "asisGroupInfoNo": 0,
+            "asisTradePtid": 0,
+            "asisPcApiKey": "0AEA55A9-01A9-4EAE-8A24-CABB8025CE2F",
+            "asisMobileApiKey": null,
+            "oAuthClientId": null,
+            "loginRedirectUrl": null,
+            "loginRedirectUrlStg": null,
+            "loginRedirectUrlDev": null,
+            "logoutRedirectUrl": null,
+            "logoutRedirectUrlStg": null,
+            "logoutRedirectUrlDev": null,
+            "gtmID": null,
+            "isOnlyHotelSale": false,
+            "hotelDiscountRate": 0,
+            "hotelDiscountMinOrderPrice": 0,
+            "hotelDiscountMaxPrice": 0
+          },
+          "userInfo": {},
+          "decryptKey": "0xE4FB57B571CC011A073D62C1C109BB",
+          "member": null,
+          "cryptoKey": null,
+          "appType": 0,
+          "identityUser": null,
+          "userClaims": {
+            "isMember": false,
+            "isEmployee": false,
+            "isMemberCorporate": false,
+            "isCompanyStaff": false,
+            "ptid": 0,
+            "mtid": null,
+            "memberNo": 0,
+            "memberName": null,
+            "memberType": null,
+            "memberCategory": null,
+            "employeeNo": 0,
+            "employeeName": null,
+            "companyStaffNo": 0,
+            "companyStaffName": null
+          },
+          "isLoggedIn": false,
+          "requestGuid": "00000000-0000-0000-0000-000000000000"
+        }
+      }
+    },
+    "__N_SSP": true
+  },
+  "page": "/package/[id]",
+  "query": {
+    "MLoc": "99",
+    "Pnum": "100634999",
+    "ANO": "81440",
+    "sno": "C117876",
+    "thru": "",
+    "id": "100634999"
+  },
+  "buildId": "xoAa8Nq-mRKhYThM-w2sg",
+  "isFallback": false,
+  "gssp": true,
+  "locale": "ko",
+  "locales": [
+    "ko"
+  ],
+  "defaultLocale": "ko",
+  "scriptLoader": []
+}

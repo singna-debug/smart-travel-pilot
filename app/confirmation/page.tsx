@@ -31,6 +31,34 @@ function safeStr(val: any): string {
     return String(val);
 }
 
+function formatToHtmlDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const cleanedDate = dateStr.replace(/[^0-9]/g, '');
+    let targetYear, targetMonth, targetDay;
+
+    const mdMatch = dateStr.match(/(\d+)\s*월\s*(\d+)\s*일/);
+    if (mdMatch) {
+        const now = new Date();
+        targetYear = now.getFullYear();
+        targetMonth = parseInt(mdMatch[1]) - 1;
+        targetDay = parseInt(mdMatch[2]);
+    } else if (cleanedDate.length >= 8) {
+        targetYear = parseInt(cleanedDate.substring(0, 4));
+        targetMonth = parseInt(cleanedDate.substring(4, 6)) - 1;
+        targetDay = parseInt(cleanedDate.substring(6, 8));
+    } else {
+        return dateStr;
+    }
+
+    const d = new Date(targetYear, targetMonth, targetDay);
+    if (isNaN(d.getTime())) return dateStr;
+
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
 export default function ConfirmationPage() {
     // 고객 검색
     const [customerQuery, setCustomerQuery] = useState('');
@@ -167,7 +195,10 @@ export default function ConfirmationPage() {
         setAnalysisResult(null);
 
         try {
-            const res = await fetch('/api/crawl-analyze', {
+            const isLocal = process.env.NODE_ENV === 'development';
+            const apiUrl = isLocal ? '/api/analyze-url' : '/api/crawl-analyze';
+
+            const res = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: productUrl }),
@@ -193,8 +224,8 @@ export default function ConfirmationPage() {
                 // ---- 기본 정보 ----
                 if (raw.title) setProductName(raw.title);
                 if (raw.destination) setDestination(raw.destination);
-                if (raw.departureDate) setDepartureDate(raw.departureDate);
-                if (raw.returnDate) setReturnDate(raw.returnDate);
+                if (raw.departureDate) setDepartureDate(formatToHtmlDate(raw.departureDate));
+                if (raw.returnDate) setReturnDate(formatToHtmlDate(raw.returnDate));
                 if (raw.duration) setDuration(raw.duration);
 
                 // ---- 항공 상세 ----

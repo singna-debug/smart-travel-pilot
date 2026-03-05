@@ -12,33 +12,40 @@ function htmlToText(html: string): string {
     const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
     if (titleMatch) pageTitle = titleMatch[1].trim();
 
-    let ogTitle = '';
-    const ogMatch = html.match(/<meta\s+(?:property|name)=["']og:title["']\s+content=["'](.*?)["']\s*\/?>/i);
-    if (ogMatch) ogTitle = ogMatch[1].trim();
-
-    let targetTitle = '';
-    const jsonTitleMatch = html.match(/["'](?:GoodsName|PrdName|prd_nm|title|goods_name)["']\s*:\s*["'](.*?)["']/i);
-    if (jsonTitleMatch) targetTitle = jsonTitleMatch[1].trim();
-
     let targetPrice = '';
-    const jsonPriceMatch = html.match(/["'](?:Price|SalePrice|goodsPrice|GoodsPrice|ProductPrice_Adult)["']\s*[:=]\s*["']?(\d+)["']?/i);
-    if (jsonPriceMatch) targetPrice = jsonPriceMatch[1];
+    // [추가] 가시적 텍스트에서 가격 추출
+    const visibleText = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ');
+    const visiblePriceMatch = visibleText.match(/(\d{1,3}(?:,\d{3})+)\s*원/);
+    if (visiblePriceMatch) {
+        targetPrice = visiblePriceMatch[1].replace(/,/g, '');
+    }
+
+    let targetAirline = '';
+    const visibleAirlineMatch = visibleText.match(/(제주항공|대한항공|아시아나항공|아시아나|진에어|티웨이항공|티웨이|이스타항공|이스타|에어서울|에어부산|에어프레미아|피치항공|스쿠트|비엣젯|필리핀항공|싱가포르항공|타이항공|ANA|JAL)/);
+    if (visibleAirlineMatch) targetAirline = visibleAirlineMatch[1];
+
+    let targetDepartureAirport = '';
+    const visibleAirportMatch = visibleText.match(/출발\s*:\s*(인천|김포|김해|부산|대구|제주|청주|무안|광주)/);
+    if (visibleAirportMatch) targetDepartureAirport = visibleAirportMatch[1];
+    else {
+        const generalAirportMatch = visibleText.match(/(인천공항|인천출발|김포공항|김포출발|김해공항|김해출발|부산출발|대구공항|대구출발|청주공항|청주출발|무안출발)/);
+        if (generalAirportMatch) targetDepartureAirport = generalAirportMatch[1].replace('공항', '').replace('출발', '');
+    }
 
     let targetDuration = '';
     const durationMatch = html.match(/(\d+)\s*박\s*(\d+)\s*일/);
     if (durationMatch) targetDuration = `${durationMatch[1]}박${durationMatch[2]}일`;
 
-    let finalTitle = targetTitle || ogTitle || pageTitle;
+    const cleanBody = visibleText.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim().substring(0, 50000);
 
-    let processed = html
-        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-        .replace(/<[^>]+>/g, ' ')
-        .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
-
-    const cleanBody = processed.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim().substring(0, 50000);
-
-    return `[METADATA]\nPAGE_TITLE: ${finalTitle}\nTARGET_PRICE: ${targetPrice}\nTARGET_DURATION: ${targetDuration}\n[CONTENT]\n${cleanBody}`;
+    return `[METADATA]
+PAGE_TITLE: ${pageTitle}
+TARGET_PRICE: ${targetPrice}
+TARGET_DURATION: ${targetDuration}
+TARGET_AIRLINE: ${targetAirline}
+TARGET_DEPARTURE_AIRPORT: ${targetDepartureAirport}
+[CONTENT]
+${cleanBody}`;
 }
 
 // ── ScrapingBee로 수집 ──
@@ -101,15 +108,15 @@ async function analyze(text: string, url: string, nextData: string | undefined, 
 
     prompt += '아래 JSON 형식으로 반환하세요. 페이지에 정보가 없으면 빈 문자열이나 빈 배열로 두세요.\n\n';
     prompt += '{\n';
-    prompt += '  "title": "상품명 전체",\n';
+    prompt += '  "title": "METADATA 섹션의 PAGE_TITLE을 우선적으로 사용 (상품명 전체)",\n';
     prompt += '  "destination": "목적지 (국가+도시)",\n';
-    prompt += '  "price": "1인 기준 가격 (숫자만)",\n';
+    prompt += '  "price": "METADATA 섹션의 TARGET_PRICE 값을 최우선적으로 사용하세요 (숫자만)",\n';
     prompt += '  "departureDate": "출발일 (YYYY-MM-DD 또는 원본 텍스트)",\n';
     prompt += '  "returnDate": "귀국일 (YYYY-MM-DD 또는 원본 텍스트)",\n';
-    prompt += '  "duration": "여행기간 (예: 3박5일)",\n';
-    prompt += '  "airline": "항공사명",\n';
+    prompt += '  "duration": "METADATA 섹션의 TARGET_DURATION 값을 최우선적으로 사용하세요 (예: 3박5일)",\n';
+    prompt += '  "airline": "METADATA 섹션의 TARGET_AIRLINE 값을 최우선적으로 사용하세요",\n';
     prompt += '  "flightCode": "편명 (예: 7C201)",\n';
-    prompt += '  "departureAirport": "출발공항",\n';
+    prompt += '  "departureAirport": "METADATA 섹션의 TARGET_DEPARTURE_AIRPORT 값을 최우선적으로 사용하세요",\n';
     prompt += '  "departureTime": "가는편 출발 시각 (HH:MM)",\n';
     prompt += '  "arrivalTime": "가는편 도착 시각 (HH:MM)",\n';
     prompt += '  "returnDepartureTime": "오는편 출발 시각 (HH:MM)",\n';

@@ -11,6 +11,34 @@ declare global {
 }
 
 
+function formatToHtmlDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const cleanedDate = dateStr.replace(/[^0-9]/g, '');
+    let targetYear, targetMonth, targetDay;
+
+    const mdMatch = dateStr.match(/(\d+)\s*월\s*(\d+)\s*일/);
+    if (mdMatch) {
+        const now = new Date();
+        targetYear = now.getFullYear();
+        targetMonth = parseInt(mdMatch[1]) - 1;
+        targetDay = parseInt(mdMatch[2]);
+    } else if (cleanedDate.length >= 8) {
+        targetYear = parseInt(cleanedDate.substring(0, 4));
+        targetMonth = parseInt(cleanedDate.substring(4, 6)) - 1;
+        targetDay = parseInt(cleanedDate.substring(6, 8));
+    } else {
+        return dateStr; // fallback for unparseable dates
+    }
+
+    const d = new Date(targetYear, targetMonth, targetDay);
+    if (isNaN(d.getTime())) return dateStr;
+
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
 export default function UrlAnalyzer() {
     const [mode, setMode] = useState<'single' | 'compare'>('single');
     const [singleUrl, setSingleUrl] = useState('');
@@ -108,11 +136,8 @@ export default function UrlAnalyzer() {
                     const rMonth = String(date.getMonth() + 1).padStart(2, '0');
                     const rDay = String(date.getDate()).padStart(2, '0');
 
-                    if (isHyphenated) {
-                        setReturnDate(`${rYear}-${rMonth}-${rDay}`);
-                    } else {
-                        setReturnDate(`${rYear}${rMonth}${rDay}`);
-                    }
+                    // HTML5 <input type="date">는 반드시 YYYY-MM-DD 형식을 요구함
+                    setReturnDate(`${rYear}-${rMonth}-${rDay}`);
                 }
             } catch (e) {
                 console.error('Return date calculation error:', e);
@@ -257,7 +282,10 @@ export default function UrlAnalyzer() {
         setSingleResult(null);
 
         try {
-            const response = await fetch('/api/analyze-url', {
+            const isLocal = process.env.NODE_ENV === 'development';
+            const apiUrl = isLocal ? '/api/analyze-url' : '/api/crawl-analyze';
+
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: singleUrl }),
@@ -280,7 +308,7 @@ export default function UrlAnalyzer() {
 
                 const info = data.data.raw;
                 if (!destination) setDestination(info.destination || '');
-                if (!departureDate) setDepartureDate(info.departureDate || '');
+                if (!departureDate && info.departureDate) setDepartureDate(formatToHtmlDate(info.departureDate));
                 if (!duration) setDuration(info.duration || '');
                 if (!interestedProduct) setInterestedProduct(info.title || '');
 

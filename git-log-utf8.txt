@@ -1,0 +1,25 @@
+﻿f92b45c fix(url-crawler): robust error handling and fallback for Gemini 429 rate limit
+c93e08d fix: JS-first strategy + visible text extraction for price/airline/airport (verified with live test)
+d026596 fix: ROOT CAUSE - ScrapingBee was returning error JSON due to invalid params (scroll_to/networkidle), switch to SSR-first strategy
+c72ebe5 fix: root cause - strip quotes from metadata in refineData, fix return date text color
+fd4d890 fix(crawler): final hardening of extraction and date parsing logic
+8f9700c fix(crawler): harden data extraction and return date calculation
+679a965 fix: resolve ModeTour extraction failure and improve return date calculation
+110dda7 fix(crawler): implement deep JSON extraction with product ID matching and price resolution
+095141d fix(crawler): final variable naming alignment and production hardening for data extraction
+47afab9 fix(crawler): align variable names with local scope in htmlToText
+6e823a6 fix(crawler): final lint fixes and variable name normalization in htmlToText
+867714e fix(crawler): fix lint errors and variable naming in hardened extraction logic
+8f402b4 fix(crawler): harden JSON extraction to handle specific productNo and prevent Nha Trang data leak
+7d158e2 fix(crawler): broaden extraction rules for price, duration, and airline to support 3-day Kyushu product
+9f32c72 fix(crawler): use browser-based crawling by default to capture dynamic data
+aef44fa Centralize Gemini API model settings in environment variables
+ed13c09 fix: aggressively clean environment variables and fix Google Sheets JSON parsing in production
+fc526c6 fix: universal 2-step analysis flow and ScrapingBee optimization for Vercel timeouts
+2761a51 fix: resolve Vercel 10s timeout by splitting analysis into two steps (Crawl and Analyze)
+ef7dd7a fix: optimize URL analysis for Vercel production limits (timeout and skip puppeteer)
+a09b2dd fix: implement interactive scraping (scroll/click) and restore flight time extraction
+65f072a fix: implement ScrapingBee fallback and refine prompt for production itinerary extraction
+b1c5729 fix: remove debug file writes and screenshots that cause EROFS in production
+ae37041 feat: enhance itinerary details, remove emojis, and fix build errors
+123c1bd First commit
