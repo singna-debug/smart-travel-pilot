@@ -87,74 +87,83 @@ async function fetchModeTourNative(url: string): Promise<any> {
         if (dataDetail.isOK && dataDetail.result) {
             const d = dataDetail.result;
 
-            // 1. Title 정제 ([출발확정] 등 제거)
+            // 1. Title 정제
             let cleanTitle = d.productName || '';
             cleanTitle = cleanTitle.replace(/\[출발확정\]/g, '').trim();
 
-            // 2. Region 정제 (일본, 후쿠오카/구마모토/유후인/벳부/아소 형식)
-            const mainRegion = d.category2 || ''; // 예: 일본
+            // 2. Region 정제
+            const mainRegion = d.category2 || '';
             const cities = d.visitCities && d.visitCities.length > 0 ? d.visitCities.join('/') : (d.category3 || '');
             const destination = mainRegion ? `${mainRegion}, ${cities}` : cities;
 
-            // 3. Duration 보정 (3일 -> 2박3일)
-            // travelPeriod가 숫자+일 형태면 refineData의 formatDurationString이 처리하겠지만 여기서도 명시적으로 확인
+            // 3. Duration 보정
             let duration = d.travelPeriod || '';
             if (/^\d+일$/.test(duration)) {
                 const days = parseInt(duration);
                 if (days > 1) duration = `${days - 1}박${duration}`;
             }
 
-            // 4. 상품 포인트 파싱 (사용자 요청 항목 반영 및 성의 있는 구성)
-            let keyPoints: string[] = [];
+            // --- 4. 상품 포인트 추출 (사이트 실제 데이터 기반) ---
+            let rawPointsText = "";
 
-            // A. 제목의 괄호 안 내용에서 핵심 혜택 추출 및 문장화
+            // A. 제목 특전
             if (cleanTitle.includes('(')) {
-                const inner = cleanTitle.substring(cleanTitle.lastIndexOf('(') + 1, cleanTitle.lastIndexOf(')'));
-                const parts = inner.split(/[+\n,]/).filter((s: string) => s.trim().length > 1);
-                parts.forEach((p: string) => {
-                    let point = p.trim();
-                    if (point.includes('온천호텔')) point = '전 일정 엄선된 온천 호텔 숙박';
-                    if (point.includes('석식')) point = '현지 특식이 포함된 호텔 석식 제공';
-                    if (point.includes('무제한')) point = '여행의 즐거움을 더하는 술/음료 무제한 제공';
-                    if (point.includes('특전')) point = `${point} 포함`;
-                    keyPoints.push(point);
-                });
+                rawPointsText += "제목 특전: " + cleanTitle.substring(cleanTitle.lastIndexOf('(') + 1, cleanTitle.lastIndexOf(')')) + "\n";
             }
 
-            // B. 지역 및 컨셉 포인트 추가
-            const cityList = d.visitCities && d.visitCities.length > 0 ? d.visitCities : [d.category3 || ''];
-            if (cityList[0]) keyPoints.push(`${cityList.join(', ')} 등 주요 관광지 완벽 일주`);
-
-            // C. API의 KeyPointInfo 데이터 활용
-            if (dataPoints && dataPoints.isOK && dataPoints.result && dataPoints.result.length > 0) {
-                dataPoints.result.forEach((p: any) => {
-                    if (p.title && !p.title.includes('이미지') && p.title.length > 2) {
-                        keyPoints.push(p.title);
-                    }
-                });
+            // B. KeyPointInfo (사이트의 '상품 핵심 포인트' 영역)
+            if (dataPoints && dataPoints.isOK && dataPoints.result) {
+                const points = dataPoints.result.map((p: any) => p.title).join(", ");
+                rawPointsText += "핵심 포인트: " + points + "\n";
             }
 
-            // D. 기타 마케팅 포인트 보완
-            if (d.groupBriefKeyword) {
-                const extra = d.groupBriefKeyword.split('#').filter(Boolean).map((s: string) => s.trim());
-                extra.forEach(ex => {
-                    if (ex.length > 2 && !keyPoints.some(kp => kp.includes(ex))) {
-                        keyPoints.push(ex);
-                    }
-                });
-            }
-
-            // E. travelRecommendNote에서 불렛 포인트 추출
+            // C. 추천 노트
             if (d.travelRecommendNote) {
-                const notes = d.travelRecommendNote.split('\n')
-                    .filter((l: string) => l.includes('*') || l.includes('▶'))
-                    .map((l: string) => l.replace(/[*▶]/g, '').trim())
-                    .filter((l: string) => l.length > 5 && l.length < 30);
-                keyPoints = [...keyPoints, ...notes];
+                rawPointsText += "추천 노트: " + d.travelRecommendNote + "\n";
             }
 
-            // 중복 제거 및 가독성 좋은 순서로 정리 (최대 8개)
-            keyPoints = Array.from(new Set(keyPoints)).filter(p => p.length > 2).slice(0, 8);
+            // D. 방문 도시
+            if (d.visitCities) {
+                rawPointsText += "방문 도시: " + d.visitCities.join(", ") + "\n";
+            }
+
+            // AI를 사용하여 실제 데이터 기반으로 포인트 5~7개 정리
+            let keyPoints: string[] = [];
+            const apiKey = process.env.GEMINI_API_KEY;
+
+            if (apiKey && rawPointsText.length > 20) {
+                try {
+                    const prompt = `다음은 모두투어 여행 상품의 실제 데이터입니다. 이 데이터를 바탕으로 상품의 핵심 포인트(특전, 일정 특징, 숙박 등)를 5~7개의 불렛 포인트로 정리하세요. 
+내용에 없는 말을 지어내지 말고, 오직 제공된 데이터에 근거하여 작성하세요.
+각 포인트는 15자 이내의 간결한 문장으로 작성하세요. 이모지는 사용하지 마세요.
+
+데이터:
+${rawPointsText}
+
+출력 형식: ["포인트1", "포인트2", ...] (JSON 배열만 출력)`;
+
+                    const aiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    const aiData = await aiRes.json();
+                    const aiText = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (aiText) {
+                        keyPoints = JSON.parse(aiText.replace(/```json\s*|\s*```/g, '').trim());
+                    }
+                } catch (e) {
+                    console.error('[ModeTour Point AI] Error:', e);
+                }
+            }
+
+            // Fallback (AI 실패 시)
+            if (keyPoints.length === 0) {
+                keyPoints = [
+                    `${cities.split('/')[0] || ''} 핵심 관광지 일주`,
+                    ...(d.travelRecommendNote || '').split('\n').filter((l: string) => l.includes('*') || l.includes('▶')).map((l: string) => l.replace(/[*▶]/g, '').trim()).slice(0, 5)
+                ];
+            }
 
             return {
                 isProduct: true,
@@ -165,7 +174,7 @@ async function fetchModeTourNative(url: string): Promise<any> {
                 airline: d.transportName || '',
                 duration: duration,
                 departureAirport: d.departureCityName || '',
-                keyPoints: keyPoints,
+                keyPoints: keyPoints.slice(0, 8),
                 exclusions: d.unincludedNote ? [d.unincludedNote.replace(/<[^>]+>/g, ' ').trim()] : [],
                 url: url
             };

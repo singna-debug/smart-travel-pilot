@@ -1,0 +1,83 @@
+﻿node.exe : 
+위치 줄:1 문자:1
++ & "C:\Program Files\
+nodejs/node.exe" "C:\P
+rogram Files\nodejs/no
+de_mo ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (:String) [   
+ ], RemoteExceptio    
+n
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+node:internal/modules/
+run_main:107
+    triggerUncaughtExc
+eption(
+    ^
+Error: Transform faile
+d with 1 error:
+C:\Users\vbxn6\.gemini
+\antigravity\scratch\s
+mart-travel-pilot\test
+-edge-full.ts:155:18: 
+ERROR: Syntax error "`
+"
+    at failureErrorWit
+hLog (C:\Users\vbxn6\A
+ppData\Local\npm-cache
+\_npx\fd45a72a545557e9
+\node_modules\esbuild\
+lib\main.js:1467:15)
+    at C:\Users\vbxn6\
+AppData\Local\npm-cach
+e\_npx\fd45a72a545557e
+9\node_modules\esbuild
+\lib\main.js:736:50
+    at responseCallbac
+ks.<computed> (C:\User
+s\vbxn6\AppData\Local\
+npm-cache\_npx\fd45a72
+a545557e9\node_modules
+\esbuild\lib\main.js:6
+03:9)
+    at handleIncomingP
+acket (C:\Users\vbxn6\
+AppData\Local\npm-cach
+e\_npx\fd45a72a545557e
+9\node_modules\esbuild
+\lib\main.js:658:12)
+    at Socket.readFrom
+Stdout (C:\Users\vbxn6
+\AppData\Local\npm-cac
+he\_npx\fd45a72a545557
+e9\node_modules\esbuil
+d\lib\main.js:581:7)
+    at Socket.emit (no
+de:events:508:28)
+    at addChunk (node:
+internal/streams/reada
+ble:559:12)
+    at readableAddChun
+kPushByteMode (node:in
+ternal/streams/readabl
+e:510:3)
+    at Readable.push (
+node:internal/streams/
+readable:390:5)
+    at Pipe.onStreamRe
+ad (node:internal/stre
+am_base_commons:189:23
+) {
+  name: 'TransformErro
+r'
+}
+
+Node.js v24.12.0
