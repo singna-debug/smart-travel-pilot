@@ -68,6 +68,80 @@ ${cleanBody}`;
     return { text: formattedText, nextData };
 }
 
+async function fetchModeTourNative(url: string): Promise<any> {
+    const productNoMatch = url.match(/package\/(\d+)/i) || url.match(/Pnum=(\d+)/i);
+    if (!productNoMatch) return null;
+    const productNo = productNoMatch[1];
+
+    const headers = {
+        'modewebapireqheader': '{"WebSiteNo":2,"CompanyNo":81202,"DeviceType":"DVTPC","ApiKey":"jm9i5RUzKPMPdklHzDKqNzwZYy0IGV5hTyKkCcpxO0IGIgVS+8Z7NnbzbARv5w7Bn90KT13Gq79XZMow6TYvwQ=="}',
+        'referer': 'https://www.modetour.com/',
+        'accept': 'application/json'
+    };
+
+    try {
+        console.log(`[Edge ModeTour] Fetching product info for: ${productNo}`);
+        const [resDetail, resPoints] = await Promise.all([
+            fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`, { headers }),
+            fetch(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}`, { headers })
+        ]);
+
+        const [dataDetail, dataPoints] = await Promise.all([resDetail.json() as any, resPoints.json() as any]);
+
+        if (dataDetail.isOK && dataDetail.result) {
+            const d = dataDetail.result;
+
+            // 상품 포인트 파싱 (다양한 출처 활용)
+            let keyPoints: string[] = [];
+
+            // 1. groupBriefKeyword (# 포인트)
+            if (d.groupBriefKeyword) {
+                keyPoints = d.groupBriefKeyword.split('#').filter(Boolean).map((s: string) => s.trim());
+            }
+
+            // 2. travelRecommendNote (불렛 포인트)
+            if (keyPoints.length < 3 && d.travelRecommendNote) {
+                const notes = d.travelRecommendNote.split('\n')
+                    .filter((l: string) => l.includes('*') || l.includes('▶'))
+                    .map((l: string) => l.replace(/[*▶]/g, '').trim())
+                    .filter((l: string) => l.length > 2);
+                keyPoints = [...keyPoints, ...notes];
+            }
+
+            // 3. keyword (콤마 구분)
+            if (keyPoints.length < 3 && d.keyword) {
+                const keywords = d.keyword.split(',').filter(Boolean).map((s: string) => s.trim());
+                keyPoints = [...keyPoints, ...keywords];
+            }
+
+            // 4. visitCities (방문 도시)
+            if (keyPoints.length < 5 && d.visitCities && d.visitCities.length > 0) {
+                keyPoints = [...keyPoints, ...d.visitCities];
+            }
+
+            // 중복 제거 및 정리
+            keyPoints = Array.from(new Set(keyPoints)).slice(0, 10);
+
+            return {
+                isProduct: true,
+                title: d.productName,
+                destination: `${d.category2 || ''} ${d.category3 || ''}`.trim() || d.displayRegionName || '',
+                price: String(d.sellingPriceAdultTotalAmount || ''),
+                departureDate: d.departureDate,
+                airline: d.transportName || '',
+                duration: d.travelPeriod || '',
+                departureAirport: d.departureCityName || '',
+                keyPoints: keyPoints,
+                exclusions: d.unincludedNote ? [d.unincludedNote.replace(/<[^>]+>/g, ' ').trim()] : [],
+                url: url
+            };
+        }
+    } catch (e) {
+        console.error('[Edge ModeTour] Native Fetch error:', e);
+    }
+    return null;
+}
+
 // ── ScrapingBee로 수집 ──
 async function crawl(url: string, apiKey: string): Promise<string | null> {
     // Attempt 1: JS 렌더링 최우선 시도 (단, 대기 시간을 최소화하여 속도 확보)
@@ -223,6 +297,15 @@ export async function POST(request: NextRequest) {
         const geminiKey = process.env.GEMINI_API_KEY;
         if (!sbKey) return NextResponse.json({ success: false, error: 'SCRAPINGBEE_API_KEY 미설정' });
         if (!geminiKey) return NextResponse.json({ success: false, error: 'GEMINI_API_KEY 미설정' });
+
+        // [New] ModeTour Fast Path: 브라우저 렌더링 없이 즉시 분석 (1초 이내)
+        if (url.includes('modetour.com')) {
+            const nativeResult = await fetchModeTourNative(url);
+            if (nativeResult) {
+                console.log('[Edge] ModeTour Native 분석 성공');
+                return NextResponse.json({ success: true, data: nativeResult });
+            }
+        }
 
         // 1. 수집
         const html = await crawl(url, sbKey);

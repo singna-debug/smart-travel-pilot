@@ -3,7 +3,7 @@
     "pageProps": {
       "departureDate": "2026-04-18",
       "productCode2": "JKP6017CJ3",
-      "productName": "[자연품은큐슈] 후쿠오카/구마모토/유후인/벳부/아소 3일 (전일정온천호텔+호텔석식2회+술음료무제한)",
+      "productName": "[출발확정][자연품은큐슈] 후쿠오카/구마모토/유후인/벳부/아소 3일 (전일정온천호텔+호텔석식2회+술음료무제한)",
       "isHideMainLayout": true,
       "host": "www.modetour.com",
       "url": "/package/100634999?MLoc=99&Pnum=100634999&ANO=81440&sno=C117876&thru=",
@@ -20,7 +20,7 @@
           "isSrcolling": false,
           "scrollPercentage": 0,
           "stopScroll": false,
-          "time": "2026-03-04T09:12:03.443Z",
+          "time": "2026-03-04T09:11:06.561Z",
           "hidden": true,
           "transparent": true,
           "backgroundColor": 0,
@@ -157,10 +157,10 @@
           "contentHeight": 40
         },
         "dateFuture": {
-          "dateFuture": "2026-03-03T09:12:03.444Z"
+          "dateFuture": "2026-03-03T09:11:06.562Z"
         },
         "tokenNotLogin": {
-          "tokenNotLogin": "Web0946713251564:5513eefa"
+          "tokenNotLogin": "Web7384559660580:bef06529"
         },
         "tourPasVehicle": {
           "idTourPass": "",
@@ -196,15 +196,15 @@
             "getPackageGetSimpleProductInfo({\"productNo\":100634999})": {
               "status": "fulfilled",
               "endpointName": "getPackageGetSimpleProductInfo",
-              "requestId": "E-Oum-G3MihNcL9315I4v",
+              "requestId": "znZ2AKC2VN0dv9c-OKHri",
               "originalArgs": {
                 "productNo": 100634999
               },
-              "startedTimeStamp": 1772669186284,
+              "startedTimeStamp": 1772678969402,
               "data": {
                 "result": {
                   "groupNumber": 100634999,
-                  "productName": "[자연품은큐슈] 후쿠오카/구마모토/유후인/벳부/아소 3일 (전일정온천호텔+호텔석식2회+술음료무제한)",
+                  "productName": "[출발확정][자연품은큐슈] 후쿠오카/구마모토/유후인/벳부/아소 3일 (전일정온천호텔+호텔석식2회+술음료무제한)",
                   "productCode": "JKP601",
                   "productCode2": "JKP6017CJ3",
                   "departureDate": "2026-04-18",
@@ -214,14 +214,14 @@
                 "errorMessages": [],
                 "isOK": true
               },
-              "fulfilledTimeStamp": 1772669186300
+              "fulfilledTimeStamp": 1772678969414
             }
           },
           "mutations": {},
           "provided": {},
           "subscriptions": {
             "getPackageGetSimpleProductInfo({\"productNo\":100634999})": {
-              "E-Oum-G3MihNcL9315I4v": {}
+              "znZ2AKC2VN0dv9c-OKHri": {}
             }
           },
           "config": {

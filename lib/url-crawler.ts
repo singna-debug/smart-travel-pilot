@@ -64,9 +64,110 @@ async function quickFetch(url: string, retries = 2): Promise<{ html: string; tit
     }
 }
 
-export async function fetchContent(url: string): Promise<{ text: string, nextData?: string }> {
+async function fetchModeTourNative(url: string): Promise<any> {
+    const productNoMatch = url.match(/package\/(\d+)/i) || url.match(/Pnum=(\d+)/i);
+    if (!productNoMatch) return null;
+    const productNo = productNoMatch[1];
+
+    const headers = {
+        'modewebapireqheader': '{"WebSiteNo":2,"CompanyNo":81202,"DeviceType":"DVTPC","ApiKey":"jm9i5RUzKPMPdklHzDKqNzwZYy0IGV5hTyKkCcpxO0IGIgVS+8Z7NnbzbARv5w7Bn90KT13Gq79XZMow6TYvwQ=="}',
+        'referer': 'https://www.modetour.com/',
+        'accept': 'application/json'
+    };
+
+    try {
+        console.log(`[ModeTour Native] Fetching product info for: ${productNo}`);
+        const [resDetail, resPoints] = await Promise.all([
+            fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`, { headers }),
+            fetch(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}`, { headers })
+        ]);
+
+        const [dataDetail, dataPoints] = await Promise.all([resDetail.json() as any, resPoints.json() as any]);
+
+        if (dataDetail.isOK && dataDetail.result) {
+            const d = dataDetail.result;
+
+            // 1. Title 정제 ([출발확정] 등 제거)
+            let cleanTitle = d.productName || '';
+            cleanTitle = cleanTitle.replace(/\[출발확정\]/g, '').trim();
+
+            // 2. Region 정제 (일본, 후쿠오카/구마모토/유후인/벳부/아소 형식)
+            const mainRegion = d.category2 || ''; // 예: 일본
+            const cities = d.visitCities && d.visitCities.length > 0 ? d.visitCities.join('/') : (d.category3 || '');
+            const destination = mainRegion ? `${mainRegion}, ${cities}` : cities;
+
+            // 3. Duration 보정 (3일 -> 2박3일)
+            // travelPeriod가 숫자+일 형태면 refineData의 formatDurationString이 처리하겠지만 여기서도 명시적으로 확인
+            let duration = d.travelPeriod || '';
+            if (/^\d+일$/.test(duration)) {
+                const days = parseInt(duration);
+                if (days > 1) duration = `${days - 1}박${duration}`;
+            }
+
+            // 4. 상품 포인트 파싱 (사용자 요청 항목 반영)
+            let keyPoints: string[] = [];
+
+            // 제목의 괄호 안 내용에서 포인트 추출 (예: 전일정온천호텔+호텔석식2회+술음료무제한)
+            if (cleanTitle.includes('(')) {
+                const inner = cleanTitle.substring(cleanTitle.lastIndexOf('(') + 1, cleanTitle.lastIndexOf(')'));
+                const parts = inner.split(/[+\n,]/).filter((s: string) => s.trim().length > 1);
+                parts.forEach((p: string) => {
+                    let point = p.trim();
+                    if (point.includes('온천호텔')) point = '전 일정 온천 호텔 숙박';
+                    if (point.includes('석식')) point = '호텔 석식 제공';
+                    if (point.includes('무제한')) point = '술, 음료 무제한 제공';
+                    keyPoints.push(point);
+                });
+            }
+
+            // 기본 포인트 추가
+            keyPoints.push(`자연을 품은 ${cities.split('/')[0] || ''} 여행`);
+            keyPoints.push(`${cities.replace(/\//g, ', ')} 관광`);
+
+            if (keyPoints.length < 5 && d.groupBriefKeyword) {
+                const extra = d.groupBriefKeyword.split('#').filter(Boolean).map((s: string) => s.trim());
+                keyPoints = [...keyPoints, ...extra];
+            }
+
+            keyPoints = Array.from(new Set(keyPoints)).slice(0, 10);
+
+            return {
+                isProduct: true,
+                title: cleanTitle,
+                destination: destination,
+                price: String(d.sellingPriceAdultTotalAmount || ''),
+                departureDate: d.departureDate,
+                airline: d.transportName || '',
+                duration: duration,
+                departureAirport: d.departureCityName || '',
+                keyPoints: keyPoints,
+                exclusions: d.unincludedNote ? [d.unincludedNote.replace(/<[^>]+>/g, ' ').trim()] : [],
+                url: url
+            };
+        }
+    } catch (e) {
+        console.error('[ModeTour Native] Fetch error:', e);
+    }
+    return null;
+}
+
+export async function fetchContent(url: string): Promise<{ text: string, nextData?: string, nativeData?: any }> {
     try {
         console.log(`[Crawler] Fetching: ${url}`);
+
+        // ModeTour인 경우 네이티브 직접 요청 시도
+        if (url.includes('modetour.com')) {
+            const nativeData = await fetchModeTourNative(url);
+            if (nativeData) {
+                console.log('[Crawler] ModeTour Native Data Acquired');
+                // HTML도 일단 가져옴 (Gemini가 추가 분석할 수도 있으니)
+                const { html } = await quickFetch(url);
+                const text = htmlToText(html, url);
+                const nextDataMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i);
+                const nextData = nextDataMatch ? nextDataMatch[1].trim() : undefined;
+                return { text, nextData, nativeData };
+            }
+        }
 
         // 1. 빠른 fetch 시도
         const { html } = await quickFetch(url);
@@ -789,6 +890,19 @@ function fallbackParse(text: string): DetailedProductInfo {
 
 export async function crawlTravelProduct(url: string): Promise<DetailedProductInfo> {
     console.log(`[Crawler] 분석 시작: ${url}`);
+
+    // [Fast-Path] 모두투어 전용 네이티브 API 연동 (딜레이 없음)
+    if (url.includes('modetour.com')) {
+        console.log('[Crawler] ModeTour URL 감지 -> 네이티브 API 우선 시도');
+        const native = await fetchModeTourNative(url);
+        if (native) {
+            console.log('[Crawler] ModeTour Native Data 수집 성공 -> 즉시 반환');
+            // refineData를 통해 포맷팅 및 보정
+            return refineData(native, `TARGET_TITLE: "${native.title}"\nTARGET_PRICE: "${native.price}"\nTARGET_DURATION: "${native.duration}"\nTARGET_AIRLINE: "${native.airline}"\nTARGET_DEPARTURE_AIRPORT: "${native.departureAirport}"\nTARGET_DEPARTURE_DATE: "${native.departureDate}"\n`, url);
+        }
+        console.log('[Crawler] ModeTour Native API 실패하여 일반 크롤링으로 폴백');
+    }
+
     const isVercel = process.env.VERCEL === '1';
 
     let fullText: string | null = null;
@@ -813,11 +927,16 @@ export async function crawlTravelProduct(url: string): Promise<DetailedProductIn
     }
 
     // 3. 모든 고급 옵션 실패 시, fallback으로 기존 빠른 fetch 사용
+    const contentResult = await fetchContent(url);
+    if (contentResult.nativeData) {
+        console.log('[Crawler] ModeTour Native Data 발견 - 최우선 적용');
+        return refineData(contentResult.nativeData, contentResult.text, url, contentResult.nextData);
+    }
+
     if (!fullText) {
         console.log(`[Crawler] 모든 고급 크롤링이 실패하여 일반 fetch로 폴백`);
-        const result = await fetchContent(url);
-        fullText = result.text;
-        nextData = result.nextData;
+        fullText = contentResult.text;
+        nextData = contentResult.nextData;
     } else {
         // 추출된 텍스트 정리
         fullText = fullText.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim();

@@ -595,14 +595,14 @@ export default function UrlAnalyzer() {
                     />
                 </div>
                 <div className="form-group">
-                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '600', marginBottom: '8px' }}>귀국일 (자동)</label>
+                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '600', marginBottom: '8px' }}>귀국일 (자동계산)</label>
                     <input
                         type="text"
                         value={returnDate}
                         onChange={(e) => setReturnDate(e.target.value)}
+                        placeholder="자동 계산됨"
                         className="analyzer-input"
-                        style={{ width: '100%', background: 'rgba(255, 255, 255, 0.05)', color: '#ffffff', fontWeight: '500' }}
-                        readOnly
+                        style={{ width: '100%', color: '#ffffff', fontWeight: 'bold' }}
                     />
                 </div>
                 <div className="form-group">
@@ -803,35 +803,35 @@ export default function UrlAnalyzer() {
                                 </button>
                             </div>
                         </div>
-                        <h3 className="product-title-text" style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '16px', color: '#e2e8f0' }}>
+                        <h3 className="product-title-text" style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '20px', color: '#ffffff', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
                             {singleResult.raw.index || 1}. {singleResult.raw.title}
                         </h3>
 
                         <div className="product-info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '16px' }}>
                             <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
-                                <span className="info-label" style={{ color: '#94a3b8', fontSize: '0.9rem', display: 'block', marginBottom: '4px' }}>💰 가격</span>
-                                <span className="info-value price" style={{ color: '#38bdf8', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>💰 가격</span>
+                                <span className="info-value price" style={{ color: '#38bdf8', fontWeight: '800', fontSize: '1.2rem' }}>
                                     {singleResult.raw.price ? (String(singleResult.raw.price).endsWith('원') ? singleResult.raw.price : `${singleResult.raw.price}원`) : '가격 정보 없음'}
                                 </span>
                             </div>
                             <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
-                                <span className="info-label" style={{ color: '#94a3b8', fontSize: '0.9rem', display: 'block', marginBottom: '4px' }}>🌏 지역</span>
-                                <span className="info-value" style={{ color: '#f8fafc', fontWeight: '500' }}>{singleResult.raw.destination}</span>
+                                <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>🌏 지역</span>
+                                <span className="info-value" style={{ color: '#ffffff', fontWeight: '600' }}>{singleResult.raw.destination}</span>
                             </div>
                             <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
-                                <span className="info-label" style={{ color: '#94a3b8', fontSize: '0.9rem', display: 'block', marginBottom: '4px' }}>✈️ 출발공항</span>
-                                <span className="info-value" style={{ color: '#f8fafc', fontWeight: '500' }}>
+                                <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>✈️ 출발공항</span>
+                                <span className="info-value" style={{ color: '#ffffff', fontWeight: '600' }}>
                                     {singleResult.raw.departureAirport}
                                     {singleResult.raw.airline && <span style={{ fontSize: '0.9rem', color: '#cbd5e1', display: 'block', marginTop: '4px' }}>({singleResult.raw.airline})</span>}
                                 </span>
                             </div>
                             <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
-                                <span className="info-label" style={{ color: '#94a3b8', fontSize: '0.9rem', display: 'block', marginBottom: '4px' }}>📅 출발일</span>
-                                <span className="info-value" style={{ color: '#f8fafc', fontWeight: '500' }}>{singleResult.raw.departureDate || '날짜 미정'}</span>
+                                <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>📅 출발일</span>
+                                <span className="info-value" style={{ color: '#ffffff', fontWeight: '600' }}>{singleResult.raw.departureDate || '날짜 미정'}</span>
                             </div>
                             <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
-                                <span className="info-label" style={{ color: '#94a3b8', fontSize: '0.9rem', display: 'block', marginBottom: '4px' }}>⏳ 기간</span>
-                                <span className="info-value" style={{ color: '#f8fafc', fontWeight: '500' }}>{singleResult.raw.duration || '기간 미정'}</span>
+                                <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>⏳ 기간</span>
+                                <span className="info-value" style={{ color: '#ffffff', fontWeight: '600' }}>{singleResult.raw.duration || '기간 미정'}</span>
                             </div>
                         </div>
 
@@ -924,7 +924,7 @@ export default function UrlAnalyzer() {
                                 if (line.startsWith('---') || line.includes('----------')) {
                                     return <div key={i} style={{ borderBottom: '1px dashed #334155', margin: '20px 0', height: '1px' }} aria-hidden="true" />;
                                 }
-                                return <p key={i} style={{ color: '#94a3b8', margin: '4px 0', minHeight: '1em' }}>{line}</p>;
+                                return <p key={i} style={{ color: '#cbd5e1', margin: '6px 0', minHeight: '1.2em', lineHeight: '1.6' }}>{line}</p>;
                             })}
                         </div>
                     </div>
