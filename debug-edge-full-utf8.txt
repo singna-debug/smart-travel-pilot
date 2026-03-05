@@ -1,0 +1,51 @@
+﻿[dotenv@17.3.1] injecting env (16) from .env.local -- tip: ?뵍 prevent building .env in docker: https://dotenvx.com/prebuild
+[Edge] ?섏쭛 ?쒕룄: JS?뚮뜑留?(鍮좊Ⅸ ?湲?
+[Edge] JS ?뚮뜑留??섏쭛 ?깃났: 531874??[Timeline] Crawl complete in 13844 ms
+[Gemini] Requesting with prompt length: 17179
+[Gemini] Response received in 488 ms
+node.exe : [Edge] AI R
+ate Limit 諛쒖깮, ?뺢퇋?앹쑝濡
+?蹂듦뎄?⑸땲??
+위치 줄:1 문자:1
++ & "C:\Program Files\
+nodejs/node.exe" "C:\P
+rogram Files\nodejs/no
+de_mo ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: ([Edge] AI    
+ Rate ...뺢퇋?앹쑝濡?蹂듦    
+뎄?⑸땲??:String) []    ,
+ RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+[Fallback] Regex Parser Engaged
+[Timeline] Analyze complete in 490 ms
+{
+  "isProduct": true,
+  "title": "?⑦궎吏&gt;?곹뭹?곸꽭&gt;JKP6017CJ3&gt;[異쒕컻?뺤젙][?먯뿰?덉??먯뒋] ?꾩퓼?ㅼ뭅/援щ쭏紐⑦넗/?좏썑??踰노?/?꾩냼 3??(?꾩씪?뺤삩泥쒗샇???명뀛?앹떇2???좎쓬猷뚮Т?쒗븳)",
+  "destination": "",
+  "price": "799000",
+  "departureDate": "2026-04-18",
+  "duration": "2諛???,
+  "airline": "?쒖＜??났",
+  "departureAirport": "?몄쿇",
+  "hotel": "",
+  "features": [],
+  "courses": [],
+  "specialOffers": [],
+  "inclusions": [],
+  "exclusions": [],
+  "itinerary": [],
+  "keyPoints": [],
+  "hashtags": "",
+  "hasNoOption": false,
+  "hasFreeSchedule": false,
+  "url": "https://www.modetour.com/package/100634999?MLoc=99&Pnum=100634999&ANO=81440&sno=C117876&thru="
+}

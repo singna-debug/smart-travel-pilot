@@ -1,0 +1,1 @@
+https://b2c-api.modetour.com/BannerContent/GetBannerSet?websiteType=WSTB2C&webPageType=WPTPackageOverseasDetail&webTemplateAreaType=WTAOverseasDetailScheduleBanner1&webTemplateType=WTTPackageDetailBannerExtension2

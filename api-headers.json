@@ -1,0 +1,16 @@
+{
+  "x-platform": "ModeEcommerce",
+  "x-incomming-pathname": "/package/100634999",
+  "sec-ch-ua-platform": "\"Windows\"",
+  "referer": "https://www.modetour.com/",
+  "accept-language": "ko-KR,ko;q=0.9",
+  "x-salespartner": "2",
+  "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+  "sec-ch-ua-mobile": "?0",
+  "x-username": "",
+  "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+  "accept": "application/json, text/plain, */*",
+  "x-userid": "",
+  "x-userdepartment": "ModeEcommerce",
+  "modewebapireqheader": "{\"WebSiteNo\":2,\"CompanyNo\":81202,\"DeviceType\":\"DVTPC\",\"ApiKey\":\"jm9i5RUzKPMPdklHzDKqNzwZYy0IGV5hTyKkCcpxO0IGIgVS+8Z7NnbzbARv5w7Bn90KT13Gq79XZMow6TYvwQ==\"}"
+}

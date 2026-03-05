@@ -1,0 +1,1 @@
+https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=100634999&companyNo=81440&companyStaffNo=C117876

@@ -1,0 +1,1 @@
+https://b2c-api.modetour.com/User/GetRecentlyViewed
