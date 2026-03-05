@@ -91,45 +91,63 @@ async function fetchModeTourNative(url: string): Promise<any> {
         if (dataDetail.isOK && dataDetail.result) {
             const d = dataDetail.result;
 
-            // 상품 포인트 파싱 (다양한 출처 활용)
+            // 1. Title 정제
+            let cleanTitle = d.productName || '';
+            cleanTitle = cleanTitle.replace(/\[출발확정\]/g, '').trim();
+
+            // 2. Region 정제
+            const mainRegion = d.category2 || '';
+            const cities = d.visitCities && d.visitCities.length > 0 ? d.visitCities.join('/') : (d.category3 || '');
+            const destination = mainRegion ? `${mainRegion}, ${cities}` : cities;
+
+            // 3. Duration 보정
+            let duration = d.travelPeriod || '';
+            if (/^\d+일$/.test(duration)) {
+                const days = parseInt(duration);
+                if (days > 1) duration = `${days - 1}박${duration}`;
+            }
+
+            // 4. 상품 포인트 파싱 (사이트 실제 데이터 기반 - 고속)
             let keyPoints: string[] = [];
 
-            // 1. groupBriefKeyword (# 포인트)
+            // A. 제목 특전
+            if (cleanTitle.includes('(')) {
+                const inner = cleanTitle.substring(cleanTitle.lastIndexOf('(') + 1, cleanTitle.lastIndexOf(')'));
+                const parts = inner.split(/[+\n,]/).filter((s: string) => s.trim().length > 1);
+                parts.forEach((p: string) => {
+                    let point = p.trim();
+                    if (point.includes('온천')) point = '엄선된 온천 숙박';
+                    if (point.includes('식사') || point.includes('석식')) point = '호텔 석식/특식 제공';
+                    if (point.includes('무제한')) point = '주류/음료 무제한';
+                    keyPoints.push(point);
+                });
+            }
+
+            // B. Site KeyPointInfo
+            if (dataPoints && dataPoints.isOK && dataPoints.result) {
+                const sitePoints = dataPoints.result
+                    .filter((p: any) => p.title && p.title.length > 2)
+                    .map((p: any) => p.title.trim());
+                keyPoints = [...keyPoints, ...sitePoints];
+            }
+
+            // C. 특징 및 키워드
             if (d.groupBriefKeyword) {
-                keyPoints = d.groupBriefKeyword.split('#').filter(Boolean).map((s: string) => s.trim());
-            }
-
-            // 2. travelRecommendNote (불렛 포인트)
-            if (keyPoints.length < 3 && d.travelRecommendNote) {
-                const notes = d.travelRecommendNote.split('\n')
-                    .filter((l: string) => l.includes('*') || l.includes('▶'))
-                    .map((l: string) => l.replace(/[*▶]/g, '').trim())
-                    .filter((l: string) => l.length > 2);
-                keyPoints = [...keyPoints, ...notes];
-            }
-
-            // 3. keyword (콤마 구분)
-            if (keyPoints.length < 3 && d.keyword) {
-                const keywords = d.keyword.split(',').filter(Boolean).map((s: string) => s.trim());
+                const keywords = d.groupBriefKeyword.split('#').filter(Boolean).map((k: string) => k.trim());
                 keyPoints = [...keyPoints, ...keywords];
             }
 
-            // 4. visitCities (방문 도시)
-            if (keyPoints.length < 5 && d.visitCities && d.visitCities.length > 0) {
-                keyPoints = [...keyPoints, ...d.visitCities];
-            }
-
             // 중복 제거 및 정리
-            keyPoints = Array.from(new Set(keyPoints)).slice(0, 10);
+            keyPoints = Array.from(new Set(keyPoints)).filter(p => p.length > 2).slice(0, 8);
 
             return {
                 isProduct: true,
-                title: d.productName,
-                destination: `${d.category2 || ''} ${d.category3 || ''}`.trim() || d.displayRegionName || '',
+                title: cleanTitle,
+                destination: destination,
                 price: String(d.sellingPriceAdultTotalAmount || ''),
                 departureDate: d.departureDate,
                 airline: d.transportName || '',
-                duration: d.travelPeriod || '',
+                duration: duration,
                 departureAirport: d.departureCityName || '',
                 keyPoints: keyPoints,
                 exclusions: d.unincludedNote ? [d.unincludedNote.replace(/<[^>]+>/g, ' ').trim()] : [],
