@@ -349,7 +349,8 @@ ${safeText.substring(0, 30000)}`;
 // ── 메인 핸들러: 수집 + 분석을 한 번에 ──
 export async function POST(request: NextRequest) {
     try {
-        const { url } = await request.json();
+        const body = await request.json();
+        const { url, source } = body;
         if (!url) return NextResponse.json({ success: false, error: 'URL이 필요합니다.' }, { status: 400 });
 
         const sbKey = process.env.SCRAPINGBEE_API_KEY;
@@ -358,7 +359,8 @@ export async function POST(request: NextRequest) {
         if (!geminiKey) return NextResponse.json({ success: false, error: 'GEMINI_API_KEY 미설정' });
 
         // [New] ModeTour Fast Path: 브라우저 렌더링 없이 즉시 분석 (1초 이내)
-        if (url.includes('modetour.com')) {
+        // [Notice] 확정서 탭(confirmation)은 상세 정보가 필요하므로 Fast Path 제외
+        if (url.includes('modetour.com') && source !== 'confirmation') {
             const nativeResult = await fetchModeTourNative(url, sbKey);
             if (nativeResult) {
                 console.log('[Edge] ModeTour Native 분석 성공');
