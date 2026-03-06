@@ -161,7 +161,7 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<any> {
         }
 
         // B. Site KeyPointInfo (사이트의 핵심 포인트 영역 데이터 그대로 사용)
-        if (dataPoints && dataPoints.isOK && dataPoints.result) {
+        if (dataPoints && dataPoints.isOK && Array.isArray(dataPoints.result)) {
             const sitePoints = dataPoints.result
                 .filter((p: any) => p.title && p.title.length > 2 && !p.title.includes('이미지'))
                 .map((p: any) => p.title.trim());

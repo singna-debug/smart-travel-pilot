@@ -165,7 +165,7 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<any> {
         }
 
         // B. Site KeyPointInfo
-        if (dataPoints && dataPoints.isOK && dataPoints.result) {
+        if (dataPoints && dataPoints.isOK && Array.isArray(dataPoints.result)) {
             const sitePoints = dataPoints.result
                 .filter((p: any) => p.title && p.title.length > 2)
                 .map((p: any) => p.title.trim());
