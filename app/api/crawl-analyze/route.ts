@@ -52,7 +52,21 @@ function htmlToText(html: string, url: string): { text: string, nextData?: strin
         }
     }
 
-    const cleanBody = visibleText.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim().substring(0, 50000);
+    // [최적화] 전체 텍스트가 너무 길면 토큰 제한에 걸리므로 지능적으로 생략
+    let bodyLimit = 40000;
+    let nextDataLimit = 30000;
+
+    // 둘 다 있을 경우 합쳐서 60,000자를 넘지 않게 조절
+    if (nextData) {
+        bodyLimit = 30000;
+        nextDataLimit = 30000;
+        // nextData가 너무 거대할 수 있으므로 1차 정리
+        if (nextData.length > nextDataLimit) {
+            nextData = nextData.substring(0, nextDataLimit);
+        }
+    }
+
+    const cleanBody = visibleText.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim().substring(0, bodyLimit);
 
     const formattedText = `==== TARGET METADATA START ====
 PAGE_TITLE: "${pageTitle}"
@@ -203,16 +217,41 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<any> {
 
 // ── ScrapingBee로 수집 ──
 async function crawl(url: string, apiKey: string): Promise<string | null> {
-    // Attempt 1: JS 렌더링 최우선 시도 (단, 대기 시간을 최소화하여 속도 확보)
+    const isModeTour = url.includes('modetour.com');
+
+    // 1. ModeTour는 SSR(render_js=false)을 먼저 시도하는 것이 압도적으로 빠르고 정보가 충분함
+    if (isModeTour) {
+        try {
+            console.log('[Edge] 수집 시도 (ModeTour): SSR HTML (render_js=false)');
+            const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&timeout=8000`;
+            const controller = new AbortController();
+            const tid = setTimeout(() => controller.abort(), 8000);
+            const res = await fetch(sbUrl, { signal: controller.signal });
+            clearTimeout(tid);
+            if (res.ok) {
+                const html = await res.text();
+                if (html.length > 5000 && html.includes('__NEXT_DATA__')) {
+                    console.log(`[Edge] ModeTour SSR 수집 성공: ${html.length}자 (NEXT_DATA 포함)`);
+                    return html;
+                }
+            }
+        } catch (e: any) {
+            console.warn('[Edge] ModeTour SSR 1차 시도 실패:', e.message);
+        }
+    }
+
+    // 2. JS 렌더링 시도 (ModeTour가 아니거나 SSR 정보가 부족할 때)
     try {
         console.log('[Edge] 수집 시도: JS렌더링 (빠른 대기)');
-        const jsScenario = encodeURIComponent('{"instructions":[{"wait":1000},{"scroll_y":2000},{"wait":500},{"scroll_y":5000}]}');
-        // wait을 2000으로 줄여서 속도 대폭 개선
-        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait=2000&js_scenario=${jsScenario}&timeout=15000`;
+        const jsScenario = encodeURIComponent('{"instructions":[{"wait":1000},{"scroll_y":2000}]}');
+        const timeout = isModeTour ? 12000 : 15000;
+        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true&wait=1500&js_scenario=${jsScenario}&timeout=${timeout}`;
+
         const controller = new AbortController();
-        const tid = setTimeout(() => controller.abort(), 15000);
+        const tid = setTimeout(() => controller.abort(), timeout);
         const res = await fetch(sbUrl, { signal: controller.signal });
         clearTimeout(tid);
+
         if (res.ok) {
             const html = await res.text();
             if (html.length > 1000 && html.includes('<') && !html.startsWith('{')) {
@@ -221,26 +260,23 @@ async function crawl(url: string, apiKey: string): Promise<string | null> {
             }
         }
     } catch (e: any) {
-        console.warn('[Edge] Attempt 1 (JS) 실패:', e.name === 'AbortError' ? 'TIMEOUT' : e.message);
+        console.warn('[Edge] JS 렌더링 시도 실패:', e.name === 'AbortError' ? 'TIMEOUT' : e.message);
     }
 
-    // Attempt 2: SSR HTML (JS 렌더링 실패 시 최후 수단)
-    try {
-        console.log('[Edge] 수집 시도: SSR HTML (render_js=false)');
-        const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&timeout=8000`;
-        const controller = new AbortController();
-        const tid = setTimeout(() => controller.abort(), 8000);
-        const res = await fetch(sbUrl, { signal: controller.signal });
-        clearTimeout(tid);
-        if (res.ok) {
-            const html = await res.text();
-            if (html.length > 1000 && html.includes('<') && !html.startsWith('{')) {
-                console.log(`[Edge] SSR 수집 성공: ${html.length}자`);
+    // 3. 최후 수단 (JS 실패 시 일반 SSR 재시도)
+    if (!isModeTour) {
+        try {
+            console.log('[Edge] 수집 시도: SSR HTML (render_js=false) - Fallback');
+            const sbUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&timeout=6000`;
+            const controller = new AbortController();
+            const tid = setTimeout(() => controller.abort(), 6000);
+            const res = await fetch(sbUrl, { signal: controller.signal });
+            clearTimeout(tid);
+            if (res.ok) {
+                const html = await res.text();
                 return html;
             }
-        }
-    } catch (e: any) {
-        console.warn('[Edge] Attempt 2 (SSR) 실패:', e.name === 'AbortError' ? 'TIMEOUT' : e.message);
+        } catch (e: any) { }
     }
 
     return null;
@@ -373,8 +409,8 @@ async function analyzeForConfirmationEdge(text: string, url: string, nextData: s
         }
     }
 
-    const safeText = text.replace(/`/g, "'").substring(0, 40000);
-    const safeNextData = nextData ? nextData.replace(/`/g, "'").substring(0, 40000) : '';
+    const safeText = text.replace(/`/g, "'").substring(0, 30000);
+    const safeNextData = nextData ? nextData.replace(/`/g, "'").substring(0, 30000) : '';
 
     let prompt = '당신은 여행 상품 웹페이지 전문 분석가입니다.\\n';
     prompt += '아래 여행 상품 페이지의 전체 내용을 분석하여, 모바일 여행 확정서에 필요한 모든 정보를 빠짐없이 추출하세요.\\n\\n';
