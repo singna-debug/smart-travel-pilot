@@ -180,8 +180,12 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<any> {
         // B. Site KeyPointInfo
         if (dataPoints && dataPoints.isOK && Array.isArray(dataPoints.result)) {
             const sitePoints = dataPoints.result
-                .filter((p: any) => p.title && p.title.length > 2)
-                .map((p: any) => p.title.trim());
+                .filter((p: any) => (p.title && p.title.length > 2) || (p.subTitle && p.subTitle.length > 5))
+                .map((p: any) => {
+                    let fullPoint = p.title || '';
+                    if (p.subTitle) fullPoint += ` (${p.subTitle})`;
+                    return fullPoint.trim();
+                });
             keyPoints = [...keyPoints, ...sitePoints];
         }
 
@@ -345,7 +349,11 @@ ${safeNextData ? `--- [중요: NEXT_JS_DATA (JSON 데이터 참조용)] ---\n${s
   "airline": "METADATA 섹션의 TARGET_AIRLINE을 최우선으로 사용하세요. 없으면 항공사(티웨이, 제주항공 등) 추출.",
   "duration": "METADATA 섹션의 TARGET_DURATION 값을 최우선으로 사용하세요. 없으면 'X박 Y일' 패턴을 찾으세요.",
   "departureAirport": "METADATA 섹션의 TARGET_DEPARTURE_AIRPORT를 최우선으로 사용하세요. 없으면 텍스트에서 '인천', '부산', '대구' 등 출발지 추출.",
-  "keyPoints": ["상품의 핵심 특징 5~7개 요약. 특히 '특전', '식사 업그레이드', '식사 포함여부', '쇼핑조건' 등을 매력적으로 작성하세요."],
+  "keyPoints": [
+    "상품의 핵심 특징 5~7개 요약. 각 포인트는 30~50자 정도로 풍성하게 작성하세요.",
+    "키워드 나열이 아니라 '~~가 포함된 ~~한 일정', '~~를 즐기는 ~~한 특전' 처럼 구체적인 혜택 중심으로 작성하세요.",
+    "특히 '특전', '식사 업그레이드', '호텔 등급', '쇼핑조건' 등 고객이 매력을 느낄만한 포인트를 상세히 추출하세요."
+  ],
   "exclusions": ["불포함 사항 요약"]
 }
 
