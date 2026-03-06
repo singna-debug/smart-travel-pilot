@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'edge';
 
 // ── htmlToText (Edge 호환) ──
-function htmlToText(html: string, url: string): { text: string, nextData?: string } {
+function htmlToText(html: string, url: string, isConfirmation: boolean = false): { text: string, nextData?: string } {
     let pageTitle = '';
     const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
     if (titleMatch) pageTitle = titleMatch[1].trim();
@@ -53,13 +53,13 @@ function htmlToText(html: string, url: string): { text: string, nextData?: strin
     }
 
     // [최적화] 전체 텍스트가 너무 길면 토큰 제한에 걸리므로 지능적으로 생략
-    let bodyLimit = 40000;
-    let nextDataLimit = 30000;
+    // 확정서 제작인 경우(isConfirmation=true) 429 에러 방지를 위해 더 타이트하게 제한
+    // 일반 URL 분석인 경우(isConfirmation=false) 품질 유지를 위해 넉넉하게 유지
+    let bodyLimit = isConfirmation ? 30000 : 60000;
+    let nextDataLimit = isConfirmation ? 25000 : 60000;
 
-    // 둘 다 있을 경우 합쳐서 60,000자를 넘지 않게 조절
+    // 둘 다 있을 경우 합쳐서 토큰 제한을 넘지 않게 조절
     if (nextData) {
-        bodyLimit = 30000;
-        nextDataLimit = 30000;
         // nextData가 너무 거대할 수 있으므로 1차 정리
         if (nextData.length > nextDataLimit) {
             nextData = nextData.substring(0, nextDataLimit);
@@ -568,7 +568,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. 텍스트 정제
-        const { text: cleanedText, nextData } = htmlToText(html, url);
+        const { text: cleanedText, nextData } = htmlToText(html, url, source === 'confirmation');
 
         // 3. AI 분석 (source에 따라 라우팅)
         let result;
