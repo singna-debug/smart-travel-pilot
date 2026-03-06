@@ -481,7 +481,12 @@ async function analyzeForConfirmationEdge(text: string, url: string, nextData: s
         }
 
         const resText = data.candidates[0].content.parts[0].text;
-        const jsonStr = resText.replace(/```json\\s*|\\s*```/g, '').trim();
+        let jsonStr = resText;
+        const startIdx = resText.indexOf('{');
+        const endIdx = resText.lastIndexOf('}');
+        if (startIdx !== -1 && endIdx !== -1) {
+            jsonStr = resText.substring(startIdx, endIdx + 1);
+        }
         return JSON.parse(jsonStr);
     } catch (e: any) {
         console.error('[Gemini] 확정서 전용 분석 오류:', e);
@@ -538,7 +543,9 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ success: false, error: 'AI 분석 한도를 초과했습니다 (1분당 요청 수 제한). 약 1분 후 다시 시도해주세요.' }, { status: 429 });
             }
             if (result && result.error === 'DEEP_ANALYSIS_FAILED') {
-                return NextResponse.json({ success: false, error: '분석에 실패했습니다. 관리자에게 문의하세요.', details: result.details });
+                let detailStr = '';
+                try { detailStr = typeof result.details === 'object' ? JSON.stringify(result.details) : String(result.details); } catch (e) { }
+                return NextResponse.json({ success: false, error: `분석 실패. (상세: ${detailStr.substring(0, 150)})`, details: result.details });
             }
             if (!result) { // Fallback to shallow if deep fails
                 console.log('[Edge] 깊은 분석 실패, 얕은 분석으로 Fallback');
