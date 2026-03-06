@@ -115,8 +115,7 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<any> {
                 ]);
 
                 dataDetail = await pResDetail.json();
-                dataPoints = JSON.parse(await pResPoints.text()); // Sometimes SB returns text for secondary requests
-                if (typeof dataPoints === "string") dataPoints = JSON.parse(dataPoints);
+                dataPoints = await pResPoints.json();
 
                 console.log(`[Edge ModeTour] Proxy API fetch successful!`);
             } catch (proxyError: any) {
