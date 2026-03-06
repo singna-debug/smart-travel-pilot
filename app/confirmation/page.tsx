@@ -217,7 +217,8 @@ export default function ConfirmationPage() {
             }
 
             if (json.success && json.data) {
-                const raw = json.data;
+                // 지원: 최근 업데이트된 { raw, formatted, recommendation } 구조 또는 기존 객체 구조
+                const raw = json.data.raw ? json.data.raw : json.data;
                 setAnalysisResult(raw);
                 setAnalysisStep('');
 
