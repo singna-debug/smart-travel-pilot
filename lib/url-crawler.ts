@@ -96,12 +96,18 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<any> {
         // Proxy Fallback
         if (sbKey) {
             try {
-                const proxyDetailUrl = `https://app.scrapingbee.com/api/v1/?api_key=${sbKey}&url=${encodeURIComponent(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`)}&render_js=false&forward_headers=true&Spb-modewebapireqheader=${encodeURIComponent(headers.modewebapireqheader)}`;
-                const proxyPointsUrl = `https://app.scrapingbee.com/api/v1/?api_key=${sbKey}&url=${encodeURIComponent(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}`)}&render_js=false&forward_headers=true&Spb-modewebapireqheader=${encodeURIComponent(headers.modewebapireqheader)}`;
+                const proxyDetailUrl = `https://app.scrapingbee.com/api/v1/?api_key=${sbKey}&url=${encodeURIComponent(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`)}&render_js=false&forward_headers=true`;
+                const proxyPointsUrl = `https://app.scrapingbee.com/api/v1/?api_key=${sbKey}&url=${encodeURIComponent(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}`)}&render_js=false&forward_headers=true`;
+
+                const proxyHeaders = {
+                    'Spb-modewebapireqheader': headers.modewebapireqheader,
+                    'Spb-referer': headers.referer,
+                    'Spb-accept': headers.accept
+                };
 
                 const [pResDetail, pResPoints] = await Promise.all([
-                    fetch(proxyDetailUrl),
-                    fetch(proxyPointsUrl)
+                    fetch(proxyDetailUrl, { headers: proxyHeaders }),
+                    fetch(proxyPointsUrl, { headers: proxyHeaders })
                 ]);
 
                 dataDetail = await pResDetail.json();
