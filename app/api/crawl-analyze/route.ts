@@ -345,7 +345,7 @@ ${safeNextData ? `--- [중요: NEXT_JS_DATA (JSON 데이터 참조용)] ---\n${s
   "airline": "METADATA 섹션의 TARGET_AIRLINE을 최우선으로 사용하세요. 없으면 항공사(티웨이, 제주항공 등) 추출.",
   "duration": "METADATA 섹션의 TARGET_DURATION 값을 최우선으로 사용하세요. 없으면 'X박 Y일' 패턴을 찾으세요.",
   "departureAirport": "METADATA 섹션의 TARGET_DEPARTURE_AIRPORT를 최우선으로 사용하세요. 없으면 텍스트에서 '인천', '부산', '대구' 등 출발지 추출.",
-  "keyPoints": ["상품의 핵심 특징 5~7개 요약"],
+  "keyPoints": ["상품의 핵심 특징 5~7개 요약. 특히 '특전', '식사 업그레이드', '식사 포함여부', '쇼핑조건' 등을 매력적으로 작성하세요."],
   "exclusions": ["불포함 사항 요약"]
 }
 
@@ -542,22 +542,28 @@ export async function POST(request: NextRequest) {
         if (!sbKey) return NextResponse.json({ success: false, error: 'SCRAPINGBEE_API_KEY 미설정' });
         if (!geminiKey) return NextResponse.json({ success: false, error: 'GEMINI_API_KEY 미설정' });
 
-        // [New] ModeTour Fast Path: 브라우저 렌더링 없이 즉시 분석 (1초 이내)
-        // [Notice] 확정서 탭(confirmation)은 상세 정보가 필요하므로 Fast Path 제외
+        // [New] ModeTour Fast Path: Native 데이터를 Gemini의 입력값으로 활용하여 품질과 속도 동시 확보
         if (url.includes('modetour.com') && source !== 'confirmation') {
             const nativeResult = await fetchModeTourNative(url, sbKey);
             if (nativeResult) {
-                console.log('[Edge] ModeTour Native 분석 성공');
-                const formatted = `[${nativeResult.title}]\n\n* 가격 : ${nativeResult.price}원\n* 출발일 : ${nativeResult.departureDate}\n* 항공 : ${nativeResult.airline}\n* 지역 : ${nativeResult.destination}\n* 기간 : ${nativeResult.duration}\n\n[상품 포인트]\n${nativeResult.keyPoints.map((p: string) => `- ${p}`).join('\n')}`;
+                console.log('[Edge] ModeTour Native 데이터를 Gemini 분석에 주입');
+                const nativeSummary = `[Native Data Summary]\nTitle: ${nativeResult.title}\nPrice: ${nativeResult.price}\nDates: ${nativeResult.departureDate}\nAirline: ${nativeResult.airline}\nDuration: ${nativeResult.duration}\nKey Points: ${nativeResult.keyPoints.join(', ')}`;
 
-                return NextResponse.json({
-                    success: true,
-                    data: {
-                        raw: nativeResult,
-                        formatted: formatted,
-                        recommendation: ''
-                    }
-                });
+                // 데이터 주입 후 AI 분석 (속도를 위해 즉시 analyze 호출)
+                const geminiResult = await analyze(nativeSummary, url, JSON.stringify(nativeResult), geminiKey);
+                if (geminiResult) {
+                    geminiResult.url = url;
+                    const formatted = `[${geminiResult.title}]\n\n* 가격 : ${geminiResult.price}원\n* 지역 : ${geminiResult.destination}\n* 기간 : ${geminiResult.duration}\n\n[상품 포인트]\n${geminiResult.keyPoints ? geminiResult.keyPoints.map((p: string) => `- ${p}`).join('\n') : ''}`;
+
+                    return NextResponse.json({
+                        success: true,
+                        data: {
+                            raw: geminiResult,
+                            formatted: formatted,
+                            recommendation: ''
+                        }
+                    });
+                }
             }
         }
 
