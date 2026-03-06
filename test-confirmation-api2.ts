@@ -2,7 +2,7 @@ const fs = require('fs');
 
 async function run() {
     console.log("Starting analysis...");
-    const url = "https://www.modetour.com/package/104409383?MLoc=99&Pnum=104409383&Sno=C117876&ANO=81440&thru=crs";
+    const url = "https://www.modetour.com/package/105374205?MLoc=99&Pnum=105374205&ANO=81440&sno=C117876&thru=crs";
 
     try {
         const res = await fetch('http://localhost:3000/api/crawl-analyze', {
