@@ -6,7 +6,6 @@ const headers = {
     'accept': 'application/json'
 };
 
-const proxyDetailUrl = `https://app.scrapingbee.com/api/v1/?api_key=${sbKey}&url=${encodeURIComponent(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`)}&render_js=false&forward_headers=true`;
 const proxyPointsUrl = `https://app.scrapingbee.com/api/v1/?api_key=${sbKey}&url=${encodeURIComponent(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}`)}&render_js=false&forward_headers=true`;
 
 const proxyHeaders = {
@@ -17,21 +16,23 @@ const proxyHeaders = {
 
 async function testProxy() {
     try {
-        const [resDetail, resPoints] = await Promise.all([
-            fetch(proxyDetailUrl, { headers: proxyHeaders }),
-            fetch(proxyPointsUrl, { headers: proxyHeaders }),
-        ]);
-        const dataDetail = await resDetail.json();
-
-        console.log("dataDetail.isOK:", dataDetail.isOK);
-        if (dataDetail.isOK) {
-            console.log("Title:", dataDetail.result.productName);
-            console.log("Price:", dataDetail.result.priceAdult);
+        const pResPoints = await fetch(proxyPointsUrl, { headers: proxyHeaders });
+        const text = await pResPoints.text();
+        console.log("Points API Response Length:", text.length);
+        console.log("- Status:", pResPoints.status);
+        if (text.length < 500) {
+            console.log("Text:", text);
         } else {
-            console.log("Error in dataDetail");
+            console.log("Starts with:", text.substring(0, 100));
         }
+
+        let parsed = JSON.parse(text);
+        if (typeof parsed === "string") parsed = JSON.parse(parsed);
+
+        console.log("- Parsed Success, isOK:", parsed.isOK);
+
     } catch (e) {
-        console.error("Error:", e);
+        console.error("Caught Error:", e);
     }
 }
 testProxy();
