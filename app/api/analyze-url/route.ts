@@ -9,11 +9,11 @@ export async function POST(request: NextRequest) {
     console.log('[API] Analyze URL Request Received');
     try {
         const body = await request.json();
-        const { url, urls, text, nextData, texts, nextDatas, preAnalyzedData } = body;
+        const { url, urls, text, nextData, texts, nextDatas, preAnalyzedData, source } = body;
 
         // 단일 URL
         if (url && !urls) {
-            return await analyzeSingleUrl(url, text, nextData, body.html);
+            return await analyzeSingleUrl(url, source, text, nextData, body.html);
         }
 
         // 다중 URL (미리 분석된 데이터가 있는 경우 - Edge API 경유)
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 }
 
-async function analyzeSingleUrl(url: string, text?: string, nextData?: string, html?: string) {
+async function analyzeSingleUrl(url: string, source: string | undefined, text?: string, nextData?: string, html?: string) {
     // URL 유효성 검사
     try {
         new URL(url);
@@ -59,7 +59,7 @@ async function analyzeSingleUrl(url: string, text?: string, nextData?: string, h
     } else if (html) {
         // [호환 모드] HTML 분석
         console.log('[API] 2단계(호환) 모드: 전달된 HTML 분석 시작');
-        const fullText = htmlToText(html);
+        const fullText = htmlToText(html, url);
 
         let parsedNextData: string | undefined = undefined;
         const startIdx = html.indexOf('<script id="__NEXT_DATA__"');
@@ -74,7 +74,7 @@ async function analyzeSingleUrl(url: string, text?: string, nextData?: string, h
     } else {
         // [1단계 모드] 직접 크롤링
         console.log('[API] 1단계 모드: 직접 크롤링 시작');
-        productInfo = await crawlTravelProduct(url);
+        productInfo = await crawlTravelProduct(url, source);
     }
 
     if (!productInfo) {
@@ -127,7 +127,7 @@ async function analyzeMultipleUrls(urls: string[], texts?: (string | null)[], ne
                 info = await analyzeForConfirmation(input.text, input.url, input.nextData || undefined);
             } else if (input.html) {
                 console.log(`[API] Multi-Analyze [${index + 1}] 호환 모드`);
-                const fullText = htmlToText(input.html);
+                const fullText = htmlToText(input.html, input.url);
                 let nextData: string | undefined = undefined;
                 const startIdx = input.html.indexOf('<script id="__NEXT_DATA__"');
                 if (startIdx !== -1) {

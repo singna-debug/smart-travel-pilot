@@ -941,11 +941,12 @@ function fallbackParse(text: string): DetailedProductInfo {
     return { title: '상품명 추출 실패', destination: '', price: '가격 문의', departureDate: '', departureAirport: '', duration: '', airline: '', hotel: '', url: '', features: [], courses: [], specialOffers: [], inclusions: [], exclusions: [], itinerary: [], keyPoints: [], hashtags: '', hasNoOption: false, hasFreeSchedule: false };
 }
 
-export async function crawlTravelProduct(url: string): Promise<DetailedProductInfo> {
+export async function crawlTravelProduct(url: string, source?: string): Promise<DetailedProductInfo> {
     console.log(`[Crawler] 분석 시작: ${url}`);
 
     // [Fast-Path] 모두투어 전용 네이티브 API 연동 (딜레이 없음)
-    if (url.includes('modetour.com')) {
+    // [Notice] 확정서 탭(confirmation)은 상세 정보가 필요하므로 Fast Path 제외
+    if (url.includes('modetour.com') && source !== 'confirmation') {
         console.log('[Crawler] ModeTour URL 감지 -> 네이티브 API 우선 시도');
         const sbKey = process.env.SCRAPINGBEE_API_KEY || undefined;
         const native = await fetchModeTourNative(url, sbKey);
