@@ -758,8 +758,8 @@ export async function POST(request: NextRequest) {
                 result.cancellationPolicy = nativeData.cancellationPolicy;
             }
 
-            // 상품 포인트: 네이티브 데이터 항상 우선 (AI가 일반 조건 텍스트를 가져오는 문제 방지)
-            if (nativeData.keyPoints && nativeData.keyPoints.length > 0) {
+            // 상품 포인트: AI가 추출한 개조식 포인트를 우선하되, 없으면 네이티브 데이터 사용
+            if ((!result.keyPoints || result.keyPoints.length === 0 || isPlaceholder(result.keyPoints)) && nativeData.keyPoints && nativeData.keyPoints.length > 0) {
                 result.keyPoints = nativeData.keyPoints;
             }
 
@@ -788,8 +788,8 @@ export async function POST(request: NextRequest) {
                     result.cancellationPolicy = nativeData.cancellationPolicy;
                 }
 
-                // 상품 포인트: 네이티브 데이터 항상 우선
-                if (nativeData.keyPoints && nativeData.keyPoints.length > 0) {
+                // 상품 포인트: AI 추출 결과 개조식 포맷 최우선
+                if ((!result.keyPoints || result.keyPoints.length === 0 || isPlaceholder(result.keyPoints)) && nativeData.keyPoints && nativeData.keyPoints.length > 0) {
                     result.keyPoints = nativeData.keyPoints;
                 }
                 if (isPlaceholder(result.itinerary) && nativeData.itinerary && nativeData.itinerary.length > 0) {

@@ -1227,8 +1227,8 @@ export async function crawlTravelProduct(url: string, source?: string): Promise<
             const richContext = `[NATIVE_DATA_START]\n${JSON.stringify(native)}\n[NATIVE_DATA_END]\n\n${native.description || ''}`;
             const aiResult = await analyzeWithGemini(richContext, url);
             if (aiResult) {
-                // 네이티브 데이터와 AI 요약 결과를 병합 (네이티브에서 이미 고품질 서술형 포인트를 추출했으므로 네이티브 우선)
-                const finalKeyPoints = (native.keyPoints && native.keyPoints.length > 0) ? native.keyPoints : (aiResult.keyPoints || []);
+                // 네이티브 데이터를 AI가 개조식으로 요약한 결과를 최우선으로 사용
+                const finalKeyPoints = (aiResult.keyPoints && aiResult.keyPoints.length > 0) ? aiResult.keyPoints : (native.keyPoints || []);
                 return refineData({ ...native, keyPoints: finalKeyPoints }, richContext, url);
             }
             return refineData(native, `TARGET_TITLE: "${native.title}"\nTARGET_PRICE: "${native.price}"\nTARGET_DURATION: "${native.duration}"\nTARGET_AIRLINE: "${native.airline}"\nTARGET_DEPARTURE_AIRPORT: "${native.departureAirport}"\nTARGET_DEPARTURE_DATE: "${native.departureDate}"\n`, url);
