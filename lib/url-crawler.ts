@@ -734,7 +734,7 @@ ${nextData ? `--- [중요: NEXT_JS_DATA (JSON 데이터 참조용)] ---\n${nextD
   "airline": "METADATA 섹션의 TARGET_AIRLINE을 최우선으로 사용하세요. 없으면 항공사(티웨이, 제주항공 등) 추출.",
   "duration": "METADATA 섹션의 TARGET_DURATION 값을 최우선으로 사용하세요. 없으면 'X박 Y일' 패턴을 찾으세요.",
   "departureAirport": "METADATA 섹션의 TARGET_DEPARTURE_AIRPORT를 최우선으로 사용하세요. 없으면 텍스트에서 '인천', '부산', '대구' 등 출발지 추출.",
-  "keyPoints": ["상품의 핵심 포인트 또는 특전내용을 위주로 최대 4개 요약 (각 포인트는 30-40자 내외로 상세하고 매력적으로 기술)"],
+  "keyPoints": ["상품 포인트 요약 ('~입니다', '~합니다' 등의 서술어 절대 금지. 반드시 명사형으로 끝나는 짧은 개조식 구문 작성. 예: '특급호텔에서 전일정 숙박', '노쇼핑 일정으로 편안한 여행')"],
   "exclusions": ["불포함 사항 요약"]
 }
 
@@ -989,7 +989,7 @@ export async function analyzeForConfirmation(text: string, url: string, nextData
     prompt += '  ],\n';
     prompt += '  "inclusions": ["포함사항 전체 목록"],\n';
     prompt += '  "exclusions": ["불포함사항 전체 목록"],\n';
-    prompt += '    "keyPoints": ["상품의 핵심 포인트 또는 특전내용을 위주로 최대 4개 요약 (각 포인트는 30-40자 내외로 상세하고 매력적으로 기술)"],\n';
+    prompt += '    "keyPoints": ["상품 포인트 요약 (\'~입니다\', \'~합니다\' 등의 서술어 절대 금지. 반드시 명사형으로 끝나는 짧은 개조식 구문 작성. 예: \'특급호텔에서 전일정 숙박\', \'노쇼핑 일정으로 편안한 여행\')"],\n';
     prompt += '  "specialOffers": ["특전/혜택"],\n';
     prompt += '  "features": ["상품 특징"],\n';
     prompt += '  "courses": ["주요 관광 코스"],\n';
@@ -1414,7 +1414,10 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
         inclusions: refined.inclusions || [],
         exclusions: refined.exclusions || [],
         itinerary: refined.itinerary || [],
-        keyPoints: (refined.keyPoints || []).slice(0, 4).map((p: string) => p.substring(0, 45)),
+        keyPoints: (refined.keyPoints || []).slice(0, 4).map((p: string) => {
+            let cleaned = p.replace(/((웹문서|다\.|입니다|합니다|해요|요|제공|포함|가능)[.\s]*)+$/gi, '').trim();
+            return cleaned.substring(0, 50);
+        }),
         hashtags: refined.hashtags || '',
         hasNoOption: (refined.features || []).includes('노옵션'),
         hasFreeSchedule: (refined.features || []).includes('자유일정포함'),
