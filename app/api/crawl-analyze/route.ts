@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const preferredRegion = 'icn1';
 export const runtime = 'nodejs';
 
-const VERSION = "2026-03-10-V4"; // 배포 확인용 버전 코드
+const VERSION = "2026-03-12-V5"; // 배포 확인용 버전 코드
 
 
 // ── htmlToText (Edge 호환 및 지능형 프루닝) ──
@@ -806,7 +806,7 @@ export async function POST(request: NextRequest) {
             ? `[${result.title}]\n\n* 가격 : ${result.price}\n* 지역 : ${result.destination}\n* 출도착 : ${departureText}\n* 기간 : ${result.duration}\n\n[상품 포인트]\n${(result.keyPoints || result.specialOffers || []).map((p: string) => `- ${p}`).join('\n')}`
             : `[${result.title}]\n\n* 출발일 : ${result.departureDate || '-'}\n* 출발공항 : ${result.departureAirport || '-'}\n* 항공 : ${result.airline || '-'}\n* 지역 : ${result.destination || '-'}\n* 기간 : ${result.duration || '-'}\n* 가격 : ${result.price}\n\n[상품 포인트]\n${(result.keyPoints || result.specialOffers || []).map((p: string) => `- ${p}`).join('\n')}`;
 
-        return NextResponse.json({ success: true, data: { raw: result, formatted } });
+        return NextResponse.json({ success: true, data: { raw: result, formatted: formatted + " [V5]" } });
     } catch (error: any) {
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
