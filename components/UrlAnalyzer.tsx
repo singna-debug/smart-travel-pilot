@@ -809,6 +809,25 @@ export default function UrlAnalyzer() {
 
                         <div className="product-info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '16px' }}>
                             <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
+                                <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>📅 출발일</span>
+                                <span className="info-value" style={{ color: '#ffffff', fontWeight: '600' }}>{singleResult.raw.departureDate || '날짜 미정'}</span>
+                            </div>
+                            <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
+                                <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>✈️ 출발공항</span>
+                                <span className="info-value" style={{ color: '#ffffff', fontWeight: '600' }}>
+                                    {singleResult.raw.departureAirport}
+                                    {singleResult.raw.airline && <span style={{ fontSize: '0.9rem', color: '#cbd5e1', display: 'block', marginTop: '4px' }}>({singleResult.raw.airline})</span>}
+                                </span>
+                            </div>
+                            <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
+                                <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>🌏 지역</span>
+                                <span className="info-value" style={{ color: '#ffffff', fontWeight: '600' }}>{singleResult.raw.destination}</span>
+                            </div>
+                            <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
+                                <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>⏳ 기간</span>
+                                <span className="info-value" style={{ color: '#ffffff', fontWeight: '600' }}>{singleResult.raw.duration || '기간 미정'}</span>
+                            </div>
+                            <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px', gridColumn: 'span 2' }}>
                                 <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>💰 가격</span>
                                 <span className="info-value price" style={{ color: '#38bdf8', fontWeight: '800', fontSize: '1.2rem' }}>
                                     {singleResult.raw.price ? (
@@ -820,25 +839,6 @@ export default function UrlAnalyzer() {
                                         })()
                                     ) : '가격 정보 없음'}
                                 </span>
-                            </div>
-                            <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
-                                <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>🌏 지역</span>
-                                <span className="info-value" style={{ color: '#ffffff', fontWeight: '600' }}>{singleResult.raw.destination}</span>
-                            </div>
-                            <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
-                                <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>✈️ 출발공항</span>
-                                <span className="info-value" style={{ color: '#ffffff', fontWeight: '600' }}>
-                                    {singleResult.raw.departureAirport}
-                                    {singleResult.raw.airline && <span style={{ fontSize: '0.9rem', color: '#cbd5e1', display: 'block', marginTop: '4px' }}>({singleResult.raw.airline})</span>}
-                                </span>
-                            </div>
-                            <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
-                                <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>📅 출발일</span>
-                                <span className="info-value" style={{ color: '#ffffff', fontWeight: '600' }}>{singleResult.raw.departureDate || '날짜 미정'}</span>
-                            </div>
-                            <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
-                                <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>⏳ 기간</span>
-                                <span className="info-value" style={{ color: '#ffffff', fontWeight: '600' }}>{singleResult.raw.duration || '기간 미정'}</span>
                             </div>
                         </div>
 
