@@ -1,6 +1,7 @@
 
 import * as iconv from 'iconv-lite';
 import type { DetailedProductInfo } from '../types';
+import { scrapeWithBrowser } from '@/lib/browser-crawler';
 
 /**
  * URL 크롤링 및 상품 정보 파싱 (서버 사이드 전용)
@@ -21,7 +22,7 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 async function quickFetch(url: string, retries = 2): Promise<{ html: string; title: string }> {
     try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 10000); // 10초 타임아웃
+        const timeout = setTimeout(() => controller.abort(), 12000); // 12초 타임아웃으로 약간 연장
 
         const response = await fetch(url, {
             headers: {
@@ -37,22 +38,30 @@ async function quickFetch(url: string, retries = 2): Promise<{ html: string; tit
         }
 
         const buffer = await response.arrayBuffer();
-        const decoder = new TextDecoder('utf-8');
-        let text = decoder.decode(buffer);
+        const contentType = response.headers.get('content-type') || '';
 
-        console.log(`[QuickFetch] Url: ${url}, Status: ${response.status}, Length: ${text.length}`);
-
-        // EUC-KR 감지 및 재인코딩
-        if (text.includes('charset=euc-kr') || text.includes('charset=EUC-KR')) {
-            text = iconv.decode(Buffer.from(buffer), 'euc-kr');
+        let html = '';
+        // 1. 헤더에서 CHARSET 확인
+        if (contentType.toLowerCase().includes('euc-kr')) {
+            html = iconv.decode(Buffer.from(buffer), 'euc-kr');
+        } else {
+            // 2. 일단 UTF-8로 디코딩 후 메타 태그 재확인
+            const tempText = new TextDecoder('utf-8').decode(buffer);
+            if (tempText.includes('charset=euc-kr') || tempText.includes('charset=EUC-KR') || tempText.includes('CP949')) {
+                html = iconv.decode(Buffer.from(buffer), 'euc-kr');
+            } else {
+                html = tempText;
+            }
         }
+
+        console.log(`[QuickFetch] Url: ${url}, Status: ${response.status}, Length: ${html.length}`);
 
         // 간단한 타이틀 추출
         let title = '';
-        const titleMatch = text.match(/<title[^>]*>(.*?)<\/title>/i);
+        const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
         if (titleMatch) title = titleMatch[1].trim();
 
-        return { html: text, title };
+        return { html, title };
 
     } catch (error) {
         if (retries > 0) {
@@ -64,7 +73,7 @@ async function quickFetch(url: string, retries = 2): Promise<{ html: string; tit
     }
 }
 
-async function fetchModeTourNative(url: string, sbKey?: string): Promise<any> {
+async function fetchModeTourNative(url: string, sbKey?: string): Promise<DetailedProductInfo | null> {
     const productNoMatch = url.match(/package\/(\d+)/i) || url.match(/Pnum=(\d+)/i);
     if (!productNoMatch) return null;
     const productNo = productNoMatch[1];
@@ -77,55 +86,34 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<any> {
 
     let dataDetail: any = null;
     let dataPoints: any = null;
+    let dataSchedule: any = null;
+    let dataHotel: any = null;
 
     try {
-        console.log(`[ModeTour Native] Fetching product info for: ${productNo} with 4s timeout (Direct)`);
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-        const [resDetail, resPoints] = await Promise.all([
-            fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`, { headers, signal: controller.signal }),
-            fetch(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}`, { headers, signal: controller.signal })
+        console.log(`[ModeTour Native] Fetching for ${productNo}`);
+        const [resDetail, resPoints, resSchedule, resHotel] = await Promise.all([
+            fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`, { headers }),
+            fetch(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}`, { headers }),
+            fetch(`https://b2c-api.modetour.com/Package/GetScheduleList?productNo=${productNo}`, { headers }),
+            fetch(`https://b2c-api.modetour.com/Package/GetHotelList?productNo=${productNo}`, { headers })
         ]);
 
-        dataDetail = await resDetail.json();
-        dataPoints = await resPoints.json();
-        clearTimeout(timeoutId);
-    } catch (e: any) {
-        console.warn(`[ModeTour Native] Direct fetch failed or blocked: ${e.message}. Attempting Proxy API...`);
-        // Proxy Fallback
-        if (sbKey) {
-            try {
-                const proxyDetailUrl = `https://app.scrapingbee.com/api/v1/?api_key=${sbKey}&url=${encodeURIComponent(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`)}&render_js=false&forward_headers=true`;
-                const proxyPointsUrl = `https://app.scrapingbee.com/api/v1/?api_key=${sbKey}&url=${encodeURIComponent(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}`)}&render_js=false&forward_headers=true`;
+        if (resDetail.ok) dataDetail = await resDetail.json();
+        if (resPoints.ok) dataPoints = await resPoints.json();
+        if (resSchedule.ok) dataSchedule = await resSchedule.json();
+        if (resHotel.ok) dataHotel = await resHotel.json();
 
-                const proxyHeaders = {
-                    'Spb-modewebapireqheader': headers.modewebapireqheader,
-                    'Spb-referer': headers.referer,
-                    'Spb-accept': headers.accept
-                };
-
-                const [pResDetail, pResPoints] = await Promise.all([
-                    fetch(proxyDetailUrl, { headers: proxyHeaders }),
-                    fetch(proxyPointsUrl, { headers: proxyHeaders })
-                ]);
-
-                dataDetail = await pResDetail.json();
-                dataPoints = await pResPoints.json();
-
-                console.log(`[ModeTour Native] Proxy API fetch successful!`);
-            } catch (proxyError: any) {
-                console.error(`[ModeTour Native] Proxy API fetch also failed: ${proxyError.message}`);
-                return null;
-            }
-        } else {
-            console.error('[ModeTour Native] No ScrapingBee key provided for fallback.');
-            return null;
+        if (!dataDetail?.result) {
+            const resSimple = await fetch(`https://b2c-api.modetour.com/Package/GetProductSimpleDetail?productNo=${productNo}`, { headers });
+            if (resSimple.ok) dataDetail = await resSimple.json();
         }
+    } catch (e: any) {
+        console.warn(`[ModeTour Native] Fetch error: ${e.message}`);
     }
 
-    if (dataDetail && dataDetail.isOK && dataDetail.result) {
+    if (dataDetail?.isOK && dataDetail.result) {
         const d = dataDetail.result;
+        console.log(`[ModeTour Native] Processing: ${d.productName || d.prd_nm}`);
 
         // 1. Title 정제
         let cleanTitle = d.productName || '';
@@ -143,47 +131,246 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<any> {
             if (days > 1) duration = `${days - 1}박${duration}`;
         }
 
-        // --- 4. 상품 포인트 추출 (사이트 실제 데이터 기반 - 고속) ---
+        // --- 4. 상품 포인트 추출 (서술형 혜택 문장) ---
         let keyPoints: string[] = [];
 
-        // A. 제목 특전 (괄호 안 내용)
-        if (cleanTitle.includes('(')) {
+        // travelRecommendNote 등 상세 정보 (Gemini 요약용 + 포인트 추출용)
+        const moreInfoText = [
+            d.travelRecommendNote,
+            d.specialEventNote,
+            d.generalBonusNote,
+        ].filter(Boolean).join('\n\n');
+
+        // 4.1. [특전] 태그가 있는 라인 최우선 추출 (스페셜 혜택 탭 내용)
+        if (moreInfoText) {
+            const rawText = moreInfoText.replace(/<[^>]+>/g, '');
+            
+            // [특전] 태그 라인 최우선 (스페셜 혜택 탭 내용)
+            const specialLines = rawText.split('\n')
+                .filter((l: string) => l.includes('[특전]') || l.includes('【특전】'))
+                .map((l: string) => l.replace(/\[특전\]|【특전】/g, '').replace(/^[\s■\*\-]+/, '').trim())
+                .filter((l: string) => {
+                    if (l.length < 5 || l.length > 60) return false;
+                    // 조건부/안내성 텍스트 필터링
+                    if (l.includes('대상자') || l.includes('유효기간') || l.includes('여권') || l.includes('등록 필요')) return false;
+                    if (l.includes('입국 카드') || l.includes('MDAC') || l.includes('비자') || l.includes('보험')) return false;
+                    if (l.includes('방문하는 모든') || l.includes('이내 등록')) return false;
+                    if (l.includes('불포함') || l.includes('포함 사항')) return false;
+                    return true;
+                });
+            keyPoints.push(...specialLines);
+
+            // 4.2. ■섹션■ 구분을 파싱하여 관광/숙박/식사 핵심 추출
+            const sections = rawText.split(/■[^■]+■/);
+            const sectionHeaders = rawText.match(/■([^■]+)■/g) || [];
+            
+            for (let i = 0; i < sectionHeaders.length && keyPoints.length < 7; i++) {
+                const header = sectionHeaders[i].replace(/■/g, '').trim();
+                const content = sections[i + 1] || '';
+                
+                if (header.includes('관광') || header.includes('관광지')) {
+                    const places = content.split('\n')
+                        .map((l: string) => l.replace(/^[\s\*\-\d\.]+/, '').trim())
+                        .filter((l: string) => l.length > 3 && !l.startsWith('#'));
+                    if (places.length > 0) {
+                        const placeNames = places.slice(0, 3)
+                            .map((p: string) => p.split(/[:：]/)[0].trim())
+                            .filter((p: string) => p.length > 2 && p.length < 15);
+                        if (placeNames.length > 0 && !keyPoints.some(kp => kp.includes('명소'))) {
+                            keyPoints.push(`${placeNames.join(', ')} 등 주요 명소 방문`);
+                        }
+                    }
+                } else if (header.includes('숙박') && !keyPoints.some(kp => kp.includes('호텔') || kp.includes('숙박'))) {
+                    const hotelLines = content.split('\n')
+                        .map((l: string) => l.replace(/^[\s\*\-]+/, '').trim())
+                        .filter((l: string) => l.length > 5);
+                    if (hotelLines.length > 0) {
+                        let h = hotelLines[0];
+                        if (h.includes('특급') || h.includes('5성')) h = '특급호텔에서 전일정 편안한 숙박';
+                        else if (h.includes('리조트')) h = '리조트 숙박';
+                        else if (h.includes('월드체인')) h = '월드체인 호텔 숙박';
+                        else if (h.length > 25) h = h.substring(0, 25).trim() + ' 숙박';
+                        if (h.length > 3) keyPoints.push(h);
+                    }
+                } else if (header.includes('식사') && !keyPoints.some(kp => kp.includes('식사') || kp.includes('석식'))) {
+                    const mealLines = content.split('\n')
+                        .map((l: string) => l.replace(/^[\s\*\-]+/, '').trim())
+                        .filter((l: string) => l.length > 3 && !l.startsWith('#'));
+                    if (mealLines.some((m: string) => m.includes('무제한'))) {
+                        keyPoints.push('호텔 식사 및 음료 무제한 제공');
+                    } else if (mealLines.length > 0) {
+                        keyPoints.push(`식사 ${mealLines.length}회 포함`);
+                    }
+                }
+            }
+            
+            // 4.3. 섹션 구분이 없는 경우 일반 라인에서 추출
+            if (keyPoints.length === 0) {
+                const lines = rawText.split('\n')
+                    .map((l: string) => l.replace(/^[\s■\*\-\d\.]+/, '').replace(/■+$/g, '').trim())
+                    .filter((l: string) => {
+                        if (l.length < 5 || l.length > 50) return false;
+                        const cl = l.replace(/■/g, '').trim();
+                        if (!cl || cl.startsWith('#')) return false;
+                        if (/^(스페셜혜택|관광|숙박|식사|차량|기타|특전|혜택)\s*$/i.test(cl)) return false;
+                        if (cl.includes('행사 인원') || cl.includes('인솔자 배정')) return false;
+                        if (cl.includes('대상자') || cl.includes('유효기간') || cl.includes('여권') || cl.includes('등록 필요')) return false;
+                        if (cl.includes('입국 카드') || l.includes('MDAC') || l.includes('비자') || l.includes('보험')) return false;
+                        if (cl.includes('방문하는 모든') || l.includes('이내 등록')) return false;
+                        return true;
+                    });
+                for (const line of lines) {
+                    if (keyPoints.length >= 7) break;
+                    if (line.includes(':') || line.includes('：')) {
+                        const [place] = line.split(/[:：]/);
+                        if (place.trim().length > 2 && place.trim().length < 20) {
+                            keyPoints.push(`${place.trim()} 관광`);
+                        }
+                    } else {
+                        let desc = line;
+                        if (/온천호텔\d+박/.test(desc)) desc = '전 일정 온천호텔 숙박';
+                        else if (/호텔석식\d+회/.test(desc)) desc = `호텔 석식 ${desc.match(/\d+/)?.[0] || ''}회 제공`;
+                        else if (/현지식\d+회/.test(desc)) desc = `현지 특식 ${desc.match(/\d+/)?.[0] || ''}회 포함`;
+                        keyPoints.push(desc.replace(/\s+/g, ' ').trim());
+                    }
+                }
+            }
+        }
+
+        // 4.4. GetProductKeyPointInfo에서 specialBenefits/sightseeings 추출 (있을 때만)
+        if (dataPoints?.isOK && dataPoints.result) {
+            const r = dataPoints.result;
+            const tabSections = [r.specialBenefits, r.sightseeings, r.hotels, r.meals].filter(Boolean);
+            for (const section of tabSections) {
+                if (Array.isArray(section)) {
+                    for (const item of section) {
+                        if (keyPoints.length >= 7) break;
+                        const title = (item.title || item.name || '').replace(/\[특전\]/g, '').trim();
+                        if (title.length > 3 && !keyPoints.includes(title)) {
+                            keyPoints.push(title);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4.5. 타이틀 괄호 안 키워드 → 서술형 보충 (기존 포인트가 부족할 때)
+        if (cleanTitle.includes('(') && keyPoints.length < 4) {
             const inner = cleanTitle.substring(cleanTitle.lastIndexOf('(') + 1, cleanTitle.lastIndexOf(')'));
             const parts = inner.split(/[+\n,]/).filter((s: string) => s.trim().length > 1);
-            parts.forEach((p: string) => {
-                let point = p.trim();
-                if (point.includes('온천')) point = '전 일정 엄선된 온천 숙박';
-                if (point.includes('식사') || point.includes('석식')) point = '지역 특식이 포함된 식사 제공';
-                if (point.includes('특전')) point = `${point} 포함`;
-                keyPoints.push(point);
+            for (const p of parts) {
+                if (keyPoints.length >= 7) break;
+                const pt = p.trim();
+                if (pt.includes('온천호텔') && !keyPoints.some(kp => kp.includes('온천'))) keyPoints.push('전 일정 온천호텔 숙박');
+                else if (pt.includes('석식') && pt.includes('무제한') && !keyPoints.some(kp => kp.includes('무제한'))) keyPoints.push('호텔 석식 및 음료 무제한 제공');
+                else if (pt.includes('석식') && !keyPoints.some(kp => kp.includes('석식'))) keyPoints.push('호텔 석식 포함');
+                else if (pt.includes('무제한') && !keyPoints.some(kp => kp.includes('무제한'))) keyPoints.push('술/음료 무제한 제공');
+            }
+        }
+
+        // 4.6. 상품 속성 자동 추가
+        if (d.isConfirmed || cleanTitle.includes('출발확정') || cleanTitle.includes('[출발확정]')) {
+            keyPoints.unshift('출발 확정 상품');
+        }
+        if (d.isNoShopping || cleanTitle.includes('노쇼핑') || moreInfoText.includes('노쇼핑')) {
+            keyPoints.push('노쇼핑 일정으로 편안한 여행');
+        }
+        if (d.isNoOption || cleanTitle.includes('노옵션') || moreInfoText.includes('노옵션')) {
+            keyPoints.push('노옵션 자유로운 일정');
+        }
+
+
+        // (호텔 포인트는 hotelInfo 정의 후 추가 - 아래 참조)
+
+        // travelRecommendNote 등 상세 정보를 description으로 전달 (Gemini 요약용)
+        const moreInfo = [
+            d.travelRecommendNote,
+            d.specialEventNote,
+            d.generalBonusNote,
+            d.groupBriefKeyword
+        ].filter(Boolean).join('\n\n');
+
+        // --- 5. 일정(Itinerary) 매핑 ---
+        let itinerary: any[] = [];
+        if (dataSchedule?.isOK && Array.isArray(dataSchedule.result)) {
+            const rawItems = dataSchedule.result;
+            // Day별로 그룹화
+            const daysMap = new Map<number, any>();
+            rawItems.forEach((item: any) => {
+                const day = item.itiDays || 1;
+                if (!daysMap.has(day)) {
+                    daysMap.set(day, {
+                        day: `${day}일차`,
+                        title: item.itiPlaceName || `Day ${day}`,
+                        activities: [],
+                        meals: { breakfast: '제공', lunch: '제공', dinner: '제공' }
+                    });
+                }
+                const dayObj = daysMap.get(day);
+
+                // 장소명 및 요약 설명 추가
+                if (item.itiPlaceName) {
+                    dayObj.activities.push({
+                        time: item.itiTime || '',
+                        location: item.itiPlaceName,
+                        description: (item.itiSummaryDes || '') + (item.itiDetailDes ? ' ' + item.itiDetailDes : '')
+                    });
+                }
+
+                // 식사 정보 매핑 (보통 itiSummaryDes 등에 식사 키워드가 있을 수 있음)
+                // 하지만 모두투어 API는 보통 식사 데이터가 따로 있는 경우가 많음.
+                // 일단 간단하게 activities에 포함됨.
             });
+            itinerary = Array.from(daysMap.values()).sort((a, b) => a.day - b.day);
         }
 
-        // B. Site KeyPointInfo (사이트의 핵심 포인트 영역 데이터 그대로 사용)
-        if (dataPoints && dataPoints.isOK && Array.isArray(dataPoints.result)) {
-            const sitePoints = dataPoints.result
-                .filter((p: any) => p.title && p.title.length > 2 && !p.title.includes('이미지'))
-                .map((p: any) => p.title.trim());
-            keyPoints = [...keyPoints, ...sitePoints];
+        // --- 6. 호텔(Hotel) 정보 매핑 ---
+        let hotelInfo = '';
+        if (dataHotel?.isOK && Array.isArray(dataHotel.result)) {
+            // 첫 번째 호텔 혹은 대표 호텔 추출
+            const firstDayHotel = dataHotel.result[0];
+            if (firstDayHotel?.listHotelPlaceData?.[0]) {
+                const h = firstDayHotel.listHotelPlaceData[0];
+                hotelInfo = `${h.placeNameK || h.itiPlaceName} (${h.address || ''})`;
+            }
         }
 
-        // C. 추천 노트/특징 결합
-        if (d.groupBriefKeyword) {
-            const keywords = d.groupBriefKeyword.split('#').filter(Boolean).map((k: string) => k.trim());
-            keyPoints = [...keyPoints, ...keywords];
+        // 4.4. 호텔 정보에서 포인트 추출 (hotelInfo가 정의된 후)
+        if (hotelInfo && !keyPoints.some(kp => kp.includes('호텔') || kp.includes('숙박'))) {
+            const hotelName = hotelInfo.split('(')[0].trim();
+            if (hotelName.length > 3) {
+                keyPoints.push(`${hotelName} 숙박`);
+            }
         }
 
-        // D. 방문 도시 기반 포인트
-        if (d.visitCities && d.visitCities.length > 0) {
-            keyPoints.push(`${d.visitCities.join(', ')} 관광 일정`);
+        // 중복 제거 및 최대 7개 제한 (refineData에서 4개로 최종 자르기)
+        // 4.6. 최종 문장 정제 및 해시태그 보충
+        keyPoints = keyPoints.map(p => 
+            p.trim()
+             .replace(/^["'\[【]+|["'\]】]+$/g, '')
+             .replace(/^[\s■\*\-]+/, '')
+             .replace(/[\.\!\?]+$/g, '')
+             .replace(/\s*입니다$/, '')
+             .replace(/다$/, '')
+             .trim()
+        ).filter(p => p.length > 5);
+
+        // 포인트가 부족하면 해시태그에서 보충
+        if (keyPoints.length < 4 && d.groupBriefKeyword) {
+            const tags = d.groupBriefKeyword.split('#')
+                .map((s: string) => s.trim())
+                .filter((s: string) => s.length > 1 && s.length < 15);
+            for (const tag of tags) {
+                if (keyPoints.length >= 4) break;
+                if (!keyPoints.some(kp => kp.includes(tag))) {
+                    const tagPoint = tag.includes('관광') || tag.includes('투어') ? `${tag} 포함` : `${tag} 관광`;
+                    keyPoints.push(tagPoint);
+                }
+            }
         }
 
-        // 중복 제거 및 퀄리티 정리
-        keyPoints = Array.from(new Set(keyPoints))
-            .filter(p => p.length > 2 && p.length < 40)
-            .slice(0, 8);
+        keyPoints = Array.from(new Set(keyPoints)).slice(0, 4);
 
-        // 가격 콤마 포맷팅
         const rawPrice = String(d.sellingPriceAdultTotalAmount || '');
         const formattedPrice = rawPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
@@ -192,14 +379,30 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<any> {
             title: cleanTitle,
             destination: destination,
             price: formattedPrice,
-            departureDate: d.departureDate,
-            airline: d.transportName || '',
+            departureDate: d.departureDate || d.start_dt || d.departure_dt || '',
+            returnDate: d.arrivalDate || d.end_dt || d.arrival_dt || '',
+            departureAirport: d.departureCityName || d.departureCity || '인천',
+            airline: d.transportName || d.carrier_nm || '',
             duration: duration,
-            departureAirport: d.departureCityName || '',
-            keyPoints: keyPoints,
+            flightCode: d.transportInfo || d.flight_no || d.carrier_no || '',
+            departureTime: d.startTime || d.depTm || d.dep_tm || d.strTm || d.str_tm || '',
+            arrivalTime: d.endTime || d.arrTm || d.arr_tm || d.endTm || d.end_tm || '',
+            returnDepartureTime: d.returnStartTime || d.returnDepTm || d.return_dep_tm || '',
+            returnArrivalTime: d.returnEndTime || d.returnArrTm || d.return_arr_tm || '',
+            hotel: hotelInfo,
+            itinerary: itinerary,
+            inclusions: d.includedNote ? [d.includedNote.replace(/<[^>]+>/g, ' ').trim()] : [],
             exclusions: d.unincludedNote ? [d.unincludedNote.replace(/<[^>]+>/g, ' ').trim()] : [],
-            url: url
-        };
+            url: url,
+            features: [],
+            courses: [],
+            specialOffers: [],
+            keyPoints: keyPoints,
+            hashtags: '',
+            hasNoOption: false,
+            hasFreeSchedule: false,
+            description: moreInfo // 추가: Gemini 요약용 상세 정보
+        } as DetailedProductInfo;
     }
     return null;
 }
@@ -295,6 +498,7 @@ export function htmlToText(html: string, url: string): string {
     let targetAirline = '';
     let targetDepartureAirport = '';
     let targetDepartureDate = '';
+    let targetDescription = '';
 
     // [강력 보완] NEXT_DATA (ModeTour 등 SPA 프레임워크 렌더링 데이터) 직접 파싱
     const startIdx = html.indexOf('<script id="__NEXT_DATA__"');
@@ -310,7 +514,7 @@ export function htmlToText(html: string, url: string): string {
                 const targetProductNo = urlProductNoMatch ? urlProductNoMatch[1] : '';
 
                 // 동적 재귀 탐색 (API 응답구조가 브라우저/서버에 따라 달라지는 것에 대응)
-                function extractVal(obj: any, key: string, targetId?: string): any {
+                const extractVal = (obj: any, key: string, targetId?: string): any => {
                     if (!obj || typeof obj !== 'object') return null;
 
                     // 1. 만약 특정 ID를 찾는 중이라면, 해당 노드가 그 ID를 직접 가졌는지 확인
@@ -338,17 +542,17 @@ export function htmlToText(html: string, url: string): string {
                         }
                     }
                     return highestVal;
-                }
+                };
 
                 // [강력 보완] ID 기반 추출 시도 후 실패 시 ID 없이 전역 시도 (백업)
-                function extractValRobust(obj: any, key: string, targetId?: string): any {
+                const extractValRobust = (obj: any, key: string, targetId?: string): any => {
                     let res = extractVal(obj, key, targetId);
                     if (!res && targetId) {
                         // ID 매칭 없이 전체 트리에서 첫 번째로 발견되는 유효값 추출
                         res = extractVal(obj, key);
                     }
                     return res;
-                }
+                };
 
                 const nextPrice = extractValRobust(nextDataObj, 'sellingPriceAdultTotalAmount', targetProductNo)
                     || extractValRobust(nextDataObj, 'productPrice_Adult', targetProductNo)
@@ -388,6 +592,11 @@ export function htmlToText(html: string, url: string): string {
                     || extractValRobust(nextDataObj, 'productName', targetProductNo)
                     || extractValRobust(nextDataObj, 'title', targetProductNo);
                 if (nextTitle) targetTitle = String(nextTitle);
+                
+                const nextDesc = extractValRobust(nextDataObj, 'travelRecommendNote', targetProductNo)
+                    || extractValRobust(nextDataObj, 'description', targetProductNo)
+                    || extractValRobust(nextDataObj, 'moreInfo', targetProductNo);
+                if (nextDesc) targetDescription = String(nextDesc);
 
             } catch (e) {
                 console.error('[Crawler] __NEXT_DATA__ 파싱 오류:', e);
@@ -491,6 +700,7 @@ TARGET_DURATION: "${targetDuration}"
 TARGET_AIRLINE: "${targetAirline}"
 TARGET_DEPARTURE_AIRPORT: "${targetDepartureAirport}"
 TARGET_DEPARTURE_DATE: "${targetDepartureDate}"
+TARGET_DESCRIPTION: "${targetDescription}"
 ==== TARGET METADATA END ====`;
 
     return `${metadataBlock}
@@ -524,7 +734,7 @@ ${nextData ? `--- [중요: NEXT_JS_DATA (JSON 데이터 참조용)] ---\n${nextD
   "airline": "METADATA 섹션의 TARGET_AIRLINE을 최우선으로 사용하세요. 없으면 항공사(티웨이, 제주항공 등) 추출.",
   "duration": "METADATA 섹션의 TARGET_DURATION 값을 최우선으로 사용하세요. 없으면 'X박 Y일' 패턴을 찾으세요.",
   "departureAirport": "METADATA 섹션의 TARGET_DEPARTURE_AIRPORT를 최우선으로 사용하세요. 없으면 텍스트에서 '인천', '부산', '대구' 등 출발지 추출.",
-  "keyPoints": ["상품의 핵심 특징 5~7개 요약"],
+  "keyPoints": ["상품의 핵심 포인트 또는 특전내용을 위주로 최대 4개 요약 (각 포인트는 30-40자 내외로 상세하고 매력적으로 기술)"],
   "exclusions": ["불포함 사항 요약"]
 }
 
@@ -536,16 +746,34 @@ ${text.substring(0, 30000)}`;
         fs.writeFileSync('debug-gemini-prompt.txt', prompt, 'utf-8');
         // ---------------------
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1 } })
-        });
+        const tryModel = async (mName: string) => {
+            console.log(`[Gemini] Trying model: ${mName}`);
+            // Retry with v1 API if v1beta fails for quota
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${mName}:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1 } })
+            });
+            const data = await response.json();
+            if (data.error) {
+                console.warn(`[Gemini] Model ${mName} error: ${data.error.message}`);
+                return { error: data.error };
+            }
+            return data;
+        };
 
-        const data = await response.json();
-        if (!data.candidates || !data.candidates[0]?.content?.parts[0]?.text) {
-            console.error('[Gemini] AI 응답에서 텍스트를 찾을 수 없거나 에러가 발생했습니다:', JSON.stringify(data).substring(0, 500));
-            console.log('[Fallback] AI 할당량 초과 또는 에러로 인해 정규식 분석 모드로 전환합니다.');
+        let data = await tryModel(modelName);
+        if (data.error?.code === 429 || data.error?.status === 'RESOURCE_EXHAUSTED') {
+            console.log('[Gemini] Flash model exhausted, trying 1.5-flash...');
+            data = await tryModel('gemini-1.5-flash');
+        }
+        if (data.error?.code === 429 || data.error?.status === 'RESOURCE_EXHAUSTED') {
+            console.log('[Gemini] 1.5-flash exhausted, trying 1.5-pro...');
+            data = await tryModel('gemini-1.5-pro');
+        }
+
+        if (data.error || !data.candidates || !data.candidates[0]?.content?.parts[0]?.text) {
+            console.error('[Gemini] All models failed or no text');
             return analyzeWithRegex(text, url);
         }
 
@@ -587,7 +815,7 @@ ${text.substring(0, 30000)}`;
             return fallback;
         }
     } catch (e: any) {
-        console.error('[Gemini] 네트워크/시스템 오류 (Rate Limit 등):', e.message);
+        console.error('[Gemini] 네트워크/시스템 오류 (Rate Limit 등):', e);
         console.log('[Fallback] 정규식을 이용한 자체 분석 모드로 전환합니다.');
         return analyzeWithRegex(text, url);
     }
@@ -658,7 +886,7 @@ export async function analyzeForConfirmation(text: string, url: string, nextData
         try {
             const dataObj = JSON.parse(nextData);
             console.log('[Debug] dataObj keys:', Object.keys(dataObj));
-            function findValues(obj: any, keyMap: string[], results: string[] = []): string[] {
+            const findValues = (obj: any, keyMap: string[], results: string[] = []): string[] => {
                 if (!obj || typeof obj !== 'object') return results;
                 for (const k in obj) {
                     if (keyMap.includes(k.toLowerCase()) && typeof obj[k] === 'string') {
@@ -668,7 +896,7 @@ export async function analyzeForConfirmation(text: string, url: string, nextData
                     findValues(obj[k], keyMap, results);
                 }
                 return results;
-            }
+            };
             const inc = findValues(dataObj, ['includednote', 'incldcn', 'inclddetailcdnm']);
             const exc = findValues(dataObj, ['notincludednote', 'notincldcn', 'notinclddetailcdnm']);
             preExtractedInclusions = inc.join('\n\n');
@@ -686,128 +914,160 @@ export async function analyzeForConfirmation(text: string, url: string, nextData
     const safeText = text.replace(/`/g, "'").substring(0, 40000);
     const safeNextData = nextData ? nextData.replace(/`/g, "'").substring(0, 40000) : '';
 
-    try {
-        console.log('[Gemini] 확정서용 종합 분석 시작...');
+    console.log('[Gemini] 확정서용 종합 분석 시작...');
 
-        // 프롬프트를 문자열 연결 방식으로 구성 (템플릿 리터럴 파싱 오류 방지)
-        let prompt = '당신은 여행 상품 웹페이지 전문 분석가입니다.\n';
-        prompt += '아래 여행 상품 페이지의 전체 내용을 분석하여, 모바일 여행 확정서에 필요한 모든 정보를 빠짐없이 추출하세요.\n\n';
-        prompt += 'URL: ' + url + '\n\n';
+    // 프롬프트를 문자열 연결 방식으로 구성 (템플릿 리터럴 파싱 오류 방지)
+    let prompt = '당신은 여행 상품 웹페이지 전문 분석가입니다.\n';
+    prompt += '아래 여행 상품 페이지의 전체 내용을 분석하여, 모바일 여행 확정서에 필요한 모든 정보를 빠짐없이 추출하세요.\n\n';
+    prompt += 'URL: ' + url + '\n\n';
 
-        if (preExtractedInclusions || preExtractedExclusions) {
-            prompt += '--- [시스템 사전 추출 정보] ---\n';
-            prompt += '포함사항 원문: ' + preExtractedInclusions + '\n';
-            prompt += '불포함사항 원문: ' + preExtractedExclusions + '\n';
-            prompt += '----------------------------------\n';
-        }
-        if (safeNextData) {
-            prompt += '--- [NEXT_JS_DATA] ---\n' + safeNextData + '\n';
-        }
-        prompt += '--- [페이지 전체 내용] ---\n';
-        prompt += safeText + '\n';
-        prompt += '--- [끝] ---\n\n';
+    if (preExtractedInclusions || preExtractedExclusions) {
+        prompt += '--- [시스템 사전 추출 정보] ---\n';
+        prompt += '포함사항 원문: ' + preExtractedInclusions + '\n';
+        prompt += '불포함사항 원문: ' + preExtractedExclusions + '\n';
+        prompt += '----------------------------------\n';
+    }
+    if (safeNextData) {
+        prompt += '--- [NEXT_JS_DATA] ---\n' + safeNextData + '\n';
+    }
+    prompt += '--- [페이지 전체 내용] ---\n';
+    prompt += safeText + '\n';
+    prompt += '--- [끝] ---\n\n';
 
-        prompt += '아래 JSON 형식으로 반환하세요. 페이지에 정보가 없으면 빈 문자열이나 빈 배열로 두세요.\n\n';
-        prompt += '{\n';
-        prompt += '  "title": "상품명 전체",\n';
-        prompt += '  "destination": "목적지 (국가+도시)",\n';
-        prompt += '  "price": "1인 기준 가격 (숫자만)",\n';
-        prompt += '  "departureDate": "출발일 (YYYY-MM-DD 또는 원본 텍스트)",\n';
-        prompt += '  "returnDate": "귀국일 (YYYY-MM-DD 또는 원본 텍스트)",\n';
-        prompt += '  "duration": "여행기간 (예: 3박5일)",\n';
-        prompt += '  "airline": "항공사명",\n';
-        prompt += '  "flightCode": "편명 (예: 7C201)",\n';
-        prompt += '  "departureAirport": "출발공항",\n';
-        prompt += '  "departureTime": "가는편 출발 시각 (HH:MM) - 본문에서 반드시 찾아주세요",\n';
-        prompt += '  "arrivalTime": "가는편 도착 시각 (HH:MM)",\n';
-        prompt += '  "returnDepartureTime": "오는편 출발 시각 (HH:MM)",\n';
-        prompt += '  "returnArrivalTime": "오는편 도착 시각 (HH:MM)",\n';
-        prompt += '  "hotel": {\n';
-        prompt += '    "name": "대표 호텔명 (한글 명칭)",\n';
-        prompt += '    "englishName": "호텔 영문명",\n';
-        prompt += '    "address": "호텔 상세 주소",\n';
-        prompt += '    "checkIn": "체크인 시간 (예: 14:00)",\n';
-        prompt += '    "checkOut": "체크아웃 시간 (예: 12:00)",\n';
-        prompt += '    "images": ["호텔 이미지 URL 배열"],\n';
-        prompt += '    "amenities": ["시설 및 서비스 목록"]\n';
-        prompt += '  },\n';
-        prompt += '  "itinerary": [\n';
-        prompt += '    {\n';
-        prompt += '      "day": "1일차",\n';
-        prompt += '      "date": "날짜",\n';
-        prompt += '      "title": "일정 제목 (예: 인천 출발 - 다낭 도착)",\n';
-        prompt += '      "activities": ["해당 일자의 핵심 활동 내용 3-5개 요약"],\n';
-        prompt += '      "transportation": "비행기 편명, 출발시간, 도착시간, 소요시간 (예: TW041 21:25 출발 -> 00:40 도착 (5시간 15분 소요))",\n';
-        prompt += '      "hotelDetails": {\n';
-        prompt += '        "name": "해당일 숙박 호텔 한글명",\n';
-        prompt += '        "address": "호텔 상세 주소",\n';
-        prompt += '        "images": ["호텔 이미지 URL 배열"],\n';
-        prompt += '        "amenities": ["시설 목록"],\n';
-        prompt += '        "checkIn": "체크인 시간",\n';
-        prompt += '        "checkOut": "체크아웃 시간"\n';
-        prompt += '      },\n';
-        prompt += '      "meals": {\n';
-        prompt += '        "breakfast": "포함 또는 불포함 또는 기내식",\n';
-        prompt += '        "lunch": "포함 또는 불포함 또는 메뉴명",\n';
-        prompt += '        "dinner": "포함 또는 불포함 또는 메뉴명"\n';
-        prompt += '      },\n';
-        prompt += '      "hotel": "해당일 숙박 호텔 한글명",\n';
-        prompt += '      "dailyNotices": ["해당 일자의 특별 유의사항"]\n';
-        prompt += '    }\n';
-        prompt += '  ],\n';
-        prompt += '  "inclusions": ["포함사항 전체 목록"],\n';
-        prompt += '  "exclusions": ["불포함사항 전체 목록"],\n';
-        prompt += '  "keyPoints": ["상품 핵심 포인트 5~7개"],\n';
-        prompt += '  "specialOffers": ["특전/혜택"],\n';
-        prompt += '  "features": ["상품 특징"],\n';
-        prompt += '  "courses": ["주요 관광 코스"],\n';
-        prompt += '  "notices": ["전체 유의사항"],\n';
-        prompt += '  "cancellationPolicy": "취소/환불 규정",\n';
-        prompt += '  "checklist": ["준비물 목록"]\n';
-        prompt += '}\n\n';
-        prompt += '중요 지침:\n';
-        prompt += '1. 이모지 사용 절대 금지: 모든 텍스트에서 이모지를 절대 사용하지 마세요. 깔끔한 텍스트만 사용합니다.\n';
-        prompt += '2. 일정표 상세화: 각 일차별 activities는 페이지 내용을 꼼꼼히 읽고 중요한 방문지, 체험 내용을 3-5문장으로 요약하여 작성하세요. 정보가 아코디언(펼치기) 메뉴나 상세 일정 탭 안에 숨어있을 수 있으니 텍스트 전체를 꼼꼼히 분석하세요.\n';
-        prompt += '3. 항공 정보 필수상 추출: 본문에서 "항공사", "편명", "출발시간", "도착시간"을 반드시 찾아내세요. 시간은 반드시 HH:MM 형식(예: 09:15, 23:40)으로 추출해야 합니다. 본문 어딘가에 숫자로 된 시각 정보가 반드시 있으니 절대 놓치지 마세요.\n';
-        prompt += '4. 교통 정보 상세화: transportation 필드에 편명, 출발/도착 시각, 총 소요 시간을 예시 형식에 맞춰 정확히 기입하세요.\n';
-        prompt += '5. 호텔 정보: 호텔 이름은 가능한 한글 정식 명칭을 사용하세요.\n';
-        prompt += '6. JSON만 반환하세요. 다른 설명 텍스트는 제외하세요.';
+    prompt += '[중요 지침]\n';
+    prompt += '1. 모든 일정(itinerary)의 activities는 본문을 꼼꼼히 읽고 상세히 기술하세요.\n';
+    prompt += '2. 호텔 정보(name, address)를 반드시 찾아내세요. 본문에 없으면 절대 "미정" 대신 [NEXT_JS_DATA] 데이터를 최우선으로 사용하세요.\n';
+    prompt += '3. 비행기 편명과 시간을 반드시 찾아내세요. 시간은 "09:00" 처럼 HH:MM 형식으로 적으세요.\n';
+    prompt += '4. 귀국날짜(returnDate)를 정확히 계산하여 YYYY-MM-DD 형식으로 적으세요.\n';
+    prompt += '5. JSON 이외의 텍스트는 출력하지 마세요. 답변에는 "연도-월-일"과 같은 가이드 문구를 넣지 말고 실제 데이터만 넣으세요.\n\n';
+    prompt += '{\n';
+    prompt += '  "title": "상품명 전체",\n';
+    prompt += '  "destination": "목적지 (국가+도시)",\n';
+    prompt += '  "price": "1인 기준 가격 (숫자만)",\n';
+    prompt += '  "departureDate": "출발일 (YYYY-MM-DD 또는 원본 텍스트)",\n';
+    prompt += '  "returnDate": "귀국일 (YYYY-MM-DD 또는 원본 텍스트)",\n';
+    prompt += '  "duration": "여행기간 (예: 3박5일)",\n';
+    prompt += '  "airline": "항공사명",\n';
+    prompt += '  "flightCode": "편명 (예: 7C201)",\n';
+    prompt += '  "departureAirport": "출발공항",\n';
+    prompt += '  "departureTime": "가는편 출발 시각 (HH:MM) - 본문에서 반드시 찾아주세요",\n';
+    prompt += '  "arrivalTime": "가는편 도착 시각 (HH:MM)",\n';
+    prompt += '  "returnDepartureTime": "오는편 출발 시각 (HH:MM)",\n';
+    prompt += '  "returnArrivalTime": "오는편 도착 시각 (HH:MM)",\n';
+    prompt += '  "hotel": {\n';
+    prompt += '    "name": "대표 호텔명 (한글 명칭)",\n';
+    prompt += '    "englishName": "호텔 영문명",\n';
+    prompt += '    "address": "호텔 상세 주소",\n';
+    prompt += '    "checkIn": "체크인 시간 (예: 14:00)",\n';
+    prompt += '    "checkOut": "체크아웃 시간 (예: 12:00)",\n';
+    prompt += '    "images": ["호텔 이미지 URL 배열"],\n';
+    prompt += '    "amenities": ["시설 및 서비스 목록"]\n';
+    prompt += '  },\n';
+    prompt += '  "itinerary": [\n';
+    prompt += '    {\n';
+    prompt += '      "day": "1일차",\n';
+    prompt += '      "date": "날짜",\n';
+    prompt += '      "title": "일정 제목 (예: 인천 출발 - 다낭 도착)",\n';
+    prompt += '      "activities": ["해당 일자의 핵심 활동 내용 3-5개 요약"],\n';
+    prompt += '      "transportation": "비행기 편명, 출발시간, 도착시간, 소요시간 (예: TW041 21:25 출발 -> 00:40 도착 (5시간 15분 소요))",\n';
+    prompt += '      "hotelDetails": {\n';
+    prompt += '        "name": "해당일 숙박 호텔 한글명",\n';
+    prompt += '        "address": "호텔 상세 주소",\n';
+    prompt += '        "images": ["호텔 이미지 URL 배열"],\n';
+    prompt += '        "amenities": ["시설 목록"],\n';
+    prompt += '        "checkIn": "체크인 시간",\n';
+    prompt += '        "checkOut": "체크아웃 시간"\n';
+    prompt += '      },\n';
+    prompt += '      "meals": {\n';
+    prompt += '        "breakfast": "포함 또는 불포함 또는 기내식",\n';
+    prompt += '        "lunch": "포함 또는 불포함 또는 메뉴명",\n';
+    prompt += '        "dinner": "포함 또는 불포함 또는 메뉴명"\n';
+    prompt += '      },\n';
+    prompt += '      "hotel": "해당일 숙박 호텔 한글명",\n';
+    prompt += '      "dailyNotices": ["해당 일자의 특별 유의사항"]\n';
+    prompt += '    }\n';
+    prompt += '  ],\n';
+    prompt += '  "inclusions": ["포함사항 전체 목록"],\n';
+    prompt += '  "exclusions": ["불포함사항 전체 목록"],\n';
+    prompt += '    "keyPoints": ["상품의 핵심 포인트 또는 특전내용을 위주로 최대 4개 요약 (각 포인트는 30-40자 내외로 상세하고 매력적으로 기술)"],\n';
+    prompt += '  "specialOffers": ["특전/혜택"],\n';
+    prompt += '  "features": ["상품 특징"],\n';
+    prompt += '  "courses": ["주요 관광 코스"],\n';
+    prompt += '  "notices": ["전체 유의사항"],\n';
+    prompt += '  "cancellationPolicy": "취소/환불 규정",\n';
+    prompt += '  "checklist": ["준비물 목록"]\n';
+    prompt += '}\n\n';
+    prompt += '중요 지침:\n';
+    prompt += '1. 이모지 사용 절대 금지: 모든 텍스트에서 이모지를 절대 사용하지 마세요. 깔끔한 텍스트만 사용합니다.\n';
+    prompt += '2. 일정표 최우선 상세화 (중요): 각 일차별(1일차, 2일차...) 상세 일정을 반드시 찾아내세요. activities는 단순히 한 줄 요약이 아니라, 방문지, 식사 장소, 이동 수단 등을 포함하여 꼼꼼하게 3-5문장으로 구체적으로 작성해야 합니다. 텍스트가 일부 깨져 있더라도 문맥을 통해 "일차", "일정", "식사" 등의 키워드를 중심으로 정보를 복원하세요.\n';
+    prompt += '3. 항공 정보 필수상 추출: 본문에서 "항공사", "편명", "출발시간", "도착시간"을 반드시 찾아내세요. 시간은 반드시 HH:MM 형식(예: 09:15, 23:40)으로 추출해야 합니다. 본문 어딘가에 숫자로 된 시각 정보가 반드시 있으니 절대 놓치지 마세요.\n';
+    prompt += '4. 교통 정보 상세화: transportation 필드에 편명, 출발/도착 시각, 총 소요 시간을 예시 형식에 맞춰 정확히 기입하세요.\n';
+    prompt += '5. 호텔 정보: 호텔 이름은 가능한 한글 정식 명칭을 사용하세요. 숙박이 없는 기내박 등의 경우 "기내박" 또는 "없음"으로 명시하세요.\n';
+    prompt += '6. JSON만 반환하세요. 다른 설명 텍스트는 제외하세요.';
 
-        const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.0-flash';
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+    const tryModel = async (mName: string) => {
+        console.log(`[Gemini-Confirm] Trying model: ${mName}`);
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { temperature: 0.1, maxOutputTokens: 8000 }
+                generationConfig: { temperature: 0.1, maxOutputTokens: 8192 }
             })
         });
-
         const data = await response.json();
+        if (data.error) {
+            console.warn(`[Gemini-Confirm] Model ${mName} error: ${data.error.message}`);
+            return { error: data.error };
+        }
+        return data;
+    };
+
+    try {
+        let data = await tryModel('gemini-1.5-pro');
+        if (data.error?.code === 429 || data.error?.status === 'RESOURCE_EXHAUSTED') {
+            data = await tryModel('gemini-1.5-flash');
+        }
+        if (data.error?.code === 429 || data.error?.status === 'RESOURCE_EXHAUSTED') {
+            data = await tryModel('gemini-2.0-flash');
+        }
+
+        if (data.error) {
+            console.error('[Gemini] All models failed:', data.error.message);
+            return null;
+        }
+
         if (!data.candidates || !data.candidates[0]?.content?.parts[0]?.text) {
-            console.error('[Gemini] 응답 형식이 올바르지 않습니다:', JSON.stringify(data));
+            console.error('[Gemini] No candidates in response');
             return null;
         }
 
         const resText = data.candidates[0].content.parts[0].text;
-        console.log('[Gemini] raw response length:', resText.length);
         const jsonStr = resText.replace(/```json\s*|\s*```/g, '').trim();
         try {
             const parsed = JSON.parse(jsonStr);
-            console.log('[Gemini] 확정서 분석 완료:', Object.keys(parsed));
+            // HTML entity cleaning for inclusions/exclusions
+            const cleanEnt = (s: any) => typeof s === 'string' ? s.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').trim() : s;
+            if (Array.isArray(parsed.inclusions)) parsed.inclusions = parsed.inclusions.map(cleanEnt);
+            if (Array.isArray(parsed.exclusions)) parsed.exclusions = parsed.exclusions.map(cleanEnt);
+
+            console.log('[Gemini] 확정서 분석 완료');
             return parsed;
         } catch (parseErr) {
-            console.error('[Gemini] JSON 파싱 실패:', jsonStr.substring(0, 500));
-            throw parseErr;
+            console.error('[Gemini] JSON 파싱 실패');
+            return null;
         }
     } catch (e: any) {
-        console.error('[Gemini] 확정서 분석 오류 상세:', e.message || e);
+        console.error('[Gemini] 확정서 분석 오류:', e.message);
         return null;
     }
 }
 
-export async function scrapeWithScrapingBee(url: string): Promise<string | null> {
-    const apiKey = process.env.SCRAPINGBEE_API_KEY?.trim();
+
+export const scrapeWithScrapingBee = async (url: string): Promise<string | null> => {
+    const rawKey = process.env.SCRAPINGBEE_API_KEY;
+    if (!rawKey) return null;
+    const apiKey = rawKey.trim();
     if (!apiKey) return null;
 
     let ssrNextData: string | undefined;
@@ -884,7 +1144,7 @@ export async function scrapeWithScrapingBee(url: string): Promise<string | null>
     return null;
 }
 
-import { scrapeWithBrowser } from '@/lib/browser-crawler';
+
 
 /**
  * 확정서 전용 크롤러 — 전체 페이지 데이터를 종합 분석
@@ -893,8 +1153,19 @@ import { scrapeWithBrowser } from '@/lib/browser-crawler';
  */
 export async function crawlForConfirmation(url: string): Promise<any> {
     console.log(`[ConfirmCrawler] 분석 시작: ${url}`);
-    const isVercel = process.env.VERCEL === '1';
 
+    // [Fast-Path] 모두투어 전용 네이티브 API 연동 (딜레이 없음, 정확도 최고)
+    if (url.includes('modetour.com')) {
+        console.log('[ConfirmCrawler] ModeTour URL 감지 -> 네이티브 API 우선 시도');
+        const native = await fetchModeTourNative(url);
+        if (native && native.itinerary && native.itinerary.length > 0) {
+            console.log('[ConfirmCrawler] ModeTour Native Data 수집 성공 -> 분석 생략');
+            return native;
+        }
+        console.log('[ConfirmCrawler] ModeTour Native API 결과가 불충분하여 일반 크롤링으로 폴백');
+    }
+
+    const isVercel = process.env.VERCEL === '1';
     let fullText: string | null = null;
     let nextData: string | undefined = undefined;
 
@@ -951,8 +1222,15 @@ export async function crawlTravelProduct(url: string, source?: string): Promise<
         const sbKey = process.env.SCRAPINGBEE_API_KEY || undefined;
         const native = await fetchModeTourNative(url, sbKey);
         if (native) {
-            console.log('[Crawler] ModeTour Native Data 수집 성공 -> 즉시 반환');
-            // refineData를 통해 포맷팅 및 보정
+            console.log('[Crawler] ModeTour Native Data 수집 성공 -> Gemini 요약 보강 시작');
+            // 네이티브 정보를 바탕으로 rich text를 구성하여 Gemini에 전달하여 포인트 요약만 요청하거나 전체 재분석
+            const richContext = `[NATIVE_DATA_START]\n${JSON.stringify(native)}\n[NATIVE_DATA_END]\n\n${native.description || ''}`;
+            const aiResult = await analyzeWithGemini(richContext, url);
+            if (aiResult) {
+                // 네이티브 데이터와 AI 요약 결과를 병합 (네이티브에서 이미 고품질 서술형 포인트를 추출했으므로 네이티브 우선)
+                const finalKeyPoints = (native.keyPoints && native.keyPoints.length > 0) ? native.keyPoints : (aiResult.keyPoints || []);
+                return refineData({ ...native, keyPoints: finalKeyPoints }, richContext, url);
+            }
             return refineData(native, `TARGET_TITLE: "${native.title}"\nTARGET_PRICE: "${native.price}"\nTARGET_DURATION: "${native.duration}"\nTARGET_AIRLINE: "${native.airline}"\nTARGET_DEPARTURE_AIRPORT: "${native.departureAirport}"\nTARGET_DEPARTURE_DATE: "${native.departureDate}"\n`, url);
         }
         console.log('[Crawler] ModeTour Native API 실패하여 일반 크롤링으로 폴백');
@@ -1136,7 +1414,7 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
         inclusions: refined.inclusions || [],
         exclusions: refined.exclusions || [],
         itinerary: refined.itinerary || [],
-        keyPoints: refined.keyPoints || [],
+        keyPoints: (refined.keyPoints || []).slice(0, 4).map((p: string) => p.substring(0, 45)),
         hashtags: refined.hashtags || '',
         hasNoOption: (refined.features || []).includes('노옵션'),
         hasFreeSchedule: (refined.features || []).includes('자유일정포함'),
@@ -1155,12 +1433,13 @@ export function formatProductInfo(info: DetailedProductInfo, index?: number): st
     const digits = p.replace(/[^0-9]/g, '');
     let r = index !== undefined ? `${index + 1}. ${info.title}\n\n` : `${info.title}\n\n`;
     const priceWithComma = String(info.price || '').replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    r += `* 가격 : ${priceWithComma}원\n`;
+
     r += `* 출발일 : ${info.departureDate || '-'}\n`;
     r += `* 출발공항 : ${info.departureAirport || '인천'}\n`;
     r += `* 항공 : ${info.airline || '-'}\n`;
     r += `* 지역 : ${info.destination || '-'}\n`;
     r += `* 기간 : ${info.duration || '-'}\n`;
+    r += `* 가격 : ${priceWithComma}원\n`;
 
     if (info.keyPoints && info.keyPoints.length > 0) {
         r += `\n[상품 포인트]\n`;
@@ -1191,12 +1470,12 @@ export function compareProducts(products: DetailedProductInfo[]): string {
     // 상세 상품별 분석 (사용자 요청에 따라 테이블/AI어드바이스 제거)
     products.forEach((p, i) => {
         comparison += `${i + 1}. ${p.title}\n\n`;
-        comparison += `* 가격 : ${p.price || '정보 없음'}\n`;
         comparison += `* 출발일 : ${p.departureDate || '미정'}\n`;
         comparison += `* 출발공항 : ${p.departureAirport || '인천'}\n`;
         comparison += `* 항공 : ${p.airline || '-'}\n`;
         comparison += `* 지역 : ${p.destination || '-'}\n`;
-        comparison += `* 기간 : ${p.duration || '-'}\n\n`;
+        comparison += `* 기간 : ${p.duration || '-'}\n`;
+        comparison += `* 가격 : ${p.price || '정보 없음'}\n\n`;
 
         if (p.keyPoints && p.keyPoints.length > 0) {
             comparison += `[상품 포인트]\n`;
