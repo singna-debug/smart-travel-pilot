@@ -410,7 +410,13 @@ export default function UrlAnalyzer() {
             cleanedContent = content.split(footerTitle)[0].trim();
         }
 
-        const fullText = greeting + cleanedContent + footer;
+        // 링크 포맷 수정: [원문 일정표 열기](URL) 형식으로 변환
+        let linkFixedContent = cleanedContent;
+        if (cleanedContent.includes('[원문 일정표 열기]')) {
+             linkFixedContent = cleanedContent.replace(/\[원문 일정표 열기\]\n\((.*?)\)/g, '[원문 일정표 열기]($1)');
+        }
+
+        const fullText = greeting + linkFixedContent + footer;
         copyToClipboard(fullText);
     };
 
