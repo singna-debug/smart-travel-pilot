@@ -134,110 +134,7 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<Detaile
         // --- 4. 상품 포인트 추출 (서술형 혜택 문장) ---
         let keyPoints: string[] = [];
 
-        // travelRecommendNote 등 상세 정보 (Gemini 요약용 + 포인트 추출용)
-        const moreInfoText = [
-            d.travelRecommendNote,
-            d.specialEventNote,
-            d.generalBonusNote,
-        ].filter(Boolean).join('\n\n');
-
-        // 4.1. [특전] 태그가 있는 라인 최우선 추출 (스페셜 혜택 탭 내용)
-        if (moreInfoText) {
-            const rawText = moreInfoText.replace(/<[^>]+>/g, '');
-            
-            // [특전] 태그 라인 최우선 (스페셜 혜택 탭 내용)
-            const specialLines = rawText.split('\n')
-                .filter((l: string) => l.includes('[특전]') || l.includes('【특전】'))
-                .map((l: string) => l.replace(/\[특전\]|【특전】/g, '').replace(/^[\s■\*\-]+/, '').trim())
-                .filter((l: string) => {
-                    if (l.length < 5 || l.length > 60) return false;
-                    // 조건부/안내성 텍스트 필터링
-                    if (l.includes('대상자') || l.includes('유효기간') || l.includes('여권') || l.includes('등록 필요')) return false;
-                    if (l.includes('입국 카드') || l.includes('MDAC') || l.includes('비자') || l.includes('보험')) return false;
-                    if (l.includes('방문하는 모든') || l.includes('이내 등록')) return false;
-                    if (l.includes('불포함') || l.includes('포함 사항')) return false;
-                    return true;
-                });
-            keyPoints.push(...specialLines);
-
-            // 4.2. ■섹션■ 구분을 파싱하여 관광/숙박/식사 핵심 추출
-            const sections = rawText.split(/■[^■]+■/);
-            const sectionHeaders = rawText.match(/■([^■]+)■/g) || [];
-            
-            for (let i = 0; i < sectionHeaders.length && keyPoints.length < 7; i++) {
-                const header = sectionHeaders[i].replace(/■/g, '').trim();
-                const content = sections[i + 1] || '';
-                
-                if (header.includes('관광') || header.includes('관광지')) {
-                    const places = content.split('\n')
-                        .map((l: string) => l.replace(/^[\s\*\-\d\.]+/, '').trim())
-                        .filter((l: string) => l.length > 3 && !l.startsWith('#'));
-                    if (places.length > 0) {
-                        const placeNames = places.slice(0, 3)
-                            .map((p: string) => p.split(/[:：]/)[0].trim())
-                            .filter((p: string) => p.length > 2 && p.length < 15);
-                        if (placeNames.length > 0 && !keyPoints.some(kp => kp.includes('명소'))) {
-                            keyPoints.push(`${placeNames.join(', ')} 등 주요 명소 방문`);
-                        }
-                    }
-                } else if (header.includes('숙박') && !keyPoints.some(kp => kp.includes('호텔') || kp.includes('숙박'))) {
-                    const hotelLines = content.split('\n')
-                        .map((l: string) => l.replace(/^[\s\*\-]+/, '').trim())
-                        .filter((l: string) => l.length > 5);
-                    if (hotelLines.length > 0) {
-                        let h = hotelLines[0];
-                        if (h.includes('특급') || h.includes('5성')) h = '특급호텔에서 전일정 편안한 숙박';
-                        else if (h.includes('리조트')) h = '리조트 숙박';
-                        else if (h.includes('월드체인')) h = '월드체인 호텔 숙박';
-                        else if (h.length > 25) h = h.substring(0, 25).trim() + ' 숙박';
-                        if (h.length > 3) keyPoints.push(h);
-                    }
-                } else if (header.includes('식사') && !keyPoints.some(kp => kp.includes('식사') || kp.includes('석식'))) {
-                    const mealLines = content.split('\n')
-                        .map((l: string) => l.replace(/^[\s\*\-]+/, '').trim())
-                        .filter((l: string) => l.length > 3 && !l.startsWith('#'));
-                    if (mealLines.some((m: string) => m.includes('무제한'))) {
-                        keyPoints.push('호텔 식사 및 음료 무제한 제공');
-                    } else if (mealLines.length > 0) {
-                        keyPoints.push(`식사 ${mealLines.length}회 포함`);
-                    }
-                }
-            }
-            
-            // 4.3. 섹션 구분이 없는 경우 일반 라인에서 추출
-            if (keyPoints.length === 0) {
-                const lines = rawText.split('\n')
-                    .map((l: string) => l.replace(/^[\s■\*\-\d\.]+/, '').replace(/■+$/g, '').trim())
-                    .filter((l: string) => {
-                        if (l.length < 5 || l.length > 50) return false;
-                        const cl = l.replace(/■/g, '').trim();
-                        if (!cl || cl.startsWith('#')) return false;
-                        if (/^(스페셜혜택|관광|숙박|식사|차량|기타|특전|혜택)\s*$/i.test(cl)) return false;
-                        if (cl.includes('행사 인원') || cl.includes('인솔자 배정')) return false;
-                        if (cl.includes('대상자') || cl.includes('유효기간') || cl.includes('여권') || cl.includes('등록 필요')) return false;
-                        if (cl.includes('입국 카드') || l.includes('MDAC') || l.includes('비자') || l.includes('보험')) return false;
-                        if (cl.includes('방문하는 모든') || l.includes('이내 등록')) return false;
-                        return true;
-                    });
-                for (const line of lines) {
-                    if (keyPoints.length >= 7) break;
-                    if (line.includes(':') || line.includes('：')) {
-                        const [place] = line.split(/[:：]/);
-                        if (place.trim().length > 2 && place.trim().length < 20) {
-                            keyPoints.push(`${place.trim()} 관광`);
-                        }
-                    } else {
-                        let desc = line;
-                        if (/온천호텔\d+박/.test(desc)) desc = '전 일정 온천호텔 숙박';
-                        else if (/호텔석식\d+회/.test(desc)) desc = `호텔 석식 ${desc.match(/\d+/)?.[0] || ''}회 제공`;
-                        else if (/현지식\d+회/.test(desc)) desc = `현지 특식 ${desc.match(/\d+/)?.[0] || ''}회 포함`;
-                        keyPoints.push(desc.replace(/\s+/g, ' ').trim());
-                    }
-                }
-            }
-        }
-
-        // 4.4. GetProductKeyPointInfo에서 specialBenefits/sightseeings 추출 (있을 때만)
+        // 4.1. GetProductKeyPointInfo에서 specialBenefits/sightseeings 우선 추출 (가장 고품질)
         if (dataPoints?.isOK && dataPoints.result) {
             const r = dataPoints.result;
             const tabSections = [r.specialBenefits, r.sightseeings, r.hotels, r.meals].filter(Boolean);
@@ -249,6 +146,102 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<Detaile
                         if (title.length > 3 && !keyPoints.includes(title)) {
                             keyPoints.push(title);
                         }
+                    }
+                }
+            }
+        }
+
+        // travelRecommendNote 등 상세 정보
+        const moreInfoText = [
+            d.travelRecommendNote,
+            d.specialEventNote,
+            d.generalBonusNote,
+        ].filter(Boolean).join('\n\n');
+
+        // 4.2. [특전] 태그가 있는 라인 또는 타이틀 추출
+        if (moreInfoText) {
+            const rawText = moreInfoText.replace(/<[^>]+>/g, '');
+            
+            const specialLines = rawText.split('\n')
+                .filter((l: string) => l.includes('[특전]') || l.includes('【특전】'))
+                .map((l: string) => l.replace(/\[특전\]|【특전】/g, '').replace(/^[\s■\*\-]+/, '').trim())
+                .filter((l: string) => {
+                    if (l.length < 5 || l.length > 60) return false;
+                    if (l.includes('대상자') || l.includes('유효기간') || l.includes('여권') || l.includes('등록 필요')) return false;
+                    if (l.includes('입국 카드') || l.includes('MDAC') || l.includes('비자') || l.includes('보험')) return false;
+                    if (l.includes('방문하는 모든') || l.includes('이내 등록')) return false;
+                    if (l.includes('불포함') || l.includes('포함 사항')) return false;
+                    return true;
+                });
+            
+            specialLines.forEach(l => {
+                if (keyPoints.length < 7 && !keyPoints.includes(l)) keyPoints.push(l);
+            });
+
+            // 4.3. ■섹션■ 구분을 파싱하여 관광/숙박/식사 핵심 추출
+            const sections = rawText.split(/■[^■]+■/);
+            const sectionHeaders = rawText.match(/■([^■]+)■/g) || [];
+            
+            for (let i = 0; i < sectionHeaders.length && keyPoints.length < 7; i++) {
+                const header = sectionHeaders[i].replace(/■/g, '').trim();
+                const content = sections[i + 1] || '';
+                if (header.includes('관광') || header.includes('관광지')) {
+                    const places = content.split('\n').map((l: string) => l.replace(/^[\s\*\-\d\.]+/, '').trim()).filter((l: string) => l.length > 3 && !l.startsWith('#'));
+                    if (places.length > 0) {
+                        const placeNames = places.slice(0, 3).map((p: string) => p.split(/[:：]/)[0].trim()).filter((p: string) => p.length > 2 && p.length < 15);
+                        if (placeNames.length > 0 && !keyPoints.some(kp => kp.includes('명소'))) {
+                            keyPoints.push(`${placeNames.join(', ')} 등 주요 명소 방문`);
+                        }
+                    }
+                } else if (header.includes('숙박') && !keyPoints.some(kp => kp.includes('호텔') || kp.includes('숙박'))) {
+                    const hotelLines = content.split('\n').map((l: string) => l.replace(/^[\s\*\-]+/, '').trim()).filter((l: string) => l.length > 5);
+                    if (hotelLines.length > 0) {
+                        let h = hotelLines[0];
+                        if (h.includes('특급') || h.includes('5성')) h = '특급호텔에서 전일정 편안한 숙박';
+                        else if (h.includes('리조트')) h = '리조트 숙박';
+                        else if (h.includes('월드체인')) h = '월드체인 호텔 숙박';
+                        else if (h.length > 25) h = h.substring(0, 25).trim() + ' 숙박';
+                        if (h.length > 3) keyPoints.push(h);
+                    }
+                } else if (header.includes('식사') && !keyPoints.some(kp => kp.includes('식사') || kp.includes('석식'))) {
+                    const mealLines = content.split('\n').map((l: string) => l.replace(/^[\s\*\-]+/, '').trim()).filter((l: string) => l.length > 3 && !l.startsWith('#'));
+                    if (mealLines.some((m: string) => m.includes('무제한'))) keyPoints.push('호텔 식사 및 음료 무제한 제공');
+                    else if (mealLines.length > 0) keyPoints.push(`식사 ${mealLines.length}회 포함`);
+                }
+            }
+            
+            // 4.4. 섹션 구분이 없는 경우 일반 라인에서 추출 (garbage fallback)
+            if (keyPoints.length < 3) {
+                const lines = rawText.split('\n')
+                    .map((l: string) => l.replace(/^[\s■\*\-\d\.]+/, '').replace(/■+$/g, '').trim())
+                    .filter((l: string) => {
+                        if (l.length < 5 || l.length > 50) return false;
+                        const cl = l.replace(/■/g, '').trim();
+                        if (!cl || cl.startsWith('#')) return false;
+                        if (/^(스페셜혜택|관광|숙박|식사|차량|기타|특전|혜택)\s*$/i.test(cl)) return false;
+                        if (cl.includes('행사 인원') || cl.includes('인솔자 배정')) return false;
+                        if (cl.includes('대상자') || cl.includes('유효기간') || cl.includes('여권') || cl.includes('등록 필요')) return false;
+                        if (cl.includes('입국 카드') || l.includes('MDAC') || l.includes('비자') || l.includes('보험')) return false;
+                        if (cl.includes('방문하는 모든') || l.includes('이내 등록')) return false;
+                        // 노출 금지 단어 추가 (마케팅 문구 방지)
+                        if (cl.includes('타사비교') || cl.includes('원하시나') || cl.includes('약속 드립니') || cl.includes('일생에 단 한')) return false;
+                        return true;
+                    });
+                for (const line of lines) {
+                    if (keyPoints.length >= 7) break;
+                    if (line.includes(':') || line.includes('：')) {
+                        const [place] = line.split(/[:：]/);
+                        if (place.trim().length > 2 && place.trim().length < 20) {
+                            if (!keyPoints.includes(`${place.trim()} 관광`)) keyPoints.push(`${place.trim()} 관광`);
+                        }
+                    } else {
+                        let desc = line;
+                        if (/온천호텔\d+박/.test(desc)) desc = '전 일정 온천호텔 숙박';
+                        else if (/호텔석식\d+회/.test(desc)) desc = `호텔 석식 ${desc.match(/\d+/)?.[0] || ''}회 제공`;
+                        else if (/현지식\d+회/.test(desc)) desc = `현지 특식 ${desc.match(/\d+/)?.[0] || ''}회 포함`;
+                        
+                        const cleaned = desc.replace(/\s+/g, ' ').trim();
+                        if (!keyPoints.includes(cleaned)) keyPoints.push(cleaned);
                     }
                 }
             }
@@ -1291,8 +1284,18 @@ export async function crawlTravelProduct(url: string, source?: string): Promise<
 
 function formatDateString(dateStr: string): string {
     if (!dateStr || dateStr.trim() === '미정') return dateStr;
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr.trim())) return dateStr.trim();
-    const match = dateStr.match(/(\d{2,4})[-\.\/년]\s*(\d{1,2})[-\.\/월]\s*(\d{1,2})/);
+    const cleanDate = dateStr.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) return cleanDate;
+    
+    // YYYYMMDD 또는 YYMMDD 형식 처리
+    if (/^\d{8}$/.test(cleanDate)) {
+        return `${cleanDate.substring(0, 4)}-${cleanDate.substring(4, 6)}-${cleanDate.substring(6, 8)}`;
+    }
+    if (/^\d{6}$/.test(cleanDate)) {
+        return `20${cleanDate.substring(0, 2)}-${cleanDate.substring(2, 4)}-${cleanDate.substring(4, 6)}`;
+    }
+
+    const match = cleanDate.match(/(\d{2,4})[-\.\/년]\s*(\d{1,2})[-\.\/월]\s*(\d{1,2})/);
     if (match) {
         let year = match[1];
         if (year.length === 2) year = `20${year}`;
@@ -1431,13 +1434,13 @@ const AIRLINE_MAP: Record<string, string> = {
 };
 
 export function formatProductInfo(info: DetailedProductInfo, index?: number): string {
-    let p = String(info.price || '');
-    // 숫자로만 된 경우 '원' 붙임 (refineData에서 이미 처리되지만 안전장치)
-    const digits = p.replace(/[^0-9]/g, '');
     let r = index !== undefined ? `${index + 1}. ${info.title}\n\n` : `${info.title}\n\n`;
-    const priceWithComma = String(info.price || '').replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
+    // 가격 콤마 포맷팅 보완
+    const rawPrice = String(info.price || '').replace(/[^0-9]/g, '');
+    const priceWithComma = rawPrice ? parseInt(rawPrice, 10).toLocaleString() : '- ';
 
-    r += `* 출발일 : ${info.departureDate || '-'}\n`;
+    r += `* 출발일 : ${formatDateString(info.departureDate || '-')}\n`;
     r += `* 출발공항 : ${info.departureAirport || '인천'}\n`;
     r += `* 항공 : ${info.airline || '-'}\n`;
     r += `* 지역 : ${info.destination || '-'}\n`;
@@ -1451,7 +1454,7 @@ export function formatProductInfo(info: DetailedProductInfo, index?: number): st
         });
     }
 
-    r += `\n[원문 일정표 열기]\n(${info.url})\n\n`;
+    r += `\n[원문 일정표 열기](${info.url})\n\n`;
     r += `📌 예약 전 확인사항\n\n`;
     r += `상품가는 예약일/출발일에 따라 변동될 수 있습니다.\n`;
     r += `항공 좌석은 예약 시점에 다시 확인해야 합니다.`;
@@ -1470,15 +1473,18 @@ export function compareProducts(products: DetailedProductInfo[]): string {
 
     let comparison = "⚖️ 상품 비교 분석 결과\n\n";
 
-    // 상세 상품별 분석 (사용자 요청에 따라 테이블/AI어드바이스 제거)
+    // 상세 상품별 분석
     products.forEach((p, i) => {
+        const rawPrice = String(p.price || '').replace(/[^0-9]/g, '');
+        const priceWithComma = rawPrice ? parseInt(rawPrice, 10).toLocaleString() : '정보 없음';
+
         comparison += `${i + 1}. ${p.title}\n\n`;
-        comparison += `* 출발일 : ${p.departureDate || '미정'}\n`;
+        comparison += `* 출발일 : ${formatDateString(p.departureDate || '미정')}\n`;
         comparison += `* 출발공항 : ${p.departureAirport || '인천'}\n`;
         comparison += `* 항공 : ${p.airline || '-'}\n`;
         comparison += `* 지역 : ${p.destination || '-'}\n`;
         comparison += `* 기간 : ${p.duration || '-'}\n`;
-        comparison += `* 가격 : ${p.price || '정보 없음'}\n\n`;
+        comparison += `* 가격 : ${priceWithComma}${rawPrice ? '원' : ''}\n\n`;
 
         if (p.keyPoints && p.keyPoints.length > 0) {
             comparison += `[상품 포인트]\n`;
@@ -1488,7 +1494,7 @@ export function compareProducts(products: DetailedProductInfo[]): string {
             comparison += `\n`;
         }
 
-        comparison += `[원문 일정표 열기]\n(${p.url})\n\n`;
+        comparison += `[원문 일정표 열기](${p.url})\n\n`;
 
         if (i < products.length - 1) {
             comparison += `------------------------------------------\n\n`;
