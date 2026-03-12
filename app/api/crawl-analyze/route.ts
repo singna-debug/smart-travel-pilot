@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { formatProductInfo } from '@/lib/url-crawler';
 
 /**
  * Node.js Serverless로 변경하여 ModeTour WAF 방화벽 우회 (Edge는 차단됨)
@@ -6,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const preferredRegion = 'icn1';
 export const runtime = 'nodejs';
 
-const VERSION = "2026-03-12-V5"; // 배포 확인용 버전 코드
+const VERSION = "2026-03-13-V6"; // 배포 확인용 버전 코드
 
 
 // ── htmlToText (Edge 호환 및 지능형 프루닝) ──
@@ -666,10 +667,7 @@ export async function POST(request: NextRequest) {
                     if (nativeData.departureAirport && !result.departureAirport) result.departureAirport = nativeData.departureAirport;
                 }
 
-                const departureText = result.departureAirport ? `${result.departureAirport} (${result.airline || '-'})` : (result.airline || '-');
-                const formatted = isConfirmation
-                    ? `[${result.title}]\n\n* 가격 : ${result.price}\n* 지역 : ${result.destination}\n* 출도착 : ${departureText}\n* 기간 : ${result.duration}\n\n[상품 포인트]\n${(result.keyPoints || result.specialOffers || []).map((p: string) => `- ${p}`).join('\n')}`
-                    : `[${result.title}]\n\n* 출발일 : ${result.departureDate || '-'}\n* 출발공항 : ${result.departureAirport || '-'}\n* 항공 : ${result.airline || '-'}\n* 지역 : ${result.destination || '-'}\n* 기간 : ${result.duration || '-'}\n* 가격 : ${result.price}\n\n[상품 포인트]\n${(result.keyPoints || result.specialOffers || []).map((p: string) => `- ${p}`).join('\n')}`;
+                const formatted = formatProductInfo(result);
 
                 return NextResponse.json({ success: true, data: { raw: result, formatted } });
             }
