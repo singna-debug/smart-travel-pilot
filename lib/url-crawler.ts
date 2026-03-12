@@ -1454,7 +1454,7 @@ export function formatProductInfo(info: DetailedProductInfo, index?: number): st
         });
     }
 
-    r += `\n[원문 일정표 열기](${info.url})\n\n`;
+    r += `\n[원문 일정표 열기]\n(${info.url})\n\n`;
     r += `📌 예약 전 확인사항\n\n`;
     r += `상품가는 예약일/출발일에 따라 변동될 수 있습니다.\n`;
     r += `항공 좌석은 예약 시점에 다시 확인해야 합니다.`;
@@ -1494,7 +1494,7 @@ export function compareProducts(products: DetailedProductInfo[]): string {
             comparison += `\n`;
         }
 
-        comparison += `[원문 일정표 열기](${p.url})\n\n`;
+        comparison += `[원문 일정표 열기]\n(${p.url})\n\n`;
 
         if (i < products.length - 1) {
             comparison += `------------------------------------------\n\n`;

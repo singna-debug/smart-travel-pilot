@@ -410,11 +410,8 @@ export default function UrlAnalyzer() {
             cleanedContent = content.split(footerTitle)[0].trim();
         }
 
-        // 링크 포맷 수정: [원문 일정표 열기](URL) 형식으로 변환
-        let linkFixedContent = cleanedContent;
-        if (cleanedContent.includes('[원문 일정표 열기]')) {
-             linkFixedContent = cleanedContent.replace(/\[원문 일정표 열기\]\n\((.*?)\)/g, '[원문 일정표 열기]($1)');
-        }
+        // 링크 포맷 수정: 서버에서 이미 [원문 일정표 열기]\n(URL) 형식을 제공하므로 그대로 사용
+        const linkFixedContent = cleanedContent;
 
         const fullText = greeting + linkFixedContent + footer;
         copyToClipboard(fullText);

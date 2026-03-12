@@ -359,6 +359,7 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<any> {
             returnDepartureTime: d.returnStartTime || d.returnDepTm || d.return_dep_tm || '',
             returnArrivalTime: d.returnEndTime || d.returnArrTm || d.return_arr_tm || '',
             hotel: hotel,
+            url: url, // URL 필드 명시적 추가
             itinerary: itinerary,
             keyPoints: keyPoints,
             inclusions: d.includedNote ? [d.includedNote.replace(/<[^>]+>/g, ' ').trim()] : [],
@@ -660,6 +661,7 @@ export async function POST(request: NextRequest) {
                     console.log('[Edge] AI failed for nativeData fallback, using nativeData as raw');
                     result = { ...nativeData, url };
                 } else {
+                    result.url = url; // AI 결과에 URL 강제 주입
                     if (!result.title || result.title.includes('실패')) result.title = nativeData.title;
                     if (!result.price || result.price === '가격 문의') result.price = nativeData.price;
                     if (!result.duration) result.duration = nativeData.duration;
@@ -711,9 +713,11 @@ export async function POST(request: NextRequest) {
                 console.warn('[Edge] Deep analysis failed, falling back to general:', result?.error);
                 result = await analyze(text, url, nextData, geminiKey, { ...nativeData, ...hints });
             }
+            if (result && !result.error) result.url = url; // 분석 결과에 URL 주입
         } else {
             console.log(`[Edge] 일반 분석 시작 (Text: ${text.length})`);
             result = await analyze(text, url, nextData, geminiKey, { ...nativeData, ...hints });
+            if (result && !result.error) result.url = url; // 분석 결과에 URL 주입
         }
 
         // 5. 최종 결과 도출
@@ -724,7 +728,7 @@ export async function POST(request: NextRequest) {
                 const raw = { ...nativeData, url };
                 return NextResponse.json({
                     success: true,
-                    data: { raw, recommendation: `[네이티브] ${nativeData.title}` }
+                    data: { raw, formatted: formatProductInfo(raw) + " [V7-N]" }
                 });
             }
             return NextResponse.json({ success: false, error: result?.error || '분석 실패' });
@@ -799,12 +803,9 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        const departureText = result.departureAirport ? `${result.departureAirport} (${result.airline || '-'})` : (result.airline || '-');
-        const formatted = isConfirmation
-            ? `[${result.title}]\n\n* 가격 : ${result.price}\n* 지역 : ${result.destination}\n* 출도착 : ${departureText}\n* 기간 : ${result.duration}\n\n[상품 포인트]\n${(result.keyPoints || result.specialOffers || []).map((p: string) => `- ${p}`).join('\n')}`
-            : `[${result.title}]\n\n* 출발일 : ${result.departureDate || '-'}\n* 출발공항 : ${result.departureAirport || '-'}\n* 항공 : ${result.airline || '-'}\n* 지역 : ${result.destination || '-'}\n* 기간 : ${result.duration || '-'}\n* 가격 : ${result.price}\n\n[상품 포인트]\n${(result.keyPoints || result.specialOffers || []).map((p: string) => `- ${p}`).join('\n')}`;
+        const formatted = formatProductInfo(result);
 
-        return NextResponse.json({ success: true, data: { raw: result, formatted: formatted + " [V5]" } });
+        return NextResponse.json({ success: true, data: { raw: result, formatted: formatted + " [V7]" } });
     } catch (error: any) {
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
