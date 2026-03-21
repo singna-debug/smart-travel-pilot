@@ -2,15 +2,35 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { MapPin, Calendar, Users, ChevronDown, Pencil } from 'lucide-react';
+import { EditableField, InfoCell, TimelineCell } from '../../components/EditableComponents';
 
 interface ChatItem {
     id: string;
     visitorName: string;
     visitorPhone: string;
+    travelersCount: string;
+    recurringCustomer: string;
+    inquirySource: string;
     destination: string;
-    productName: string;
     departureDate: string;
+    returnDate: string;
+    duration: string;
+    productName: string;
+    productUrl: string;
+    summary: string;
     status: string;
+    source: string;
+    nextFollowup: string;
+    confirmedProduct: string;
+    confirmedDate: string;
+    prepaidDate: string;
+    noticeDate: string;
+    balanceDate: string;
+    confirmationSent: string;
+    departureNotice: string;
+    phoneNotice: string;
+    happyCall: string;
     lastMessage: string;
     lastMessageAt: string;
     messageCount: number;
@@ -19,16 +39,17 @@ interface ChatItem {
     sheetGid?: number;
 }
 
-const STATUS_OPTIONS = ['상담중', '견적제공', '예약확정', '결제완료', '상담완료', '취소/보류'];
+const STATUS_OPTIONS = ['상담중', '예약확정', '선금완료', '잔금완료', '여행완료', '취소/보류', '상담완료'];
 
-// 다크 테마 색상
+// 다크 테마 색상 (모든 상태 매핑)
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
     '상담중': { bg: '#3b82f6', text: '#fff' },
-    '견적제공': { bg: '#f59e0b', text: '#fff' },
     '예약확정': { bg: '#10b981', text: '#fff' },
-    '결제완료': { bg: '#8b5cf6', text: '#fff' },
-    '상담완료': { bg: '#6b7280', text: '#fff' },
+    '선금완료': { bg: '#8b5cf6', text: '#fff' },
+    '잔금완료': { bg: '#4f46e5', text: '#fff' },
+    '여행완료': { bg: '#0ea5e9', text: '#fff' },
     '취소/보류': { bg: '#ef4444', text: '#fff' },
+    '상담완료': { bg: '#6b7280', text: '#fff' },
 };
 
 export default function ChatsPage() {
@@ -40,13 +61,85 @@ export default function ChatsPage() {
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [updating, setUpdating] = useState<string | null>(null);
+    const [editingCustomerChatId, setEditingCustomerChatId] = useState<string | null>(null);
+    const [editingTripChatId, setEditingTripChatId] = useState<string | null>(null);
     const [deleting, setDeleting] = useState(false);
+    const [expandedId, setExpandedId] = useState<string | null>(null);
+    const [confirmModal, setConfirmModal] = useState<{ chat: ChatItem; } | null>(null);
+    const [confirmUrl, setConfirmUrl] = useState('');
+    const [confirming, setConfirming] = useState(false);
+    const [customerHistoryByPhone, setCustomerHistoryByPhone] = useState<Record<string, any[]>>({});
+    const [historyLoading, setHistoryLoading] = useState<string | null>(null);
+
+    const fetchCustomerHistory = async (chatId: string, phone: string) => {
+        if (!phone || phone === '미정' || customerHistoryByPhone[phone]) return;
+        setHistoryLoading(chatId);
+        try {
+            const res = await fetch(`/api/consultations/history?phone=${encodeURIComponent(phone)}`);
+            const data = await res.json();
+            if (data.success) {
+                setCustomerHistoryByPhone(prev => ({ ...prev, [phone]: data.data }));
+            }
+        } catch (err) {
+            console.error('History fetch error:', err);
+        } finally {
+            setHistoryLoading(null);
+        }
+    };
 
     useEffect(() => {
         fetchChats();
         const interval = setInterval(fetchChats, 30000);
         return () => clearInterval(interval);
     }, [statusFilter]);
+
+    const handleFieldUpdate = async (chatId: string, field: string, value: string) => {
+        const chat = chats.find(c => c.id === chatId);
+        if (!chat) return;
+        if (chat.sheetRowIndex === undefined) {
+            alert('구글 시트 연동 정보가 아직 확인되지 않았습니다. 잠시 후 ↻새로고침을 눌러 다시 시도해주세요.');
+            return;
+        }
+
+        // 날짜 자동 포맷팅 (예: 20260412 -> 2026-04-12)
+        const dateFields = ['departureDate', 'returnDate', 'confirmedDate', 'prepaidDate', 'noticeDate', 'balanceDate', 'confirmationSent', 'departureNotice', 'phoneNotice', 'happyCall', 'nextFollowup'];
+        let formattedValue = value;
+        if (dateFields.includes(field) && formattedValue) {
+            const cleanStr = formattedValue.trim();
+            if (/^\d{8}(\s*\(.*\))?$/.test(cleanStr)) {
+                formattedValue = cleanStr.replace(/^(\d{4})(\d{2})(\d{2})(.*)$/, '$1-$2-$3$4').trim();
+            } else if (/^\d{6}(\s*\(.*\))?$/.test(cleanStr)) {
+                formattedValue = cleanStr.replace(/^(\d{2})(\d{2})(\d{2})(.*)$/, '20$1-$2-$3$4').trim();
+            } else if (/^\d{4}\.\d{1,2}\.\d{1,2}(\s*\(.*\))?$/.test(cleanStr)) {
+                // 2026.04.12 형식 지원
+                formattedValue = cleanStr.replace(/^(\d{4})\.(\d{1,2})\.(\d{1,2})(.*)$/, (_, y, m, d, rest) => 
+                    `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}${rest}`
+                ).trim();
+            }
+        }
+
+        try {
+            const res = await fetch('/api/consultations', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    rowIndex: chat.sheetRowIndex,
+                    sheetName: chat.sheetName,
+                    field,
+                    value: formattedValue
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setChats(prev => prev.map(c => c.id === chatId ? { ...c, [field]: formattedValue } : c));
+            } else {
+                alert(`수정 실패: ${data.error}`);
+            }
+        } catch (error) {
+            console.error('Update field error:', error);
+            alert('업데이트 중 오류가 발생했습니다.');
+        }
+    };
 
     const fetchChats = async (forceRefresh = false) => {
         try {
@@ -94,6 +187,13 @@ export default function ChatsPage() {
             return;
         }
 
+        // 예약확정 선택 시 → 확정상품 URL 입력 모달 표시
+        if (newStatus === '예약확정') {
+            setConfirmModal({ chat });
+            setConfirmUrl('');
+            return;
+        }
+
         setUpdating(chat.id);
         try {
             const response = await fetch('/api/consultations', {
@@ -119,6 +219,61 @@ export default function ChatsPage() {
             alert('상태 변경 중 오류가 발생했습니다.');
         } finally {
             setUpdating(null);
+        }
+    };
+
+    const handleConfirmReservation = async () => {
+        if (!confirmModal || !confirmUrl.trim()) {
+            alert('확정상품 URL을 입력해주세요.');
+            return;
+        }
+
+        const { chat } = confirmModal;
+        setConfirming(true);
+
+        try {
+            const response = await fetch('/api/consultations/confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    rowIndex: chat.sheetRowIndex,
+                    sheetName: chat.sheetName,
+                    confirmedProductUrl: confirmUrl.trim(),
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                // 로컬 상태 업데이트
+                setChats(prev => prev.map(c =>
+                    c.id === chat.id ? {
+                        ...c,
+                        status: '예약확정',
+                        confirmedProduct: data.data.confirmedProductUrl,
+                        confirmedDate: data.data.confirmedDate,
+                        departureDate: data.data.departureDate || c.departureDate,
+                        returnDate: data.data.returnDate || c.returnDate,
+                        destination: data.data.destination || c.destination,
+                        prepaidDate: data.data.prepaidDate,
+                        noticeDate: data.data.noticeDate,
+                        balanceDate: data.data.balanceDate,
+                        confirmationSent: data.data.confirmationSent,
+                        departureNotice: data.data.departureNotice,
+                        phoneNotice: data.data.phoneNotice,
+                        happyCall: data.data.happyCall,
+                    } : c
+                ));
+                setConfirmModal(null);
+                setConfirmUrl('');
+                alert(`예약확정 완료! 출발일: ${data.data.departureDate || '미정'}, 귀국일: ${data.data.returnDate || '미정'}`);
+            } else {
+                alert('예약확정 실패: ' + data.error);
+            }
+        } catch (error) {
+            console.error('예약확정 오류:', error);
+            alert('예약확정 처리 중 오류가 발생했습니다.');
+        } finally {
+            setConfirming(false);
         }
     };
 
@@ -301,7 +456,7 @@ export default function ChatsPage() {
     return (
         <div>
             <header className="page-header">
-                <h1 className="page-title">💬 상담 목록</h1>
+                <h1 className="page-title">상담 목록</h1>
                 <p className="page-subtitle">카카오톡 채널 상담 내역을 확인하고 관리하세요</p>
             </header>
 
@@ -361,15 +516,12 @@ export default function ChatsPage() {
                 flexWrap: 'wrap'
             }}>
                 <div style={{ position: 'relative', flex: 1, minWidth: '250px' }}>
-                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }}>
-                        🔍
-                    </span>
                     <input
                         type="text"
                         placeholder="고객명, 목적지, 상품명으로 검색..."
                         style={{
                             width: '100%',
-                            padding: '10px 12px 10px 36px',
+                            padding: '10px 12px 10px 12px',
                             backgroundColor: '#111827',
                             border: '1px solid #374151',
                             borderRadius: '8px',
@@ -401,7 +553,7 @@ export default function ChatsPage() {
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                    <option value="">🔘 전체 상태</option>
+                    <option value="">전체 상태</option>
                     {STATUS_OPTIONS.map(s => (
                         <option key={s} value={s}>{s}</option>
                     ))}
@@ -413,14 +565,14 @@ export default function ChatsPage() {
                         title="최신 데이터 불러오기"
                         style={{ padding: '10px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
-                        🔄 새로고침
+                        새로고침
                     </button>
                     <button
                         className="action-button"
                         onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${process.env.NEXT_PUBLIC_SHEET_ID || ''}`, '_blank')}
                         style={{ padding: '10px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#10b981', color: 'white', border: 'none' }}
                     >
-                        📊 시트 열기
+                        시트 열기
                     </button>
                 </div>
             </div>
@@ -451,7 +603,7 @@ export default function ChatsPage() {
                             fontSize: '14px',
                         }}
                     >
-                        🗑️ 선택 삭제
+                        선택 삭제
                     </button>
                 </div>
             )}
@@ -494,116 +646,394 @@ export default function ChatsPage() {
                                 </div>
 
                                 {/* 목록 */}
-                                {filteredChats.map((chat) => (
-                                    <div
-                                        key={chat.id}
-                                        style={{
-                                            display: 'grid',
-                                            gridTemplateColumns: '40px 100px 1fr 90px 130px 90px 50px',
-                                            padding: '16px',
-                                            borderBottom: '1px solid #374151',
-                                            alignItems: 'center',
-                                            backgroundColor: selectedIds.has(chat.id) ? '#37415150' : '#111827',
-                                            transition: 'background-color 0.2s',
-                                            gap: '16px',
-                                        }}
-                                    >
-                                        {/* 체크박스 */}
-                                        <div>
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedIds.has(chat.id)}
-                                                onChange={() => toggleSelect(chat.id)}
-                                                style={{ cursor: 'pointer' }}
-                                            />
-                                        </div>
+                                {filteredChats.map((chat) => {
+                                    const isExpanded = expandedId === chat.id;
+                                    const today = new Date().toISOString().split('T')[0];
 
-                                        {/* 상담일자 */}
-                                        <div style={{ fontSize: '13px', color: '#9ca3af', fontWeight: 500 }}>
-                                            {formatDateOnly(chat.lastMessageAt)}
-                                        </div>
-
-                                        {/* 고객 정보 */}
-                                        <Link href={`/chats/${chat.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <div style={{
-                                                    width: '36px',
-                                                    height: '36px',
-                                                    borderRadius: '50%',
-                                                    backgroundColor: '#374151',
-                                                    display: 'flex',
+                                    return (
+                                        <div key={chat.id}>
+                                            <div
+                                                onClick={(e) => {
+                                                    // Don't expand if clicking on interactive elements
+                                                    const target = e.target as HTMLElement;
+                                                    if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'OPTION' || target.tagName === 'BUTTON' || target.tagName === 'A' || target.closest('a') || target.closest('select') || target.closest('button')) return;
+                                                    const newExpandedId = isExpanded ? null : chat.id;
+                                                    setExpandedId(newExpandedId);
+                                                    if (newExpandedId && chat.visitorPhone) {
+                                                        fetchCustomerHistory(chat.id, chat.visitorPhone);
+                                                    }
+                                                }}
+                                                style={{
+                                                    display: 'grid',
+                                                    gridTemplateColumns: '40px 100px 1fr 90px 130px 90px 50px',
+                                                    padding: '16px',
+                                                    borderBottom: isExpanded ? 'none' : '1px solid #374151',
                                                     alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    fontSize: '16px',
-                                                }}>
-                                                    👤
-                                                </div>
+                                                    backgroundColor: isExpanded ? 'rgba(59, 130, 246, 0.05)' : (selectedIds.has(chat.id) ? '#37415150' : '#111827'),
+                                                    transition: 'background-color 0.2s',
+                                                    gap: '16px',
+                                                    cursor: 'pointer',
+                                                    borderLeft: isExpanded ? '3px solid #3b82f6' : '3px solid transparent',
+                                                }}
+                                            >
+                                                {/* 체크박스 */}
                                                 <div>
-                                                    <div style={{ fontWeight: 500, color: '#fff', marginBottom: '2px' }}>
-                                                        {chat.visitorName}
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedIds.has(chat.id)}
+                                                        onChange={() => toggleSelect(chat.id)}
+                                                        style={{ cursor: 'pointer' }}
+                                                    />
+                                                </div>
+
+                                                {/* 상담일자 */}
+                                                <div style={{ fontSize: '13px', color: '#9ca3af', fontWeight: 500 }}>
+                                                    {formatDateOnly(chat.lastMessageAt)}
+                                                </div>
+
+                                                {/* 고객 정보 */}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <div>
+                                                        <div style={{ fontWeight: 500, color: '#fff', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                            {chat.visitorName}
+                                                            {(chat.source === '카카오톡' || !chat.source) && chat.id.startsWith('sheet-') === false && (
+                                                                <span style={{ backgroundColor: '#FEE500', color: '#000', fontSize: '10px', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>K</span>
+                                                            )}
+                                                            {chat.recurringCustomer === '재방문' && (
+                                                                <span style={{ backgroundColor: '#3b82f620', color: '#60a5fa', fontSize: '10px', padding: '1px 5px', borderRadius: '3px', fontWeight: 600 }}>재방문</span>
+                                                            )}
+                                                        </div>
+                                                        <div style={{ fontSize: '12px', color: '#9ca3af', display: 'flex', gap: '10px' }}>
+                                                            {chat.destination && (
+                                                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#60a5fa', fontWeight: 500 }}>
+                                                                    <MapPin size={12} style={{ flexShrink: 0 }} /> 
+                                                                    <span style={{ maxWidth: '180px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={chat.destination}>{chat.destination}</span>
+                                                                </span>
+                                                            )}
+                                                            {chat.departureDate && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#34d399', fontWeight: 500 }}><Calendar size={12} /> {chat.departureDate}</span>}
+                                                            {chat.travelersCount && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#f59e0b', fontWeight: 500 }}><Users size={12} /> {chat.travelersCount}명</span>}
+                                                        </div>
                                                     </div>
-                                                    <div style={{ fontSize: '12px', color: '#9ca3af', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                                        {chat.destination && <span>📍 {chat.destination}</span>}
-                                                        {chat.departureDate && <span>📅 {chat.departureDate}</span>}
-                                                    </div>
+                                                </div>
+
+                                                {/* 상태 배지 */}
+                                                <div>
+                                                    <span style={getStatusStyle(chat.status)}>
+                                                        {chat.status}
+                                                    </span>
+                                                </div>
+
+                                                {/* 상태 변경 드롭다운 */}
+                                                <div>
+                                                    <select
+                                                        value={chat.status}
+                                                        onChange={(e) => handleStatusChange(chat, e.target.value)}
+                                                        disabled={updating === chat.id}
+                                                        style={{
+                                                            padding: '6px 8px',
+                                                            borderRadius: '4px',
+                                                            border: '1px solid #374151',
+                                                            fontSize: '12px',
+                                                            cursor: 'pointer',
+                                                            backgroundColor: updating === chat.id ? '#374151' : '#1f2937',
+                                                            color: '#fff',
+                                                            width: '100%',
+                                                        }}
+                                                    >
+                                                        {STATUS_OPTIONS.map(s => (
+                                                            <option key={s} value={s}>{s}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+
+                                                {/* 최근 활동 */}
+                                                <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                                                    {formatTime(chat.lastMessageAt)}
+                                                </div>
+
+                                                {/* 시트 링크 */}
+                                                <div>
+                                                    <button
+                                                        onClick={(e) => openGoogleSheet(e, chat.sheetRowIndex, chat.sheetName, chat.sheetGid)}
+                                                        title={`Google Sheets (${chat.sheetName || '기본'})에서 보기`}
+                                                        style={{
+                                                            padding: '6px 8px',
+                                                            border: '1px solid #374151',
+                                                            borderRadius: '4px',
+                                                            backgroundColor: '#1f2937',
+                                                            cursor: 'pointer',
+                                                            color: '#9ca3af',
+                                                            fontSize: '12px',
+                                                            fontWeight: 600,
+                                                        }}
+                                                    >
+                                                        열기
+                                                    </button>
                                                 </div>
                                             </div>
-                                        </Link>
 
-                                        {/* 상태 배지 */}
-                                        <div>
-                                            <span style={getStatusStyle(chat.status)}>
-                                                {chat.status}
-                                            </span>
-                                        </div>
+                                            {/* ── Expandable Detail Panel ── */}
+                                            {isExpanded && (
+                                                <div style={{
+                                                    padding: '20px 24px',
+                                                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03))',
+                                                    borderBottom: '2px solid #3b82f6',
+                                                    borderLeft: '3px solid #3b82f6',
+                                                    animation: 'fadeSlideDown 0.2s ease-out',
+                                                }}>
+                                                    {/* Row 1: Customer + Trip Info */}
+                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                                                        {/* Customer Info Card & History */}
+                                                        <div style={{ background: '#1f2937', borderRadius: '10px', padding: '16px', border: '1px solid #374151', display: 'flex', flexDirection: 'column' }}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 0 12px 0', borderBottom: '1px solid #374151', paddingBottom: '8px' }}>
+                                                                <h4 style={{ color: '#60a5fa', fontSize: '13px', fontWeight: 700, margin: 0 }}>고객 정보</h4>
+                                                                <button 
+                                                                    onClick={(e) => { e.stopPropagation(); setEditingCustomerChatId(editingCustomerChatId === chat.id ? null : chat.id); }}
+                                                                    style={{ background: editingCustomerChatId === chat.id ? '#10b98120' : 'transparent', color: editingCustomerChatId === chat.id ? '#34d399' : '#9ca3af', border: 'none', cursor: 'pointer', fontSize: '11px', padding: '4px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                                                >
+                                                                    {editingCustomerChatId === chat.id ? '완료' : <><Pencil size={12} /> 편집</>}
+                                                                </button>
+                                                            </div>
+                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                                                                <EditableField label="고객명" value={chat.visitorName} field="visitorName" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingCustomerChatId === chat.id} />
+                                                                <EditableField label="연락처" value={chat.visitorPhone} field="visitorPhone" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingCustomerChatId === chat.id} />
+                                                                <EditableField label="총인원" value={chat.travelersCount} field="travelersCount" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingCustomerChatId === chat.id} />
+                                                                <EditableField label="재방문여부" value={chat.recurringCustomer} field="recurringCustomer" chatId={chat.id} onSave={handleFieldUpdate} options={['신규고객', '재방문', '장기미방문', '정보없음']} forceEditMode={editingCustomerChatId === chat.id} />
+                                                                <EditableField label="유입경로" value={chat.inquirySource} field="inquirySource" chatId={chat.id} onSave={handleFieldUpdate} options={['네이버 톡톡', '네이버 블로그', '네이버 카페', '카카오톡 채널', '인스타그램', '페이스북', '당근마켓', '지인소개', '기존고객', '전화문의', '기타']} forceEditMode={editingCustomerChatId === chat.id} />
+                                                                <InfoCell label="등록방식" value={chat.source || '-'} highlight={chat.source === '카카오톡' ? '#fbbf24' : '#a78bfa'} />
+                                                            </div>
 
-                                        {/* 상태 변경 드롭다운 */}
-                                        <div>
-                                            <select
-                                                value={chat.status}
-                                                onChange={(e) => handleStatusChange(chat, e.target.value)}
-                                                disabled={updating === chat.id}
-                                                style={{
-                                                    padding: '6px 8px',
-                                                    borderRadius: '4px',
-                                                    border: '1px solid #374151',
-                                                    fontSize: '12px',
-                                                    cursor: 'pointer',
-                                                    backgroundColor: updating === chat.id ? '#374151' : '#1f2937',
-                                                    color: '#fff',
-                                                    width: '100%',
-                                                }}
-                                            >
-                                                {STATUS_OPTIONS.map(s => (
-                                                    <option key={s} value={s}>{s}</option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                                        </div>
 
-                                        {/* 최근 활동 */}
-                                        <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                                            {formatTime(chat.lastMessageAt)}
-                                        </div>
+                                                        {/* Trip Info Card */}
+                                                        <div style={{ background: '#1f2937', borderRadius: '10px', padding: '16px', border: '1px solid #374151' }}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 0 12px 0', borderBottom: '1px solid #374151', paddingBottom: '8px' }}>
+                                                                <h4 style={{ color: '#34d399', fontSize: '13px', fontWeight: 700, margin: 0 }}>여행 정보</h4>
+                                                                <button 
+                                                                    onClick={(e) => { e.stopPropagation(); setEditingTripChatId(editingTripChatId === chat.id ? null : chat.id); }}
+                                                                    style={{ background: editingTripChatId === chat.id ? '#10b98120' : 'transparent', color: editingTripChatId === chat.id ? '#34d399' : '#9ca3af', border: 'none', cursor: 'pointer', fontSize: '11px', padding: '4px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                                                >
+                                                                    {editingTripChatId === chat.id ? '완료' : <><Pencil size={12} /> 편집</>}
+                                                                </button>
+                                                            </div>
+                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                                                                <EditableField label="목적지" value={chat.destination} field="destination" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingTripChatId === chat.id} />
+                                                                <EditableField label="출발일" value={chat.departureDate} field="departureDate" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingTripChatId === chat.id} />
+                                                                <EditableField label="귀국일" value={chat.returnDate} field="returnDate" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingTripChatId === chat.id} />
+                                                                <EditableField label="기간" value={chat.duration} field="duration" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingTripChatId === chat.id} />
+                                                            </div>
+                                                            {/* 상품 목록 (단일/비교분석 공통) */}
+                                                            {(() => {
+                                                                const names = (chat.productName || '').split(/\n|,\s*/).filter(Boolean);
+                                                                const urls = (chat.productUrl || '').split(/\n|,\s*/).filter(Boolean);
+                                                                const maxLen = Math.max(names.length, urls.length, 1);
+                                                                const isMultiple = maxLen > 1;
 
-                                        {/* 시트 링크 */}
-                                        <div>
-                                            <button
-                                                onClick={(e) => openGoogleSheet(e, chat.sheetRowIndex, chat.sheetName, chat.sheetGid)}
-                                                title={`Google Sheets (${chat.sheetName || '기본'})에서 보기`}
-                                                style={{
-                                                    padding: '6px 8px',
-                                                    border: '1px solid #374151',
-                                                    borderRadius: '4px',
-                                                    backgroundColor: '#1f2937',
-                                                    cursor: 'pointer',
-                                                    fontSize: '14px',
-                                                }}
-                                            >
-                                                📊
-                                            </button>
+                                                                return (
+                                                                    <div style={{ marginTop: '10px' }}>
+                                                                        <div style={{ fontSize: '11px', color: isMultiple ? '#f59e0b' : '#34d399', fontWeight: 700, marginBottom: '8px', letterSpacing: '0.5px' }}>
+                                                                            {isMultiple ? `비교 상품 (${maxLen}개)` : `상담 상품`}
+                                                                        </div>
+                                                                        
+                                                                        {/* 편집 모드 */}
+                                                                        {(editingTripChatId === chat.id) ? (
+                                                                            <div style={{ display: 'grid', gap: '8px', marginBottom: '12px', padding: '12px', background: '#111827', borderRadius: '8px', border: '1px dashed #374151' }}>
+                                                                                <EditableField 
+                                                                                    label={isMultiple ? "전체 상품명 (콤마/줄바꿈 구분)" : "상품명"} 
+                                                                                    value={chat.productName} 
+                                                                                    field="productName" 
+                                                                                    chatId={chat.id} 
+                                                                                    onSave={handleFieldUpdate} 
+                                                                                    wide 
+                                                                                    forceEditMode={true} 
+                                                                                />
+                                                                                <EditableField 
+                                                                                    label={isMultiple ? "전체 상품 URL (콤마/줄바꿈 구분)" : "상품 URL"} 
+                                                                                    value={chat.productUrl} 
+                                                                                    field="productUrl" 
+                                                                                    chatId={chat.id} 
+                                                                                    onSave={handleFieldUpdate} 
+                                                                                    wide 
+                                                                                    forceEditMode={true}
+                                                                                    displayValue={chat.productUrl ? <span style={{ color: '#38bdf8' }}>🔗 링크 {isMultiple ? '복수 ' : ''}등록됨 (수정)</span> : undefined}
+                                                                                />
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                                                {Array.from({ length: maxLen }).map((_, i) => {
+                                                                                    const name = names[i] || (isMultiple ? `상품 ${i + 1}` : '상품명 미상');
+                                                                                    const url = urls[i] || '';
+                                                                                    return (
+                                                                                        <div key={i} style={{
+                                                                                            display: 'flex', alignItems: 'center', gap: '8px',
+                                                                                            padding: '8px 10px', background: '#111827',
+                                                                                            borderRadius: '6px', borderLeft: `3px solid ${isMultiple ? ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ef4444'][i % 5] : '#3b82f6'}`,
+                                                                                        }}>
+                                                                                            {isMultiple && <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: 700, minWidth: '20px' }}>{i + 1}</span>}
+                                                                                            <div style={{ flex: 1, overflow: 'hidden' }}>
+                                                                                                {url ? (
+                                                                                                    <a href={url.trim()} target="_blank" rel="noopener noreferrer"
+                                                                                                        style={{ fontSize: '12px', color: '#38bdf8', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textDecoration: 'underline' }}>
+                                                                                                        {name.trim()}
+                                                                                                    </a>
+                                                                                                ) : (
+                                                                                                    <div style={{ fontSize: '12px', color: '#e5e7eb', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                                                        {name.trim()}
+                                                                                                    </div>
+                                                                                                )}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    );
+                                                                                })}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* 아래 Row: 방문 이력 (재방문 고객용) - 100% 폭 사용 */}
+                                                    {(() => {
+                                                        const history = customerHistoryByPhone[chat.visitorPhone];
+                                                        const isLoadingHistory = historyLoading === chat.id;
+                                                        
+                                                        if (isLoadingHistory) {
+                                                            return (
+                                                                <div style={{ marginBottom: '16px', padding: '16px', background: '#1f2937', borderRadius: '10px', border: '1px solid #374151' }}>
+                                                                    <span style={{ color: '#f59e0b', fontSize: '13px', fontWeight: 600 }}>이전 방문 이력을 불러오는 중입니다...</span>
+                                                                </div>
+                                                            );
+                                                        }
+                                                        
+                                                        if (!history || history.length < 2) return null;
+
+                                                        // 현재 상담 제외 이전 방문만 리스트화 후, 상품명+URL 기준으로 중복 제거
+                                                        const previousVisitsMap = new Map();
+                                                        history.filter((h: any) =>
+                                                            h.sheetName !== chat.sheetName || h.consultationDate !== chat.lastMessageAt
+                                                        ).slice(0, -1).forEach((h: any) => {
+                                                            const key = `${h.productName}-${h.productUrl || h.sheetName}`;
+                                                            if (!previousVisitsMap.has(key)) {
+                                                                previousVisitsMap.set(key, h);
+                                                            }
+                                                        });
+                                                        const previousVisits = Array.from(previousVisitsMap.values());
+
+                                                        if (previousVisits.length === 0) return null;
+
+                                                        return (
+                                                            <div style={{ background: '#1f2937', borderRadius: '10px', padding: '16px', border: '1px solid #374151', marginBottom: '16px' }}>
+                                                                <h4 style={{ color: '#f59e0b', fontSize: '13px', fontWeight: 700, margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                    이전 문의 및 방문 이력
+                                                                    <span style={{ backgroundColor: '#f59e0b20', color: '#f59e0b', fontSize: '11px', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+                                                                        {previousVisits.length}건
+                                                                    </span>
+                                                                </h4>
+                                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
+                                                                    {previousVisits.map((visit: any, idx: number) => {
+                                                                        const isConfirmed = ['예약확정', '결제완료', '전액결제', '완납', '여행완료', '출발확정'].includes(visit.status);
+                                                                        const borderColor = isConfirmed ? '#10b981' : '#6b7280';
+                                                                        const badgeBg = isConfirmed ? '#10b98120' : '#374151';
+                                                                        const badgeColor = isConfirmed ? '#34d399' : '#9ca3af';
+                                                                        // 문의는 상담일자(consultationDate), 예약확정은 출발일(departureDate)을 노출
+                                                                        const displayDate = isConfirmed ? visit.departureDate : (visit.consultationDate ? visit.consultationDate.split(' ')[0] : '-');
+                                                                        const dateLabel = isConfirmed ? '출발일:' : '문의일:';
+
+                                                                        return (
+                                                                            <div key={idx} style={{
+                                                                                display: 'flex', alignItems: 'center', gap: '10px',
+                                                                                padding: '12px', background: '#111827',
+                                                                                borderRadius: '8px', borderLeft: `4px solid ${borderColor}`,
+                                                                                border: '1px solid #1f2937'
+                                                                            }}>
+                                                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                                                    <div style={{ fontSize: '13px', color: '#f3f4f6', fontWeight: 600, marginBottom: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                                        {visit.productName || '상품 미정'}
+                                                                                    </div>
+                                                                                    <div style={{ fontSize: '11px', color: '#9ca3af', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                                                                        {displayDate && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600, color: isConfirmed ? '#34d399' : '#9ca3af' }}><Calendar size={12} /> {dateLabel} {displayDate}</span>}
+                                                                                        {visit.destination && <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={12} /> {visit.destination}</span>}
+                                                                                        {visit.status && (
+                                                                                            <span style={{
+                                                                                                padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 700,
+                                                                                                background: badgeBg,
+                                                                                                color: badgeColor,
+                                                                                            }}>
+                                                                                                {visit.status}
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                                {visit.productUrl && (
+                                                                                    <a href={visit.productUrl} target="_blank" rel="noopener noreferrer"
+                                                                                        title="상품 페이지 열기"
+                                                                                        style={{ fontSize: '12px', color: '#38bdf8', textDecoration: 'none', whiteSpace: 'nowrap', fontWeight: 600, padding: '6px 8px', background: '#38bdf810', borderRadius: '6px', border: '1px solid #38bdf830' }}>
+                                                                                        열기 →
+                                                                                    </a>
+                                                                                )}
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })()}
+
+                                                    {/* Row 2: Summary */}
+
+                                                    <div style={{ background: '#1f2937', borderRadius: '10px', padding: '16px', border: '1px solid #374151', marginBottom: '16px' }}>
+                                                        <h4 style={{ color: '#fbbf24', fontSize: '13px', fontWeight: 700, margin: '0 0 10px 0', borderBottom: '1px solid #374151', paddingBottom: '8px' }}>상담 요약</h4>
+                                                        <EditableField 
+                                                            label="" 
+                                                            value={chat.summary || ''} 
+                                                            field="summary" 
+                                                            chatId={chat.id} 
+                                                            onSave={handleFieldUpdate} 
+                                                            allowClickToEdit={true}
+                                                            multiline={true}
+                                                            displayValue={
+                                                                <div style={{ fontSize: '13px', color: '#d1d5db', lineHeight: '1.7', whiteSpace: 'pre-wrap', background: '#111827', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #fbbf24', width: '100%', minHeight: '40px' }}>
+                                                                    {chat.summary || <span style={{ color: '#6b7280' }}>여기를 클릭하여 요약을 작성하거나 수정하세요.</span>}
+                                                                </div>
+                                                            }
+                                                        />
+                                                    </div>
+
+                                                    {/* Row 3: Automation Timeline */}
+                                                    <div style={{ background: '#1f2937', borderRadius: '10px', padding: '16px', border: '1px solid #374151' }}>
+                                                        <h4 style={{ color: '#a78bfa', fontSize: '13px', fontWeight: 700, margin: '0 0 12px 0', borderBottom: '1px solid #374151', paddingBottom: '8px' }}>진행 현황</h4>
+                                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
+                                                            <TimelineCell label="팔로업일" date={chat.nextFollowup} today={today} field="nextFollowup" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                            <TimelineCell label="예약확정일" date={chat.confirmedDate} today={today} field="confirmedDate" chatId={chat.id} />
+                                                            <TimelineCell label="선금일" date={chat.prepaidDate} today={today} field="prepaidDate" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                            <TimelineCell label="출발전안내" date={chat.noticeDate} today={today} field="noticeDate" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                            <TimelineCell label="잔금일" date={chat.balanceDate} today={today} field="balanceDate" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                            <TimelineCell label="확정서발송" date={chat.confirmationSent} today={today} field="confirmationSent" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                            <TimelineCell label="출발안내" date={chat.departureNotice} today={today} field="departureNotice" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                            <TimelineCell label="전화안내" date={chat.phoneNotice} today={today} field="phoneNotice" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                            <TimelineCell label="해피콜" date={chat.happyCall} today={today} field="happyCall" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                            {chat.confirmedProduct && (
+                                                                <div style={{ gridColumn: 'span 1', padding: '8px', background: '#111827', borderRadius: '6px', fontSize: '11px' }}>
+                                                                    <div style={{ color: '#6b7280', marginBottom: '4px' }}>확정상품</div>
+                                                                    <a href={chat.confirmedProduct} target="_blank" rel="noopener noreferrer" style={{ color: '#38bdf8', fontSize: '11px', textDecoration: 'none' }}>열기 →</a>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Footer */}
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', fontSize: '11px', color: '#6b7280' }}>
+                                                        <span>📋 상담일시: {chat.lastMessageAt ? new Date(chat.lastMessageAt).toLocaleString('ko-KR') : '-'}</span>
+                                                        <Link href={`/chats/${chat.id}`} style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '12px', fontWeight: 600 }}>
+                                                            💬 대화내역 보기 →
+                                                        </Link>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
@@ -684,6 +1114,113 @@ export default function ChatsPage() {
                     </div>
                 </div>
             )}
+
+            {/* 예약확정 모달 */}
+            {confirmModal && (
+                <div
+                    style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 1000,
+                    }}
+                    onClick={() => !confirming && setConfirmModal(null)}
+                >
+                    <div
+                        style={{
+                            backgroundColor: '#1f2937', borderRadius: '16px',
+                            padding: '28px', maxWidth: '500px', width: '90%',
+                            boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                            color: '#fff', border: '1px solid #10b981',
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                            <span style={{ fontSize: '24px' }}>✅</span>
+                            <div>
+                                <h3 style={{ margin: 0, fontSize: '18px' }}>예약확정</h3>
+                                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#9ca3af' }}>
+                                    {confirmModal.chat.visitorName} 고객의 확정상품 URL을 입력하세요
+                                </p>
+                            </div>
+                        </div>
+
+                        <div style={{ marginBottom: '16px' }}>
+                            <label style={{ fontSize: '12px', color: '#9ca3af', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
+                                확정상품 URL
+                            </label>
+                            <input
+                                type="url"
+                                placeholder="https://www.modetour.com/..."
+                                value={confirmUrl}
+                                onChange={(e) => setConfirmUrl(e.target.value)}
+                                disabled={confirming}
+                                autoFocus
+                                style={{
+                                    width: '100%', padding: '12px 14px',
+                                    backgroundColor: '#111827', border: '1px solid #374151',
+                                    borderRadius: '8px', color: '#fff', fontSize: '14px',
+                                    outline: 'none', transition: 'border-color 0.2s',
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = '#10b981'}
+                                onBlur={(e) => e.target.style.borderColor = '#374151'}
+                                onKeyDown={(e) => e.key === 'Enter' && handleConfirmReservation()}
+                            />
+                        </div>
+
+                        <div style={{
+                            backgroundColor: '#111827', borderRadius: '8px',
+                            padding: '12px 14px', marginBottom: '20px',
+                            fontSize: '12px', color: '#9ca3af', lineHeight: '1.6',
+                        }}>
+                            <div style={{ color: '#34d399', fontWeight: 600, marginBottom: '6px' }}>자동으로 계산되는 항목:</div>
+                            📅 출발일/귀국일 (URL에서 추출) · 📍 목적지<br />
+                            💰 선금일 (확정+2일) · 📢 출발전안내 (출발-4주)<br />
+                            💳 잔금일 (출발-3주) · 📨 확정서발송 (출발-2주)<br />
+                            🛫 출발안내 (-3일) · 📞 전화안내 (-1일) · 🎉 해피콜 (귀국+1일)
+                        </div>
+
+                        {confirming && (
+                            <div style={{ textAlign: 'center', padding: '12px', color: '#10b981', fontSize: '14px', marginBottom: '12px' }}>
+                                ⏳ URL 분석 및 날짜 계산 중...
+                            </div>
+                        )}
+
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                            <button
+                                onClick={() => setConfirmModal(null)}
+                                disabled={confirming}
+                                style={{
+                                    padding: '10px 20px', borderRadius: '8px',
+                                    border: '1px solid #374151', backgroundColor: '#374151',
+                                    color: '#fff', cursor: confirming ? 'not-allowed' : 'pointer',
+                                    fontSize: '14px', opacity: confirming ? 0.5 : 1,
+                                }}
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={handleConfirmReservation}
+                                disabled={confirming || !confirmUrl.trim()}
+                                style={{
+                                    padding: '10px 24px', borderRadius: '8px',
+                                    border: 'none',
+                                    backgroundColor: confirming ? '#065f46' : '#10b981',
+                                    color: 'white',
+                                    cursor: confirming || !confirmUrl.trim() ? 'not-allowed' : 'pointer',
+                                    fontSize: '14px', fontWeight: 600,
+                                    opacity: !confirmUrl.trim() ? 0.5 : 1,
+                                    transition: 'all 0.2s',
+                                }}
+                            >
+                                {confirming ? '처리 중...' : '예약확정 진행'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
+
+

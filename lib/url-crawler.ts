@@ -9,8 +9,9 @@ import { scrapeWithBrowser } from '@/lib/browser-crawler';
 
 const USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+    'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
 ];
 
 function getRandomUserAgent() {
@@ -19,14 +20,18 @@ function getRandomUserAgent() {
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function quickFetch(url: string, retries = 2): Promise<{ html: string; title: string }> {
+async function quickFetch(url: string, retries = 1): Promise<{ html: string; title: string }> {
     try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 12000); // 12초 타임아웃으로 약간 연장
+        const timeout = setTimeout(() => controller.abort(), 4000); // 4초 타임아웃으로 대폭 단축
 
         const response = await fetch(url, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                'User-Agent': getRandomUserAgent(),
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
             },
             signal: controller.signal
         });
@@ -63,17 +68,18 @@ async function quickFetch(url: string, retries = 2): Promise<{ html: string; tit
 
         return { html, title };
 
-    } catch (error) {
+    } catch (error: any) {
         if (retries > 0) {
             console.log(`[QuickFetch] 재시도 (${retries}회 남음): ${url}`);
             await sleep(1000);
             return quickFetch(url, retries - 1);
         }
-        throw error;
+        console.warn(`[QuickFetch] 최종 실패: ${url} (${error.message})`);
+        return { html: '', title: '' }; // 에러를 던지지 않고 빈 결과 반환
     }
 }
 
-async function fetchModeTourNative(url: string, sbKey?: string): Promise<DetailedProductInfo | null> {
+async function fetchModeTourNative(url: string, isSummaryOnly = false): Promise<DetailedProductInfo | null> {
     const productNoMatch = url.match(/package\/(\d+)/i) || url.match(/Pnum=(\d+)/i);
     if (!productNoMatch) return null;
     const productNo = productNoMatch[1];
@@ -90,18 +96,34 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<Detaile
     let dataHotel: any = null;
 
     try {
-        console.log(`[ModeTour Native] Fetching for ${productNo}`);
-        const [resDetail, resPoints, resSchedule, resHotel] = await Promise.all([
+        console.log(`[ModeTour Native] Fetching for ${productNo} (SummaryOnly=${isSummaryOnly})`);
+        
+        // 요약 모드일 때는 일정(Schedule) 목록을 가져오지 않음 (가장 큰 데이터)
+        const fetchTasks = [
             fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`, { headers }),
             fetch(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}`, { headers }),
-            fetch(`https://b2c-api.modetour.com/Package/GetScheduleList?productNo=${productNo}`, { headers }),
             fetch(`https://b2c-api.modetour.com/Package/GetHotelList?productNo=${productNo}`, { headers })
-        ]);
+        ];
+        
+        if (!isSummaryOnly) {
+            fetchTasks.push(fetch(`https://b2c-api.modetour.com/Package/GetScheduleList?productNo=${productNo}`, { headers }));
+        }
 
-        if (resDetail.ok) dataDetail = await resDetail.json();
+        const responses = await Promise.all(fetchTasks);
+        const resDetail = responses[0];
+        const resPoints = responses[1];
+        const resHotel = responses[2];
+        const resSchedule = !isSummaryOnly ? responses[3] : null;
+
+        if (resDetail.ok) {
+            dataDetail = await resDetail.json();
+        }
         if (resPoints.ok) dataPoints = await resPoints.json();
-        if (resSchedule.ok) dataSchedule = await resSchedule.json();
         if (resHotel.ok) dataHotel = await resHotel.json();
+        if (resSchedule?.ok) {
+            dataSchedule = await resSchedule.json();
+            console.log(`[ModeTour Native] schedule result OK, len: ${dataSchedule?.result?.length || 0}`);
+        }
 
         if (!dataDetail?.result) {
             const resSimple = await fetch(`https://b2c-api.modetour.com/Package/GetProductSimpleDetail?productNo=${productNo}`, { headers });
@@ -114,6 +136,8 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<Detaile
     if (dataDetail?.isOK && dataDetail.result) {
         const d = dataDetail.result;
         console.log(`[ModeTour Native] Processing: ${d.productName || d.prd_nm}`);
+        console.log(`[ModeTour Native-DEBUG] d keys: ${Object.keys(d).join(', ')}`);
+        console.log(`[ModeTour Native-DEBUG] transport: ${d.transportName}, carrier: ${d.carrier_nm}, fltNo: ${d.flight_no}`);
 
         // 1. Title 정제
         let cleanTitle = d.productName || '';
@@ -285,46 +309,191 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<Detaile
 
         // --- 5. 일정(Itinerary) 매핑 ---
         let itinerary: any[] = [];
-        if (dataSchedule?.isOK && Array.isArray(dataSchedule.result)) {
-            const rawItems = dataSchedule.result;
-            // Day별로 그룹화
-            const daysMap = new Map<number, any>();
-            rawItems.forEach((item: any) => {
-                const day = item.itiDays || 1;
-                if (!daysMap.has(day)) {
-                    daysMap.set(day, {
-                        day: `${day}일차`,
-                        title: item.itiPlaceName || `Day ${day}`,
-                        activities: [],
-                        meals: { breakfast: '제공', lunch: '제공', dinner: '제공' }
-                    });
-                }
-                const dayObj = daysMap.get(day);
+        if (dataSchedule?.isOK && dataSchedule.result?.scheduleItemList) {
+            const scheduleDays = dataSchedule.result.scheduleItemList;
+            
+            itinerary = scheduleDays.map((dayData: any, idx: number) => {
+                const dayNum = idx + 1;
+                let activities: string[] = [];
 
-                // 장소명 및 요약 설명 추가
-                if (item.itiPlaceName) {
-                    dayObj.activities.push({
-                        time: item.itiTime || '',
-                        location: item.itiPlaceName,
-                        description: (item.itiSummaryDes || '') + (item.itiDetailDes ? ' ' + item.itiDetailDes : '')
-                    });
+                // 1. 항공편 정보 (itiSeq가 없는 경우가 많으므로 최상단에 추가)
+                const airListVal = Array.isArray(dayData.listAirRouteInfo) ? dayData.listAirRouteInfo : dayData.listAirRouteInfo?.item;
+                const airList: any[] = Array.isArray(airListVal) ? airListVal : [];
+                
+                let transport: any = null;
+                if (airList.length > 0) {
+                    // 세그먼트가 나눠져 있는 경우를 대비해 데이터를 병합
+                    const merged = {
+                        airline: airList.find(f => f.transportName)?.transportName || '',
+                        logoUrl: airList.find(f => f.transportLogoUrl)?.transportLogoUrl || '',
+                        departureCity: airList.find(f => f.departureCityName)?.departureCityName || airList.find(f => f.departureCity)?.departureCity || '',
+                        departureTime: airList.find(f => f.departureTime)?.departureTime || '',
+                        arrivalCity: airList.find(f => f.arrivalCityName)?.arrivalCityName || airList.find(f => f.arrivalCity)?.arrivalCity || '',
+                        arrivalTime: airList.find(f => f.arrivalTime)?.arrivalTime || '',
+                        duration: airList.find(f => f.departureFlightDuration)?.departureFlightDuration || '',
+                        flightNo: airList.find(f => f.departureFlight)?.departureFlight || ''
+                    };
+                    
+                    if (merged.departureCity || merged.arrivalCity) {
+                        transport = merged;
+                    }
                 }
 
-                // 식사 정보 매핑 (보통 itiSummaryDes 등에 식사 키워드가 있을 수 있음)
-                // 하지만 모두투어 API는 보통 식사 데이터가 따로 있는 경우가 많음.
-                // 일단 간단하게 activities에 포함됨.
+                // 2. 모든 카테고리별 일정 항목 수집 및 정렬
+                const allItems: any[] = [];
+                const listKeys = [
+                    'listItemSchedule', 'listScheduleItem', 'ortherActions', 
+                    'listLocalPlace', 'listGuidePlace', 'listHotelPlace', 
+                    'listTransportPlace', 'listMealPlace'
+                ];
+                
+                listKeys.forEach(key => {
+                    const val = dayData[key];
+                    if (Array.isArray(val)) {
+                        allItems.push(...val);
+                    } else if (val && Array.isArray(val.item)) {
+                        allItems.push(...val.item);
+                    }
+                });
+
+                // itiSeq 순으로 정렬
+                allItems.sort((a, b) => (a.itiSeq || 0) - (b.itiSeq || 0));
+
+                const EXCLUDE_LABELS = [
+                    '기타단문', '관광(콘텐츠)', '유의 ㅣ 안내사항', 
+                    '중국 입국 유의사항/ 온라인 입국신고서 작성 안내사항',
+                    '호텔 체크인/체크아웃 안내', '선택 관광 (콘텐츠)',
+                    '현지 합류(합사) 행사 안내', 'null', 'undefined'
+                ];
+
+                const isNullStr = (s: any) => !s || s === 'null' || s === 'undefined' || String(s).trim() === '';
+
+                // 3. 정렬된 항목들을 텍스트로 변환
+                allItems.forEach((item: any) => {
+                    let loc = item.itiPlaceName || item.itiServiceName || '';
+                    if (EXCLUDE_LABELS.some(l => loc.includes(l)) || isNullStr(loc)) loc = '';
+
+                    const descParts: string[] = [];
+                    
+                    if (!isNullStr(item.itiSummaryDes)) descParts.push(item.itiSummaryDes);
+                    if (!isNullStr(item.itiDetailDes)) descParts.push(item.itiDetailDes.replace(/<[^>]+>/g, '').trim());
+                    
+                    const optVal = item.scheduleItemServiceOptions;
+                    const optList = Array.isArray(optVal) ? optVal : optVal?.item;
+                    if (Array.isArray(optList)) {
+                        optList.forEach((opt: any) => {
+                            const optName = opt.itiServiceName || '';
+                            if (!isNullStr(opt.serviceWITHSummary)) descParts.push(opt.serviceWITHSummary.replace(/<[^>]+>/g, '').trim());
+                            else if (!isNullStr(opt.serviceExplaination)) descParts.push(opt.serviceExplaination.replace(/<[^>]+>/g, '').trim());
+                            if (!isNullStr(opt.detailDes)) descParts.push(opt.detailDes.replace(/<[^>]+>/g, '').trim());
+                            
+                            if (optName && !loc.includes(optName) && !EXCLUDE_LABELS.some(l => optName.includes(l)) && !isNullStr(optName)) {
+                                descParts.unshift(optName);
+                            }
+                        });
+                    }
+
+                    if (!isNullStr(item.serviceWITHSummary) && !descParts.includes(item.serviceWITHSummary)) descParts.push(item.serviceWITHSummary);
+                    if (!isNullStr(item.serviceExplaination) && !descParts.includes(item.serviceExplaination)) descParts.push(item.serviceExplaination);
+
+                    // 각 파트에서 EXCLUDE_LABELS 제거 및 개별 줄 단위 중복 제거
+                    const processedParts: string[] = [];
+                    descParts.forEach(part => {
+                        if (isNullStr(part)) return;
+                        const lines = part.split(/\n|\r\n/).map(l => l.trim()).filter(l => !isNullStr(l));
+                        lines.forEach(line => {
+                            if (EXCLUDE_LABELS.some(l => line === l)) return;
+
+                            // 접두어 제거 시도 (예: "유의 ㅣ 안내사항 - " 제거)
+                            let cleanLine = line;
+                            EXCLUDE_LABELS.forEach(label => {
+                                const regex = new RegExp(`^${label}\\s*[-ㅣ\\s]*[-ㅣ]\\s*`, 'g'); // 공백/기호 유연하게 처리
+                                cleanLine = cleanLine.replace(regex, '').trim();
+                            });
+                            
+                            if (isNullStr(cleanLine) || EXCLUDE_LABELS.includes(cleanLine)) return;
+                            if (cleanLine === '.' || cleanLine === '-') return;
+                            processedParts.push(cleanLine);
+                        });
+                    });
+
+                    const fullDesc = processedParts
+                        .filter((s, i, a) => a.indexOf(s) === i) // 중복 제거
+                        .join('\n');
+                    
+                    if (loc || fullDesc) {
+                        let block = loc;
+                        if (loc && fullDesc) {
+                            if (!fullDesc.includes(loc)) block += '\n' + fullDesc;
+                            else block = fullDesc;
+                        } else if (fullDesc) {
+                            block = fullDesc;
+                        }
+                        
+                        // 다시 한번 최종적으로 접두어 제거 (loc가 붙은 경우 대비)
+                        let finalBlock = block.trim();
+                        EXCLUDE_LABELS.forEach(label => {
+                            const regex = new RegExp(`^${label}\\s*[-ㅣ\\s]*[-ㅣ]\\s*`, 'g');
+                            finalBlock = finalBlock.replace(regex, '').trim();
+                        });
+
+                        if (finalBlock && !activities.includes(finalBlock)) {
+                            activities.push(finalBlock);
+                        }
+                    }
+                });
+
+                const mealsObj = dayData.listMealPlace;
+                const mealList: any[] = Array.isArray(mealsObj) ? mealsObj : mealsObj?.item || [];
+
+                const getMeal = (type: string) => {
+                    const m = mealList.find((item: any) => item.itiServiceName === type || item.mealTypeName === type);
+                    const val = m ? (m.itiPlaceName || m.itiSummaryDes || '제공') : '불포함';
+                    return isNullStr(val) ? '불포함' : val;
+                };
+
+                return {
+                    day: `${dayNum}일차`,
+                    date: dayData.date || '',
+                    title: dayData.allPlaceTravelToday || '',
+                    activities: activities.filter((s, i, a) => a.indexOf(s) === i), 
+                    transport: transport,
+                    meals: {
+                        breakfast: getMeal('조식'),
+                        lunch: getMeal('중식'),
+                        dinner: getMeal('석식')
+                    },
+                    hotel: dayData.scheduleHotel || ''
+                };
             });
-            itinerary = Array.from(daysMap.values()).sort((a, b) => a.day - b.day);
         }
 
         // --- 6. 호텔(Hotel) 정보 매핑 ---
         let hotelInfo = '';
+        let hotels: any[] = [];
         if (dataHotel?.isOK && Array.isArray(dataHotel.result)) {
-            // 첫 번째 호텔 혹은 대표 호텔 추출
-            const firstDayHotel = dataHotel.result[0];
-            if (firstDayHotel?.listHotelPlaceData?.[0]) {
-                const h = firstDayHotel.listHotelPlaceData[0];
-                hotelInfo = `${h.placeNameK || h.itiPlaceName} (${h.address || ''})`;
+            const uniqueHotels = new Map<string, any>();
+            dataHotel.result.forEach((dayHotel: any) => {
+                if (Array.isArray(dayHotel.listHotelPlaceData)) {
+                    dayHotel.listHotelPlaceData.forEach((h: any) => {
+                        const name = h.placeNameK || h.itiPlaceName;
+                        if (name && !uniqueHotels.has(name)) {
+                            const hotelObj = {
+                                name: name,
+                                address: h.address || '',
+                                checkIn: '14:00',
+                                checkOut: '12:00',
+                                images: h.itiPlaceImg ? [h.itiPlaceImg] : [],
+                                amenities: []
+                            };
+                            uniqueHotels.set(name, hotelObj);
+                            hotels.push(hotelObj);
+                        }
+                    });
+                }
+            });
+            if (hotels.length > 0) {
+                hotelInfo = hotels[0].name + (hotels[0].address ? ` (${hotels[0].address})` : '');
             }
         }
 
@@ -334,6 +503,19 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<Detaile
             if (hotelName.length > 3) {
                 keyPoints.push(`${hotelName} 숙박`);
             }
+        }
+
+        // --- 7. 미팅 및 수속 정보 추출 ---
+        let meetingInfo: any[] = [];
+        const meetingText = d.entryPointNote || '';
+        if (meetingText) {
+            const cleanMeeting = meetingText.replace(/<[^>]+>/g, ' ').trim();
+            meetingInfo.push({
+                type: '미팅정보',
+                location: '본문 참조',
+                time: '본문 참조',
+                description: cleanMeeting
+            });
         }
 
         // 중복 제거 및 최대 7개 제한 (refineData에서 4개로 최종 자르기)
@@ -367,7 +549,7 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<Detaile
         const rawPrice = String(d.sellingPriceAdultTotalAmount || '');
         const formattedPrice = rawPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-        return {
+        const finalRet = {
             isProduct: true,
             title: cleanTitle,
             destination: destination,
@@ -383,6 +565,8 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<Detaile
             returnDepartureTime: d.returnStartTime || d.returnDepTm || d.return_dep_tm || '',
             returnArrivalTime: d.returnEndTime || d.returnArrTm || d.return_arr_tm || '',
             hotel: hotelInfo,
+            hotels: hotels,
+            meetingInfo: meetingInfo,
             itinerary: itinerary,
             inclusions: d.includedNote ? [d.includedNote.replace(/<[^>]+>/g, ' ').trim()] : [],
             exclusions: d.unincludedNote ? [d.unincludedNote.replace(/<[^>]+>/g, ' ').trim()] : [],
@@ -396,24 +580,30 @@ async function fetchModeTourNative(url: string, sbKey?: string): Promise<Detaile
             hasFreeSchedule: false,
             description: moreInfo // 추가: Gemini 요약용 상세 정보
         } as DetailedProductInfo;
+        console.log(`[ModeTour Native] Final Return Airline: ${finalRet.airline}, Airport: ${finalRet.departureAirport}, Days: ${finalRet.itinerary?.length || 0}`);
+        return finalRet;
     }
     return null;
 }
 
-export async function fetchContent(url: string): Promise<{ text: string, nextData?: string, nativeData?: any }> {
+export async function fetchContent(url: string, isSummaryOnly = false): Promise<{ text: string, nextData?: string, nativeData?: any }> {
     try {
-        console.log(`[Crawler] Fetching: ${url}`);
+        console.log(`[Crawler] Fetching: ${url} (isSummaryOnly=${isSummaryOnly})`);
 
         // ModeTour인 경우 네이티브 직접 요청 시도
         if (url.includes('modetour.com')) {
-            const nativeData = await fetchModeTourNative(url);
+            const nativeData = await fetchModeTourNative(url, isSummaryOnly);
             if (nativeData) {
                 console.log('[Crawler] ModeTour Native Data Acquired');
-                // HTML도 일단 가져옴 (Gemini가 추가 분석할 수도 있으니)
+                // 요약 모드면 HTML 추가 획득 패스
+                if (isSummaryOnly) {
+                    return { text: '', nativeData };
+                }
                 const { html } = await quickFetch(url);
                 const text = htmlToText(html, url);
                 const nextDataMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i);
                 const nextData = nextDataMatch ? nextDataMatch[1].trim() : undefined;
+                console.log(`[Crawler] Native Flow: Text Len: ${text.length}, NextData Len: ${nextData?.length || 0}`);
                 return { text, nextData, nativeData };
             }
         }
@@ -423,10 +613,12 @@ export async function fetchContent(url: string): Promise<{ text: string, nextDat
 
         // 2. HTML을 텍스트로 변환 (메타데이터 포함)
         const text = htmlToText(html, url);
+        console.log(`[Crawler] QuickFetch Flow: Text Len: ${text.length}`);
 
         // HTML 원본에서 __NEXT_DATA__ 추출 (이미 htmlToText에서 썼을 수도 있지만 명시적으로 추출)
         const nextDataMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i);
         const nextData = nextDataMatch ? nextDataMatch[1].trim() : undefined;
+        console.log(`[Crawler] QuickFetch Flow: NextData Len: ${nextData?.length || 0}`);
 
         if (text.length > 500 || html.length > 5000) {
             return { text, nextData };
@@ -702,37 +894,38 @@ TARGET_DESCRIPTION: "${targetDescription}"
 ${cleanBody}`;
 }
 
-export async function analyzeWithGemini(text: string, url: string, nextData?: string): Promise<DetailedProductInfo | null> {
-    const apiKey = process.env.GEMINI_API_KEY?.trim();
-    if (!apiKey) return null;
+export async function analyzeWithGemini(text: string, url: string, nextData?: string, isSummaryOnly = false): Promise<DetailedProductInfo | null> {
+    const rawApiKey = process.env.GEMINI_API_KEY?.trim();
+    if (!rawApiKey) return null;
+    
+    // API 키가 여러 개 등록되어 있을 경우(쉼표 구분) 첫 번째 키만 사용
+    const apiKey = rawApiKey.split(',')[0].trim();
 
     try {
         const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.0-flash';
-        console.log(`[Gemini] AI 분석 시작... (모델: ${modelName})`);
+        console.log(`[Gemini] AI 분석 시작... (모델: ${modelName}, 요약모드: ${isSummaryOnly})`);
 
-        // --- ADDED LOGGING ---
-        console.log(`[Gemini] 입력 텍스트 원본 길이: ${text.length}`);
-
-        const prompt = `다음 여행 상품 페이지에서 정보를 추출하여 JSON으로 반환하세요.
+        let prompt = `다음 여행 상품 페이지에서 정보를 추출하여 JSON으로 반환하세요.
 URL: ${url}
 ${nextData ? `--- [중요: NEXT_JS_DATA (JSON 데이터 참조용)] ---\n${nextData.substring(0, 15000)}\n` : ''}
 
 반환 형식:
 {
   "isProduct": true,
-  "title": "METADATA 섹션의 TARGET_TITLE 또는 PAGE_TITLE 중 더 구체적인 것을 그대로 추출 (상품명 전체)",
+  "title": "상품명 전체",
   "destination": "목적지 (국가+도시)",
-  "price": "METADATA 섹션의 TARGET_PRICE 값을 최우선적으로 사용하세요 (숫자만 추출). 없으면 텍스트에서 성인 1인 가격을 찾으세요.",
-  "departureDate": "출발일 (YYYY-MM-DD 형식 권장)",
-  "airline": "METADATA 섹션의 TARGET_AIRLINE을 최우선으로 사용하세요. 없으면 항공사(티웨이, 제주항공 등) 추출.",
-  "duration": "METADATA 섹션의 TARGET_DURATION 값을 최우선으로 사용하세요. 없으면 'X박 Y일' 패턴을 찾으세요.",
-  "departureAirport": "METADATA 섹션의 TARGET_DEPARTURE_AIRPORT를 최우선으로 사용하세요. 없으면 텍스트에서 '인천', '부산', '대구' 등 출발지 추출.",
-  "keyPoints": ["상품 포인트 요약 ('~입니다', '~합니다' 등의 서술어 절대 금지. 반드시 명사형으로 끝나는 짧은 개조식 구문 작성. 예: '특급호텔에서 전일정 숙박', '노쇼핑 일정으로 편안한 여행')"],
-  "exclusions": ["불포함 사항 요약"]
-}
+  "price": "성인 1인 가격 (숫자만)",
+  "departureDate": "출발일 (YYYY-MM-DD)",
+  "airline": "항공사명",
+  "duration": "여행기간 (예: 3박5일)",
+  "departureAirport": "출발공항",
+  "keyPoints": ["상품 포인트 요약 (명사형 개조식)"]`;
 
-입력 텍스트:
-${text.substring(0, 30000)}`;
+        if (!isSummaryOnly) {
+            prompt += `,\n  "exclusions": ["불포함 사항 요약"],\n  "itinerary": [{"day": "1일차", "activities": ["활동 내역..."]}]`;
+        }
+
+        prompt += `\n}\n\n입력 텍스트:\n${text.substring(0, 20000)}`;
 
         console.log(`[Gemini] 최종 프롬프트 길이: ${prompt.length}`);
         const fs = require('fs');
@@ -867,8 +1060,12 @@ function analyzeWithRegex(text: string, url: string): DetailedProductInfo {
  * 확정서 전용 종합 분석 — 페이지 전체 내용에서 일정/식사/호텔/포함사항 등 모두 추출
  */
 export async function analyzeForConfirmation(text: string, url: string, nextData?: string): Promise<any | null> {
-    const apiKey = process.env.GEMINI_API_KEY?.trim();
-    if (!apiKey) return null;
+    const rawKeys = process.env.GEMINI_API_KEY || '';
+    const apiKeys = rawKeys.split(',').map(k => k.trim()).filter(Boolean);
+    if (apiKeys.length === 0) {
+        console.error('[Gemini-Confirm] No API keys found in environment');
+        return null;
+    }
 
     let preExtractedInclusions = '';
     let preExtractedExclusions = '';
@@ -959,10 +1156,10 @@ export async function analyzeForConfirmation(text: string, url: string, nextData
     prompt += '  "itinerary": [\n';
     prompt += '    {\n';
     prompt += '      "day": "1일차",\n';
-    prompt += '      "date": "날짜",\n';
-    prompt += '      "title": "일정 제목 (예: 인천 출발 - 다낭 도착)",\n';
-    prompt += '      "activities": ["해당 일자의 핵심 활동 내용 3-5개 요약"],\n';
-    prompt += '      "transportation": "비행기 편명, 출발시간, 도착시간, 소요시간 (예: TW041 21:25 출발 -> 00:40 도착 (5시간 15분 소요))",\n';
+    prompt += '      "date": "날짜 (간략일정에 명시된 날짜 그대로)",\n';
+    prompt += '      "title": "일정 제목",\n';
+    prompt += '      "activities": ["간략일정에 명시된 항목 그대로 (원문 100% 유지. 임의로 요약/수정 금지)"],\n';
+    prompt += '      "transportation": "간략일정표에 표시된 항공편 양식 그대로 (예: 인천 (ICN) 출발 2026.04.12(일) 18:40 - 4시간 30분 소요 - 곤명 (KMG) 도착 2026.04.12(일) 22:10) 본문에 있는 정보를 절대 누락하지 말고 그대로 적으세요.",\n';
     prompt += '      "hotelDetails": {\n';
     prompt += '        "name": "해당일 숙박 호텔 한글명",\n';
     prompt += '        "address": "호텔 상세 주소",\n';
@@ -989,23 +1186,48 @@ export async function analyzeForConfirmation(text: string, url: string, nextData
     prompt += '  "notices": ["전체 유의사항"],\n';
     prompt += '  "cancellationPolicy": "취소/환불 규정",\n';
     prompt += '  "checklist": ["준비물 목록"]\n';
+    prompt += '  "meetingInfo": [\n';
+    prompt += '    {\n';
+    prompt += '      "type": "미팅장소/수속카운터",\n';
+    prompt += '      "location": "상세 위치",\n';
+    prompt += '      "time": "미팅 시각",\n';
+    prompt += '      "description": "미팅 관련 상세 안내 내용 (원문 그대로 복사)"\n';
+    prompt += '    }\n';
+    prompt += '  ],\n';
+    prompt += '  "checklist": ["준비물 목록"]\n';
     prompt += '}\n\n';
-    prompt += '중요 지침:\n';
-    prompt += '1. 이모지 사용 절대 금지: 모든 텍스트에서 이모지를 절대 사용하지 마세요. 깔끔한 텍스트만 사용합니다.\n';
-    prompt += '2. 일정표 최우선 상세화 (중요): 각 일차별(1일차, 2일차...) 상세 일정을 반드시 찾아내세요. activities는 단순히 한 줄 요약이 아니라, 방문지, 식사 장소, 이동 수단 등을 포함하여 꼼꼼하게 3-5문장으로 구체적으로 작성해야 합니다. 텍스트가 일부 깨져 있더라도 문맥을 통해 "일차", "일정", "식사" 등의 키워드를 중심으로 정보를 복원하세요.\n';
-    prompt += '3. 항공 정보 필수상 추출: 본문에서 "항공사", "편명", "출발시간", "도착시간"을 반드시 찾아내세요. 시간은 반드시 HH:MM 형식(예: 09:15, 23:40)으로 추출해야 합니다. 본문 어딘가에 숫자로 된 시각 정보가 반드시 있으니 절대 놓치지 마세요.\n';
-    prompt += '4. 교통 정보 상세화: transportation 필드에 편명, 출발/도착 시각, 총 소요 시간을 예시 형식에 맞춰 정확히 기입하세요.\n';
-    prompt += '5. 호텔 정보: 호텔 이름은 가능한 한글 정식 명칭을 사용하세요. 숙박이 없는 기내박 등의 경우 "기내박" 또는 "없음"으로 명시하세요.\n';
-    prompt += '6. JSON만 반환하세요. 다른 설명 텍스트는 제외하세요.';
+    prompt += '중요 지침 (절대 엄수):\n';
+    prompt += '1. 원문 보존 (VERBATIM): 간략일정(Brief Itinerary) 섹션을 찾아 그 안의 activities(활동/명소/안내/미팅/투숙/유의사항 모두 포함)와 교통편 정보(transportation)를 절대로 요약하거나 고치지 말고 원문 그대로 토시 하나 틀리지 않게 복사하세요.\n';
+    prompt += '   특히 activities 배열에는 단순히 관광지 이름만 넣지 말고, 해당 일자에 적힌 "인천 국제 공항 출발", "유의사항", "가이드 미팅 후 투숙" 등 모든 안내 텍스트 블록들을 개별 문자열로 배열에 전부 넣으세요.\n';
+    prompt += '2. 교통 시간/소요시간: 출발시간, 도착시간, 소요시간이 있다면 "transportation" 필드에 간략일정 양식 그대로 담으세요.\n';
+    prompt += '3. 호텔명 정확도: 호텔 이름은 원문에 명시된 전체 정식 명칭을 사용하세요. 주소가 있다면 반드시 포함하세요.\n';
+    prompt += '4. 미팅 및 수속 정보: 본문에서 미팅 안내 등을 찾아 meetingInfo에 상세히 기록하세요.\n';
+    prompt += '5. 다중 호텔 추출: 일정표 전체에서 언급된 모든 호텔들을 찾아내어 hotels 배열에 담으세요.\n';
+    prompt += '6. 이모지 사용 금지: 깔끔한 텍스트만 사용합니다.\n';
+    prompt += '7. JSON 형식만 반환하세요.';
 
-    const tryModel = async (mName: string) => {
-        console.log(`[Gemini-Confirm] Trying model: ${mName}`);
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${apiKey}`, {
+    console.log(`[Gemini-Confirm] Combined Prompt Length: ${prompt.length}`);
+    console.log(`[Gemini-Confirm] Prompt Snippet (Tail): ${prompt.substring(prompt.length - 500)}`);
+    // safeText와 safeNextData 존재 여부 및 길이 로그
+    console.log(`[Gemini-Confirm] safeText Len: ${safeText.length}, safeNextData Len: ${safeNextData.length}`);
+    if (safeText.includes('일정') || safeText.includes('1일차')) {
+        console.log('[Gemini-Confirm] "일정" or "1일차" keywords FOUND in safeText');
+    } else {
+        console.log('[Gemini-Confirm] "일정" or "1일차" keywords MISSING from safeText!!!');
+    }
+
+    const tryModel = async (mName: string, activeKey: string) => {
+        console.log(`[Gemini-Confirm] Trying model: ${mName} with key ending in ..${activeKey.slice(-4)}`);
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${mName}:generateContent?key=${activeKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { temperature: 0.1, maxOutputTokens: 8192 }
+                generationConfig: { 
+                    temperature: 0.1, 
+                    maxOutputTokens: 8192,
+                    responseMimeType: "application/json"
+                }
             })
         });
         const data = await response.json();
@@ -1016,40 +1238,70 @@ export async function analyzeForConfirmation(text: string, url: string, nextData
         return data;
     };
 
+    let finalResult: any = null;
+
     try {
-        let data = await tryModel('gemini-1.5-pro');
-        if (data.error?.code === 429 || data.error?.status === 'RESOURCE_EXHAUSTED') {
-            data = await tryModel('gemini-1.5-flash');
-        }
-        if (data.error?.code === 429 || data.error?.status === 'RESOURCE_EXHAUSTED') {
-            data = await tryModel('gemini-2.0-flash');
+        for (const activeKey of apiKeys) {
+            console.log(`[Gemini-Confirm] Attempting with key ..${activeKey.slice(-4)}`);
+            
+            // Try models in sequence for this key
+            const modelsToTry = [
+                'models/gemini-2.0-flash',
+                'models/gemini-1.5-pro',
+                'models/gemini-1.5-flash-latest',
+                'models/gemini-pro-latest'
+            ];
+
+            for (const mName of modelsToTry) {
+                const data = await tryModel(mName, activeKey);
+                
+                if (data.error) {
+                    if (data.error.code === 429 || data.error.status === 'RESOURCE_EXHAUSTED' || data.error.message?.includes('quota')) {
+                        console.warn(`[Gemini-Confirm] Key ..${activeKey.slice(-4)} reached quota. Moving to next key.`);
+                        break; // Try next key
+                    }
+                    continue; // Try next model with same key
+                }
+
+                if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    const resText = data.candidates[0].content.parts[0].text;
+                    console.log(`[Gemini-Confirm] Raw Response: ${resText.substring(0, 500)}...`);
+                    const jsonStr = resText.replace(/```json\s*|\s*```/g, '').trim();
+                    try {
+                        const parsed = JSON.parse(jsonStr);
+                        // Cleaning logic
+                        const cleanEnt = (s: any) => typeof s === 'string' ? s.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').trim() : s;
+                        if (Array.isArray(parsed.inclusions)) parsed.inclusions = parsed.inclusions.map(cleanEnt);
+                        if (Array.isArray(parsed.exclusions)) parsed.exclusions = parsed.exclusions.map(cleanEnt);
+
+                        // Itinerary Fallback
+                        if (!parsed.itinerary || !Array.isArray(parsed.itinerary) || parsed.itinerary.length === 0) {
+                            console.log('[Gemini] Itinerary empty, creating fallback Day 1');
+                            parsed.itinerary = [{
+                                day: "전체 일정",
+                                title: parsed.title || "상품 일정 안내",
+                                activities: ["상세 일정 정보를 추출하지 못했습니다. 상세 내용은 원문 페이지를 참고해 주세요."],
+                                meals: { breakfast: "정보 없음", lunch: "정보 없음", dinner: "정보 없음" }
+                            }];
+                        }
+
+                        console.log('[Gemini] 확정서 분석 완료 (일정수: ' + parsed.itinerary.length + ')');
+                        finalResult = parsed;
+                        break; // Success! Break model loop
+                    } catch (parseErr) {
+                        console.error('[Gemini] JSON 파싱 실패', parseErr);
+                    }
+                }
+            }
+            if (finalResult) break; // Success! Break key loop
         }
 
-        if (data.error) {
-            console.error('[Gemini] All models failed:', data.error.message);
+        if (!finalResult) {
+            console.error('[Gemini] All keys and models failed or produced invalid data');
             return null;
         }
+        return finalResult;
 
-        if (!data.candidates || !data.candidates[0]?.content?.parts[0]?.text) {
-            console.error('[Gemini] No candidates in response');
-            return null;
-        }
-
-        const resText = data.candidates[0].content.parts[0].text;
-        const jsonStr = resText.replace(/```json\s*|\s*```/g, '').trim();
-        try {
-            const parsed = JSON.parse(jsonStr);
-            // HTML entity cleaning for inclusions/exclusions
-            const cleanEnt = (s: any) => typeof s === 'string' ? s.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').trim() : s;
-            if (Array.isArray(parsed.inclusions)) parsed.inclusions = parsed.inclusions.map(cleanEnt);
-            if (Array.isArray(parsed.exclusions)) parsed.exclusions = parsed.exclusions.map(cleanEnt);
-
-            console.log('[Gemini] 확정서 분석 완료');
-            return parsed;
-        } catch (parseErr) {
-            console.error('[Gemini] JSON 파싱 실패');
-            return null;
-        }
     } catch (e: any) {
         console.error('[Gemini] 확정서 분석 오류:', e.message);
         return null;
@@ -1144,141 +1396,160 @@ export const scrapeWithScrapingBee = async (url: string): Promise<string | null>
  * 확정서는 정확도와 모든 세부 정보(포함/불포함/일정표) 추출이 필수이므로, 
  * 다소 지연되더라도 JS 렌더링이 보장되는 브라우저 크롤링을 사용합니다.
  */
-export async function crawlForConfirmation(url: string): Promise<any> {
-    console.log(`[ConfirmCrawler] 분석 시작: ${url}`);
+export async function crawlForConfirmation(url: string): Promise<DetailedProductInfo | null> {
+    const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
+    console.log(`[Crawler] crawlForConfirmation Start. Vercel=${isVercel}, URL=${url}`);
 
-    // [Fast-Path] 모두투어 전용 네이티브 API 연동 (딜레이 없음, 정확도 최고)
-    if (url.includes('modetour.com')) {
-        console.log('[ConfirmCrawler] ModeTour URL 감지 -> 네이티브 API 우선 시도');
-        const native = await fetchModeTourNative(url);
-        if (native && native.itinerary && native.itinerary.length > 0) {
-            console.log('[ConfirmCrawler] ModeTour Native Data 수집 성공 -> 분석 생략');
-            return native;
-        }
-        console.log('[ConfirmCrawler] ModeTour Native API 결과가 불충분하여 일반 크롤링으로 폴백');
-    }
+    // 타임아웃 안전망 (26초) - Vercel 30초 제한 대비
+    let timeoutPromise = new Promise<null>((_, reject) => {
+        setTimeout(() => reject(new Error('Total analysis timeout (26s)')), 26000);
+    });
 
-    const isVercel = process.env.VERCEL === '1';
-    let fullText: string | null = null;
-    let nextData: string | undefined = undefined;
-
-    // 1. 브라우저 크롤링 시도 (Vercel이 아닐 때만 - Puppeteer 호환성 문제)
-    if (!isVercel) {
+    try {
+        const result = await Promise.race([
+            _executeDeepCrawl(url, isVercel),
+            timeoutPromise
+        ]);
+        return result as DetailedProductInfo | null;
+    } catch (e: any) {
+        console.error(`[Crawler] Deep Crawl Failed or Timeout: ${e.message}`);
+        // 타임아웃 발생 시, 아주 최소한의 데이터만이라도 반환 시도 (기존 fetchContent는 매우 빠름)
         try {
-            console.log('[ConfirmCrawler] 로컬 환경: Browser 크롤링(Puppeteer) 시도');
-            fullText = await scrapeWithBrowser(url);
-        } catch (e) {
-            console.log(`[ConfirmCrawler] 브라우저 크롤링 중 에러 발생 (무시하고 다음 단계 진행)`);
+            const contentResult = await fetchContent(url);
+            if (contentResult.nativeData) return refineData(contentResult.nativeData, contentResult.text, url);
+            return refineData(fallbackParse(contentResult.text), contentResult.text, url);
+        } catch (inner) {
+            return null;
         }
-    } else {
-        console.log('[ConfirmCrawler] Vercel 환경: Browser 크롤링 건너뜀 (시간 절약)');
+    }
+}
+
+async function _executeDeepCrawl(url: string, isVercel: boolean): Promise<DetailedProductInfo | null> {
+    let fullText = '';
+    let nextData: any = undefined;
+    let nativeDataObj: any = null;
+
+    // 1. [최우선] 모두투어 Native API 시도 (가장 빠름: 1~3초)
+    if (url.includes('modetour.com')) {
+        console.log('[ConfirmCrawler] ModeTour URL 감지 -> 네이티브 API 우선 획득');
+        try {
+            const native = await fetchModeTourNative(url, false); // 확정서는 전체 데이터 필요
+            if (native) {
+                console.log('[ConfirmCrawler] ModeTour Native Data 수집 성공.');
+                nativeDataObj = native;
+                nextData = JSON.stringify(native);
+                
+                // HTML도 가져와서 fullText 채우기 (AI 분석 보조용)
+                const contentResult = await fetchContent(url);
+                fullText = contentResult.text;
+            }
+        } catch (e: any) {
+            console.warn('[ConfirmCrawler] Native API 호출 중 오류:', e.message);
+        }
     }
 
-    // 2. 브라우저 크롤링 실패 시 ScrapingBee 시도 (특히 Vercel 운영 환경에서 필수)
-    if (!fullText && process.env.SCRAPINGBEE_API_KEY) {
-        console.log(`[ConfirmCrawler] ScrapingBee로 전환...`);
-        fullText = await scrapeWithScrapingBee(url);
+    // 2. 브라우저 크롤링 (Native 실패 시 또는 타 사이트)
+    if (!fullText) {
+        if (!isVercel) {
+            try {
+                console.log('[ConfirmCrawler] 로컬 환경: Browser 크롤링(Puppeteer) 시도');
+                fullText = await scrapeWithBrowser(url) || '';
+            } catch (e: any) {
+                console.log(`[ConfirmCrawler] 브라우저 크롤링 중 에러 발생: ${e.message}`);
+            }
+        } else if (process.env.SCRAPINGBEE_API_KEY) {
+            console.log(`[ConfirmCrawler] ScrapingBee로 전환...`);
+            const sbResult = await scrapeWithScrapingBee(url);
+            if (sbResult) fullText = sbResult;
+        }
     }
 
-    // 3. 모든 고급 옵션 실패 시, fallback으로 기존 빠른 fetch 사용
+    // 3. 여전히 데이터가 없으면 일반 fetch
     if (!fullText) {
         console.log(`[ConfirmCrawler] 모든 고급 크롤링이 실패하여 일반 fetch로 폴백`);
         const result = await fetchContent(url);
         fullText = result.text;
-        nextData = result.nextData;
+        if (!nextData) nextData = result.nextData;
     } else {
-        // 추출된 텍스트 정리
         fullText = fullText.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim();
     }
 
+    // 4. AI 분석 (최종 단계: 10~20초 소요)
+    console.log(`[Crawler] AI 분석 시작... (데이터 길이: ${fullText?.length || 0})`);
+    // analyzeForConfirmation는 이미 상단에 정의되어 있다고 가정 (1047번 라인)
     const result = await analyzeForConfirmation(fullText, url, nextData);
+    
     if (result) {
         result.url = url;
+        // [중요] 네이티브 데이터가 있으면 AI 결과에 주입
+        if (nativeDataObj) {
+            console.log('[ConfirmCrawler] AI 결과에 네이티브 데이터 주입 (Verbatim)');
+            if (nativeDataObj.itinerary && nativeDataObj.itinerary.length > 0) result.itinerary = nativeDataObj.itinerary;
+            if (nativeDataObj.meetingInfo && nativeDataObj.meetingInfo.length > 0) result.meetingInfo = nativeDataObj.meetingInfo;
+            if (nativeDataObj.airline) result.airline = nativeDataObj.airline;
+            if (nativeDataObj.flightCode) result.flightCode = nativeDataObj.flightCode;
+            if (nativeDataObj.departureAirport) result.departureAirport = nativeDataObj.departureAirport;
+        }
         return result;
     }
-    // 최종 폴객: 일반 파싱
-    console.log('[ConfirmCrawler] 확정서 전용 Gemini 분석 실패, 일반 파싱으로 폴백');
-    return await crawlTravelProduct(url);
+
+    // 최종 폴백: 일반 파싱
+    console.log('[ConfirmCrawler] 확정서 분석 실패, 일반 파싱으로 폴백');
+    return await crawlTravelProduct(url, 'confirmation');
 }
+
 
 function fallbackParse(text: string): DetailedProductInfo {
     return { title: '상품명 추출 실패', destination: '', price: '가격 문의', departureDate: '', departureAirport: '', duration: '', airline: '', hotel: '', url: '', features: [], courses: [], specialOffers: [], inclusions: [], exclusions: [], itinerary: [], keyPoints: [], hashtags: '', hasNoOption: false, hasFreeSchedule: false };
 }
 
 export async function crawlTravelProduct(url: string, source?: string): Promise<DetailedProductInfo> {
-    console.log(`[Crawler] 분석 시작: ${url}`);
+    console.log(`[Crawler] crawlTravelProduct (Normal Mode) Start: ${url}`);
 
-    // [Fast-Path] 모두투어 전용 네이티브 API 연동 (딜레이 없음)
-    // [Notice] 확정서 탭(confirmation)은 상세 정보가 필요하므로 Fast Path 제외
-    if (url.includes('modetour.com') && source !== 'confirmation') {
-        console.log('[Crawler] ModeTour URL 감지 -> 네이티브 API 우선 시도');
-        const sbKey = process.env.SCRAPINGBEE_API_KEY || undefined;
-        const native = await fetchModeTourNative(url, sbKey);
+    // 1. [Fast Path] ModeTour Native API
+    if (url.includes('modetour.com')) {
+        console.log('[Crawler] ModeTour 감지: Native API (Summary Only) 시도');
+        const native = await fetchModeTourNative(url, true); // 요약 모드 활성화
         if (native) {
-            console.log('[Crawler] ModeTour Native Data 수집 성공 -> Gemini 요약 보강 시작');
-            // 네이티브 정보를 바탕으로 rich text를 구성하여 Gemini에 전달하여 포인트 요약만 요청하거나 전체 재분석
-            const richContext = `[NATIVE_DATA_START]\n${JSON.stringify(native)}\n[NATIVE_DATA_END]\n\n${native.description || ''}`;
-            const aiResult = await analyzeWithGemini(richContext, url);
-            if (aiResult) {
-                // 네이티브 데이터를 AI가 개조식으로 요약한 결과를 최우선으로 사용
-                const finalKeyPoints = (aiResult.keyPoints && aiResult.keyPoints.length > 0) ? aiResult.keyPoints : (native.keyPoints || []);
-                return refineData({ ...native, keyPoints: finalKeyPoints }, richContext, url);
-            }
-            return refineData(native, `TARGET_TITLE: "${native.title}"\nTARGET_PRICE: "${native.price}"\nTARGET_DURATION: "${native.duration}"\nTARGET_AIRLINE: "${native.airline}"\nTARGET_DEPARTURE_AIRPORT: "${native.departureAirport}"\nTARGET_DEPARTURE_DATE: "${native.departureDate}"\n`, url);
+            console.log('[Crawler] ModeTour Native 수집 성공 (AI 분석 건너뜀)');
+            return refineData(native, JSON.stringify(native), url);
         }
-        console.log('[Crawler] ModeTour Native API 실패하여 일반 크롤링으로 폴백');
     }
 
-    const isVercel = process.env.VERCEL === '1';
+    // 2. [Vercel 최적화] Vercel에서는 ScrapingBee 대신 일반 fetch 시도 후 안될 때만 AI 고려
+    const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
+    
+    let fullText = '';
+    let nextData: any = undefined;
 
-    let fullText: string | null = null;
-    let nextData: string | undefined = undefined;
-
-    // 1. 브라우저 크롤링 시도 (Vercel이 아닐 때만 - Puppeteer 호환성 문제)
-    if (!isVercel) {
-        try {
-            console.log('[Crawler] 로컬 환경: Browser 크롤링(Puppeteer) 시도');
-            fullText = await scrapeWithBrowser(url);
-        } catch (e) {
-            console.log(`[Crawler] 브라우저 크롤링 중 에러 발생 (무시하고 다음 단계 진행)`);
-        }
-    } else {
-        console.log('[Crawler] Vercel 환경: Browser 크롤링 건너뜀 (시간 절약)');
-    }
-
-    // 2. 브라우저 크롤링 실패 시 ScrapingBee 시도 (특히 Vercel 운영 환경에서 필수)
-    if (!fullText && process.env.SCRAPINGBEE_API_KEY) {
-        console.log(`[Crawler] ScrapingBee로 전환...`);
-        fullText = await scrapeWithScrapingBee(url);
-    }
-
-    // 3. 모든 고급 옵션 실패 시, fallback으로 기존 빠른 fetch 사용
-    const contentResult = await fetchContent(url);
+    // 일반 fetch 시도 (isSummaryOnly=true)
+    const contentResult = await fetchContent(url, true);
     if (contentResult.nativeData) {
-        console.log('[Crawler] ModeTour Native Data 발견 - 최우선 적용');
         return refineData(contentResult.nativeData, contentResult.text, url, contentResult.nextData);
     }
+    
+    fullText = contentResult.text;
+    nextData = contentResult.nextData;
 
-    if (!fullText) {
-        console.log(`[Crawler] 모든 고급 크롤링이 실패하여 일반 fetch로 폴백`);
-        fullText = contentResult.text;
-        nextData = contentResult.nextData;
-    } else {
-        // 추출된 텍스트 정리
-        fullText = fullText.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim();
+    // 만약 텍스트가 너무 적고 (정상적인 페이지가 아님) Vercel이 아니라면 브라우저 시도
+    if (fullText.length < 500 && !isVercel) {
+        try {
+            const browserText = await scrapeWithBrowser(url);
+            if (browserText) fullText = browserText;
+        } catch (e) {}
     }
 
-    console.log(`[Crawler] AI 분석 시작... (데이터 길이: ${fullText.length})`);
-    const aiResult = await analyzeWithGemini(fullText, url, nextData);
+    // 텍스트 정리
+    fullText = fullText.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim();
 
-    if (aiResult) {
-        console.log(`[Crawler] AI 분석 결과 수신 성공: ${aiResult.title}`);
-        if (aiResult.isProduct) {
-            return refineData(aiResult, fullText, url, nextData);
-        }
-    } else {
-        console.error('[Crawler] AI 분석 결과가 null입니다.');
+    // 3. AI 분석 (최종 수단)
+    console.log(`[Crawler] AI 분석 시작 (Normal Mode: Summary Only)`);
+    const aiResult = await analyzeWithGemini(fullText, url, nextData, true);
+
+    if (aiResult?.isProduct) {
+        return refineData(aiResult, fullText, url, nextData);
     }
+    
     return refineData(fallbackParse(fullText), fullText, url, nextData);
 }
 
@@ -1334,103 +1605,52 @@ function formatDurationString(durationStr: string): string {
 export function refineData(info: DetailedProductInfo, originalText: string, url: string, nextData?: string): DetailedProductInfo {
     const refined = { ...info };
 
-    // 메타데이터 값에서 따옴표 제거 헬퍼
-    const stripQuotes = (s: string) => s.replace(/^"|"$/g, '').trim();
-
-    // [강력 보완] Title 보정
-    if (!refined.title || refined.title.length < 5 || refined.title.includes('undefined') || refined.title.includes('상품상세')) {
-        const titleMatch = originalText.match(/TARGET_TITLE:\s*"?([^"\n]*)"?/);
-        if (titleMatch && stripQuotes(titleMatch[1]) && stripQuotes(titleMatch[1]) !== 'undefined') {
-            refined.title = stripQuotes(titleMatch[1]);
-        } else {
-            const ogMatch = originalText.match(/OG_TITLE:\s*"?([^"\n]*)"?/);
-            if (ogMatch && stripQuotes(ogMatch[1]) && stripQuotes(ogMatch[1]) !== 'undefined') refined.title = stripQuotes(ogMatch[1]);
-            else {
-                const classMatch = originalText.match(/CLASS_TITLE:\s*"?([^"\n]*)"?/);
-                if (classMatch && stripQuotes(classMatch[1])) refined.title = stripQuotes(classMatch[1]);
-            }
+    // 기본적인 포맷팅만 수행 (AI가 추출한 데이터를 최대한 존중)
+    if (refined.price) {
+        const digits = String(refined.price).replace(/[^0-9]/g, '');
+        if (digits && parseInt(digits, 10) > 1000) {
+            refined.price = parseInt(digits, 10).toLocaleString() + '원';
         }
     }
 
-    // [강력 보완] Price 보정
-    let rawPrice = String(refined.price || '');
-    const metadataPrice = originalText.match(/TARGET_PRICE:\s*"?([^"\n]*)"?/);
-    if (metadataPrice) {
-        const mPrice = stripQuotes(metadataPrice[1]).replace(/[^0-9]/g, '');
-        if (mPrice && mPrice !== '0') {
-            // 만약 AI가 가격을 못 가져왔거나, 메타데이터 가격이 더 크다면 메타데이터 신뢰
-            const currentPriceNum = parseInt(rawPrice.replace(/[^0-9]/g, '') || '0', 10);
-            if (!rawPrice || rawPrice === '0' || parseInt(mPrice, 10) > currentPriceNum) {
-                rawPrice = mPrice;
-            }
+    if (refined.departureDate) {
+        refined.departureDate = formatDateString(refined.departureDate);
+    }
+
+    if (refined.duration) {
+        refined.duration = formatDurationString(refined.duration);
+    }
+
+    // 항공사 이름 매핑 (코드 -> 이름)
+    if (refined.airline && refined.airline.length <= 3) {
+        const airlineCode = refined.airline.trim().toUpperCase();
+        if (AIRLINE_MAP[airlineCode]) {
+            console.log(`[Refine] Mapping airline code ${airlineCode} to ${AIRLINE_MAP[airlineCode]}`);
+            refined.airline = AIRLINE_MAP[airlineCode];
         }
     }
-
-    // [강력 보완] 항공사 보정
-    if (!refined.airline || refined.airline.length < 2) {
-        const metadataAirline = originalText.match(/TARGET_AIRLINE:\s*"?([^"\n]*)"?/);
-        if (metadataAirline && stripQuotes(metadataAirline[1]).length >= 2) {
-            refined.airline = stripQuotes(metadataAirline[1]);
-        }
-    }
-
-    // [강력 보완] 출발공항 보정
-    if (!refined.departureAirport || refined.departureAirport === '인천') {
-        const metadataAirport = originalText.match(/TARGET_DEPARTURE_AIRPORT:\s*"?([^"\n]*)"?/);
-        if (metadataAirport && stripQuotes(metadataAirport[1]) && stripQuotes(metadataAirport[1]) !== 'undefined') {
-            refined.departureAirport = stripQuotes(metadataAirport[1]);
-        }
-    }
-
-    // 숫자 부분만 추출하여 콤마 포맷팅 (Price)
-    const digits = rawPrice.replace(/[^0-9]/g, '');
-    if (digits && parseInt(digits, 10) > 1000) {
-        refined.price = parseInt(digits, 10).toLocaleString() + '원';
-    } else if (digits === '0') {
-        refined.price = '0원';
-    }
-
-    // 항공사 보정
-    let airline = refined.airline || '';
-    const airlineCode = airline.substring(0, 2).toUpperCase();
-    if (AIRLINE_MAP[airlineCode]) airline = AIRLINE_MAP[airlineCode];
-    refined.airline = airline;
-
-    // 카테고리/기간 절대 보정: AI 텍스트 예측보다 원본 메타데이터/JSON 추출값을 무조건 1순위로 신뢰
-    const durationMatch = originalText.match(/TARGET_DURATION:\s*"?([^"\n]*)"?/);
-    let rawDuration = (durationMatch && stripQuotes(durationMatch[1]) && stripQuotes(durationMatch[1]) !== 'undefined')
-        ? stripQuotes(durationMatch[1])
-        : String(refined.duration || '');
-
-    // 포맷팅 적용
-    refined.departureDate = formatDateString(refined.departureDate || '');
-    refined.duration = formatDurationString(rawDuration);
-
-    console.log(`[Crawler Refine] AI Duration: ${refined.duration} -> Final Duration: ${rawDuration} -> Formatted: ${formatDurationString(rawDuration)}`);
+    console.log(`[Refine-DEBUG] After Refine: Airline=${refined.airline}, Airport=${refined.departureAirport}, Date=${refined.departureDate}`);
 
     return {
         ...refined,
         url,
-        features: refined.features || [],
-        courses: refined.courses || [],
-        specialOffers: refined.specialOffers || [],
+        itinerary: refined.itinerary || [],
+        keyPoints: (refined.keyPoints || []).slice(0, 4),
         inclusions: refined.inclusions || [],
         exclusions: refined.exclusions || [],
-        itinerary: refined.itinerary || [],
-        keyPoints: (refined.keyPoints || []).slice(0, 4).map((p: string) => {
-            let cleaned = p.replace(/((웹문서|다\.|입니다|합니다|해요|요|제공|포함|가능)[.\s]*)+$/gi, '').trim();
-            return cleaned.substring(0, 50);
-        }),
-        hashtags: refined.hashtags || '',
-        hasNoOption: (refined.features || []).includes('노옵션'),
-        hasFreeSchedule: (refined.features || []).includes('자유일정포함'),
+        specialOffers: refined.specialOffers || [],
+        notices: refined.notices || [],
+        features: refined.features || [],
+        courses: refined.courses || []
     };
 }
 
 const AIRLINE_MAP: Record<string, string> = {
     '7C': '제주항공', 'KE': '대한항공', 'OZ': '아시아나', 'LJ': '진에어',
     'TW': '티웨이', 'ZE': '이스타', 'RS': '에어서울', 'BX': '에어부산',
-    'VN': '베트남항공', 'VJ': '비엣젯', 'PR': '필리핀항공', '5J': '세부퍼시픽'
+    'VN': '베트남항공', 'VJ': '비엣젯', 'PR': '필리핀항공', '5J': '세부퍼시픽',
+    'CX': '캐세이퍼시픽', 'CI': '중화항공', 'BR': '에바항공', 'MU': '동방항공',
+    'CZ': '남방항공', 'CA': '중국국제항공', 'HO': '길상항공'
 };
 
 export function formatProductInfo(info: DetailedProductInfo, index?: number): string {
@@ -1441,8 +1661,9 @@ export function formatProductInfo(info: DetailedProductInfo, index?: number): st
     const priceWithComma = rawPrice ? parseInt(rawPrice, 10).toLocaleString() : '- ';
 
     r += `* 출발일 : ${formatDateString(info.departureDate || '-')}\n`;
-    r += `* 출발공항 : ${info.departureAirport || '인천'}\n`;
-    r += `* 항공 : ${info.airline || '-'}\n`;
+    r += `* 출발공항 : ${info.departureAirport || '인천공항'}\n`;
+    r += `* 항공사 : ${info.airline || '정보없음'}\n`;
+    r += `* 여행기간 : ${info.duration || '-'}\n\n`;
     r += `* 지역 : ${info.destination || '-'}\n`;
     r += `* 기간 : ${info.duration || '-'}\n`;
     r += `* 가격 : ${priceWithComma}원\n`;

@@ -1,5 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { deleteConsultationFromSheet, updateConsultationStatus } from '@/lib/google-sheets';
+import { deleteConsultationFromSheet, updateConsultationStatus, updateConsultationField } from '@/lib/google-sheets';
+
+// 상담 개별 필드 업데이트 (PATCH)
+export async function PATCH(request: NextRequest) {
+    try {
+        const body = await request.json();
+        const { rowIndex, field, value, sheetName } = body;
+
+        if (!rowIndex || !field) {
+            return NextResponse.json(
+                { success: false, error: 'rowIndex와 field가 필요합니다.' },
+                { status: 400 }
+            );
+        }
+
+        const success = await updateConsultationField(rowIndex, field, value ?? '', sheetName);
+
+        if (success) {
+            return NextResponse.json({ success: true, message: `${field} 업데이트 완료` });
+        } else {
+            return NextResponse.json(
+                { success: false, error: 'Google Sheets 업데이트 실패' },
+                { status: 500 }
+            );
+        }
+    } catch (error) {
+        console.error('필드 업데이트 오류:', error);
+        return NextResponse.json(
+            { success: false, error: '처리 중 오류가 발생했습니다.' },
+            { status: 500 }
+        );
+    }
+}
 
 // 상담 상태 업데이트
 export async function PUT(request: NextRequest) {

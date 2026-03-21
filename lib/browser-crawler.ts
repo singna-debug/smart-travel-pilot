@@ -47,16 +47,16 @@ export async function scrapeWithBrowser(url: string): Promise<string | null> {
             console.log('[Browser] 초기 로딩 대기 실패, 스크롤 진행');
         }
 
-        console.log('[Browser] 스크롤 다운 (Optimized - 8000px)...');
+        console.log('[Browser] 스크롤 다운 (Optimized - 12000px)...');
         await page.evaluate(async () => {
-            const maxScroll = 8000;
+            const maxScroll = 12000; // 충분히 깊게 스크롤
             const scrollStep = 1000;
             let currentScroll = 0;
 
             while (currentScroll < maxScroll && currentScroll < document.body.scrollHeight) {
                 currentScroll += scrollStep;
                 window.scrollTo(0, currentScroll);
-                await new Promise(resolve => setTimeout(resolve, 200)); // 0.2s wait
+                await new Promise(resolve => setTimeout(resolve, 300)); // 조금 더 여유 있게 대기
             }
         });
 
@@ -64,7 +64,7 @@ export async function scrapeWithBrowser(url: string): Promise<string | null> {
         try {
             await page.waitForFunction(() => {
                 return document.body.innerText.length > 2500;
-            }, { timeout: 7000 });
+            }, { timeout: 10000 });
         } catch (e) {
             console.log('[Browser] 전체 콘텐츠 로딩 대기 실패 (시간 초과), 계속 진행');
         }
@@ -74,8 +74,22 @@ export async function scrapeWithBrowser(url: string): Promise<string | null> {
             await page.evaluate(async () => {
                 // 클릭할 키워드 목록
                 const keywords = ['더보기', '자세히 보기', '자세히보기', '펼치기', '상세보기', '상세', '호텔정보', '호텔 정보', '숙박정보', '포함', '불포함', '일정'];
+                
+                // 모두투어 전용: 일정표 더보기 버튼 클래스들
+                const specSelectors = ['.btn_more', '.btn_detail', '.itinerary_more', 'a[onclick*="getSchedule"]'];
+                
+                // 1. 특정 셀렉터 우선 시도
+                for (const sel of specSelectors) {
+                    const els = document.querySelectorAll(sel);
+                    for (const el of Array.from(els) as HTMLElement[]) {
+                        if (el.offsetParent !== null) { // 보이는 것만
+                            el.click();
+                            await new Promise(r => setTimeout(r, 300));
+                        }
+                    }
+                }
 
-                // button, a, div, span 중에서 키워드를 포함하는 요소 찾기
+                // 2. 키워드 기반 클릭
                 const elements = Array.from(document.querySelectorAll('button, a, div.btn, span.btn, div[role="button"], span[role="button"]')) as HTMLElement[];
 
                 let clickedCount = 0;
@@ -83,17 +97,18 @@ export async function scrapeWithBrowser(url: string): Promise<string | null> {
                     const text = (el.innerText || el.textContent || '').trim();
                     if (text.length > 0 && text.length < 15 && keywords.some(k => text.includes(k))) {
                         try {
-                            el.click();
-                            clickedCount++;
-                            // 클릭 후 잠시 대기
-                            await new Promise(r => setTimeout(r, 200));
+                            if (el.offsetParent !== null) { // 화면에 보이는 것만 클릭
+                                el.click();
+                                clickedCount++;
+                                await new Promise(r => setTimeout(r, 300));
+                            }
                         } catch (e) { }
                     }
                 }
                 console.log(`[Browser In-Page] 클릭된 버튼 수: ${clickedCount}`);
             });
             // 모달이나 추가 콘텐츠가 로드될 시간 대기
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await new Promise(resolve => setTimeout(resolve, 2000));
         } catch (e) {
             console.log('[Browser] 클릭 처리 중 오류 발생 (무시하고 진행)', e);
         }
