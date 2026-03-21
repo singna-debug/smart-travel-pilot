@@ -92,17 +92,20 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    id: item.sheetRowIndex,
+                    rowIndex: item.sheetRowIndex,
                     sheetName: item.sheetName,
                     sheetGid: item.sheetGid,
                     field,
                     value,
                 }),
             });
-            if (!response.ok) throw new Error('업데이트 실패');
-        } catch (error) {
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || '업데이트 실패');
+            }
+        } catch (error: any) {
             setLocalData(originalData);
-            alert('업데이트 중 오류가 발생했습니다.');
+            alert(`업데이트 중 오류가 발생했습니다: ${error.message}`);
         }
     };
 
