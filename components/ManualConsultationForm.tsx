@@ -5,24 +5,36 @@ import { useState } from 'react';
 interface ConsultationForm {
     customerName: string;
     customerPhone: string;
+    travelersCount: string;
     destination: string;
     productName: string;
     productUrl: string;
     departureDate: string;
     notes: string;
     source: string;
+    status: string;
+    confirmedProduct: string;
+    confirmedDate: string;
+    recurringCustomer: string;
+    inquirySource: string;
 }
 
 export default function ManualConsultationForm() {
     const [form, setForm] = useState<ConsultationForm>({
         customerName: '',
         customerPhone: '',
+        travelersCount: '',
         destination: '',
         productName: '',
         productUrl: '',
         departureDate: '',
         notes: '',
         source: '전화',
+        status: '상담중',
+        confirmedProduct: '',
+        confirmedDate: '',
+        recurringCustomer: '신규고객',
+        inquirySource: '',
     });
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -47,14 +59,20 @@ export default function ManualConsultationForm() {
                 body: JSON.stringify({
                     customerName: form.customerName,
                     customerPhone: form.customerPhone,
+                    travelersCount: form.travelersCount,
                     destination: form.destination,
                     departureDate: form.departureDate,
                     interestedProduct: form.productName,
-                    productUrl: form.productUrl, // Backend might need adjustment to handle this directly
+                    productUrl: form.productUrl,
                     memo: form.notes,
-                    status: '상담중',
+                    status: form.status,
+                    confirmedProduct: form.confirmedProduct,
+                    confirmedDate: form.confirmedDate,
+                    recurringCustomer: form.recurringCustomer,
+                    inquirySource: form.inquirySource,
+                    source: form.source,
                     isComparison: false,
-                    analysisData: { raw: { url: form.productUrl, title: form.productName } } // Dummy for compatibility
+                    analysisData: { raw: { url: form.productUrl, title: form.productName } }
                 }),
             });
 
@@ -66,12 +84,18 @@ export default function ManualConsultationForm() {
                 setForm({
                     customerName: '',
                     customerPhone: '',
+                    travelersCount: '',
                     destination: '',
                     productName: '',
                     productUrl: '',
                     departureDate: '',
                     notes: '',
                     source: '전화',
+                    status: '상담중',
+                    confirmedProduct: '',
+                    confirmedDate: '',
+                    recurringCustomer: '신규고객',
+                    inquirySource: '',
                 });
 
                 setTimeout(() => setSuccess(false), 3000);
@@ -138,6 +162,45 @@ export default function ManualConsultationForm() {
                     </div>
 
                     <div className="form-group">
+                        <label className="form-label">총인원</label>
+                        <input
+                            type="number"
+                            value={form.travelersCount || ''}
+                            onChange={(e) => setForm({ ...form, travelersCount: e.target.value })}
+                            placeholder="예: 2"
+                            className="form-input"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">재방문 여부</label>
+                        <select
+                            value={form.recurringCustomer}
+                            onChange={(e) => updateForm('recurringCustomer', e.target.value)}
+                            className="form-select"
+                        >
+                            <option value="신규고객">🆕 신규고객</option>
+                            <option value="재방문">🔄 재방문</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">유입 경로</label>
+                        <select
+                            value={form.inquirySource}
+                            onChange={(e) => updateForm('inquirySource', e.target.value)}
+                            className="form-select"
+                        >
+                            <option value="">-- 선택 --</option>
+                            <option value="블로그">📱 블로그</option>
+                            <option value="지인소개">🤝 지인소개</option>
+                            <option value="카카오톡채널">💬 카카오톡채널</option>
+                            <option value="인스타그램">📸 인스타그램</option>
+                            <option value="매장방문">🏢 매장방문</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group">
                         <label className="form-label">목적지</label>
                         <input
                             type="text"
@@ -168,6 +231,49 @@ export default function ManualConsultationForm() {
                             className="form-input"
                         />
                     </div>
+
+                    <div className="form-group">
+                        <label className="form-label">상담 단계</label>
+                        <select
+                            value={form.status}
+                            onChange={(e) => updateForm('status', e.target.value)}
+                            className="form-select"
+                        >
+                            <option value="상담중">상담중</option>
+                            <option value="예약확정">예약확정</option>
+                            <option value="선금완료">선금완료</option>
+                            <option value="잔금완료">잔금완료</option>
+                            <option value="여행완료">여행완료</option>
+                            <option value="취소/보류">취소/보류</option>
+                            <option value="상담완료">상담완료</option>
+                        </select>
+                    </div>
+
+                    {['예약확정', '선금완료', '잔금완료', '여행완료'].includes(form.status) && (
+                        <>
+                            <div className="form-group full-width">
+                                <label className="form-label" style={{ color: 'var(--accent-primary)' }}>✨ 확정상품 URL (날짜 자동분석)</label>
+                                <input
+                                    type="url"
+                                    value={form.confirmedProduct}
+                                    onChange={(e) => updateForm('confirmedProduct', e.target.value)}
+                                    placeholder="https://..."
+                                    className="form-input"
+                                    style={{ borderColor: 'var(--accent-primary)' }}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label" style={{ color: 'var(--accent-primary)' }}>📅 예약확정일</label>
+                                <input
+                                    type="date"
+                                    value={form.confirmedDate}
+                                    onChange={(e) => updateForm('confirmedDate', e.target.value)}
+                                    className="form-input"
+                                    style={{ borderColor: 'var(--accent-primary)' }}
+                                />
+                            </div>
+                        </>
+                    )}
 
                     <div className="form-group full-width">
                         <label className="form-label">상품 URL</label>

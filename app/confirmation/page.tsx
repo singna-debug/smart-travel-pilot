@@ -33,30 +33,48 @@ function safeStr(val: any): string {
 
 function formatToHtmlDate(dateStr: string): string {
     if (!dateStr) return '';
-    const cleanedDate = dateStr.replace(/[^0-9]/g, '');
-    let targetYear, targetMonth, targetDay;
+    
+    // 이미 YYYY-MM-DD 형식이면 그대로 반환
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+
+    // 점(.)이나 다른 구분자를 사용하는 경우 처리 (예: 2026.04.18)
+    const dotMatch = dateStr.match(/(\d{4})[./-](\d{1,2})[./-](\d{1,2})/);
+    if (dotMatch) {
+        const y = dotMatch[1];
+        const m = dotMatch[2].padStart(2, '0');
+        const d = dotMatch[3].padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
 
     const mdMatch = dateStr.match(/(\d+)\s*월\s*(\d+)\s*일/);
     if (mdMatch) {
         const now = new Date();
-        targetYear = now.getFullYear();
-        targetMonth = parseInt(mdMatch[1]) - 1;
-        targetDay = parseInt(mdMatch[2]);
-    } else if (cleanedDate.length >= 8) {
-        targetYear = parseInt(cleanedDate.substring(0, 4));
-        targetMonth = parseInt(cleanedDate.substring(4, 6)) - 1;
-        targetDay = parseInt(cleanedDate.substring(6, 8));
-    } else {
-        return dateStr;
+        const targetYear = now.getFullYear();
+        const targetMonth = String(mdMatch[1]).padStart(2, '0');
+        const targetDay = String(mdMatch[2]).padStart(2, '0');
+        return `${targetYear}-${targetMonth}-${targetDay}`;
     }
 
-    const d = new Date(targetYear, targetMonth, targetDay);
-    if (isNaN(d.getTime())) return dateStr;
+    const cleanedDate = dateStr.replace(/[^0-9]/g, '');
+    if (cleanedDate.length === 8) {
+        const y = cleanedDate.substring(0, 4);
+        const m = cleanedDate.substring(4, 6);
+        const d = cleanedDate.substring(6, 8);
+        return `${y}-${m}-${d}`;
+    }
 
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
+    // fallback: Date 객체로 시도
+    try {
+        const d = new Date(dateStr);
+        if (!isNaN(d.getTime())) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+    } catch (e) {}
+
+    return dateStr;
 }
 
 export default function ConfirmationPage() {
@@ -94,13 +112,10 @@ export default function ConfirmationPage() {
     const [returnDepartureTime, setReturnDepartureTime] = useState('');
     const [returnArrivalTime, setReturnArrivalTime] = useState('');
 
-    // 숙박
-    const [hotelName, setHotelName] = useState('');
-    const [hotelAddress, setHotelAddress] = useState('');
-    const [checkIn, setCheckIn] = useState('');
-    const [checkOut, setCheckOut] = useState('');
-    const [hotelImages, setHotelImages] = useState('');
-    const [hotelAmenities, setHotelAmenities] = useState('');
+    // 숙박 (다중 지원)
+    const [hotels, setHotels] = useState<any[]>([{
+        name: '', address: '', checkIn: '', checkOut: '', images: [], amenities: []
+    }]);
 
     // 안내
     const [inclusions, setInclusions] = useState('');
@@ -232,32 +247,64 @@ export default function ConfirmationPage() {
                 // ---- 항공 상세 ----
                 if (raw.airline) setAirline(raw.airline);
                 if (raw.departureAirport) setDepartureAirport(raw.departureAirport);
+                
+                // 시간 정보는 raw.departureTime 등이 문자열일 수도 있고 객체일 수도 있으므로 유연하게 처리
                 if (raw.departureTime) setDepartureTime(raw.departureTime);
                 if (raw.arrivalTime) setArrivalTime(raw.arrivalTime);
                 if (raw.returnDepartureTime) setReturnDepartureTime(raw.returnDepartureTime);
                 if (raw.returnArrivalTime) setReturnArrivalTime(raw.returnArrivalTime);
+                
+                // 편명/코드 (필요시 추가 매핑)
+                // if (raw.flightCode) ... (현재 state에 flightCode가 없으면 생략 가능)
 
-                if (raw.hotel?.name) {
-                    const enName = raw.hotel.englishName ? ` (${raw.hotel.englishName})` : '';
-                    setHotelName(raw.hotel.name + enName);
+                // ---- 호텔 상세 (다중 지원) ----
+                let extractedHotels: any[] = [];
+                if (raw.hotels && Array.isArray(raw.hotels) && raw.hotels.length > 0) {
+                    extractedHotels = raw.hotels.map((h: any) => ({
+                        ...h,
+                        checkIn: h.checkIn || formatToHtmlDate(raw.departureDate || ''),
+                        checkOut: h.checkOut || formatToHtmlDate(raw.returnDate || '')
+                    }));
+                } else if (raw.hotel) {
+                    // 단일 호텔 백업
+                    const h = typeof raw.hotel === 'object' ? raw.hotel : { name: raw.hotel };
+                    extractedHotels = [{
+                        name: h.name || '',
+                        address: h.address || raw.hotelAddress || '',
+                        checkIn: h.checkIn || formatToHtmlDate(raw.departureDate || ''),
+                        checkOut: h.checkOut || formatToHtmlDate(raw.returnDate || ''),
+                        images: Array.isArray(h.images) ? h.images : [],
+                        amenities: Array.isArray(h.amenities) ? h.amenities : []
+                    }];
                 }
-                if (raw.hotel?.address) setHotelAddress(raw.hotel.address);
-                if (raw.hotel?.images?.length) setHotelImages(raw.hotel.images.join('\n'));
-                if (raw.hotel?.amenities?.length) setHotelAmenities(raw.hotel.amenities.join('\n'));
 
-                if (typeof raw.hotel === 'string' && raw.hotel) setHotelName(raw.hotel);
-                if (raw.hotelAddress && !raw.hotel?.address) setHotelAddress(raw.hotelAddress);
+                if (extractedHotels.length > 0) {
+                    setHotels(extractedHotels);
+                }
 
-                if (raw.departureDate) setCheckIn(raw.departureDate);
-                if (raw.returnDate) setCheckOut(raw.returnDate);
-
-                if (raw.inclusions?.length) setInclusions(raw.inclusions.join('\n'));
-                if (raw.exclusions?.length) setExclusions(raw.exclusions.join('\n'));
+                // ---- 일정 및 미팅 ----
+                if (raw.itinerary && Array.isArray(raw.itinerary) && raw.itinerary.length > 0) {
+                    setItinerary(raw.itinerary);
+                }
+                
+                if (raw.meetingInfo && Array.isArray(raw.meetingInfo)) {
+                    setMeetingInfo(raw.meetingInfo);
+                } else if (raw.notices && Array.isArray(raw.notices)) {
+                    // notices에 미팅 관련 내용이 있을 수 있음 (legacy 대응)
+                    const mInfo = raw.notices
+                        .filter((n: string) => n.includes('미팅') || n.includes('집합'))
+                        .map((n: string) => ({ title: '미팅 안내', content: n }));
+                    if (mInfo.length > 0) setMeetingInfo(mInfo);
+                    setNotices(raw.notices.join('\n'));
+                } else if (typeof raw.notices === 'string') {
+                    setNotices(raw.notices);
+                }
+                if (raw.inclusions?.length) setInclusions(Array.isArray(raw.inclusions) ? raw.inclusions.join('\n') : raw.inclusions);
+                if (raw.exclusions?.length) setExclusions(Array.isArray(raw.exclusions) ? raw.exclusions.join('\n') : raw.exclusions);
                 if (raw.cancellationPolicy) setCancellationPolicy(raw.cancellationPolicy);
-                if (raw.checklist?.length) setChecklist(raw.checklist.join('\n'));
-                if (raw.itinerary?.length) setItinerary(raw.itinerary);
-                if (raw.meetingInfo?.length) setMeetingInfo(raw.meetingInfo);
+                if (raw.checklist?.length) setChecklist(Array.isArray(raw.checklist) ? raw.checklist.join('\n') : raw.checklist);
 
+                // ---- 유의사항 (Notices) 통합 ----
                 const noticesParts: string[] = [];
                 if (raw.keyPoints?.length) {
                     noticesParts.push('핵심 포인트:\n' + raw.keyPoints.map((k: string) => `• ${k}`).join('\n'));
@@ -294,6 +341,13 @@ export default function ConfirmationPage() {
     const removeTraveler = (i: number) => setTravelers(prev => prev.filter((_, idx) => idx !== i));
     const updateTraveler = (i: number, field: keyof TravelerInfo, value: string) => {
         setTravelers(prev => prev.map((t, idx) => idx === i ? { ...t, [field]: value } : t));
+    };
+
+    // 호텔 관리
+    const addHotel = () => setHotels(prev => [...prev, { name: '', address: '', checkIn: departureDate, checkOut: returnDate, images: [], amenities: [] }]);
+    const removeHotel = (i: number) => setHotels(prev => prev.filter((_, idx) => idx !== i));
+    const updateHotel = (i: number, field: string, value: any) => {
+        setHotels(prev => prev.map((h, idx) => idx === i ? { ...h, [field]: value } : h));
     };
 
     // 미팅/수속 정보 관리
@@ -438,12 +492,11 @@ export default function ConfirmationPage() {
                     departureTime, arrivalTime,
                     returnDepartureTime, returnArrivalTime,
                 },
-                hotel: {
-                    name: hotelName, address: hotelAddress,
-                    checkIn, checkOut,
-                    images: hotelImages.split('\n').map(s => s.trim()).filter(Boolean),
-                    amenities: hotelAmenities.split('\n').map(s => s.trim()).filter(Boolean),
-                },
+                hotels: hotels.map(h => ({
+                    ...h,
+                    images: Array.isArray(h.images) ? h.images : (typeof h.images === 'string' ? h.images.split('\n').filter(Boolean) : []),
+                    amenities: Array.isArray(h.amenities) ? h.amenities : (typeof h.amenities === 'string' ? h.amenities.split('\n').filter(Boolean) : []),
+                })),
                 itinerary: itinerary, // 상태 값 사용
                 meetingInfo,
                 inclusions: inclusions.split('\n').map(s => s.trim()).filter(Boolean),
@@ -669,44 +722,53 @@ export default function ConfirmationPage() {
                         <input value={returnArrivalTime} onChange={e => setReturnArrivalTime(e.target.value)} placeholder="21:00" />
                     </div>
                 </div>
-                <div className="confirm-grid" style={{ marginTop: '16px' }}>
-                    <div className="confirm-field">
-                        <label>호텔명</label>
-                        <input value={hotelName} onChange={e => setHotelName(e.target.value)} placeholder="호텔명" />
+                {hotels.map((h, i) => (
+                    <div key={i} className="hotel-edit-card" style={{ marginBottom: '24px', padding: '16px', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                            <h4 style={{ margin: 0 }}>숙박 {i + 1}</h4>
+                            {hotels.length > 1 && <button onClick={() => removeHotel(i)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>✕ 삭제</button>}
+                        </div>
+                        <div className="confirm-grid">
+                            <div className="confirm-field">
+                                <label>호텔명</label>
+                                <input value={h.name} onChange={e => updateHotel(i, 'name', e.target.value)} placeholder="호텔명" />
+                            </div>
+                            <div className="confirm-field">
+                                <label>호텔 주소</label>
+                                <input value={h.address} onChange={e => updateHotel(i, 'address', e.target.value)} placeholder="주소" />
+                            </div>
+                            <div className="confirm-field">
+                                <label>체크인</label>
+                                <input type="date" value={h.checkIn} onChange={e => updateHotel(i, 'checkIn', e.target.value)} />
+                            </div>
+                            <div className="confirm-field">
+                                <label>체크아웃</label>
+                                <input type="date" value={h.checkOut} onChange={e => updateHotel(i, 'checkOut', e.target.value)} />
+                            </div>
+                        </div>
+                        <div className="confirm-grid" style={{ marginTop: '12px' }}>
+                            <div className="confirm-field" style={{ gridColumn: '1 / -1' }}>
+                                <label>호텔 이미지 URL (엔터로 구분)</label>
+                                <textarea
+                                    value={Array.isArray(h.images) ? h.images.join('\n') : h.images}
+                                    onChange={e => updateHotel(i, 'images', e.target.value.split('\n'))}
+                                    rows={2}
+                                    placeholder="https://..."
+                                />
+                            </div>
+                            <div className="confirm-field" style={{ gridColumn: '1 / -1' }}>
+                                <label>시설 및 서비스 (엔터로 구분)</label>
+                                <textarea
+                                    value={Array.isArray(h.amenities) ? h.amenities.join('\n') : h.amenities}
+                                    onChange={e => updateHotel(i, 'amenities', e.target.value.split('\n'))}
+                                    rows={2}
+                                    placeholder="수영장, 와이파이..."
+                                />
+                            </div>
+                        </div>
                     </div>
-                    <div className="confirm-field">
-                        <label>호텔 주소</label>
-                        <input value={hotelAddress} onChange={e => setHotelAddress(e.target.value)} placeholder="주소" />
-                    </div>
-                    <div className="confirm-field">
-                        <label>체크인</label>
-                        <input type="date" value={checkIn} onChange={e => setCheckIn(e.target.value)} />
-                    </div>
-                    <div className="confirm-field">
-                        <label>체크아웃</label>
-                        <input type="date" value={checkOut} onChange={e => setCheckOut(e.target.value)} />
-                    </div>
-                </div>
-                <div className="confirm-grid" style={{ marginTop: '16px' }}>
-                    <div className="confirm-field" style={{ gridColumn: '1 / -1' }}>
-                        <label>호텔 이미지 URL (엔터로 구분)</label>
-                        <textarea
-                            value={hotelImages}
-                            onChange={e => setHotelImages(e.target.value)}
-                            rows={3}
-                            placeholder="https://...&#10;https://..."
-                        />
-                    </div>
-                    <div className="confirm-field" style={{ gridColumn: '1 / -1' }}>
-                        <label>시설 및 서비스 (엔터로 구분)</label>
-                        <textarea
-                            value={hotelAmenities}
-                            onChange={e => setHotelAmenities(e.target.value)}
-                            rows={3}
-                            placeholder="수영장&#10;와이파이&#10;조식 제공"
-                        />
-                    </div>
-                </div>
+                ))}
+                <button onClick={addHotel} className="btn-add-hotel" style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px dashed var(--border-color)', borderRadius: '8px', cursor: 'pointer', fontWeight: 500 }}>+ 호텔 추가</button>
             </div>
 
             {/* 미팅 및 수속 정보 */}

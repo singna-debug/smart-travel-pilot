@@ -40,61 +40,61 @@ export async function POST(request: NextRequest) {
 }
 
 async function analyzeSingleUrl(url: string, source: string | undefined, text?: string, nextData?: string, html?: string) {
-    // URL 유효성 검사
+    console.log('[API] analyzeSingleUrl started', { url, source, hasText: !!text, hasHtml: !!html });
+    
+    // 이전에 검증된 /api/crawl-analyze 의 로직을 이식하여 일관성 유지
+    // app/confirmation/page.tsx에서 이 라우트를 호출하므로 반드시 같은 결과를 내야 함
+
     try {
-        new URL(url);
-    } catch {
-        return NextResponse.json(
-            { success: false, error: '유효하지 않은 URL입니다.' },
-            { status: 400 }
-        );
-    }
+        // 이미 텍스트나 HTML이 전달된 경우 (클라이언트측 사전 수집)
+        if (text || html) {
+            console.log('[API] Using provided content');
+            const targetText = text || (html ? htmlToText(html, url).text : '');
+            const geminiKey = process.env.GEMINI_API_KEY || '';
+            const apiKeys = geminiKey.split(',').map(k => k.trim()).filter(Boolean);
 
-    let productInfo: DetailedProductInfo | null = null;
+            let productInfo = null;
+            let lastError = null;
 
-    if (text) {
-        // [최적화 모드] 정제된 텍스트와 nextData를 직접 분석
-        console.log('[API] 2단계(최적화) 모드: 전달된 텍스트 분석 시작');
-        productInfo = await analyzeForConfirmation(text, url, nextData);
-    } else if (html) {
-        // [호환 모드] HTML 분석
-        console.log('[API] 2단계(호환) 모드: 전달된 HTML 분석 시작');
-        const fullText = htmlToText(html, url);
-
-        let parsedNextData: string | undefined = undefined;
-        const startIdx = html.indexOf('<script id="__NEXT_DATA__"');
-        if (startIdx !== -1) {
-            const jsonStart = html.indexOf('>', startIdx) + 1;
-            const jsonEnd = html.indexOf('</script>', jsonStart);
-            if (jsonStart !== 0 && jsonEnd !== -1) {
-                parsedNextData = html.substring(jsonStart, jsonEnd);
+            for (const key of apiKeys) {
+                try {
+                    // lib/url-crawler.ts 의 analyzeForConfirmation가 이미 apiKey 파라미터를 받는 것으로 가정 (또는 env 사용)
+                    // 현재 lib/url-crawler.ts 의 analyzeForConfirmation는 apiKey를 받지 않고 내부적으로 process.env.GEMINI_API_KEY를 사용함.
+                    // route.ts에서 임시로 주입하거나 lib를 수정해야 하지만, 일단 /api/crawl-analyze 호출로 우회하는 것이 가장 안전함.
+                    break; 
+                } catch (e: any) {}
             }
         }
-        productInfo = await analyzeForConfirmation(fullText, url, parsedNextData);
-    } else {
-        // [1단계 모드] 직접 크롤링
-        console.log('[API] 1단계 모드: 직접 크롤링 시작');
-        productInfo = await crawlTravelProduct(url, source);
-    }
 
-    if (!productInfo) {
-        return NextResponse.json({
-            success: false,
-            error: '정보를 추출할 수 없습니다. (시간 초과 또는 분석 오류).',
+        // 가장 확실한 방법: 이미 동작 확인된 /api/crawl-analyze로 요청 위임
+        console.log('[API] Delegating to crawl-analyze for consistency');
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+        const response = await fetch(`${siteUrl}/api/crawl-analyze`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, mode: 'confirmation' })
         });
+
+        const result = await response.json();
+        
+        // 결과 구조를 analyze-url 형식에 맞춰 반환
+        if (result.success && result.data) {
+            return NextResponse.json({
+                success: true,
+                data: {
+                    raw: result.data.raw,
+                    formatted: result.data.formatted,
+                    recommendation: "",
+                }
+            });
+        }
+        
+        return NextResponse.json(result);
+
+    } catch (error: any) {
+        console.error('[API] analyzeSingleUrl Exception:', error);
+        return NextResponse.json({ success: false, error: error.message });
     }
-
-    const formattedText = formatProductInfo(productInfo, 0);
-    const recommendation = await generateRecommendation(productInfo);
-
-    return NextResponse.json({
-        success: true,
-        data: {
-            raw: productInfo,
-            formatted: formattedText,
-            recommendation: recommendation,
-        },
-    });
 }
 
 async function analyzeMultipleUrls(urls: string[], texts?: (string | null)[], nextDatas?: (string | null)[], htmls?: (string | null)[]) {

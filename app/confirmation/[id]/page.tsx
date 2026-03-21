@@ -304,6 +304,7 @@ export default function ConfirmationViewerPage() {
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState<TabKey>('개요');
     const [showHotelModal, setShowHotelModal] = useState(false);
+    const [selectedHotelIdx, setSelectedHotelIdx] = useState(0);
     const [expandedDays, setExpandedDays] = useState<Record<number, boolean>>({});
     const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
     const [calcAmount, setCalcAmount] = useState('');
@@ -732,30 +733,34 @@ export default function ConfirmationViewerPage() {
                 {/* ============================== 2. 일정표 (+ 숙소 통합) ============================== */}
                 {activeTab === '일정표' && (
                     <>
-                        {/* 호텔 요약 카드 (상단) */}
-                        {doc.hotel.name && (
+                        {/* 호텔 요약 카드 (다중 지원) */}
+                        {doc.hotels && doc.hotels.length > 0 ? (
                             <div className="mc-section" style={{ paddingBottom: '12px' }}>
-                                <div className="mc-hotel-summary" onClick={() => setShowHotelModal(true)}>
-                                    {doc.hotel.images && doc.hotel.images.length > 0 && (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img
-                                            className="hotel-summary-img"
-                                            src={doc.hotel.images[0].startsWith('[IMG: ') ? doc.hotel.images[0].replace('[IMG: ', '').replace(']', '') : doc.hotel.images[0]}
-                                            alt={doc.hotel.name}
-                                        />
-                                    )}
-                                    <div className="hotel-summary-info">
-                                        <div className="hotel-summary-name">{doc.hotel.name}</div>
-                                        {doc.hotel.address && <div className="hotel-summary-addr">{doc.hotel.address}</div>}
-                                        <div className="hotel-summary-meta">
-                                            {doc.hotel.checkIn && <span>체크인 {doc.hotel.checkIn}</span>}
-                                            {doc.hotel.checkOut && <span> · 체크아웃 {doc.hotel.checkOut}</span>}
+                                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginBottom: '8px', paddingLeft: '4px' }}>숙소 정보 ({doc.hotels.length})</div>
+                                <div className="hotel-summary-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    {doc.hotels.map((h, idx) => (
+                                        <div key={idx} className="mc-hotel-summary" onClick={() => { setSelectedHotelIdx(idx); setShowHotelModal(true); }}>
+                                            {h.images && h.images.length > 0 && (
+                                                <img
+                                                    className="hotel-summary-img"
+                                                    src={h.images[0]?.startsWith('[IMG: ') ? h.images[0].replace('[IMG: ', '').replace(']', '') : (h.images[0] || '')}
+                                                    alt={h.name}
+                                                />
+                                            )}
+                                            <div className="hotel-summary-info">
+                                                <div className="hotel-summary-name">{h.name}</div>
+                                                {h.address && <div className="hotel-summary-addr">{h.address}</div>}
+                                                <div className="hotel-summary-meta">
+                                                    {h.checkIn && <span>체크인 {h.checkIn}</span>}
+                                                    {h.checkOut && <span> · 체크아웃 {h.checkOut}</span>}
+                                                </div>
+                                            </div>
+                                            <div className="hotel-summary-arrow">›</div>
                                         </div>
-                                    </div>
-                                    <div className="hotel-summary-arrow">›</div>
+                                    ))}
                                 </div>
                             </div>
-                        )}
+                        ) : null}
 
                         {/* 일정별 아코디언 */}
                         {doc.itinerary && doc.itinerary.length > 0 && (
@@ -779,60 +784,89 @@ export default function ConfirmationViewerPage() {
 
                                                 {isOpen && (
                                                     <div className="day-body">
-                                                        {day.transportation && (
-                                                            <div className="day-transport">
-                                                                <span className="trans-icon">교통</span> {day.transportation}
+                                                        {/* 일별 교통 정보 (구조화된 데이터 우선) */}
+                                                        {day.transport ? (
+                                                            <div className="day-transport-card" style={{ marginBottom: '16px' }}>
+                                                                <div className="mc-flight-card" style={{ background: '#f8fafc', border: '1px solid #f1f5f9' }}>
+                                                                    <div className="mc-flight-row" style={{ padding: '12px 0' }}>
+                                                                        <div className="flight-time">
+                                                                            <div className="ft-time" style={{ fontSize: '1.1rem' }}>{day.transport.departureTime}</div>
+                                                                            <div className="ft-airport" style={{ fontWeight: 600 }}>{day.transport.departureCity} 출발</div>
+                                                                        </div>
+                                                                        <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
+                                                                            <OutboundFlightIcon />
+                                                                            <div style={{ position: 'absolute', bottom: '-15px', fontSize: '0.65rem', color: '#10b981', fontWeight: 600 }}>
+                                                                                {day.transport.duration && `${day.transport.duration} 소요`}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flight-time right-align">
+                                                                            <div className="ft-time" style={{ fontSize: '1.1rem' }}>{day.transport.arrivalTime}</div>
+                                                                            <div className="ft-airport" style={{ fontWeight: 600 }}>{day.transport.arrivalCity} 도착</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div style={{ padding: '4px 12px 10px', fontSize: '0.75rem', color: '#64748b', textAlign: 'center', borderTop: '0.5px solid #f1f5f9' }}>
+                                                                        {day.transport.airline} {day.transport.flightNo && `(${day.transport.flightNo})`}
+                                                                    </div>
+                                                                </div>
                                                             </div>
+                                                        ) : (
+                                                            day.transportation && (
+                                                                <div className="day-transport">
+                                                                    <span className="trans-icon">교통</span> {day.transportation}
+                                                                </div>
+                                                            )
                                                         )}
+
                                                         <div className="day-content">
                                                             {typeof day === 'string' ? day : (
-                                                                <>
+                                                                <div className="activity-list">
                                                                     {day.activities && Array.isArray(day.activities) ? (
                                                                         day.activities.map((act: string, ai: number) => (
-                                                                            <div key={ai} className="day-activity">{act}</div>
+                                                                            <div key={ai} className="day-activity-item">
+                                                                                <span className="activity-bullet">•</span>
+                                                                                <div className="activity-text">
+                                                                                    {act.split('\n').map((line, li) => (
+                                                                                        <div key={li} className={li === 0 ? 'activity-header' : 'activity-desc'}>
+                                                                                            {line}
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </div>
                                                                         ))
                                                                     ) : (
-                                                                        day.description || day.content || ''
+                                                                        <div className="day-activity">{day.description || day.content || ''}</div>
                                                                     )}
-                                                                </>
+                                                                </div>
                                                             )}
                                                         </div>
 
-                                                        {/* 식사 정보 */}
-                                                        {day.meals && (
-                                                            <div className="day-meals">
-                                                                {day.meals.breakfast && (
-                                                                    <span className={`meal-chip ${day.meals.breakfast === '불포함' ? 'excluded' : 'included'}`}>
-                                                                        조식: {day.meals.breakfast}
-                                                                    </span>
-                                                                )}
-                                                                {day.meals.lunch && (
-                                                                    <span className={`meal-chip ${day.meals.lunch === '불포함' ? 'excluded' : 'included'}`}>
-                                                                        중식: {day.meals.lunch}
-                                                                    </span>
-                                                                )}
-                                                                {day.meals.dinner && (
-                                                                    <span className={`meal-chip ${day.meals.dinner === '불포함' ? 'excluded' : 'included'}`}>
-                                                                        석식: {day.meals.dinner}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        )}
-
-                                                        {/* 해당일 호텔 및 체크인 정보 */}
-                                                        {(day.hotel || day.hotelDetails?.name) && (
-                                                            <div className="day-hotel">
-                                                                <div className="dh-name">
-                                                                    숙소: {day.hotel || day.hotelDetails?.name}
-                                                                </div>
-                                                                {(day.hotelDetails?.checkIn || day.hotelDetails?.checkOut) && (
-                                                                    <div className="dh-times">
-                                                                        {day.hotelDetails.checkIn && <span>체크인 {day.hotelDetails.checkIn}</span>}
-                                                                        {day.hotelDetails.checkOut && <span> · 체크아웃 {day.hotelDetails.checkOut}</span>}
+                                                        {/* 하단 통합 정보 박스 (숙소/식사) */}
+                                                        <div className="day-summary-box" style={{ marginTop: '20px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+                                                            {(day.hotel || day.hotelDetails?.name) && (
+                                                                <div className="summary-row" style={{ display: 'flex', gap: '12px', marginBottom: day.meals ? '10px' : '0' }}>
+                                                                    <div className="summary-icon">🏢</div>
+                                                                    <div className="summary-content">
+                                                                        <span style={{ fontSize: '0.8rem', color: '#64748b', marginRight: '8px', fontWeight: 600 }}>예정호텔</span>
+                                                                        <span style={{ fontSize: '0.85rem', color: '#1e293b', fontWeight: 600 }}>{day.hotel || day.hotelDetails?.name}</span>
                                                                     </div>
-                                                                )}
-                                                            </div>
-                                                        )}
+                                                                </div>
+                                                            )}
+                                                            {day.meals && (
+                                                                <div className="summary-row" style={{ display: 'flex', gap: '12px' }}>
+                                                                    <div className="summary-icon">🍴</div>
+                                                                    <div className="summary-content">
+                                                                        <span style={{ fontSize: '0.8rem', color: '#64748b', marginRight: '8px', fontWeight: 600 }}>식사</span>
+                                                                        <span style={{ fontSize: '0.85rem', color: '#1e293b', fontWeight: 500 }}>
+                                                                            {[
+                                                                                day.meals.breakfast && day.meals.breakfast !== '불포함' && `조식: ${day.meals.breakfast}`,
+                                                                                day.meals.lunch && day.meals.lunch !== '불포함' && `중식: ${day.meals.lunch}`,
+                                                                                day.meals.dinner && day.meals.dinner !== '불포함' && `석식: ${day.meals.dinner}`
+                                                                            ].filter(Boolean).join(' · ') || '현지식'}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
 
                                                         {/* 일별 유의사항 */}
                                                         {day.dailyNotices && day.dailyNotices.length > 0 && (
@@ -1340,7 +1374,7 @@ export default function ConfirmationViewerPage() {
             </div>
 
             {/* 숙소 상세 모달 */}
-            {showHotelModal && (
+            {showHotelModal && doc && (doc.hotels?.[selectedHotelIdx] || (doc as any).hotel) && (
                 <div className="mc-modal-overlay" onClick={() => setShowHotelModal(false)}>
                     <div className="mc-modal" onClick={e => e.stopPropagation()}>
                         <div className="mc-modal-header">
@@ -1348,37 +1382,44 @@ export default function ConfirmationViewerPage() {
                             <button className="mc-modal-close" onClick={() => setShowHotelModal(false)}>✕</button>
                         </div>
                         <div className="mc-modal-body">
-                            <div className="mcm-hotel-name">{doc.hotel.name}</div>
-                            {doc.hotel.address && (
-                                <div className="mcm-hotel-address" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
-                                    <span>📍 {doc.hotel.address}</span>
-                                    <a
-                                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${doc.hotel.name} ${doc.hotel.address}`)}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 600, whiteSpace: 'nowrap', textDecoration: 'none', border: '1px solid #0ea5e9', padding: '2px 8px', borderRadius: '4px' }}
-                                    >
-                                        지도보기
-                                    </a>
-                                </div>
-                            )}
-                            <div className="mcm-times">
-                                {doc.hotel.checkIn && <span>체크인: {doc.hotel.checkIn}</span>}
-                                {doc.hotel.checkOut && <span> | 체크아웃: {doc.hotel.checkOut}</span>}
-                            </div>
-                            {doc.hotel.amenities && doc.hotel.amenities.length > 0 && (
-                                <div className="mch-amenities">
-                                    {(Array.isArray(doc.hotel.amenities) ? (doc.hotel.amenities.length === 1 && doc.hotel.amenities[0].includes(',') ? doc.hotel.amenities[0].split(',') : doc.hotel.amenities) : String(doc.hotel.amenities).split(',')).map((am: string, i: number) => (
-                                        <span key={i} className="mc-chip">{am.trim()}</span>
-                                    ))}
-                                </div>
-                            )}
-                            <div className="mcm-images">
-                                {doc.hotel.images?.map((img: string, i: number) => (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img key={i} src={img.startsWith('[IMG: ') ? img.replace('[IMG: ', '').replace(']', '') : img} alt={`Hotel ${i}`} style={{ width: '100%', borderRadius: '12px', marginBottom: '10px' }} />
-                                ))}
-                            </div>
+                            {(() => {
+                                const h = (doc?.hotels?.[selectedHotelIdx] || (doc as any)?.hotel);
+                                if (!h) return null;
+                                return (
+                                    <>
+                                        <div className="mcm-hotel-name">{h.name}</div>
+                                        {h.address && (
+                                            <div className="mcm-hotel-address" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                                                <span>📍 {h.address}</span>
+                                                <a
+                                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${h.name} ${h.address}`)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 600, whiteSpace: 'nowrap', textDecoration: 'none', border: '1px solid #0ea5e9', padding: '2px 8px', borderRadius: '4px' }}
+                                                >
+                                                    지도보기
+                                                </a>
+                                            </div>
+                                        )}
+                                        <div className="mcm-times">
+                                            {h.checkIn && <span>체크인: {h.checkIn}</span>}
+                                            {h.checkOut && <span> | 체크아웃: {h.checkOut}</span>}
+                                        </div>
+                                        {h.amenities && (Array.isArray(h.amenities) ? h.amenities.length > 0 : String(h.amenities).length > 0) && (
+                                            <div className="mch-amenities">
+                                                {(Array.isArray(h.amenities) ? (h.amenities.length === 1 && h.amenities[0].includes(',') ? h.amenities[0].split(',') : h.amenities) : String(h.amenities).split(',')).map((am: string, i: number) => (
+                                                    <span key={i} className="mc-chip">{am.trim()}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <div className="mcm-images">
+                                            {h.images?.map((img: string, i: number) => (
+                                                <img key={i} src={img.startsWith('[IMG: ') ? img.replace('[IMG: ', '').replace(']', '') : img} alt={`Hotel ${i}`} style={{ width: '100%', borderRadius: '12px', marginBottom: '10px' }} />
+                                            ))}
+                                        </div>
+                                    </>
+                                );
+                            })()}
                         </div>
                     </div>
                 </div>

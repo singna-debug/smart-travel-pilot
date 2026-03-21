@@ -1,0 +1,14 @@
+{
+  "error": {
+    "code": 400,
+    "message": "Invalid requests[0].setDataValidation: This operation is not allowed on cells in typed columns.",
+    "errors": [
+      {
+        "message": "Invalid requests[0].setDataValidation: This operation is not allowed on cells in typed columns.",
+        "domain": "global",
+        "reason": "badRequest"
+      }
+    ],
+    "status": "INVALID_ARGUMENT"
+  }
+}

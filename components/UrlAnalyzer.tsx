@@ -61,6 +61,11 @@ export default function UrlAnalyzer() {
     const [returnDate, setReturnDate] = useState('');
     const [status, setStatus] = useState('상담중');
     const [interestedProduct, setInterestedProduct] = useState('');
+    const [confirmedProduct, setConfirmedProduct] = useState('');
+    const [confirmedDate, setConfirmedDate] = useState('');
+    const [recurringCustomer, setRecurringCustomer] = useState('신규고객');
+    const [inquirySource, setInquirySource] = useState('');
+    const [travelersCount, setTravelersCount] = useState('');
     const [memo, setMemo] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
@@ -433,6 +438,12 @@ export default function UrlAnalyzer() {
                     returnDate,
                     status,
                     interestedProduct,
+                    confirmedProduct,
+                    confirmedDate,
+                    recurringCustomer,
+                    inquirySource,
+                    travelersCount: travelersCount === '' ? null : Number(travelersCount), // Ensure it's a number or null
+                    source: '카카오톡',
                     memo,
                     analysisData,
                     isComparison: isComparison,
@@ -561,6 +572,18 @@ export default function UrlAnalyzer() {
                     />
                 </div>
                 <div className="form-group">
+                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '600', marginBottom: '8px' }}>총인원</label>
+                    <input
+                        type="number"
+                        value={travelersCount}
+                        onChange={(e) => setTravelersCount(e.target.value)}
+                        placeholder="예: 2"
+                        min="1"
+                        className="analyzer-input"
+                        style={{ width: '100%' }}
+                    />
+                </div>
+                <div className="form-group">
                     <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '600', marginBottom: '8px' }}>여행지</label>
                     <input
                         type="text"
@@ -570,6 +593,34 @@ export default function UrlAnalyzer() {
                         className="analyzer-input"
                         style={{ width: '100%' }}
                     />
+                </div>
+                <div className="form-group">
+                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '600', marginBottom: '8px' }}>재방문 여부</label>
+                    <select
+                        value={recurringCustomer}
+                        onChange={(e) => setRecurringCustomer(e.target.value)}
+                        className="analyzer-input"
+                        style={{ width: '100%', appearance: 'none', cursor: 'pointer' }}
+                    >
+                        <option value="신규고객">🆕 신규고객</option>
+                        <option value="재방문">🔄 재방문</option>
+                    </select>
+                </div>
+                <div className="form-group">
+                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '600', marginBottom: '8px' }}>유입 경로</label>
+                    <select
+                        value={inquirySource}
+                        onChange={(e) => setInquirySource(e.target.value)}
+                        className="analyzer-input"
+                        style={{ width: '100%', appearance: 'none', cursor: 'pointer' }}
+                    >
+                        <option value="">-- 선택 --</option>
+                        <option value="블로그">📱 블로그</option>
+                        <option value="지인소개">🤝 지인소개</option>
+                        <option value="카카오톡채널">💬 카카오톡채널</option>
+                        <option value="인스타그램">📸 인스타그램</option>
+                        <option value="매장방문">🏢 매장방문</option>
+                    </select>
                 </div>
             </div>
 
@@ -617,14 +668,42 @@ export default function UrlAnalyzer() {
                         style={{ width: '100%', appearance: 'none', cursor: 'pointer' }}
                     >
                         <option value="상담중">상담중</option>
-                        <option value="견적제공">견적제공</option>
                         <option value="예약확정">예약확정</option>
-                        <option value="결제완료">결제완료</option>
+                        <option value="선금완료">선금완료</option>
+                        <option value="잔금완료">잔금완료</option>
+                        <option value="여행완료">여행완료</option>
+                        <option value="취소/보류">취소/보류</option>
                         <option value="상담완료">상담완료</option>
-                        <option value="취소">취소</option>
                     </select>
                 </div>
             </div>
+
+            {/* Row 2-1: 예약확정 시 추가 정보 (확정상품, 예약확정일) */}
+            {(['예약확정', '선금완료', '잔금완료', '여행완료'].includes(status)) && (
+                <div className="analyzer-form-grid-2" style={{ marginTop: '16px' }}>
+                    <div className="form-group">
+                        <label style={{ display: 'block', color: 'var(--accent-primary)', fontSize: '0.9rem', fontWeight: '600', marginBottom: '8px' }}>✨ 확정상품 URL (날짜 자동분석)</label>
+                        <input
+                            type="url"
+                            value={confirmedProduct}
+                            onChange={(e) => setConfirmedProduct(e.target.value)}
+                            placeholder="확정된 상품의 URL을 입력하세요"
+                            className="analyzer-input"
+                            style={{ width: '100%', borderColor: 'var(--accent-primary)' }}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label style={{ display: 'block', color: 'var(--accent-primary)', fontSize: '0.9rem', fontWeight: '600', marginBottom: '8px' }}>📅 예약확정일</label>
+                        <input
+                            type="date"
+                            value={confirmedDate}
+                            onChange={(e) => setConfirmedDate(e.target.value)}
+                            className="analyzer-input"
+                            style={{ width: '100%', borderColor: 'var(--accent-primary)' }}
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Row 3: 관심 상품명 */}
             <div className="form-group" style={{ marginBottom: '20px' }}>

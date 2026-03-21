@@ -1,58 +1,43 @@
 import { addDays, subDays, format, parse, isValid } from 'date-fns';
 
 /**
- * 출발일 기준으로 자동화 날짜들을 계산합니다.
+ * 출발일, 귀국일, 예약확정일 기준으로 모든 자동화 날짜들을 계산합니다.
  */
-export function calculateAutomationDates(departureDateStr: string) {
-    // 다양한 날짜 형식 파싱 시도
-    let departureDate: Date | null = null;
-    let formattedDateStr = departureDateStr;
+export function calculateAutomationDates(params: {
+    departureDateStr?: string;
+    returnDateStr?: string;
+    confirmedDateStr?: string;
+}) {
+    const { departureDateStr, returnDateStr, confirmedDateStr } = params;
 
-    const formats = [
-        'yyyy-MM-dd',
-        'yyyy/MM/dd',
-        'yyyy.MM.dd',
-        'MM/dd/yyyy',
-        'MM-dd-yyyy',
-    ];
+    const parseDate = (dStr?: string) => {
+        if (!dStr) return null;
+        const parsed = new Date(dStr.replace(/\./g, '-'));
+        return isValid(parsed) ? parsed : null;
+    };
 
-    for (const fmt of formats) {
-        try {
-            const parsed = parse(departureDateStr, fmt, new Date());
-            if (isValid(parsed)) {
-                departureDate = parsed;
-                formattedDateStr = format(parsed, 'yyyy-MM-dd');
-                break;
-            }
-        } catch {
-            continue;
-        }
-    }
+    const departureDate = parseDate(departureDateStr);
+    const returnDate = parseDate(returnDateStr);
+    const confirmedDate = parseDate(confirmedDateStr);
 
-    // ISO 형식 시도
-    if (!departureDate) {
-        const isoDate = new Date(departureDateStr);
-        if (isValid(isoDate)) {
-            departureDate = isoDate;
-            formattedDateStr = format(isoDate, 'yyyy-MM-dd');
-        }
-    }
-
-    if (!departureDate) {
-        return {
-            balance_due_date: '날짜 파싱 불가',
-            notice_date: '날짜 파싱 불가',
-            next_followup: format(addDays(new Date(), 2), 'yyyy-MM-dd'),
-        };
-    }
+    const prepaid_date = confirmedDate ? format(addDays(confirmedDate, 2), 'yyyy-MM-dd') : '';
+    const notice_date = departureDate ? format(addDays(departureDate, -28), 'yyyy-MM-dd') : '';
+    const balance_date = departureDate ? format(addDays(departureDate, -21), 'yyyy-MM-dd') : '';
+    const confirmation_sent = departureDate ? format(addDays(departureDate, -14), 'yyyy-MM-dd') : '';
+    const departure_notice = departureDate ? format(addDays(departureDate, -3), 'yyyy-MM-dd') : '';
+    const phone_notice = departureDate ? format(addDays(departureDate, -1), 'yyyy-MM-dd') : '';
+    const happy_call = (returnDate && isValid(returnDate)) ? format(addDays(returnDate, 1), 'yyyy-MM-dd') : '';
+    const next_followup = format(addDays(new Date(), 2), 'yyyy-MM-dd');
 
     return {
-        // 잔금 입금 기한: 출발일 - 30일
-        balance_due_date: format(subDays(departureDate, 30), 'yyyy-MM-dd'),
-        // 여행 전 주의사항 발송일: 출발일 - 3일
-        notice_date: format(subDays(departureDate, 3), 'yyyy-MM-dd'),
-        // 팔로업: 오늘 + 2일
-        next_followup: format(addDays(new Date(), 2), 'yyyy-MM-dd'),
+        prepaid_date,
+        notice_date,
+        balance_date,
+        confirmation_sent,
+        departure_notice,
+        phone_notice,
+        happy_call,
+        next_followup
     };
 }
 

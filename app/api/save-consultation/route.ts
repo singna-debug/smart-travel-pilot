@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { appendConsultationToSheet } from '@/lib/google-sheets';
-import type { ConsultationData, AnalysisResult, SingleResult } from '@/types';
+import type { ConsultationData } from '@/types';
+import { calculateAutomationDates, getTodayString } from '@/lib/date-calculator';
+import { crawlTravelProduct } from '@/lib/url-crawler';
 
 // 연락처 포맷팅 (010-XXXX-XXXX)
 function formatPhone(phoneStr: string): string {
@@ -17,11 +19,9 @@ function formatPhone(phoneStr: string): string {
 // 날짜 포맷팅 (YYYY-MM-DD)
 function formatDateString(dateStr: string): string {
     if (!dateStr) return '';
-    // 이미 YYYY-MM-DD 형태인지 대략 확인
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr.trim())) {
         return dateStr.trim();
     }
-    // 예: "2026.02.25", "26. 2. 25", "2026/02/25", "2026-02-25 (수)"
     const match = dateStr.match(/(\d{2,4})[-\.\/년]\s*(\d{1,2})[-\.\/월]\s*(\d{1,2})/);
     if (match) {
         let year = match[1];
@@ -37,24 +37,21 @@ function formatDateString(dateStr: string): string {
 function formatDurationString(durationStr: string): string {
     if (!durationStr) return '';
     let str = durationStr.trim();
-    // "3박 4일" -> "3박4일"
     const boxDayMatch = str.match(/(\d+)\s*박\s*(\d+)\s*일?/);
     if (boxDayMatch) {
         return `${boxDayMatch[1]}박${boxDayMatch[2]}일`;
     }
-    // "5일" -> "4박5일"
     const onlyDayMatch = str.match(/^(\d+)\s*일$/);
     if (onlyDayMatch) {
         const days = parseInt(onlyDayMatch[1], 10);
         if (days > 1) return `${days - 1}박${days}일`;
     }
-    // "4박" -> "4박5일"
     const onlyBoxMatch = str.match(/^(\d+)\s*박$/);
     if (onlyBoxMatch) {
         const nights = parseInt(onlyBoxMatch[1], 10);
         return `${nights}박${nights + 1}일`;
     }
-    return str.replace(/\s+/g, ''); // 그 외 경우 띄어쓰기 정도만 제거
+    return str.replace(/\s+/g, '');
 }
 
 export async function POST(request: NextRequest) {
@@ -71,7 +68,13 @@ export async function POST(request: NextRequest) {
             interestedProduct: formInterestedProduct,
             memo,
             analysisData,
-            isComparison
+            isComparison,
+            confirmedProduct,
+            confirmedDate,
+            recurringCustomer: formRecurringCustomer, // Renamed to avoid conflict with `automation.recurringCustomer`
+            inquirySource: formInquirySource, // Renamed to avoid conflict with `automation.inquirySource`
+            source: formSource,
+            travelersCount // Added travelersCount here
         } = body;
 
         if (!customerName) {
@@ -81,32 +84,27 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 데이터 구성 (폼 입력값 우선, 없으면 분석 데이터에서 추출)
+        // 1. 데이터 구성
         let name = customerName;
-        // 구글 시트에서 010이 10으로 저장되는 것을 방지하기 위해 강제로 문자열 처리 (') 및 010-XXXX-XXXX 포맷 적용
         let formattedPhone = formatPhone(String(customerPhone || ''));
         let phone = formattedPhone ? `'${formattedPhone}` : '';
         let productName = formInterestedProduct || '';
-        let url = body.productUrl || ''; // 수동 입력 URL 우선
+        let url = body.productUrl || '';
         let destination = formDestination || '';
         let departureDate = formDepartureDate || '';
         let duration = formDuration || '';
         let returnDate = formReturnDate || '';
-        // 상담요약 구성: 사용자가 직접 입력한 메모(상담 내용 요약)만 저장합니다.
+        let status = formStatus || '상담중';
         const summaryText = memo || '';
 
-        if (isComparison && analysisData.products && analysisData.products.length > 0) {
+        // AI 데이터에서 추출
+        if (isComparison && analysisData?.products && analysisData.products.length > 0) {
             if (!productName) productName = `[비교분석] ${analysisData.products[0].raw.title} 외 ${analysisData.products.length - 1}건`;
-
-            // 여러 URL을 "1. url \n 2. url" 형식으로 구성하여 구글 시트에서 클릭 가능하게 함
-            url = analysisData.products
-                .map((p: any, idx: number) => `${idx + 1}. ${p.url}`)
-                .join('\n');
-
+            url = analysisData.products.map((p: any, idx: number) => `${idx + 1}. ${p.url}`).join('\n');
             if (!destination) destination = analysisData.products[0].raw.destination || '';
             if (!departureDate) departureDate = analysisData.products[0].raw.departureDate || '';
             if (!duration) duration = analysisData.products[0].raw.duration || '';
-        } else if (!isComparison && analysisData.raw) {
+        } else if (!isComparison && analysisData?.raw) {
             if (!productName) productName = analysisData.raw.title;
             url = analysisData.raw.url;
             if (!destination) destination = analysisData.raw.destination || '';
@@ -114,58 +112,104 @@ export async function POST(request: NextRequest) {
             if (!duration) duration = analysisData.raw.duration || '';
         }
 
-        // 포맷팅 적용
+        // 2. 포맷팅
         departureDate = formatDateString(departureDate);
         returnDate = formatDateString(returnDate);
         duration = formatDurationString(duration);
 
-        // 귀국일이 비어있고 출발일과 기간(X박Y일) 정보가 있으면 자동 계산
-        if (departureDate && !returnDate && duration) {
-            const durationMatch = duration.match(/\d+박\s*(\d+)일/);
-            if (durationMatch) {
-                const daysToAdd = parseInt(durationMatch[1], 10) - 1;
-                if (daysToAdd >= 0) {
-                    const d = new Date(departureDate);
-                    if (!isNaN(d.getTime())) {
-                        d.setDate(d.getDate() + daysToAdd);
-                        const rYear = d.getFullYear();
-                        const rMonth = String(d.getMonth() + 1).padStart(2, '0');
-                        const rDay = String(d.getDate()).padStart(2, '0');
-                        returnDate = `${rYear}-${rMonth}-${rDay}`;
+        // 3. 확정상품 URL 분석 (Strict: URL이 있으면 크롤러 결과가 최우선)
+        let finalConfirmedProduct = confirmedProduct || '';
+        if (finalConfirmedProduct && finalConfirmedProduct.startsWith('http')) {
+            try {
+                const crawled = await crawlTravelProduct(finalConfirmedProduct);
+                if (crawled) {
+                    // 크롤링된 정보가 있으면 기존 폼 데이터보다 우선함
+                    if (crawled.departureDate) {
+                        departureDate = formatDateString(crawled.departureDate);
                     }
+                    if (crawled.returnDate) {
+                        returnDate = formatDateString(crawled.returnDate);
+                    }
+                    if (crawled.duration) {
+                        duration = formatDurationString(crawled.duration);
+                    }
+                    
+                    // 귀국일이 없는데 기간이 있다면 계산
+                    if (departureDate && !returnDate && duration) {
+                        const daysMatch = duration.match(/(\d+)일/);
+                        if (daysMatch) {
+                            const daysToAdd = parseInt(daysMatch[1], 10) - 1;
+                            const d = new Date(departureDate);
+                            if (!isNaN(d.getTime())) {
+                                d.setDate(d.getDate() + daysToAdd);
+                                returnDate = d.toISOString().split('T')[0];
+                            }
+                        }
+                    }
+                }
+            } catch (crawlErr) {
+                console.warn('[Crawl Error] 확정상품 URL 분석 실패:', crawlErr);
+            }
+        }
+
+        // 4. 귀국일 자동 계산
+        if (departureDate && !returnDate && duration) {
+            const daysMatch = duration.match(/(\d+)일/);
+            if (daysMatch) {
+                const daysToAdd = parseInt(daysMatch[1], 10) - 1;
+                const d = new Date(departureDate);
+                if (!isNaN(d.getTime()) && daysToAdd >= 0) {
+                    d.setDate(d.getDate() + daysToAdd);
+                    returnDate = d.toISOString().split('T')[0];
                 }
             }
         }
 
-        // 팔로업일 자동 계산 (상담일로부터 2일 뒤, 한국시간 기준)
+        // 5. 예약확정일 처리
+        let finalConfirmedDate = confirmedDate || '';
+        if (status === '예약확정' && !finalConfirmedDate) {
+            finalConfirmedDate = getTodayString();
+        }
+
+        // 6. 모든 자동화 날짜 계산
+        const automationDates = calculateAutomationDates({
+            departureDateStr: departureDate,
+            returnDateStr: returnDate,
+            confirmedDateStr: finalConfirmedDate
+        });
+
         const kstNow = new Date(new Date().getTime() + 9 * 60 * 60000 + new Date().getTimezoneOffset() * 60000);
-        const followUpDate = new Date(kstNow);
-        followUpDate.setDate(kstNow.getDate() + 2);
-        const nextFollowUp = `${followUpDate.getFullYear()}-${String(followUpDate.getMonth() + 1).padStart(2, '0')}-${String(followUpDate.getDate()).padStart(2, '0')}`;
 
         const consultationData: ConsultationData = {
-            customer: {
-                name: name,
-                phone: phone,
-            },
+            customer: { name, phone },
             trip: {
-                destination: destination,
+                destination,
                 departure_date: departureDate,
                 return_date: returnDate,
-                duration: duration,
+                duration,
                 product_name: productName,
-                url: url,
+                url,
+                travelers_count: travelersCount || '', // New field: 총인원
             },
             summary: summaryText.substring(0, 50000),
-            source: '수동등록',
+            source: formSource || '수동등록',
             automation: {
-                status: (formStatus as any) || '상담중',
-                next_followup: nextFollowUp,
-                balance_due_date: '',
-                notice_date: '',
+                status: status,
+                next_followup: automationDates.next_followup,
+                recurringCustomer: formRecurringCustomer || '신규고객',
+                inquirySource: formInquirySource || '',
+                confirmed_product: finalConfirmedProduct,
+                confirmed_date: finalConfirmedDate,
+                prepaid_date: automationDates.prepaid_date,
+                notice_date: automationDates.notice_date,
+                balance_date: automationDates.balance_date,
+                confirmation_sent: automationDates.confirmation_sent,
+                departure_notice: automationDates.departure_notice,
+                phone_notice: automationDates.phone_notice,
+                happy_call: automationDates.happy_call,
             },
             timestamp: kstNow.toISOString(),
-            visitor_id: 'admin-analyzer',
+            visitor_id: body.visitorId || 'admin-analyzer',
         };
 
         const success = await appendConsultationToSheet(consultationData);
@@ -174,15 +218,14 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: true });
         } else {
             return NextResponse.json(
-                { success: false, error: '구글 시트 저장에 실패했습니다. 관리자에게 문의하세요.' },
+                { success: false, error: '구글 시트 저장에 실패했습니다.' },
                 { status: 500 }
             );
         }
-
-    } catch (error) {
+    } catch (error: any) {
         console.error('Save Consultation API Error:', error);
         return NextResponse.json(
-            { success: false, error: '서버 오류가 발생했습니다.' },
+            { success: false, error: '서버 오류: ' + error.message },
             { status: 500 }
         );
     }

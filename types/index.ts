@@ -10,14 +10,25 @@ export interface ConsultationData {
     departure_date: string;
     return_date?: string;
     travelers?: string;
+    travelers_count?: string;     // 총인원 (연락처 다음 컬럼)
     url: string;
     duration?: string;
   };
   automation: {
-    status: '상담중' | '견적제공' | '예약확정' | '결제완료' | '상담완료' | '취소' | '관리자확인필요';
-    balance_due_date: string;
-    notice_date: string;
-    next_followup: string;
+    status: '상담중' | '예약확정' | '선금완료' | '잔금완료' | '여행완료' | '취소/보류' | string;
+    next_followup: string;        // 차기 팔로업일
+    recurringCustomer?: string;    // 재방문여부
+    inquirySource?: string;       // 유입경로 (인사이트)
+    confirmed_product?: string;   // 확정상품 URL
+    confirmed_date?: string;      // 예약확정일
+    prepaid_date?: string;        // 선금일 (확정+2일)
+    notice_date?: string;         // 출발전안내(4주)
+    balance_date?: string;        // 잔금일 (출발-3주)
+    confirmation_sent?: string;   // 확정서 발송 (출발-2주)
+    departure_notice?: string;    // 출발안내 (출발-3일)
+    phone_notice?: string;        // 전화 안내 (출발-1일)
+    happy_call?: string;          // 해피콜 (귀국+1일)
+    balance_due_date?: string;    // (구) 잔금기한 - 호환성 유지
   };
   sheetRowIndex?: number;
   sheetName?: string;
@@ -118,7 +129,8 @@ export interface DetailedProductInfo {
   departureAirport: string;
   duration: string;
   airline: string;
-  hotel: string;
+  hotel: string; // 기존 단일 호텔 필드 (요약용)
+  hotels?: HotelInfo[]; // 다중 호텔 지원
   url: string;
   features: string[];
   courses: string[];
@@ -130,9 +142,12 @@ export interface DetailedProductInfo {
   hashtags: string;
   hasNoOption: boolean;
   hasFreeSchedule: boolean;
+  returnDate?: string;
   isProduct?: boolean;
   index?: number;
   meetingInfo?: MeetingInfo[];
+  description?: string;
+  notices?: string[];
 }
 
 // URL 분석기 단일 결과 타입
@@ -217,7 +232,7 @@ export interface ConfirmationDocument {
   };
 
   // 숙박 정보
-  hotel: HotelInfo;
+  hotels: HotelInfo[]; // 다중 호텔 지원
 
   // 일정표 (URL 분석에서 가져옴)
   itinerary: any[];

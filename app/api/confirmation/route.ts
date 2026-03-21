@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
             hotel: body.hotel || {
                 name: '', address: '', checkIn: '', checkOut: '',
             },
+            hotels: body.hotels || (body.hotel ? [body.hotel] : []),
             itinerary: body.itinerary || [],
             inclusions: body.inclusions || [],
             exclusions: body.exclusions || [],
