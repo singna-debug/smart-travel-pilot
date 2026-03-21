@@ -20,49 +20,60 @@ export async function getTodayNotificationMessage(): Promise<string | null> {
         const consultations = await getAllConsultations(true); // 강제 리프레시
         const today = getTodayKST();
 
-        const reminders: ConsultationData[] = [];
-        const notices: ConsultationData[] = [];
-        const balanceDues: ConsultationData[] = [];
+        const categories = {
+            reminders: { label: '리마인드', emoji: '🔔', list: [] as ConsultationData[] },
+            prepaid: { label: '선금 요청', emoji: '💰', list: [] as ConsultationData[] },
+            preDeparture: { label: '출발전 안내', emoji: '✉️', list: [] as ConsultationData[] },
+            balance: { label: '잔금 요청', emoji: '💵', list: [] as ConsultationData[] },
+            confirmation: { label: '확정서 발송', emoji: '📄', list: [] as ConsultationData[] },
+            departure: { label: '출발안내', emoji: '✈️', list: [] as ConsultationData[] },
+            phone: { label: '전화안내', emoji: '📞', list: [] as ConsultationData[] },
+            happyCall: { label: '해피콜', emoji: '🎉', list: [] as ConsultationData[] },
+        };
 
         consultations.forEach((item) => {
-            const { next_followup, notice_date, balance_due_date } = item.automation || {};
+            const { next_followup, prepaid_date, notice_date, balance_date, confirmation_sent, departure_notice, phone_notice, happy_call, balance_due_date } = item.automation || {};
 
-            if (next_followup === today) reminders.push(item);
-            if (notice_date === today) notices.push(item);
-            if (balance_due_date === today) balanceDues.push(item);
+            if (next_followup === today) categories.reminders.list.push(item);
+            if (prepaid_date === today) categories.prepaid.list.push(item);
+            if (notice_date === today) categories.preDeparture.list.push(item);
+            if (balance_date === today || balance_due_date === today) categories.balance.list.push(item);
+            if (confirmation_sent === today) categories.confirmation.list.push(item);
+            if (departure_notice === today) categories.departure.list.push(item);
+            if (phone_notice === today) categories.phone.list.push(item);
+            if (happy_call === today) categories.happyCall.list.push(item);
         });
 
-        if (reminders.length === 0 && notices.length === 0 && balanceDues.length === 0) {
+        const totalCount = Object.values(categories).reduce((acc, cat) => acc + cat.list.length, 0);
+
+        if (totalCount === 0) {
             return null;
         }
 
-        let message = `<b>📢 오늘(${today}) 업무 알림</b>\n\n`;
+        let message = `<b>오늘(${today})의 챙겨야 할 스케줄 요약</b>\n\n`;
+        
+        // 요약 섹션
+        Object.values(categories).forEach(cat => {
+            message += `- ${cat.label}: ${cat.list.length}건\n`;
+        });
 
-        if (reminders.length > 0) {
-            message += `<b>[🔔 팔로업 / 리마인드]</b>\n`;
-            reminders.forEach((r, idx) => {
-                message += `${idx + 1}. ${r.customer.name} (${r.customer.phone})\n   - ${r.trip.destination} (${r.trip.product_name})\n`;
-            });
-            message += `\n`;
-        }
+        message += `\n✅ <b>확인이 필요한 총 ${totalCount}건의 업무가 있습니다.</b>\n`;
+        message += `\n-----------------------------------\n\n`;
+        message += `📋 <b>오늘 처리해야 할 상세 리스트</b>\n\n`;
 
-        if (notices.length > 0) {
-            message += `<b>[✉️ 예약안내 발송]</b>\n`;
-            notices.forEach((n, idx) => {
-                message += `${idx + 1}. ${n.customer.name} (${n.customer.phone})\n   - ${n.trip.destination} (${n.trip.product_name})\n`;
-            });
-            message += `\n`;
-        }
+        // 상세 섹션
+        Object.values(categories).forEach(cat => {
+            if (cat.list.length > 0) {
+                message += `[${cat.emoji} ${cat.label}]\n`;
+                cat.list.forEach((item, idx) => {
+                    message += `${idx + 1}. ${item.customer.name} (${item.customer.phone})\n`;
+                    message += `   - ${item.trip.destination} (${item.trip.product_name})\n`;
+                });
+                message += `\n`;
+            }
+        });
 
-        if (balanceDues.length > 0) {
-            message += `<b>[💰 잔금 확인 / 확정서]</b>\n`;
-            balanceDues.forEach((b, idx) => {
-                message += `${idx + 1}. ${b.customer.name} (${b.customer.phone})\n   - ${b.trip.destination} (${b.trip.product_name})\n`;
-            });
-            message += `\n`;
-        }
-
-        message += `<i>사이트에서 상세 내용을 확인하세요!</i>`;
+        message += `<i>상세 내용은 대시보드에서 확인해 주세요!</i>`;
         return message;
 
     } catch (error) {
