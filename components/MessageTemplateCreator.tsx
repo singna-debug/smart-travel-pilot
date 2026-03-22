@@ -28,13 +28,17 @@ interface ProductInfo {
     exclusions: string[];
 }
 
-type TemplateType = 'booking' | 'remind' | 'balance' | 'postTrip';
+type TemplateType = 'remind' | 'booking' | 'pre_4w' | 'balance' | 'ticket' | 'confirmation' | 'departure' | 'happy_call';
 
 const TEMPLATE_LABELS: Record<TemplateType, { label: string; icon: string }> = {
-    booking: { label: '예약확정', icon: '✅' },
     remind: { label: '리마인드', icon: '⏰' },
-    balance: { label: '잔금안내', icon: '💰' },
-    postTrip: { label: '여행후/후기', icon: '🏖️' },
+    booking: { label: '예약 및 결제', icon: '✅' },
+    pre_4w: { label: '출발 4주 전', icon: '📅' },
+    balance: { label: '잔금 안내', icon: '💰' },
+    ticket: { label: '항공권 발권', icon: '🎫' },
+    confirmation: { label: '확정서 안내', icon: '📖' },
+    departure: { label: '출발 안내', icon: '✈️' },
+    happy_call: { label: '해피콜', icon: '📞' },
 };
 
 const AGENT_NAME = '김호기';
@@ -62,7 +66,7 @@ export default function MessageTemplateCreator() {
     const [product, setProduct] = useState<ProductInfo | null>(null);
     const [loadingProduct, setLoadingProduct] = useState(false);
 
-    const [templateType, setTemplateType] = useState<TemplateType>('booking');
+    const [templateType, setTemplateType] = useState<TemplateType>('remind');
 
     // 추가 입력 필드
     const [bookingNumber, setBookingNumber] = useState('');
@@ -73,6 +77,8 @@ export default function MessageTemplateCreator() {
     const [bankHolder, setBankHolder] = useState('모두투어네트워크');
     const [excludedCosts, setExcludedCosts] = useState('');
     const [depositPerPerson, setDepositPerPerson] = useState('');
+    const [confirmationLink, setConfirmationLink] = useState('');
+    const [reviewLink, setReviewLink] = useState('');
 
     const [generatedText, setGeneratedText] = useState('');
     const [copied, setCopied] = useState(false);
@@ -169,43 +175,65 @@ export default function MessageTemplateCreator() {
         const totalPrice = priceNum * travelersNum;
         const totalPriceStr = totalPrice > 0 ? `${formatPrice(totalPrice)}원` : '';
 
-        // 잔금 표시 문자열
-        let priceCalcLine = `성인 ${price}(계약금 입금 시 요금으로 확정됩니다.)
-+ 0(유류 할증료 매월 변동되며 잔금 시 최종 확정 적용됩니다.)`;
-        if (travelersNum > 0 && priceNum > 0) {
-            priceCalcLine += ` = ${price} * ${travelersNum}명 = ${totalPriceStr}`;
-        }
-
         let text = '';
 
         switch (templateType) {
+            case 'remind':
+                text = `✈️ [모두투어] 안녕하세요, ${name}님! (담당: ${AGENT_NAME})
+
+안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
+일전에 상담 도와드린 ${dest} 여행 상품은 잘 확인해 보셨을까요?
+
+상품을 살펴보시다 더 궁금하신 점이나 조정이 필요한 부분이 있으시면 언제든 편하게 말씀해 주세요. ${name}님께 가장 꼭 맞고 만족스러운 여행이 되도록 정성껏 다듬어 드리겠습니다.
+
+──────────────────
+
+🏆 믿고 맡길 수 있는 '클럽모두투어'
+
+✅ 모두투어 직영 운영 20년
+✅ 축적된 전문성과 노하우
+✅ 25년 연속 모두투어 최우수 대리점 선정
+✅ 2023년 고객만족 대상 수상
+✅ 중소기업청 공식 인증 우수 중소기업
+✅ "김반장과 함께" 단체여행 전문
+
+생애 첫 허니문부터 소중한 부모님 효도 관광까지, 저희는 고객님의 생애 모든 소중한 여정을 진심으로 함께합니다.
+
+신뢰와 전문성으로 완벽한 여행을 약속드립니다.
+답장 기다리겠습니다. 감사합니다! ✈️`;
+                break;
+
             case 'booking':
+                const bookingPriceCalc = `성인 ${price}(계약금 입금 시 요금으로 확정됩니다.)
++ 0(유류 할증료 매월 변동되며 잔금 시 최종 확정 적용됩니다.)${travelersNum > 0 && priceNum > 0 ? ` = ${price} * ${travelersNum}명 = ${totalPriceStr}` : ''}`;
+
                 text = `✈️ [모두투어] 여행 예약 안내 (담당: ${AGENT_NAME})
-안녕하세요, ${name}님! 예약을 진심으로 감사드립니다.
+
+안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
+예약을 진심으로 감사드립니다.
 원활한 여행 준비를 위해 주요 사항을 안내해 드립니다.
 
-────────────────────────
+──────────────────
 
 Ⅰ. 예약 및 결제 정보
 
 1. 예약 정보
-
 - 예약일자 : ${todayStr}
 - 예약/여행자 : ${name}님 ${phone}${travelersNum > 0 ? ` 일행 ${travelersNum}분` : ''}
 - 예약번호 : ${bookingNumber || '(예약번호)'}
 - 출 발 일 : ${departureDate}
 - 상품제목 : ${title}
-
 - 상세일정 : ${url}
 (위 주소를 클릭하시면. 일정, 호텔 등 세부 사항을 확인할 수 있습니다.)
+
 - 항 공 사 :  ${airlineDisplay}
 
-────────────────────────
+──────────────────
 
 2. 상품가 및 결제 안내 (가상계좌 및 카드)
 
 - 상 품 가 : 
-${priceCalcLine}
+${bookingPriceCalc}
 
 - 상품 가격은 예약일에 따라 변동될 수 있습니다.
 - 불 포 함 : ${excludedCosts || '가이드팁, 매너 팁, 개인 경비'}
@@ -214,7 +242,7 @@ ${priceCalcLine}
 - 계  약  금: ${deposit}${depositDeadline ? ` (${depositDeadline}까지)` : ''}
 - 잔       금: 출발 3주전 다시 안내드립니다.
 
-────────────────────────
+──────────────────
 
 3. 결제방법
 1) 카드결제: 모두투어 홈페이지 혹은 어플을 통해 결제
@@ -222,12 +250,11 @@ ${priceCalcLine}
 2) 가상계좌
 ${bankAccount}
 예  금  주 : ${bankHolder}
-────────────────────────
+──────────────────
 
 Ⅱ. 취소 규정 및 계약 진행 일정
 
 1. 취소료 규정 (국외여행 특별약관)
-
 예약/결제 취소 안내
 인터넷상에서 예약/결제 취소 및 변경은 불가능하오니, 예약/결제 취소나 여행자정보 변경을 원하시면 반드시 예약담당자에게 연락하여 주시기 바랍니다.
 
@@ -235,130 +262,211 @@ ${bankAccount}
 여행약관에 의거하여 다음과 같이 취소료가 부과됩니다.
 [특별약관]
 ■ 여행자의 여행계약 해제 요청 시 여행약관에 의거하여 취소료가 부과됩니다.
-- 여행개시(출발일) ~40일전까지 취소 통보 시 - 계약금 환급
-- 여행개시(출발일) 39~30일전까지 취소 통보 시 - 여행경비의 20% 배상
-- 여행개시(출발일) 29~20일전까지 취소 통보 시 - 여행경비의 40% 배상
-- 여행개시(출발일) 19~8일전까지 취소 통보 시 - 여행경비의 60% 배상
-- 여행개시(출발일) 7~1일전까지 취소 통보 시 - 여행경비의 90% 배상
-- 여행개시(출발일) 당일 취소 통보 시 - 여행경비의 100% 배상
+- 여행개시(출발일) ~30일전까지 취소 통보 시 - 계약금 환급
+- 여행개시(출발일) 29~20일전까지 취소 통보 시 - 여행경비의 10% 배상
+- 여행개시(출발일) 19~10일전까지 취소 통보 시 - 여행경비의 15% 배상
+- 여행개시(출발일) 9~8일전까지 취소 통보 시 - 여행경비의 20% 배상
+- 여행개시(출발일) 7~1일전까지 취소 통보 시 - 여행경비의 30% 배상
+- 여행개시(출발일) 당일 취소 통보 시 - 여행경비의 50% 배상
 
-본 상품은 항공료와 숙박비용이 해당 업체로 선납된 상품으로 일반 약관보다 높은 취소 수수료가 적용됩니다.
+여행 취소 접수 안내
+- 취소는 업무시간 내 접수 시 확인 및 적용이 가능합니다.
+- 업무시간은 월-금 09:00~18:00 (주말,공휴일 제외)
 
-취소 접수 안내
-- 업무시간: 월-금 09:00 ~ 18:00 (주말/공휴일 제외)
-- 업무시간 외 접수는 다음 영업일 접수로 간주
-- 취소료 발생일은 영업일 기준 (주말/공휴일 제외)`;
+2. 계약 진행 일정
+1) 계약 시: 계약금 및 여권 수령
+2) 계약 시: 호텔 및 항공 확보
+3) 출발 3~5주 전: 공항버스 예약
+4) 출발 3주 전: 잔금 납부
+5) 출발 1주 전: 최종 안내서 배부
+6) 출발 2~5일 전: 호텔/일정 확정, 가이드 배정
+7) 출발: 즐거운 여행!`;
                 break;
 
-            case 'remind':
-                text = `✈️ [모두투어] 출발 안내 (담당: ${AGENT_NAME})
+            case 'pre_4w':
+                text = `✈️ [모두투어] 출발 전 필수 체크사항 안내 (담당: ${AGENT_NAME})
 
-안녕하세요, ${name}님! 😊
-다가오는 ${dest} 여행 출발일이 얼마 남지 않았습니다!
+안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
+${dest} 여행 출발이 어느덧 한 달 앞으로 다가왔습니다.
+미리 챙기시면 좋은 체크사항들을 안내해 드립니다.
 
-📅 출발일: ${departureDate}
-✈️ 항공사: ${airlineDisplay}
-📦 상품명: ${title}
+1. 현금영수증
+- 현금 결제 부분만 발행 가능
+- 담당자에게 번호 알려주세요
 
-────────────────────────
+──────────────────
 
-📋 출발 전 체크리스트
+2. 모두투어 회원가입 (마일리지 적립)
 
-✅ 여권 유효기간 확인 (입국일 기준 6개월 이상)
-✅ 여행자보험 가입 여부 확인
-✅ 환전 준비
-✅ 짐 꾸리기 (기내 반입 금지 물품 확인)
+🎁 신규가입 혜택
+- 2만원 할인 쿠폰 발행 (현금처럼 사용 가능)
+- 모두투어 마일리지 적립 (항공사 마일리지와 별도)
+- 다음 여행 시 현금처럼 사용 가능
 
-────────────────────────
+📝 가입 방법
+- 가입 사이트: https://www.modetour.com/
+- 거래처명: "클럽모두" 입력
+- 개인별 가입 필수
 
-📌 주의사항
-- 공항에는 출발 2~3시간 전에 도착해 주세요.
-- 여권을 반드시 소지해 주세요.
-- 기타 궁금한 사항은 언제든 연락 주세요!
+⚠️ 중요 안내
+- 출발 전 미가입 시 마일리지 적립 불가
+- 가입 후 전체 일행의 스마트폰 번호를 각각 알려주셔야 적립됨
 
-담당자 ${AGENT_NAME} 드림 ✈️`;
+💳 2만원 쿠폰 사용 순서
+1) "신규" 회원가입 (광고수신 동의 필수)
+2) 로그아웃 후 1회 로그인
+3) 쿠폰함에서 2만원 확인 후 결제 시 사용
+
+──────────────────
+
+3. 인천공항 버스 예약 (필수!) - 광주권 출발 고객
+
+🚌 예약 정보
+- 수속 시작: 출발 3시간 전부터
+- 시간에 맞는 버스로 예약하세요
+
+🔗 예약 사이트
+- 상행버스: https://www.kobus.co.kr/main.do (출발 1달 전~)
+- 하행버스: https://txbus.t-money.co.kr/main.do (출발 2~3주 전~)
+
+📞 예약 후
+- 예약한 버스 시간을 여행사에 알려주세요`;
                 break;
 
             case 'balance': {
-                // 기납금 계산
                 const depositPP = parseInt(depositPerPerson.replace(/[^0-9]/g, ''), 10) || 0;
                 const totalDeposit = depositPP * (travelersNum || 1);
                 const remainingBalance = (priceNum * (travelersNum || 1)) - totalDeposit;
+                const totalDepositStr = formatPrice(totalDeposit);
+                const remainingBalanceStr = formatPrice(remainingBalance);
 
-                // 상품가 라인
-                let balPriceLine = `- 상 품 가: ${price}`;
-                if (travelersNum > 0 && priceNum > 0) {
-                    balPriceLine = `- 상 품 가: ${price} × ${travelersNum}명 = ${totalPriceStr}`;
-                }
+                text = `✈️ [모두투어] 여행 상품 잔금 결제 안내 (담당: ${AGENT_NAME})
 
-                // 기납금 & 잔금 라인
-                let balDepositLine = '';
-                let balRemainingLine = '';
-                if (depositPP > 0) {
-                    balDepositLine = `- 기 납 금: ${formatPrice(depositPP)}원 × ${travelersNum || 1}명 = ${formatPrice(totalDeposit)}원`;
-                    balRemainingLine = `- 잔    금: ${formatPrice(remainingBalance)}원`;
-                }
+안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
+기다려주신 ${dest} 여행이 이제 곧 시작됩니다!
+안전하고 즐거운 여행을 위해 기간 내 잔금 결제 부탁드립니다.
 
-                text = `💰 [모두투어] 잔금 안내 (담당: ${AGENT_NAME})
+──────────────────
 
-안녕하세요, ${name}님! 😊
-${dest} 여행 잔금 결제 안내드립니다.
+💳 납부 금액
+- 계약금: ${totalDepositStr}원 (납부 완료)
+- 잔    금: ${remainingBalanceStr}원
 
-📦 상품명: ${title}
-📅 출발일: ${departureDate}
+──────────────────
 
-────────────────────────
+📅 납부 기한
+- ${selectedCustomer?.balanceDueDate || '출발 3주 전'}까지
 
-💳 잔금 결제 안내
+──────────────────
 
-- 잔금 마감일: ${selectedCustomer?.balanceDueDate || '출발 3주 전'}
-${balPriceLine}
-${balDepositLine ? balDepositLine + '\n' + balRemainingLine : ''}
-
-결제방법:
-1) 카드결제: 모두투어 홈페이지 혹은 어플
-2) 가상계좌:
+💡 결제 방법
+1) 가상계좌 입금
 ${bankAccount}
-예금주: ${bankHolder}
+예금주 : ${bankHolder}
 
-────────────────────────
+2) 카드 결제
+- 모두투어 홈페이지 마이페이지에서 직접 결제
 
-⚠️ 잔금 미납 시 예약이 자동 취소될 수 있으니 기한 내 결제 부탁드립니다.
+──────────────────
 
-궁금한 사항이 있으시면 편하게 연락 주세요! 😊
-담당자 ${AGENT_NAME} 드림`;
+📞 담당자 정보
+(주)클럽모두투어 ${AGENT_NAME}
+- 전화: 02-951-9004
+- 휴대폰: 010-9307-9004`;
                 break;
             }
 
-            case 'postTrip':
-                text = `🏖️ [모두투어] 여행 후 인사 (담당: ${AGENT_NAME})
+            case 'ticket':
+                text = `✈️ [모두투어] 항공권 발권 및 좌석 지정 안내 (담당: ${AGENT_NAME})
 
-안녕하세요, ${name}님! 😊
-${dest} 여행은 잘 다녀오셨나요? ✈️
+안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
+${name}님의 소중한 여행을 위한 항공권 발권이 완료되었습니다.
+미리 좌석을 지정하여 더욱 편안한 여행을 준비해 보세요.
 
-${duration ? `${duration}간의 ` : ''}여행이 즐거우셨길 바랍니다!
-혹시 여행 중 불편하셨던 점이나 개선이 필요한 부분이 있으시면 편하게 말씀해 주세요.
+──────────────────
 
-고객님의 소중한 의견은 더 나은 여행 서비스를 위해 적극 반영하겠습니다. 🙏
+✅ 좌석 배정
+고객님의 항공권이 발권되었습니다. 예약번호를 통해 항공사 홈페이지 또는 전화로 좌석 지정을 하실 수 있습니다.
+좌석 위치에 따라 추가 요금이 발생할 수 있으며, 이는 항공사 규정에 따릅니다.
 
-────────────────────────
+출발 1일 전 지정의 경우 무료로 진행 가능하나 일행과 떨어질 수 있습니다.
 
-⭐ 여행 후기 안내
+──────────────────
 
-혹시 시간이 되신다면, 간단한 여행 후기를 남겨주시면 정말 큰 힘이 됩니다!
+🔄 좌석 변경 방법
+1) 사전 변경 (항공사 홈페이지)
+- 예약번호 또는 항공권 번호로 직접 변경 가능
 
-📝 후기 작성 방법:
-- 모두투어 홈페이지 또는 앱 → 마이페이지 → 여행 후기
+2) 온라인 체크인 시 변경
+- 출발 1일 전부터 온라인 체크인 시 변경 가능
 
-${name}님의 솔직한 후기는 다른 여행자분들에게 큰 도움이 되고,
-저희에게는 더 좋은 서비스를 만들어가는 소중한 자산이 됩니다. ✨
+3) 출발 당일 공항에서 변경
+- 공항 항공사 카운터에서 좌석 조정 요청
 
-────────────────────────
+──────────────────
 
-다음에도 멋진 여행을 함께 준비하겠습니다!
-항상 감사드립니다.
+📌 참고사항
+- 좌석 현황에 따라 변경이 불가할 수 있습니다.`;
+                break;
 
-담당자 ${AGENT_NAME} 드림 ✈️`;
+            case 'confirmation':
+                text = `✈️ [모두투어] 여행 확정서(가이드북) 안내 (담당: ${AGENT_NAME})
+
+안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
+기다려주신 ${dest} 여행의 모든 준비가 완료되어 '최종 확정서(가이드북)'를 보내드립니다.
+
+──────────────────
+
+🔗 확정서 확인하기: ${confirmationLink || '(확정서 링크)'}
+
+위 링크를 클릭하시면 호텔 정보, 미팅 장소, 준비물 등 여행에 꼭 필요한 정보들을 한눈에 확인하실 수 있습니다.
+여행 전 꼭 한 번 정독 부탁드리며, 추가로 궁금하신 사항은 언제든 말씀해 주세요.
+
+──────────────────
+
+행복한 여행의 시작, 끝까지 정성껏 챙기겠습니다. ✈️`;
+                break;
+
+            case 'departure':
+                text = `✈️ [모두투어] 드디어 출발! 즐거운 여행 되세요! (담당: ${AGENT_NAME})
+
+안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
+드디어 기다리시던 ${dest} 여행 출발일입니다!
+
+짐은 빠짐없이 잘 챙기셨나요? 🧳
+공항에는 항공기 출발 최소 3시간 전에는 도착하셔서 여유 있게 수속하시길 권장드립니다.
+
+──────────────────
+
+현지에서 혹시라도 비상상황이 발생하거나 도움이 필요하실 경우 아래 연락처로 연락 주세요.
+📞 현지 비상연락처: (현지 연락처)
+
+──────────────────
+
+설레는 마음 가득 안고 조심히 잘 다녀오세요!
+${name}님의 여행이 눈부시게 아름답길 진심으로 응원합니다. ✨
+
+${AGENT_NAME} 드림 ✈️`;
+                break;
+
+            case 'happy_call':
+                text = `✈️ [모두투어] 여행은 즐거우셨나요? 해피콜 안내 (담당: ${AGENT_NAME})
+
+안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
+${dest} 여행은 무사히 잘 다녀오셨나요? 일상으로 돌아오신 소감이 어떠신지 궁금합니다.
+
+이번 여행이 ${name}님께 소중한 추억으로 남았길 진심으로 바라며,
+바쁘시겠지만 소중한 여행 후기 한 줄 부탁드려도 될까요? 📝
+${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
+
+──────────────────
+
+🔗 후기 남기러 가기: ${reviewLink || '(후기 링크)'}
+
+──────────────────
+
+다음 여행도 ${name}님께 가장 완벽한 일정으로 준비해 드리겠습니다.
+항상 감사드립니다! 💖`;
                 break;
         }
 
@@ -627,6 +735,40 @@ ${name}님의 솔직한 후기는 다른 여행자분들에게 큰 도움이 되
                                     className="msg-field-input"
                                     value={bankAccount}
                                     onChange={(e) => setBankAccount(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {templateType === 'confirmation' && (
+                    <div>
+                        <div className="msg-section-title">📖 확정서 정보</div>
+                        <div className="msg-fields-grid">
+                            <div className="msg-field full">
+                                <label className="msg-field-label">확정서(가이드북) 링크</label>
+                                <input
+                                    className="msg-field-input"
+                                    placeholder="https://www.modetour.com/..."
+                                    value={confirmationLink}
+                                    onChange={(e) => setConfirmationLink(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {templateType === 'happy_call' && (
+                    <div>
+                        <div className="msg-section-title">📞 후기 정보</div>
+                        <div className="msg-fields-grid">
+                            <div className="msg-field full">
+                                <label className="msg-field-label">여행 후기 작성 링크</label>
+                                <input
+                                    className="msg-field-input"
+                                    placeholder="https://www.modetour.com/..."
+                                    value={reviewLink}
+                                    onChange={(e) => setReviewLink(e.target.value)}
                                 />
                             </div>
                         </div>

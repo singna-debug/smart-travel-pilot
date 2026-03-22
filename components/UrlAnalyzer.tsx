@@ -602,8 +602,8 @@ export default function UrlAnalyzer() {
                         className="analyzer-input"
                         style={{ width: '100%', appearance: 'none', cursor: 'pointer' }}
                     >
-                        <option value="신규고객">🆕 신규고객</option>
-                        <option value="재방문">🔄 재방문</option>
+                        <option value="신규고객">신규고객</option>
+                        <option value="재방문">재방문</option>
                     </select>
                 </div>
                 <div className="form-group">
@@ -615,11 +615,11 @@ export default function UrlAnalyzer() {
                         style={{ width: '100%', appearance: 'none', cursor: 'pointer' }}
                     >
                         <option value="">-- 선택 --</option>
-                        <option value="블로그">📱 블로그</option>
-                        <option value="지인소개">🤝 지인소개</option>
-                        <option value="카카오톡채널">💬 카카오톡채널</option>
-                        <option value="인스타그램">📸 인스타그램</option>
-                        <option value="매장방문">🏢 매장방문</option>
+                        <option value="블로그">블로그</option>
+                        <option value="지인소개">지인소개</option>
+                        <option value="카카오톡채널">카카오톡채널</option>
+                        <option value="인스타그램">인스타그램</option>
+                        <option value="매장방문">매장방문</option>
                     </select>
                 </div>
             </div>
