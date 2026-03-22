@@ -34,14 +34,19 @@ export async function getTodayNotificationMessage(): Promise<string | null> {
         consultations.forEach((item) => {
             const { next_followup, prepaid_date, notice_date, balance_date, confirmation_sent, departure_notice, phone_notice, happy_call, balance_due_date } = item.automation || {};
 
-            if (next_followup === today) categories.reminders.list.push(item);
-            if (prepaid_date === today) categories.prepaid.list.push(item);
-            if (notice_date === today) categories.preDeparture.list.push(item);
-            if (balance_date === today || balance_due_date === today) categories.balance.list.push(item);
-            if (confirmation_sent === today) categories.confirmation.list.push(item);
-            if (departure_notice === today) categories.departure.list.push(item);
-            if (phone_notice === today) categories.phone.list.push(item);
-            if (happy_call === today) categories.happyCall.list.push(item);
+            const isNotDone = (val?: string) => {
+                if (!val) return false;
+                return !val.includes('(완료)');
+            };
+
+            if (next_followup === today && isNotDone(next_followup)) categories.reminders.list.push(item);
+            if (prepaid_date === today && isNotDone(prepaid_date)) categories.prepaid.list.push(item);
+            if (notice_date === today && isNotDone(notice_date)) categories.preDeparture.list.push(item);
+            if ((balance_date === today || balance_due_date === today) && isNotDone(balance_date)) categories.balance.list.push(item);
+            if (confirmation_sent === today && isNotDone(confirmation_sent)) categories.confirmation.list.push(item);
+            if (departure_notice === today && isNotDone(departure_notice)) categories.departure.list.push(item);
+            if (phone_notice === today && isNotDone(phone_notice)) categories.phone.list.push(item);
+            if (happy_call === today && isNotDone(happy_call)) categories.happyCall.list.push(item);
         });
 
         const totalCount = Object.values(categories).reduce((acc, cat) => acc + cat.list.length, 0);
