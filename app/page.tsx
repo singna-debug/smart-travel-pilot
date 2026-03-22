@@ -157,7 +157,7 @@ export default function DashboardPage() {
       </section>
 
       {/* 3. 상세 리스트 */}
-      <ConsultationList title={activeTitle} data={currentList} />
+      <ConsultationList title={activeTitle} data={currentList} onUpdate={fetchDashboardData} />
     </div>
   );
 }

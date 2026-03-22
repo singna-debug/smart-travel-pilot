@@ -9,9 +9,10 @@ interface ConsultationListProps {
     title: string;
     data: ConsultationData[];
     emptyMessage?: string;
+    onUpdate?: () => void;
 }
 
-export default function ConsultationList({ title, data, emptyMessage = "해당하는 내역이 없습니다." }: ConsultationListProps) {
+export default function ConsultationList({ title, data, emptyMessage = "해당하는 내역이 없습니다.", onUpdate }: ConsultationListProps) {
     const [localData, setLocalData] = useState<ConsultationData[]>(data);
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
@@ -99,10 +100,13 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                     value,
                 }),
             });
-            const data = await response.json();
-            if (!response.ok || !data.success) {
-                throw new Error(data.error || '업데이트 실패');
+            const apiResult = await response.json();
+            if (!response.ok || !apiResult.success) {
+                throw new Error(apiResult.error || '업데이트 실패');
             }
+            
+            // 상위 컴포넌트(대시보드)에 정보 갱신 알림
+            if (onUpdate) onUpdate();
         } catch (error: any) {
             setLocalData(originalData);
             alert(`업데이트 중 오류가 발생했습니다: ${error.message}`);
