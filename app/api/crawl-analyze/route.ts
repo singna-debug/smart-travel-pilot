@@ -12,8 +12,8 @@ const VERSION = "2026-03-22-V12-STABLE";
  */
 export async function POST(req: NextRequest) {
     try {
-        const { url, mode = 'normal' } = await req.json();
-        const isConfirmation = (mode === 'deep' || mode === 'confirmation');
+        const { url, mode = 'normal', source } = await req.json();
+        const isConfirmation = (mode === 'deep' || mode === 'confirmation' || source === 'confirmation');
 
         console.log(`[POST] Starting for URL: ${url}, Mode: ${mode}, Version: ${VERSION}`);
 
