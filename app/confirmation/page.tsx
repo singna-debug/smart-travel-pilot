@@ -216,7 +216,7 @@ export default function ConfirmationPage() {
             const res = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: productUrl, source: 'confirmation' }),
+                body: JSON.stringify({ url: productUrl, mode: 'confirmation' }),
             });
 
             const textResponse = await res.text();
