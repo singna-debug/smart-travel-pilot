@@ -1145,6 +1145,7 @@ export async function updateConsultationStatus(rowIndex: number, status: string,
 
         console.log(`[Google Sheets] ${targetSheetName} 행 ${rowIndex} 상태 업데이트: ${status}`);
         cachedConsultations = null; // 캐시 초기화
+        cachedAllData = null; // 공통 캐시도 초기화
         return true;
     } catch (error: any) {
         console.error('[Google Sheets] 상태 업데이트 오류:', error.message);
@@ -1205,6 +1206,7 @@ export async function updateConsultationField(
 
         console.log(`[Google Sheets] ${targetSheetName} 행 ${rowIndex} ${field}(${column}) 업데이트: ${finalValue}`);
         cachedConsultations = null;
+        cachedAllData = null; // 모든 캐시 초기화 (대시보드 동기화 보장)
         return true;
     } catch (error: any) {
         console.error('[Google Sheets] 필드 업데이트 오류:', error.message);
