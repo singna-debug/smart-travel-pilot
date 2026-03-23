@@ -29,6 +29,7 @@ export interface ConsultationData {
     phone_notice?: string;        // 전화 안내 (출발-1일)
     happy_call?: string;          // 해피콜 (귀국+1일)
     balance_due_date?: string;    // (구) 잔금기한 - 호환성 유지
+    inquiry_info_backup?: string; // 원본 문의 정보 백업 (AA열)
   };
   sheetRowIndex?: number;
   sheetName?: string;

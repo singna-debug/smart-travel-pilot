@@ -3,6 +3,34 @@
 import { useState, useEffect } from 'react';
 import GoogleContactsPicker from './GoogleContactsPicker';
 
+function formatToHtmlDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const cleanedDate = dateStr.replace(/[^0-9]/g, '');
+    let targetYear, targetMonth, targetDay;
+
+    const mdMatch = dateStr.match(/(\d+)\s*월\s*(\d+)\s*일/);
+    if (mdMatch) {
+        const now = new Date();
+        targetYear = now.getFullYear();
+        targetMonth = parseInt(mdMatch[1]) - 1;
+        targetDay = parseInt(mdMatch[2]);
+    } else if (cleanedDate.length >= 8) {
+        targetYear = parseInt(cleanedDate.substring(0, 4));
+        targetMonth = parseInt(cleanedDate.substring(4, 6)) - 1;
+        targetDay = parseInt(cleanedDate.substring(6, 8));
+    } else {
+        return dateStr;
+    }
+
+    const d = new Date(targetYear, targetMonth, targetDay);
+    if (isNaN(d.getTime())) return dateStr;
+
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
 interface ConsultationForm {
     customerName: string;
     customerPhone: string;
@@ -113,6 +141,42 @@ export default function ManualConsultationForm() {
             }
         }
     }, [form.departureDate, form.duration]);
+
+    // 예약확정 상품 URL 입력 시 자동 분석 (Booking 모드)
+    useEffect(() => {
+        const analyzeConfirmedProduct = async () => {
+            const url = form.confirmedProduct;
+            if (url && url.startsWith('http') && url.length > 15) {
+                // 주요 정보가 비어있거나 '미정'인 경우 자동 분석 시도
+                if (!form.destination || form.destination === '미정' || !form.departureDate) {
+                    try {
+                        const res = await fetch('/api/crawl-analyze', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url, mode: 'booking' })
+                        });
+                        const data = await res.json();
+                        if (data.success && data.data) {
+                            const p = data.data;
+                            setForm(prev => ({
+                                ...prev,
+                                destination: (p.destination && (!prev.destination || prev.destination === '미정')) ? p.destination : prev.destination,
+                                departureDate: p.departureDate ? formatToHtmlDate(p.departureDate) : prev.departureDate,
+                                duration: (p.duration && (!prev.duration || prev.duration === '미정')) ? p.duration : prev.duration,
+                                productName: (p.title && (!prev.productName || prev.productName === '미정')) ? p.title : prev.productName,
+                                returnDate: p.returnDate ? formatToHtmlDate(p.returnDate) : prev.returnDate
+                            }));
+                        }
+                    } catch (e) {
+                        console.error('Booking analysis error:', e);
+                    }
+                }
+            }
+        };
+
+        const timer = setTimeout(analyzeConfirmedProduct, 1000);
+        return () => clearTimeout(timer);
+    }, [form.confirmedProduct]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -338,11 +402,15 @@ export default function ManualConsultationForm() {
                             style={{ width: '100%', appearance: 'none', cursor: 'pointer' }}
                         >
                             <option value="">-- 선택 --</option>
-                            <option value="블로그">블로그</option>
+                            <option value="네이버 블로그">네이버 블로그</option>
+                            <option value="카카오톡 채널">카카오톡 채널</option>
+                            <option value="인스타그램 및 페이스북">인스타그램 및 페이스북</option>
+                            <option value="당근마켓">당근마켓</option>
+                            <option value="닷컴">닷컴</option>
                             <option value="지인소개">지인소개</option>
-                            <option value="카카오톡채널">카카오톡채널</option>
-                            <option value="인스타그램">인스타그램</option>
-                            <option value="매장방문">매장방문</option>
+                            <option value="기존고객">기존고객</option>
+                            <option value="전화문의">전화문의</option>
+                            <option value="기타">기타</option>
                         </select>
                     </div>
                 </div>

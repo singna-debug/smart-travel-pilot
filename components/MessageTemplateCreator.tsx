@@ -13,6 +13,7 @@ interface Customer {
     url: string;
     status: string;
     balanceDueDate: string;
+    travelersCount: string;
     timestamp: string;
 }
 
@@ -28,11 +29,12 @@ interface ProductInfo {
     exclusions: string[];
 }
 
-type TemplateType = 'remind' | 'booking' | 'pre_4w' | 'balance' | 'ticket' | 'confirmation' | 'departure' | 'happy_call';
+type TemplateType = 'remind' | 'booking' | 'dotcom' | 'pre_4w' | 'balance' | 'ticket' | 'confirmation' | 'departure' | 'happy_call';
 
 const TEMPLATE_LABELS: Record<TemplateType, { label: string; icon: string }> = {
     remind: { label: '리마인드', icon: '⏰' },
     booking: { label: '예약 및 결제', icon: '✅' },
+    dotcom: { label: '닷컴안내', icon: '🌐' },
     pre_4w: { label: '출발 4주 전', icon: '📅' },
     balance: { label: '잔금 안내', icon: '💰' },
     ticket: { label: '항공권 발권', icon: '🎫' },
@@ -101,10 +103,11 @@ export default function MessageTemplateCreator() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // 고객 선택 시 URL 자동 입력
+    // 고객 선택 시 자동 입력 (URL, 인원 등)
     useEffect(() => {
-        if (selectedCustomer?.url) {
-            setUrl(selectedCustomer.url);
+        if (selectedCustomer) {
+            if (selectedCustomer.url) setUrl(selectedCustomer.url);
+            if (selectedCustomer.travelersCount) setTravelers(selectedCustomer.travelersCount);
         }
     }, [selectedCustomer]);
 
@@ -179,10 +182,12 @@ export default function MessageTemplateCreator() {
 
         switch (templateType) {
             case 'remind':
-                text = `✈️ [모두투어] 안녕하세요, ${name}님! (담당: ${AGENT_NAME})
+                text = `✈️ [모두투어] 상담 상품 리마인드 (담당: ${AGENT_NAME})
 
 안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
-일전에 상담 도와드린 ${dest} 여행 상품은 잘 확인해 보셨을까요?
+일전에 상담 도와드린 ${dest ? dest + ' ' : ''}여행 상품은 잘 확인해 보셨을까요?
+
+🔗 기존 안내한 일정 URL : ${url || '(일정표 링크)'}
 
 상품을 살펴보시다 더 궁금하신 점이나 조정이 필요한 부분이 있으시면 언제든 편하게 말씀해 주세요. ${name}님께 가장 꼭 맞고 만족스러운 여행이 되도록 정성껏 다듬어 드리겠습니다.
 
@@ -281,6 +286,33 @@ ${bankAccount}
 5) 출발 1주 전: 최종 안내서 배부
 6) 출발 2~5일 전: 호텔/일정 확정, 가이드 배정
 7) 출발: 즐거운 여행!`;
+                break;
+
+            case 'dotcom':
+                text = `✈️  여행 예약 안내
+                
+${name} 고객님, 안녕하세요! 😊
+이번 여행의 담당자로 배정된 모두투어 ${AGENT_NAME}입니다.
+
+신속한 예약을 위해 현재 항공, 호텔 확인 중이며,
+잠시 후 예약 관련 안내를 위해 전화 드리겠습니다.
+통화하기 편한 시간 알려주시면 좋습니다. 
+
+📋 예약 확인 내역
+• 여 행 지 : ${dest}
+• 출 발 일 : ${departureDate}
+• 인      원: 총 ${travelersNum > 0 ? travelersNum : '(미정)'}명
+• 예약상품 : ${url || '(일정표 링크)'}
+
+기타 궁금하신 점은 아래 연락처로 언제든 편하게 문의해 주세요.
+고객님의 즐거운 여행을 위해 정성을 다해 준비하겠습니다!
+
+📞 상담 및 문의
+• 담당자: (주)클럽모두투어 ${AGENT_NAME}
+• 직통전화: 02-951-9004
+• 휴대폰: 010-9307-9004
+
+감사합니다. ${AGENT_NAME} 드림`;
                 break;
 
             case 'pre_4w':

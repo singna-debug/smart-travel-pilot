@@ -230,7 +230,7 @@ async function getOrCreateMonthlySheet(sheets: any, spreadsheetId: string, month
         // 헤더 초기화
         const consultationHeaders = [
             '상담일시', '고객성함', '연락처', '총인원', '재방문여부', '유입경로', '목적지', '출발일', '귀국일', '기간', '상품명', '상품URL', '상담요약', '상담단계', '등록방식', '팔로업일',
-            '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id'
+            '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup'
         ];
 
         await sheets.spreadsheets.values.update({
@@ -411,11 +411,12 @@ export async function appendConsultationToSheet(data: ConsultationData): Promise
             data.automation.phone_notice || '',      // X: 전화 안내 (23)
             data.automation.happy_call || '',        // Y: 해피콜 (24)
             data.visitor_id || '',                  // Z: visitor_id (25)
+            data.automation.inquiry_info_backup || '', // AA: inquiry_info_backup (26)
         ];
 
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
-            range: `${targetSheet}!A:Z`,
+            range: `${targetSheet}!A:AA`,
             valueInputOption: 'USER_ENTERED',
             requestBody: {
                 values: [row],
@@ -543,6 +544,7 @@ export async function upsertConsultationToSheet(data: ConsultationData): Promise
             data.automation.phone_notice || '',      // X: 전화 안내 (23)
             data.automation.happy_call || '',        // Y: 해피콜 (24)
             data.visitor_id || '',                  // Z: visitor_id (25)
+            data.automation.inquiry_info_backup || '', // AA: inquiry_info_backup (26)
         ];
 
         // 2. 행 삭제
@@ -571,7 +573,7 @@ export async function upsertConsultationToSheet(data: ConsultationData): Promise
 
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
-            range: `${targetSheet}!A:Z`,
+            range: `${targetSheet}!A:AA`,
             valueInputOption: 'USER_ENTERED',
             requestBody: { values: [newRow] },
         });
@@ -830,6 +832,7 @@ export async function getConsultationHistory(customerPhone: string): Promise<Con
                     departure_notice: autoFormatDateString(row[22]),  // W: 출발안내 (index 22)
                     phone_notice: autoFormatDateString(row[23]),      // X: 전화 안내 (index 23)
                     happy_call: autoFormatDateString(row[24]),        // Y: 해피콜 (index 24)
+                    inquiry_info_backup: row[26] || '',               // AA: 백업 (index 26)
                 },
                 source: row[14] || '',                // O: 등록방식 (index 14)
                 timestamp: row[0],
@@ -949,6 +952,7 @@ export async function getAllConsultations(forceRefresh = false): Promise<Consult
                     departure_notice: autoFormatDateString(row[22]),  // W: 출발안내 (index 22)
                     phone_notice: autoFormatDateString(row[23]),      // X: 전화 안내 (index 23)
                     happy_call: autoFormatDateString(row[24]),        // Y: 해피콜 (index 24)
+                    inquiry_info_backup: row[26] || '',               // AA: 백업 (index 26)
                 },
                 source: row[14] || '수동등록',        // O: 등록방식 (index 14)
                 visitor_id: row[25] || '',            // Z: visitor_id (index 25)
@@ -1120,6 +1124,7 @@ export async function deleteConsultationFromSheet(rowIndex: number, sheetName?: 
 
 /**
  * Google Sheets에서 특정 상담의 상태를 업데이트합니다.
+ * 상태가 '상담중', '견적제공', '취소' 등으로 변경되면 예약 관련 정보(Q, R, S열)를 자동으로 비웁니다.
  */
 export async function updateConsultationStatus(rowIndex: number, status: string, sheetName?: string): Promise<boolean> {
     try {
@@ -1133,13 +1138,61 @@ export async function updateConsultationStatus(rowIndex: number, status: string,
 
         const targetSheetName = sheetName || '시트1';
 
-        // N열(14번째)이 상담단계 컬럼 (index 13)
-        await sheets.spreadsheets.values.update({
+        // 업데이트할 값들 준비
+        const data = [
+            {
+                range: `${targetSheetName}!N${rowIndex}`,
+                values: [[status]]
+            }
+        ];
+
+        // 예약 정보 초기화가 필요한 상태들
+        const resetStatuses = ['상담중', '견적제공', '취소', '취소/보류', '상담완료'];
+        if (resetStatuses.includes(status)) {
+            console.log(`[Google Sheets] 상태가 ${status}로 변경되어 모든 예약/일정 정보(Q-Y)를 초기화합니다.`);
+            
+            // AA열(백업)에서 원래 정보를 읽어와 복원 시도 (상담중으로 되돌릴 때만)
+            if (status === '상담중') {
+                try {
+                    const resp = await sheets.spreadsheets.values.get({
+                        spreadsheetId: sheetId,
+                        range: `${targetSheetName}!A${rowIndex}:AA${rowIndex}`,
+                    });
+                    const row = resp.data.values?.[0];
+                    const backupJson = row?.[26]; // AA: index 26
+                    
+                    if (backupJson) {
+                        const backup = JSON.parse(backupJson);
+                        console.log('[Google Sheets] 원본 정보 복원:', backup);
+                        data.push({
+                            range: `${targetSheetName}!G${rowIndex}:L${rowIndex}`,
+                            values: [[
+                                backup.destination || '', 
+                                backup.departureDate || '', 
+                                backup.returnDate || '', 
+                                backup.duration || '', 
+                                backup.productName || '', 
+                                backup.productUrl || ''
+                            ]]
+                        });
+                    }
+                } catch (e: any) {
+                    console.error('[Google Sheets] 백업 원복 실패:', e.message);
+                }
+            }
+
+            data.push({
+                range: `${targetSheetName}!Q${rowIndex}:Y${rowIndex}`,
+                values: [['', '', '', '', '', '', '', '', '']] 
+                // Q=확정상품, R=예약확정일, S=선금일, T=출발전안내(4주), U=잔금일, V=확정서, W=출발안내, X=전화안내, Y=해피콜
+            });
+        }
+
+        await sheets.spreadsheets.values.batchUpdate({
             spreadsheetId: sheetId,
-            range: `${targetSheetName}!N${rowIndex}`, // Changed from M to N
-            valueInputOption: 'USER_ENTERED',
             requestBody: {
-                values: [[status]],
+                valueInputOption: 'USER_ENTERED',
+                data: data
             },
         });
 
@@ -1169,6 +1222,7 @@ const FIELD_TO_COLUMN: Record<string, string> = {
     confirmedProduct: 'Q', confirmedDate: 'R',
     prepaidDate: 'S', noticeDate: 'T', balanceDate: 'U',
     confirmationSent: 'V', departureNotice: 'W', phoneNotice: 'X', happyCall: 'Y',
+    inquiryInfoBackup: 'AA',
 };
 
 export async function updateConsultationField(
@@ -1178,6 +1232,10 @@ export async function updateConsultationField(
     sheetName?: string
 ): Promise<boolean> {
     try {
+        if (field === 'status') {
+            return await updateConsultationStatus(rowIndex, value, sheetName);
+        }
+
         const column = FIELD_TO_COLUMN[field];
         if (!column) {
             console.error(`[Google Sheets] 알 수 없는 필드: ${field}`);

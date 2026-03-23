@@ -131,7 +131,25 @@ export default function ChatsPage() {
             });
             const data = await res.json();
             if (data.success) {
-                setChats(prev => prev.map(c => c.id === chatId ? { ...c, [field]: formattedValue } : c));
+                setChats(prev => prev.map(c => {
+                    if (c.id === chatId) {
+                        const updated = { ...c, [field]: formattedValue };
+                        // 상태가 상담중/견적제공/취소 등으로 변경되면 모든 예약 정보 초기화
+                        if (field === 'status' && ['상담중', '견적제공', '취소', '취소/보류', '상담완료'].includes(formattedValue)) {
+                            updated.confirmedProduct = '';
+                            updated.confirmedDate = '';
+                            updated.prepaidDate = '';
+                            updated.noticeDate = '';
+                            updated.balanceDate = '';
+                            updated.confirmationSent = '';
+                            updated.departureNotice = '';
+                            updated.phoneNotice = '';
+                            updated.happyCall = '';
+                        }
+                        return updated;
+                    }
+                    return c;
+                }));
             } else {
                 alert(`수정 실패: ${data.error}`);
             }
@@ -208,9 +226,25 @@ export default function ChatsPage() {
 
             const data = await response.json();
             if (data.success) {
-                setChats(prev => prev.map(c =>
-                    c.id === chat.id ? { ...c, status: newStatus } : c
-                ));
+                setChats(prev => prev.map(c => {
+                    if (c.id === chat.id) {
+                        const updated = { ...c, status: newStatus };
+                        // 상담 상태가 초기화/취소되면 모든 관련 예약 정보도 로컬에서 비움
+                        if (['상담중', '견적제공', '취소', '취소/보류', '상담완료'].includes(newStatus)) {
+                            updated.confirmedProduct = '';
+                            updated.confirmedDate = '';
+                            updated.prepaidDate = '';
+                            updated.noticeDate = '';
+                            updated.balanceDate = '';
+                            updated.confirmationSent = '';
+                            updated.departureNotice = '';
+                            updated.phoneNotice = '';
+                            updated.happyCall = '';
+                        }
+                        return updated;
+                    }
+                    return c;
+                }));
             } else {
                 alert('상태 변경에 실패했습니다: ' + data.error);
             }
@@ -646,12 +680,12 @@ export default function ChatsPage() {
                                 </div>
 
                                 {/* 목록 */}
-                                {filteredChats.map((chat) => {
-                                    const isExpanded = expandedId === chat.id;
-                                    const today = new Date().toISOString().split('T')[0];
-
-                                    return (
-                                        <div key={chat.id}>
+                                 {filteredChats.map((chat, idx) => {
+                                     const isExpanded = expandedId === chat.id;
+                                     const today = new Date().toISOString().split('T')[0];
+ 
+                                     return (
+                                         <div key={`${chat.id}-${idx}`}>
                                             <div
                                                 onClick={(e) => {
                                                     // Don't expand if clicking on interactive elements
@@ -695,7 +729,7 @@ export default function ChatsPage() {
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                                     <div>
                                                         <div style={{ fontWeight: 500, color: '#fff', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                            {chat.visitorName}
+                                                            {chat.visitorName || (chat.source === '카카오톡' || !chat.source ? '[K]미정' : '(이름 미정)')}
                                                             {(chat.source === '카카오톡' || !chat.source) && chat.id.startsWith('sheet-') === false && (
                                                                 <span style={{ backgroundColor: '#FEE500', color: '#000', fontSize: '10px', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>K</span>
                                                             )}
@@ -795,11 +829,19 @@ export default function ChatsPage() {
                                                                 </button>
                                                             </div>
                                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                                                                <EditableField label="고객명" value={chat.visitorName} field="visitorName" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingCustomerChatId === chat.id} />
+                                                                <EditableField 
+                                                                    label="고객명" 
+                                                                    value={chat.visitorName} 
+                                                                    field="visitorName" 
+                                                                    chatId={chat.id} 
+                                                                    onSave={handleFieldUpdate} 
+                                                                    forceEditMode={editingCustomerChatId === chat.id} 
+                                                                    displayValue={chat.visitorName || (chat.source === '카카오톡' || !chat.source ? '[K]미정' : '(이름 미정)')}
+                                                                />
                                                                 <EditableField label="연락처" value={chat.visitorPhone} field="visitorPhone" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingCustomerChatId === chat.id} />
                                                                 <EditableField label="총인원" value={chat.travelersCount} field="travelersCount" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingCustomerChatId === chat.id} />
                                                                 <EditableField label="재방문여부" value={chat.recurringCustomer} field="recurringCustomer" chatId={chat.id} onSave={handleFieldUpdate} options={['신규고객', '재방문', '장기미방문', '정보없음']} forceEditMode={editingCustomerChatId === chat.id} />
-                                                                <EditableField label="유입경로" value={chat.inquirySource} field="inquirySource" chatId={chat.id} onSave={handleFieldUpdate} options={['네이버 톡톡', '네이버 블로그', '네이버 카페', '카카오톡 채널', '인스타그램', '페이스북', '당근마켓', '지인소개', '기존고객', '전화문의', '기타']} forceEditMode={editingCustomerChatId === chat.id} />
+                                                                <EditableField label="유입경로" value={chat.inquirySource} field="inquirySource" chatId={chat.id} onSave={handleFieldUpdate} options={['네이버 블로그', '카카오톡 채널', '인스타그램 및 페이스북', '당근마켓', '닷컴', '지인소개', '기존고객', '전화문의', '기타']} forceEditMode={editingCustomerChatId === chat.id} />
                                                                 <InfoCell label="등록방식" value={chat.source || '-'} highlight={chat.source === '카카오톡' ? '#fbbf24' : '#a78bfa'} />
                                                             </div>
 
@@ -816,6 +858,7 @@ export default function ChatsPage() {
                                                                     {editingTripChatId === chat.id ? '완료' : <><Pencil size={12} /> 편집</>}
                                                                 </button>
                                                             </div>
+
                                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
                                                                 <EditableField label="목적지" value={chat.destination} field="destination" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingTripChatId === chat.id} />
                                                                 <EditableField label="출발일" value={chat.departureDate} field="departureDate" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingTripChatId === chat.id} />
@@ -824,10 +867,20 @@ export default function ChatsPage() {
                                                             </div>
                                                             {/* 상품 목록 (단일/비교분석 공통) */}
                                                             {(() => {
-                                                                const names = (chat.productName || '').split(/\n|,\s*/).filter(Boolean);
-                                                                const urls = (chat.productUrl || '').split(/\n|,\s*/).filter(Boolean);
+                                                                const robustSplit = (str: string) => {
+                                                                    if (!str) return [];
+                                                                    const s = str.trim();
+                                                                    // '1.상품...2.상품...' 형태(공백 없음) or '1. 상품...' 형태 처리
+                                                                    if (/\d+\./.test(s)) {
+                                                                        const parts = s.split(/\s*(?=\d+\.)/).map(v => v.trim()).filter(Boolean);
+                                                                        if (parts.length > 1) return parts;
+                                                                    }
+                                                                    return s.split(/\s*,\s*|\s*\n\s*|\s*\|\s*/).map(v => v.trim()).filter(Boolean);
+                                                                };
+                                                                const names = robustSplit(chat.productName || '');
+                                                                const urls = robustSplit(chat.productUrl || '');
                                                                 const maxLen = Math.max(names.length, urls.length, 1);
-                                                                const isMultiple = maxLen > 1;
+                                                                const isMultiple = names.length > 1 || urls.length > 1 || (chat.productName || '').includes(',') || (chat.productUrl || '').includes(',');
 
                                                                 return (
                                                                     <div style={{ marginTop: '10px' }}>
@@ -861,7 +914,9 @@ export default function ChatsPage() {
                                                                         ) : (
                                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                                                                 {Array.from({ length: maxLen }).map((_, i) => {
-                                                                                    const name = names[i] || (isMultiple ? `상품 ${i + 1}` : '상품명 미상');
+                                                                                    const rawName = names[i] || '';
+                                                                                    const cleanName = rawName.replace(/^\d+\.?\s*/, '').replace(/^상품\d+:\s*/, '').trim();
+                                                                                    const name = cleanName ? `상품${i + 1}: ${cleanName}` : (isMultiple ? `상품 ${i + 1}` : '상품명 미상');
                                                                                     const url = urls[i] || '';
                                                                                     return (
                                                                                         <div key={i} style={{
@@ -872,10 +927,23 @@ export default function ChatsPage() {
                                                                                             {isMultiple && <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: 700, minWidth: '20px' }}>{i + 1}</span>}
                                                                                             <div style={{ flex: 1, overflow: 'hidden' }}>
                                                                                                 {url ? (
-                                                                                                    <a href={url.trim()} target="_blank" rel="noopener noreferrer"
-                                                                                                        style={{ fontSize: '12px', color: '#38bdf8', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textDecoration: 'underline' }}>
-                                                                                                        {name.trim()}
-                                                                                                    </a>
+                                                                                                    (() => {
+                                                                                                        let cleanUrl = url.trim().replace(/^\d+\.?\s*/, '');
+                                                                                                        if (cleanUrl.startsWith('https:/') && !cleanUrl.startsWith('https://')) {
+                                                                                                            cleanUrl = cleanUrl.replace('https:/', 'https://');
+                                                                                                        } else if (cleanUrl.startsWith('http:/') && !cleanUrl.startsWith('http://')) {
+                                                                                                            cleanUrl = cleanUrl.replace('http:/', 'http://');
+                                                                                                        }
+                                                                                                        if (cleanUrl && !cleanUrl.startsWith('http')) {
+                                                                                                            cleanUrl = 'https://' + cleanUrl;
+                                                                                                        }
+                                                                                                        return (
+                                                                                                            <a href={cleanUrl} target="_blank" rel="noopener noreferrer"
+                                                                                                                style={{ fontSize: '12px', color: '#38bdf8', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textDecoration: 'underline' }}>
+                                                                                                                {name.trim()}
+                                                                                                            </a>
+                                                                                                        );
+                                                                                                    })()
                                                                                                 ) : (
                                                                                                     <div style={{ fontSize: '12px', color: '#e5e7eb', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                                                                         {name.trim()}
@@ -1005,14 +1073,22 @@ export default function ChatsPage() {
                                                         <h4 style={{ color: '#a78bfa', fontSize: '13px', fontWeight: 700, margin: '0 0 12px 0', borderBottom: '1px solid #374151', paddingBottom: '8px' }}>진행 현황</h4>
                                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
                                                             <TimelineCell label="팔로업일" date={chat.nextFollowup} today={today} field="nextFollowup" chatId={chat.id} onCheck={handleFieldUpdate} />
-                                                            <TimelineCell label="예약확정일" date={chat.confirmedDate} today={today} field="confirmedDate" chatId={chat.id} />
-                                                            <TimelineCell label="선금일" date={chat.prepaidDate} today={today} field="prepaidDate" chatId={chat.id} onCheck={handleFieldUpdate} />
-                                                            <TimelineCell label="출발전안내" date={chat.noticeDate} today={today} field="noticeDate" chatId={chat.id} onCheck={handleFieldUpdate} />
-                                                            <TimelineCell label="잔금일" date={chat.balanceDate} today={today} field="balanceDate" chatId={chat.id} onCheck={handleFieldUpdate} />
-                                                            <TimelineCell label="확정서발송" date={chat.confirmationSent} today={today} field="confirmationSent" chatId={chat.id} onCheck={handleFieldUpdate} />
-                                                            <TimelineCell label="출발안내" date={chat.departureNotice} today={today} field="departureNotice" chatId={chat.id} onCheck={handleFieldUpdate} />
-                                                            <TimelineCell label="전화안내" date={chat.phoneNotice} today={today} field="phoneNotice" chatId={chat.id} onCheck={handleFieldUpdate} />
-                                                            <TimelineCell label="해피콜" date={chat.happyCall} today={today} field="happyCall" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                            {chat.status !== '상담중' && chat.status !== '견적제공' && (
+                                                                <>
+                                                                    <TimelineCell label="예약확정일" date={chat.confirmedDate} today={today} field="confirmedDate" chatId={chat.id} />
+                                                                    <TimelineCell label="선금일" date={chat.prepaidDate} today={today} field="prepaidDate" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                                </>
+                                                            )}
+                                                            {chat.status !== '상담중' && chat.status !== '견적제공' && (
+                                                                <>
+                                                                    <TimelineCell label="출발전안내" date={chat.noticeDate} today={today} field="noticeDate" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                                    <TimelineCell label="잔금일" date={chat.balanceDate} today={today} field="balanceDate" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                                    <TimelineCell label="확정서발송" date={chat.confirmationSent} today={today} field="confirmationSent" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                                    <TimelineCell label="출발안내" date={chat.departureNotice} today={today} field="departureNotice" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                                    <TimelineCell label="전화안내" date={chat.phoneNotice} today={today} field="phoneNotice" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                                    <TimelineCell label="해피콜" date={chat.happyCall} today={today} field="happyCall" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                                </>
+                                                            )}
                                                             {chat.confirmedProduct && (
                                                                 <div style={{ gridColumn: 'span 1', padding: '8px', background: '#111827', borderRadius: '6px', fontSize: '11px' }}>
                                                                     <div style={{ color: '#6b7280', marginBottom: '4px' }}>확정상품</div>
