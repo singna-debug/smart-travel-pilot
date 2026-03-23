@@ -243,89 +243,176 @@
     font-size: 0.9rem;
 }
 
-/* 일정표 */
+/* 일정표 - 모두투어 스타일 타임라인 전환 */
 .mc-itinerary {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 24px;
+    padding-top: 10px;
 }
 
 .mc-day-card {
-    background: #f8fafc;
-    border-radius: 10px;
-    padding: 14px;
-    border-left: 3px solid #6366f1;
+    background: #fff;
+    border-radius: 16px;
+    padding: 0; /* 내부 패딩 제거하고 헤더/바디 분리 */
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.mc-day-card .day-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #fff;
+    border-bottom: 1px solid #f8fafc;
+    cursor: pointer;
 }
 
 .mc-day-card .day-number {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #6366f1;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.mc-day-card .day-content {
-    font-size: 0.85rem;
-    color: #475569;
-    line-height: 1.6;
-}
-
-/* 추가 일정 상세 스타일 */
-.day-transport {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1e293b;
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: #f1f5f9;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    font-weight: 600;
+    gap: 10px;
+}
+
+.mc-day-card .day-date {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+    padding-left: 10px;
+    border-left: 1px solid #e2e8f0;
+}
+
+.mc-day-card .day-title {
+    font-size: 0.9rem;
     color: #475569;
-    margin-bottom: 10px;
+    font-weight: 600;
+    margin-left: auto;
 }
 
-.trans-icon {
-    font-size: 1rem;
+.day-body {
+    padding: 20px;
+    position: relative;
 }
 
-.day-hotel {
+/* 타임라인 수직선 */
+.activity-list {
+    position: relative;
+    padding-left: 30px; /* 여유 공간 확보 */
+}
+
+.activity-list::before {
+    content: '';
+    position: absolute;
+    left: 9px; /* (dot width 18 - line width 1.5) / 2 = 8.25? No, dot center is 9. */
+    top: 10px;
+    bottom: 10px;
+    width: 1.5px;
+    background: #e2e8f0;
+}
+
+.day-activity-item {
+    position: relative;
+    margin-bottom: 28px;
+}
+
+.day-activity-item:last-child {
+    margin-bottom: 0;
+}
+
+/* 타임라인 점 (Dot) */
+.timeline-dot {
+    position: absolute;
+    left: -25px; /* padding-left 30 - 5 (dot offset) */
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+/* 위치 아이콘 점 스타일 */
+.timeline-dot.location {
+    left: -30px;
+    top: 2px;
+    width: 20px;
+    height: 20px;
+    background: #10b981;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.activity-text {
+    display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    gap: 4px;
 }
 
-.dh-name {
+.activity-header {
+    font-size: 0.95rem;
     font-weight: 700;
     color: #1e293b;
-    margin-bottom: 2px;
-}
-
-.dh-times {
-    font-size: 0.7rem;
-    color: #94a3b8;
-}
-
-.day-notices {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px dashed #e2e8f0;
     display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: 6px;
 }
 
-.day-notice-item {
-    font-size: 0.78rem;
+.activity-desc {
+    font-size: 0.82rem;
     color: #64748b;
-    display: flex;
-    gap: 6px;
     line-height: 1.5;
 }
 
-.dn-bullet {
-    font-size: 0.9rem;
-    flex-shrink: 0;
+/* 교통 정보 카드 개선 */
+.day-transport-card {
+    margin-bottom: 20px;
+}
+
+.mc-flight-card.compact {
+    background: #fff;
+    border: 1.5px solid #f1f5f9;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.summary-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    font-size: 1.1rem;
+}
+
+.day-summary-box {
+    margin-top: 24px;
+    padding: 18px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+}
+
+.summary-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.summary-row + .summary-row {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #e2e8f0;
 }
 
 /* 파일 다운로드 */

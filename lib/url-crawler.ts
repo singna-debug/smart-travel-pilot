@@ -905,7 +905,28 @@ export async function analyzeWithGemini(text: string, url: string, nextData?: st
         const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.0-flash';
         console.log(`[Gemini] AI 분석 시작... (모델: ${modelName}, 요약모드: ${isSummaryOnly})`);
 
-        let prompt = `다음 여행 상품 페이지에서 정보를 추출하여 JSON으로 반환하세요.
+        let prompt = '';
+        
+        if (isSummaryOnly && text.includes('BOOKING_MODE')) {
+             // 예약확정 전용 초간단 프롬프트
+             prompt = `다음 여행 상품 페이지에서 핵심 예약 정보만 추출하여 JSON으로 반환하세요.
+URL: ${url}
+
+반환 형식:
+{
+  "isProduct": true,
+  "title": "상품명",
+  "destination": "목적지 (국가+도시)",
+  "price": "성인 1인 가격 (숫자만)",
+  "departureDate": "출발일 (YYYY-MM-DD)",
+  "duration": "여행기간 (예: 3박5일)",
+  "returnDate": "귀국일 (YYYY-MM-DD)"
+}
+
+입력 텍스트:
+${text.substring(0, 10000)}`;
+        } else {
+            prompt = `다음 여행 상품 페이지에서 정보를 추출하여 JSON으로 반환하세요.
 URL: ${url}
 ${nextData ? `--- [중요: NEXT_JS_DATA (JSON 데이터 참조용)] ---\n${nextData.substring(0, 15000)}\n` : ''}
 
@@ -921,11 +942,12 @@ ${nextData ? `--- [중요: NEXT_JS_DATA (JSON 데이터 참조용)] ---\n${nextD
   "departureAirport": "출발공항",
   "keyPoints": ["상품 포인트 요약 (명사형 개조식)"]`;
 
-        if (!isSummaryOnly) {
-            prompt += `,\n  "exclusions": ["불포함 사항 요약"],\n  "itinerary": [{"day": "1일차", "activities": ["활동 내역..."]}]`;
-        }
+            if (!isSummaryOnly) {
+                prompt += `,\n  "exclusions": ["불포함 사항 요약"],\n  "itinerary": [{"day": "1일차", "activities": ["활동 내역..."]}]`;
+            }
 
-        prompt += `\n}\n\n입력 텍스트:\n${text.substring(0, 20000)}`;
+            prompt += `\n}\n\n입력 텍스트:\n${text.substring(0, 20000)}`;
+        }
 
         console.log(`[Gemini] 최종 프롬프트 길이: ${prompt.length}`);
         const fs = require('fs');
@@ -1389,31 +1411,85 @@ export const scrapeWithScrapingBee = async (url: string): Promise<string | null>
     return null;
 }
 
+/**
+ * 1. 예약확정(Booking) 전용 크롤러 — 목적지, 날짜, 가격 등 핵심 메타데이터만 빠르게 추출
+ */
+export async function crawlForBooking(url: string): Promise<DetailedProductInfo | null> {
+    console.log(`[Crawler] crawlForBooking Start. URL=${url}`);
+    try {
+        // 예약확정 정보는 Native API가 있다면 그것만으로도 충분함 (가장 빠름)
+        if (url.includes('modetour.com')) {
+            const native = await fetchModeTourNative(url, true); // 요약모드
+            if (native && native.departureDate && native.destination) {
+                console.log('[BookingCrawler] ModeTour Native Data 수집 성공');
+                return refineData(native, '', url);
+            }
+        }
 
+        // Native 실패 시 빠른 fetch + Gemini 요약 분석
+        const { html } = await quickFetch(url);
+        if (!html) return null;
+
+        const text = htmlToText(html, url);
+        // "BOOKING_MODE" 토큰을 넣어 analyzeWithGemini가 최소 프롬프트를 사용하게 함
+        const aiResult = await analyzeWithGemini('BOOKING_MODE\n' + text, url, undefined, true);
+        
+        if (aiResult) {
+            return refineData(aiResult, text, url);
+        }
+        return refineData(fallbackParse(text), text, url);
+    } catch (e: any) {
+        console.error(`[BookingCrawler] Error: ${e.message}`);
+        return null;
+    }
+}
 
 /**
- * 확정서 전용 크롤러 — 전체 페이지 데이터를 종합 분석
- * 확정서는 정확도와 모든 세부 정보(포함/불포함/일정표) 추출이 필수이므로, 
- * 다소 지연되더라도 JS 렌더링이 보장되는 브라우저 크롤링을 사용합니다.
+ * 2. 일반 상품 분석 (Comparison/Normal)
+ */
+export async function crawlTravelProduct(url: string, source?: string): Promise<DetailedProductInfo | null> {
+    console.log(`[Crawler] crawlTravelProduct (Normal Mode) Start. URL=${url}`);
+    
+    // 1. [최우선] 모두투어 Native API 시도
+    if (url.includes('modetour.com')) {
+        try {
+            const native = await fetchModeTourNative(url, true);
+            if (native) return refineData(native, '', url);
+        } catch (e) {}
+    }
+
+    const { html } = await quickFetch(url);
+    if (!html) return null;
+
+    const text = htmlToText(html, url);
+    const aiResult = await analyzeWithGemini(text, url, undefined, true);
+    
+    if (aiResult) {
+        return refineData(aiResult, text, url);
+    }
+    return refineData(fallbackParse(text), text, url);
+}
+
+/**
+ * 3. 확정서 전용 크롤러 (Confirmation) — 전체 페이지 상세 분석
  */
 export async function crawlForConfirmation(url: string): Promise<DetailedProductInfo | null> {
     const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
     console.log(`[Crawler] crawlForConfirmation Start. Vercel=${isVercel}, URL=${url}`);
 
-    // 타임아웃 안전망 (26초) - Vercel 30초 제한 대비
+    // 타임아웃 안전망 (26초)
     let timeoutPromise = new Promise<null>((_, reject) => {
         setTimeout(() => reject(new Error('Total analysis timeout (26s)')), 26000);
     });
 
     try {
         const result = await Promise.race([
-            _executeDeepCrawl(url, isVercel),
+            _executeDeepCrawl(url, isVercel, true), // Passing true for confirmation document mode
             timeoutPromise
         ]);
         return result as DetailedProductInfo | null;
     } catch (e: any) {
         console.error(`[Crawler] Deep Crawl Failed or Timeout: ${e.message}`);
-        // 타임아웃 발생 시, 아주 최소한의 데이터만이라도 반환 시도 (기존 fetchContent는 매우 빠름)
         try {
             const contentResult = await fetchContent(url);
             if (contentResult.nativeData) return refineData(contentResult.nativeData, contentResult.text, url);
@@ -1424,22 +1500,24 @@ export async function crawlForConfirmation(url: string): Promise<DetailedProduct
     }
 }
 
-async function _executeDeepCrawl(url: string, isVercel: boolean): Promise<DetailedProductInfo | null> {
+function fallbackParse(text: string): DetailedProductInfo {
+    return { title: '상품명 추출 실패', destination: '', price: '가격 문의', departureDate: '', departureAirport: '', duration: '', airline: '', hotel: '', url: '', features: [], courses: [], specialOffers: [], inclusions: [], exclusions: [], itinerary: [], keyPoints: [], hashtags: '', hasNoOption: false, hasFreeSchedule: false };
+}
+
+async function _executeDeepCrawl(url: string, isVercel: boolean, isFullDoc = false): Promise<DetailedProductInfo | null> {
     let fullText = '';
     let nextData: any = undefined;
     let nativeDataObj: any = null;
 
-    // 1. [최우선] 모두투어 Native API 시도 (가장 빠름: 1~3초)
+    // 1. [최우선] 모두투어 Native API 시도
     if (url.includes('modetour.com')) {
-        console.log('[ConfirmCrawler] ModeTour URL 감지 -> 네이티브 API 우선 획득');
+        console.log(`[ConfirmCrawler] ModeTour URL 감지 -> 네이티브 API 우선 획득 (isFullDoc=${isFullDoc})`);
         try {
-            const native = await fetchModeTourNative(url, false); // 확정서는 전체 데이터 필요
+            const native = await fetchModeTourNative(url, !isFullDoc);
             if (native) {
                 console.log('[ConfirmCrawler] ModeTour Native Data 수집 성공.');
                 nativeDataObj = native;
                 nextData = JSON.stringify(native);
-                
-                // HTML도 가져와서 fullText 채우기 (AI 분석 보조용)
                 const contentResult = await fetchContent(url);
                 fullText = contentResult.text;
             }
@@ -1448,25 +1526,18 @@ async function _executeDeepCrawl(url: string, isVercel: boolean): Promise<Detail
         }
     }
 
-    // 2. 브라우저 크롤링 (Native 실패 시 또는 타 사이트)
     if (!fullText) {
         if (!isVercel) {
             try {
-                console.log('[ConfirmCrawler] 로컬 환경: Browser 크롤링(Puppeteer) 시도');
                 fullText = await scrapeWithBrowser(url) || '';
-            } catch (e: any) {
-                console.log(`[ConfirmCrawler] 브라우저 크롤링 중 에러 발생: ${e.message}`);
-            }
+            } catch (e: any) {}
         } else if (process.env.SCRAPINGBEE_API_KEY) {
-            console.log(`[ConfirmCrawler] ScrapingBee로 전환...`);
             const sbResult = await scrapeWithScrapingBee(url);
             if (sbResult) fullText = sbResult;
         }
     }
 
-    // 3. 여전히 데이터가 없으면 일반 fetch
     if (!fullText) {
-        console.log(`[ConfirmCrawler] 모든 고급 크롤링이 실패하여 일반 fetch로 폴백`);
         const result = await fetchContent(url);
         fullText = result.text;
         if (!nextData) nextData = result.nextData;
@@ -1474,16 +1545,11 @@ async function _executeDeepCrawl(url: string, isVercel: boolean): Promise<Detail
         fullText = fullText.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim();
     }
 
-    // 4. AI 분석 (최종 단계: 10~20초 소요)
-    console.log(`[Crawler] AI 분석 시작... (데이터 길이: ${fullText?.length || 0})`);
-    // analyzeForConfirmation는 이미 상단에 정의되어 있다고 가정 (1047번 라인)
     const result = await analyzeForConfirmation(fullText, url, nextData);
     
     if (result) {
         result.url = url;
-        // [중요] 네이티브 데이터가 있으면 AI 결과에 주입
         if (nativeDataObj) {
-            console.log('[ConfirmCrawler] AI 결과에 네이티브 데이터 주입 (Verbatim)');
             if (nativeDataObj.itinerary && nativeDataObj.itinerary.length > 0) result.itinerary = nativeDataObj.itinerary;
             if (nativeDataObj.meetingInfo && nativeDataObj.meetingInfo.length > 0) result.meetingInfo = nativeDataObj.meetingInfo;
             if (nativeDataObj.airline) result.airline = nativeDataObj.airline;
@@ -1493,64 +1559,7 @@ async function _executeDeepCrawl(url: string, isVercel: boolean): Promise<Detail
         return result;
     }
 
-    // 최종 폴백: 일반 파싱
-    console.log('[ConfirmCrawler] 확정서 분석 실패, 일반 파싱으로 폴백');
-    return await crawlTravelProduct(url, 'confirmation');
-}
-
-
-function fallbackParse(text: string): DetailedProductInfo {
-    return { title: '상품명 추출 실패', destination: '', price: '가격 문의', departureDate: '', departureAirport: '', duration: '', airline: '', hotel: '', url: '', features: [], courses: [], specialOffers: [], inclusions: [], exclusions: [], itinerary: [], keyPoints: [], hashtags: '', hasNoOption: false, hasFreeSchedule: false };
-}
-
-export async function crawlTravelProduct(url: string, source?: string): Promise<DetailedProductInfo> {
-    console.log(`[Crawler] crawlTravelProduct (Normal Mode) Start: ${url}`);
-
-    // 1. [Fast Path] ModeTour Native API
-    if (url.includes('modetour.com')) {
-        console.log('[Crawler] ModeTour 감지: Native API (Summary Only) 시도');
-        const native = await fetchModeTourNative(url, true); // 요약 모드 활성화
-        if (native) {
-            console.log('[Crawler] ModeTour Native 수집 성공 (AI 분석 건너뜀)');
-            return refineData(native, JSON.stringify(native), url);
-        }
-    }
-
-    // 2. [Vercel 최적화] Vercel에서는 ScrapingBee 대신 일반 fetch 시도 후 안될 때만 AI 고려
-    const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
-    
-    let fullText = '';
-    let nextData: any = undefined;
-
-    // 일반 fetch 시도 (isSummaryOnly=true)
-    const contentResult = await fetchContent(url, true);
-    if (contentResult.nativeData) {
-        return refineData(contentResult.nativeData, contentResult.text, url, contentResult.nextData);
-    }
-    
-    fullText = contentResult.text;
-    nextData = contentResult.nextData;
-
-    // 만약 텍스트가 너무 적고 (정상적인 페이지가 아님) Vercel이 아니라면 브라우저 시도
-    if (fullText.length < 500 && !isVercel) {
-        try {
-            const browserText = await scrapeWithBrowser(url);
-            if (browserText) fullText = browserText;
-        } catch (e) {}
-    }
-
-    // 텍스트 정리
-    fullText = fullText.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim();
-
-    // 3. AI 분석 (최종 수단)
-    console.log(`[Crawler] AI 분석 시작 (Normal Mode: Summary Only)`);
-    const aiResult = await analyzeWithGemini(fullText, url, nextData, true);
-
-    if (aiResult?.isProduct) {
-        return refineData(aiResult, fullText, url, nextData);
-    }
-    
-    return refineData(fallbackParse(fullText), fullText, url, nextData);
+    return await crawlTravelProduct(url);
 }
 
 function formatDateString(dateStr: string): string {

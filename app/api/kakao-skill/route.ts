@@ -81,6 +81,14 @@ export async function POST(request: NextRequest) {
 
         consultationData.visitor_id = visitorId;
         consultationData.source = '카카오톡';
+        consultationData.automation.inquiry_info_backup = JSON.stringify({
+            destination: consultationData.trip.destination,
+            departureDate: consultationData.trip.departure_date,
+            returnDate: consultationData.trip.return_date,
+            duration: consultationData.trip.duration,
+            productName: consultationData.trip.product_name,
+            productUrl: consultationData.trip.url,
+        });
 
         // [Optimized] 응답 속도 개선: 시트 저장은 백그라운드로 미루고 응답부터 보냄
         const response = await createResponseData(visitorId, responseMessage, consultationData);
@@ -226,6 +234,14 @@ async function processBackgroundTask(body: KakaoSkillRequest, callbackUrl: strin
 
     consultationData.visitor_id = visitorId;
     consultationData.source = '카카오톡';
+    consultationData.automation.inquiry_info_backup = JSON.stringify({
+        destination: consultationData.trip.destination,
+        departureDate: consultationData.trip.departure_date,
+        returnDate: consultationData.trip.return_date,
+        duration: consultationData.trip.duration,
+        productName: consultationData.trip.product_name,
+        productUrl: consultationData.trip.url,
+    });
 
     // 3. 응답 데이터 생성
     const responseBody = await createResponseData(visitorId, responseMessage, consultationData);

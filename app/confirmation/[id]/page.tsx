@@ -775,36 +775,38 @@ export default function ConfirmationViewerPage() {
                                             <div key={i} className={`mc-day-card ${isOpen ? 'open' : 'closed'}`}>
                                                 <div className="day-header" onClick={() => toggleDay(i)}>
                                                     <div className="day-number">
-                                                        {typeof day === 'string' ? `Day ${i + 1}` : (day.day || `Day ${i + 1}`)}
+                                                        {typeof day === 'string' ? `${i + 1}일차` : (day.day || `${i + 1}일차`)}
                                                         {day.date && <span className="day-date">{day.date}</span>}
                                                     </div>
                                                     {day.title && <div className="day-title">{day.title}</div>}
-                                                    <div className={`day-chevron ${isOpen ? 'open' : ''}`}>▾</div>
+                                                    <div className={`day-chevron ${isOpen ? 'open' : ''}`}>
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                                    </div>
                                                 </div>
 
                                                 {isOpen && (
                                                     <div className="day-body">
                                                         {/* 일별 교통 정보 (구조화된 데이터 우선) */}
                                                         {day.transport ? (
-                                                            <div className="day-transport-card" style={{ marginBottom: '16px' }}>
-                                                                <div className="mc-flight-card" style={{ background: '#f8fafc', border: '1px solid #f1f5f9' }}>
-                                                                    <div className="mc-flight-row" style={{ padding: '12px 0' }}>
+                                                            <div className="day-transport-card">
+                                                                <div className="mc-flight-card compact">
+                                                                    <div className="mc-flight-row" style={{ padding: '8px 0' }}>
                                                                         <div className="flight-time">
-                                                                            <div className="ft-time" style={{ fontSize: '1.1rem' }}>{day.transport.departureTime}</div>
-                                                                            <div className="ft-airport" style={{ fontWeight: 600 }}>{day.transport.departureCity} 출발</div>
+                                                                            <div className="ft-time" style={{ fontSize: '1rem' }}>{day.transport.departureTime}</div>
+                                                                            <div className="ft-airport" style={{ color: '#64748b', fontSize: '0.75rem' }}>{day.transport.departureCity} 출발</div>
                                                                         </div>
                                                                         <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
                                                                             <OutboundFlightIcon />
-                                                                            <div style={{ position: 'absolute', bottom: '-15px', fontSize: '0.65rem', color: '#10b981', fontWeight: 600 }}>
+                                                                            <div style={{ position: 'absolute', bottom: '-12px', fontSize: '0.65rem', color: '#10b981', fontWeight: 600 }}>
                                                                                 {day.transport.duration && `${day.transport.duration} 소요`}
                                                                             </div>
                                                                         </div>
                                                                         <div className="flight-time right-align">
-                                                                            <div className="ft-time" style={{ fontSize: '1.1rem' }}>{day.transport.arrivalTime}</div>
-                                                                            <div className="ft-airport" style={{ fontWeight: 600 }}>{day.transport.arrivalCity} 도착</div>
+                                                                            <div className="ft-time" style={{ fontSize: '1rem' }}>{day.transport.arrivalTime}</div>
+                                                                            <div className="ft-airport" style={{ color: '#64748b', fontSize: '0.75rem' }}>{day.transport.arrivalCity} 도착</div>
                                                                         </div>
                                                                     </div>
-                                                                    <div style={{ padding: '4px 12px 10px', fontSize: '0.75rem', color: '#64748b', textAlign: 'center', borderTop: '0.5px solid #f1f5f9' }}>
+                                                                    <div style={{ padding: '8px 12px 0', fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center', borderTop: '1px dashed #f1f5f9', marginTop: '10px' }}>
                                                                         {day.transport.airline} {day.transport.flightNo && `(${day.transport.flightNo})`}
                                                                     </div>
                                                                 </div>
@@ -812,7 +814,9 @@ export default function ConfirmationViewerPage() {
                                                         ) : (
                                                             day.transportation && (
                                                                 <div className="day-transport">
-                                                                    <span className="trans-icon">교통</span> {day.transportation}
+                                                                    <span className="trans-icon">
+                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px'}}><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+                                                                    </span> {day.transportation}
                                                                 </div>
                                                             )
                                                         )}
@@ -821,18 +825,30 @@ export default function ConfirmationViewerPage() {
                                                             {typeof day === 'string' ? day : (
                                                                 <div className="activity-list">
                                                                     {day.activities && Array.isArray(day.activities) ? (
-                                                                        day.activities.map((act: string, ai: number) => (
-                                                                            <div key={ai} className="day-activity-item">
-                                                                                <span className="activity-bullet">•</span>
-                                                                                <div className="activity-text">
-                                                                                    {act.split('\n').map((line, li) => (
-                                                                                        <div key={li} className={li === 0 ? 'activity-header' : 'activity-desc'}>
-                                                                                            {line}
-                                                                                        </div>
-                                                                                    ))}
+                                                                        day.activities.map((act: string, ai: number) => {
+                                                                            const lines = act.split('\n');
+                                                                            const isLocation = lines[0].includes('>') || lines[0].includes('예술단지') || lines[0].includes('공공기관');
+
+                                                                            return (
+                                                                                <div key={ai} className="day-activity-item">
+                                                                                    <div className={`timeline-dot ${isLocation ? 'location' : ''}`}>
+                                                                                        {isLocation && (
+                                                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div className="activity-text">
+                                                                                        {lines.map((line, li) => (
+                                                                                            <div key={li} className={li === 0 ? 'activity-header' : 'activity-desc'}>
+                                                                                                {line.replace('>', '').trim()}
+                                                                                                {li === 0 && line.includes('>') && (
+                                                                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{color: '#94a3b8', marginLeft: '4px'}}><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                                                                                )}
+                                                                                            </div>
+                                                                                        ))}
+                                                                                    </div>
                                                                                 </div>
-                                                                            </div>
-                                                                        ))
+                                                                            );
+                                                                        })
                                                                     ) : (
                                                                         <div className="day-activity">{day.description || day.content || ''}</div>
                                                                     )}
@@ -841,22 +857,26 @@ export default function ConfirmationViewerPage() {
                                                         </div>
 
                                                         {/* 하단 통합 정보 박스 (숙소/식사) */}
-                                                        <div className="day-summary-box" style={{ marginTop: '20px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+                                                        <div className="day-summary-box">
                                                             {(day.hotel || day.hotelDetails?.name) && (
-                                                                <div className="summary-row" style={{ display: 'flex', gap: '12px', marginBottom: day.meals ? '10px' : '0' }}>
-                                                                    <div className="summary-icon">🏢</div>
+                                                                <div className="summary-row">
+                                                                    <div className="summary-icon">
+                                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                                                    </div>
                                                                     <div className="summary-content">
-                                                                        <span style={{ fontSize: '0.8rem', color: '#64748b', marginRight: '8px', fontWeight: 600 }}>예정호텔</span>
-                                                                        <span style={{ fontSize: '0.85rem', color: '#1e293b', fontWeight: 600 }}>{day.hotel || day.hotelDetails?.name}</span>
+                                                                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600, marginBottom: '2px' }}>예정호텔</div>
+                                                                        <span style={{ fontSize: '0.9rem', color: '#1e293b', fontWeight: 700 }}>{day.hotel || day.hotelDetails?.name}</span>
                                                                     </div>
                                                                 </div>
                                                             )}
                                                             {day.meals && (
-                                                                <div className="summary-row" style={{ display: 'flex', gap: '12px' }}>
-                                                                    <div className="summary-icon">🍴</div>
+                                                                <div className="summary-row">
+                                                                    <div className="summary-icon">
+                                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>
+                                                                    </div>
                                                                     <div className="summary-content">
-                                                                        <span style={{ fontSize: '0.8rem', color: '#64748b', marginRight: '8px', fontWeight: 600 }}>식사</span>
-                                                                        <span style={{ fontSize: '0.85rem', color: '#1e293b', fontWeight: 500 }}>
+                                                                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600, marginBottom: '2px' }}>식사</div>
+                                                                        <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 500 }}>
                                                                             {[
                                                                                 day.meals.breakfast && day.meals.breakfast !== '불포함' && `조식: ${day.meals.breakfast}`,
                                                                                 day.meals.lunch && day.meals.lunch !== '불포함' && `중식: ${day.meals.lunch}`,
@@ -873,7 +893,8 @@ export default function ConfirmationViewerPage() {
                                                             <div className="day-notices">
                                                                 {day.dailyNotices.map((note: string, ni: number) => (
                                                                     <div key={ni} className="day-notice-item">
-                                                                        <span className="dn-bullet">안내</span> {note}
+                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginTop: '2px', flexShrink: 0}}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                                                        <span>{note}</span>
                                                                     </div>
                                                                 ))}
                                                             </div>

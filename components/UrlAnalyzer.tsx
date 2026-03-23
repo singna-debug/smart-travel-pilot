@@ -149,6 +149,44 @@ export default function UrlAnalyzer() {
             }
         }
     }, [departureDate, duration]);
+    
+    // 예약확정 상품 URL 입력 시 자동 분석 (Booking 모드: 목적지, 날짜 등 핵심 정보만 추출)
+    useEffect(() => {
+        const analyzeConfirmedProduct = async () => {
+            // URL이 유효하고, 아직 주요 정보가 입력되지 않았거나 URL만 새로 입력된 경우 자동 분석 시도
+            if (confirmedProduct && confirmedProduct.startsWith('http') && confirmedProduct.length > 15) {
+                // 중복 요청 방지를 위한 간단한 체크 (이전 URL과 다르거나 주요 필드가 비어있을 때)
+                if (!destination || !departureDate || destination === '미정') {
+                    console.log('[UrlAnalyzer] 예약 상품 자동 분석 시작 (Booking Mode)');
+                    setAnalysisStep('예약 정보 추출 중...');
+                    try {
+                        const res = await fetch('/api/crawl-analyze', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url: confirmedProduct, mode: 'booking' })
+                        });
+                        const data = await res.json();
+                        if (data.success && data.data) {
+                            const p = data.data;
+                            if (p.destination && (!destination || destination === '미정')) setDestination(p.destination);
+                            if (p.departureDate) setDepartureDate(formatToHtmlDate(p.departureDate));
+                            if (p.returnDate) setReturnDate(formatToHtmlDate(p.returnDate));
+                            if (p.duration && (!duration || duration === '미정')) setDuration(p.duration);
+                            if (p.title && (!interestedProduct || interestedProduct === '미정')) setInterestedProduct(p.title);
+                            console.log('[UrlAnalyzer] 예약 정보 추출 성공');
+                        }
+                    } catch (e) {
+                        console.error('Booking analysis error:', e);
+                    } finally {
+                        setAnalysisStep('');
+                    }
+                }
+            }
+        };
+
+        const timer = setTimeout(analyzeConfirmedProduct, 1000); // 디바운싱
+        return () => clearTimeout(timer);
+    }, [confirmedProduct]);
 
     // 구글 연동 관련 상태
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -405,7 +443,9 @@ export default function UrlAnalyzer() {
     };
 
     const handleGreetingCopy = (content: string) => {
-        const greeting = `안녕하세요. 모두투어 김호기 팀장입니다.\n${customerName || '고객'}님 문의주신 ${destination || '요청하신'} 일정표입니다.\n\n`;
+        // 중복 인사말 방지: content에 이미 "안녕하세요"가 포함되어 있는지 확인
+        const hasGreeting = content.includes('안녕하세요') || content.includes('님!');
+        const greeting = hasGreeting ? '' : `안녕하세요. 모두투어 김호기 팀장입니다.\n${customerName || '고객'}님 문의주신 ${destination || '요청하신'} 일정표입니다.\n\n`;
         const footerTitle = "📌 예약 전 확인사항";
         const footer = `\n\n${footerTitle}\n상품가는 예약일/출발일에 따라 변동될 수 있습니다.\n항공 좌석은 예약 시점에 다시 확인해야 합니다.\n\n추가로 궁금하신 점이나, 더 비교하고 싶으신 상품이 있으시면 편하게 말씀해주세요.\n감사합니다. 김호기 드림\n\n📞 상담 및 문의\n* 담당자: (주)클럽모두투어 김호기\n* 직통전화: 02-951-9004\n* 휴대폰: 010-9307-9004`;
 
@@ -437,16 +477,22 @@ export default function UrlAnalyzer() {
                     duration,
                     returnDate,
                     status,
-                    interestedProduct,
                     confirmedProduct,
                     confirmedDate,
                     recurringCustomer,
                     inquirySource,
-                    travelersCount: travelersCount === '' ? null : Number(travelersCount), // Ensure it's a number or null
-                    source: '카카오톡',
+                    travelersCount: travelersCount === '' ? null : Number(travelersCount),
+                    source: '수동등록',
                     memo,
                     analysisData,
                     isComparison: isComparison,
+                    // 비교 분석 시 상품명과 URL을 명시적으로 전달
+                    interestedProduct: isComparison && analysisData?.products 
+                        ? analysisData.products.map((p: any) => p.raw.title).join(', ')
+                        : interestedProduct,
+                    productUrl: isComparison 
+                        ? multiUrls.filter(u => u.trim()).join(', ')
+                        : singleUrl,
                 }),
             });
             setSaveSuccess(true);
@@ -615,11 +661,15 @@ export default function UrlAnalyzer() {
                         style={{ width: '100%', appearance: 'none', cursor: 'pointer' }}
                     >
                         <option value="">-- 선택 --</option>
-                        <option value="블로그">블로그</option>
+                        <option value="네이버 블로그">네이버 블로그</option>
+                        <option value="카카오톡 채널">카카오톡 채널</option>
+                        <option value="인스타그램 및 페이스북">인스타그램 및 페이스북</option>
+                        <option value="당근마켓">당근마켓</option>
+                        <option value="닷컴">닷컴</option>
                         <option value="지인소개">지인소개</option>
-                        <option value="카카오톡채널">카카오톡채널</option>
-                        <option value="인스타그램">인스타그램</option>
-                        <option value="매장방문">매장방문</option>
+                        <option value="기존고객">기존고객</option>
+                        <option value="전화문의">전화문의</option>
+                        <option value="기타">기타</option>
                     </select>
                 </div>
             </div>

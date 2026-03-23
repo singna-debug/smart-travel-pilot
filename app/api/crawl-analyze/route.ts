@@ -1,34 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { formatProductInfo, crawlForConfirmation, crawlTravelProduct } from '@/lib/url-crawler';
+import { formatProductInfo, crawlForConfirmation, crawlTravelProduct, crawlForBooking } from '@/lib/url-crawler';
 
 export const preferredRegion = 'icn1';
 export const runtime = 'nodejs';
 
-const VERSION = "2026-03-22-V12-STABLE";
+const VERSION = "2026-03-23-V13-STABLE";
 
 /**
  * 이 엔드포인트는 URL을 받아서 크롤링하고 여행 정보를 분석합니다.
- * mode: 'normal' (목록용 간단 분석), 'confirmation' (확정서용 상세 분석)
+ * mode: 'normal' (목록용 간단 분석), 'booking' (예약용 메타데이터 분석), 'confirmation' (확정서용 상세 분석)
  */
 export async function POST(req: NextRequest) {
     try {
         const { url, mode = 'normal', source } = await req.json();
-        const isConfirmation = (mode === 'deep' || mode === 'confirmation' || source === 'confirmation');
+        
+        // 하위 호환성 유지
+        let effectiveMode = mode;
+        if (mode === 'deep' || mode === 'confirmation' || source === 'confirmation') {
+            effectiveMode = 'confirmation';
+        }
 
-        console.log(`[POST] Starting for URL: ${url}, Mode: ${mode}, Version: ${VERSION}`);
+        console.log(`[POST] Starting for URL: ${url}, Mode: ${effectiveMode}, Version: ${VERSION}`);
 
         if (!url) {
             return NextResponse.json({ success: false, error: 'URL이 필요합니다.' });
         }
 
         let result = null;
-        if (isConfirmation) {
-            // 확정서 모드: lib/url-crawler.ts의 고무적인 모든 크롤링/AI 로직 사용
-            console.log(`[POST] Using crawlForConfirmation for ${url}`);
+        if (effectiveMode === 'confirmation') {
             result = await crawlForConfirmation(url);
+        } else if (effectiveMode === 'booking') {
+            result = await crawlForBooking(url);
         } else {
-            // 일반 분석 모드
-            console.log(`[POST] Using crawlTravelProduct for ${url}`);
             result = await crawlTravelProduct(url);
         }
 

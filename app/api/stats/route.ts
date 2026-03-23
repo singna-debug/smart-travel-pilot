@@ -109,38 +109,82 @@ export async function GET() {
             ['선금완료', '잔금완료', '결제완료'].includes(c.automation.status)
         );
 
+        // 중복 고객 합치기 (전화번호 기준, 번호 없으면 이름 기준)
+        const deduplicateByPhone = (list: any[]) => {
+            const map = new Map<string, any>();
+            list.forEach(c => {
+                const phone = c.customer.phone ? String(c.customer.phone).replace(/[^0-9]/g, '') : '';
+                const key = phone || c.customer.name;
+                if (!key) return;
+                
+                const existing = map.get(key);
+                if (!existing) {
+                    map.set(key, c);
+                } else {
+                    // 더 최신 타임스탬프인 경우 교체
+                    const curDate = parseD(c.timestamp);
+                    const extDate = parseD(existing.timestamp);
+                    if (curDate && extDate && curDate > extDate) {
+                        map.set(key, c);
+                    } else if (curDate && !extDate) {
+                        map.set(key, c);
+                    }
+                }
+            });
+            // 노출 시에는 다시 최신순 정렬 (타임스탬프 기준)
+            return Array.from(map.values()).sort((a, b) => {
+                const da = parseD(a.timestamp);
+                const db = parseD(b.timestamp);
+                if (!da) return 1;
+                if (!db) return -1;
+                return db.getTime() - da.getTime();
+            });
+        };
+
+        const dedupRecentInquiries = deduplicateByPhone(recentInquiries);
+        const dedupReminders = deduplicateByPhone(reminders);
+        const dedupConfirmed = deduplicateByPhone(confirmed);
+        const dedupPrepaid = deduplicateByPhone(prepaidRequest);
+        const dedupNotice = deduplicateByPhone(noticeRequest);
+        const dedupBalance = deduplicateByPhone(balanceRequest);
+        const dedupConfirmationSent = deduplicateByPhone(confirmationSent);
+        const dedupDepartureNotice = deduplicateByPhone(departureNotice);
+        const dedupPhoneNotice = deduplicateByPhone(phoneNotice);
+        const dedupHappyCall = deduplicateByPhone(happyCall);
+        const dedupCompletedInquiries = deduplicateByPhone(completedInquiries);
+
         return NextResponse.json({
             success: true,
             data: {
                 summary: {
-                    newInquiriesCount: recentInquiries.length,
-                    confirmedCount: confirmed.length,
-                    completedCount: completedInquiries.length,
-                    reminderCount: reminders.length,
+                    newInquiriesCount: dedupRecentInquiries.length,
+                    confirmedCount: dedupConfirmed.length,
+                    completedCount: dedupCompletedInquiries.length,
+                    reminderCount: dedupReminders.length,
                 },
                 schedule: {
-                    remindersCount: reminders.length,
-                    confirmedCount: confirmed.length,
-                    prepaidCount: prepaidRequest.length,
-                    noticeCount: noticeRequest.length,
-                    balanceCount: balanceRequest.length,
-                    confirmationSentCount: confirmationSent.length,
-                    departureNoticeCount: departureNotice.length,
-                    phoneNoticeCount: phoneNotice.length,
-                    happyCallCount: happyCall.length,
+                    remindersCount: dedupReminders.length,
+                    confirmedCount: dedupConfirmed.length,
+                    prepaidCount: dedupPrepaid.length,
+                    noticeCount: dedupNotice.length,
+                    balanceCount: dedupBalance.length,
+                    confirmationSentCount: dedupConfirmationSent.length,
+                    departureNoticeCount: dedupDepartureNotice.length,
+                    phoneNoticeCount: dedupPhoneNotice.length,
+                    happyCallCount: dedupHappyCall.length,
                 },
                 lists: {
-                    recentInquiries,
-                    reminders,
-                    confirmed,
-                    completedInquiries,
-                    prepaidRequest,
-                    noticeRequest,
-                    balanceRequest,
-                    confirmationSent,
-                    departureNotice,
-                    phoneNotice,
-                    happyCall,
+                    recentInquiries: dedupRecentInquiries,
+                    reminders: dedupReminders,
+                    confirmed: dedupConfirmed,
+                    completedInquiries: dedupCompletedInquiries,
+                    prepaidRequest: dedupPrepaid,
+                    noticeRequest: dedupNotice,
+                    balanceRequest: dedupBalance,
+                    confirmationSent: dedupConfirmationSent,
+                    departureNotice: dedupDepartureNotice,
+                    phoneNotice: dedupPhoneNotice,
+                    happyCall: dedupHappyCall,
                 }
             },
         });

@@ -84,6 +84,23 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
             const path = updateMapping[field];
             if (path.length === 1) copy[path[0]] = value;
             else if (path.length === 2) copy[path[0]][path[1]] = value;
+
+            // 상태 변경 시 관련 예약정보 UI에서도 즉시 초기화 (상담중/견적제공/취소 등)
+            if (field === 'status' && ['상담중', '견적제공', '취소', '취소/보류', '상담완료'].includes(value)) {
+                if (copy.automation) {
+                    copy.automation.confirmed_product = '';
+                    copy.automation.confirmed_date = '';
+                    copy.automation.prepaid_date = '';
+                    // 타임라인 정보들까지 일괄 초기화
+                    copy.automation.notice_date = '';
+                    copy.automation.balance_date = '';
+                    copy.automation.confirmation_sent = '';
+                    copy.automation.departure_notice = '';
+                    copy.automation.phone_notice = '';
+                    copy.automation.happy_call = '';
+                }
+            }
+
             newData[index] = copy;
             setLocalData(newData);
         }
@@ -180,12 +197,13 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                         </td>
                                         <td>
                                             <div className="cell-primary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                {item.customer.name}
-                                                {(!item.source || item.source === '카카오톡') && (
+                                                {item.customer.name === '미정' && item.source === '카카오톡' ? '[K]미정' : item.customer.name}
+                                                {item.source === '카카오톡' && (
                                                     <span style={{
                                                         backgroundColor: '#FEE500', color: '#000000',
                                                         fontSize: '0.65rem', padding: '2px 6px',
-                                                        borderRadius: '4px', fontWeight: '600'
+                                                        borderRadius: '4px', fontWeight: '600',
+                                                        marginLeft: '4px'
                                                     }}>K</span>
                                                 )}
                                             </div>
@@ -225,15 +243,19 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                                         팔로업: {item.automation.next_followup}
                                                     </div>
                                                 )}
-                                                {item.automation.prepaid_date && (
-                                                    <div style={isDateToday(item.automation.prepaid_date) ? { color: '#ef4444', fontWeight: 'bold' } : {}}>
-                                                        선금일: {item.automation.prepaid_date}
-                                                    </div>
-                                                )}
-                                                {item.automation.notice_date && (
-                                                    <div style={isDateToday(item.automation.notice_date) ? { color: '#10b981', fontWeight: 'bold' } : {}}>
-                                                        안내(4주): {item.automation.notice_date}
-                                                    </div>
+                                                {item.automation.status !== '상담중' && item.automation.status !== '견적제공' && (
+                                                    <>
+                                                        {item.automation.prepaid_date && (
+                                                            <div style={isDateToday(item.automation.prepaid_date) ? { color: '#ef4444', fontWeight: 'bold' } : {}}>
+                                                                선금일: {item.automation.prepaid_date}
+                                                            </div>
+                                                        )}
+                                                        {item.automation.notice_date && (
+                                                            <div style={isDateToday(item.automation.notice_date) ? { color: '#10b981', fontWeight: 'bold' } : {}}>
+                                                                안내(4주): {item.automation.notice_date}
+                                                            </div>
+                                                        )}
+                                                    </>
                                                 )}
                                             </div>
                                         </td>
@@ -265,11 +287,27 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                                                 </button>
                                                             </div>
                                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                                                                <EditableField label="고객명" value={item.customer.name} field="visitorName" chatId={strIndex} onSave={handleFieldUpdate} forceEditMode={editingCustomerChatId === strIndex} />
+                                                                <EditableField 
+                                                                    label="고객명" 
+                                                                    value={item.customer.name} 
+                                                                    field="visitorName" 
+                                                                    chatId={strIndex} 
+                                                                    onSave={handleFieldUpdate} 
+                                                                    forceEditMode={editingCustomerChatId === strIndex} 
+                                                                    displayValue={item.customer.name || ((!item.source || item.source === '카카오톡') ? '[K]미정' : '(이름 미정)')}
+                                                                />
                                                                 <EditableField label="연락처" value={item.customer.phone} field="visitorPhone" chatId={strIndex} onSave={handleFieldUpdate} forceEditMode={editingCustomerChatId === strIndex} />
                                                                 <EditableField label="총인원" value={String(item.trip.travelers_count || '')} field="travelersCount" chatId={strIndex} onSave={handleFieldUpdate} forceEditMode={editingCustomerChatId === strIndex} />
                                                                 <EditableField label="재방문여부" value={item.automation.recurringCustomer || ''} field="recurringCustomer" chatId={strIndex} onSave={handleFieldUpdate} options={['신규고객', '재방문', '장기미방문', '정보없음']} forceEditMode={editingCustomerChatId === strIndex} />
-                                                                <EditableField label="유입경로" value={item.automation.inquirySource || ''} field="inquirySource" chatId={strIndex} onSave={handleFieldUpdate} options={['네이버 톡톡', '네이버 블로그', '네이버 카페', '카카오톡 채널', '인스타그램', '페이스북', '당근마켓', '지인소개', '기존고객', '전화문의', '기타']} forceEditMode={editingCustomerChatId === strIndex} />
+                                                                 <EditableField 
+                                                                    label="유입경로" 
+                                                                    value={item.automation.inquirySource || ''} 
+                                                                    field="inquirySource" 
+                                                                    chatId={strIndex} 
+                                                                    onSave={handleFieldUpdate} 
+                                                                    options={['네이버 블로그', '카카오톡 채널', '인스타그램 및 페이스북', '당근마켓', '닷컴', '지인소개', '기존고객', '전화문의', '기타']} 
+                                                                    forceEditMode={editingCustomerChatId === strIndex} 
+                                                                />
                                                                 <InfoCell label="등록방식" value={item.source || '-'} highlight={item.source === '카카오톡' ? '#fbbf24' : '#a78bfa'} />
                                                             </div>
 
@@ -294,10 +332,20 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                                             </div>
                                                             {/* 상품 목록 (단일/비교분석 공통) */}
                                                             {(() => {
-                                                                const names = (item.trip.product_name || '').split(/\n|,\s*/).filter(Boolean);
-                                                                const urls = (item.trip.url || '').split(/\n|,\s*/).filter(Boolean);
+                                                                const robustSplit = (str: string) => {
+                                                                    if (!str) return [];
+                                                                    const s = str.trim();
+                                                                    // '1.상품...2.상품...' 형태(공백 없음) or '1. 상품...' 형태 처리
+                                                                    if (/\d+\./.test(s)) {
+                                                                        const parts = s.split(/\s*(?=\d+\.)/).map(v => v.trim()).filter(Boolean);
+                                                                        if (parts.length > 1) return parts;
+                                                                    }
+                                                                    return s.split(/\s*,\s*|\s*\n\s*|\s*\|\s*/).map(v => v.trim()).filter(Boolean);
+                                                                };
+                                                                const names = robustSplit(item.trip.product_name || '');
+                                                                const urls = robustSplit(item.trip.url || '');
                                                                 const maxLen = Math.max(names.length, urls.length, 1);
-                                                                const isMultiple = maxLen > 1;
+                                                                 const isMultiple = (item.trip.product_name || '').includes(',') || (item.trip.url || '').includes(',') || maxLen > 1;
 
                                                                 return (
                                                                     <div style={{ marginTop: '10px' }}>
@@ -331,7 +379,9 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                                                         ) : (
                                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                                                                 {Array.from({ length: maxLen }).map((_, i) => {
-                                                                                    const name = names[i] || (isMultiple ? `상품 ${i + 1}` : '상품명 미상');
+                                                                                    const rawName = names[i] || '';
+                                                                                    const cleanName = rawName.replace(/^\d+\.?\s*/, '').replace(/^상품\d+:\s*/, '').trim();
+                                                                                    const name = cleanName ? `상품${i + 1}: ${cleanName}` : (isMultiple ? `상품 ${i + 1}` : '상품명 미상');
                                                                                     const url = urls[i] || '';
                                                                                     return (
                                                                                         <div key={i} style={{
@@ -342,11 +392,25 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                                                                             {isMultiple && <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: 700, minWidth: '20px' }}>{i + 1}</span>}
                                                                                             <div style={{ flex: 1, overflow: 'hidden' }}>
                                                                                                 {url ? (
-                                                                                                    <a href={url.trim()} target="_blank" rel="noopener noreferrer"
-                                                                                                        style={{ fontSize: '12px', color: '#38bdf8', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textDecoration: 'underline' }}>
-                                                                                                        {name.trim()}
-                                                                                                    </a>
-                                                                                                ) : (
+                                                                        (() => {
+                                                                            let cleanUrl = url.trim().replace(/^\d+\.?\s*/, '');
+                                                                            // https:/ 시작하면 https://로 보정
+                                                                            if (cleanUrl.startsWith('https:/') && !cleanUrl.startsWith('https://')) {
+                                                                                cleanUrl = cleanUrl.replace('https:/', 'https://');
+                                                                            } else if (cleanUrl.startsWith('http:/') && !cleanUrl.startsWith('http://')) {
+                                                                                cleanUrl = cleanUrl.replace('http:/', 'http://');
+                                                                            }
+                                                                            if (cleanUrl && !cleanUrl.startsWith('http')) {
+                                                                                cleanUrl = 'https://' + cleanUrl;
+                                                                            }
+                                                                            return (
+                                                                                <a href={cleanUrl} target="_blank" rel="noopener noreferrer"
+                                                                                    style={{ fontSize: '12px', color: '#38bdf8', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textDecoration: 'underline' }}>
+                                                                                    {name.trim()}
+                                                                                </a>
+                                                                            );
+                                                                        })()
+                                                                    ) : (
                                                                                                     <div style={{ fontSize: '12px', color: '#e5e7eb', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                                                                         {name.trim()}
                                                                                                     </div>

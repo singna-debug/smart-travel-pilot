@@ -99,8 +99,10 @@ export async function POST(request: NextRequest) {
 
         // AI 데이터에서 추출
         if (isComparison && analysisData?.products && analysisData.products.length > 0) {
-            if (!productName) productName = `[비교분석] ${analysisData.products[0].raw.title} 외 ${analysisData.products.length - 1}건`;
-            url = analysisData.products.map((p: any, idx: number) => `${idx + 1}. ${p.url}`).join('\n');
+            if (!productName || productName.includes('외')) {
+                productName = analysisData.products.map((p: any) => p.raw.title).join(', ');
+            }
+            url = analysisData.products.map((p: any) => p.url).join(', ');
             if (!destination) destination = analysisData.products[0].raw.destination || '';
             if (!departureDate) departureDate = analysisData.products[0].raw.departureDate || '';
             if (!duration) duration = analysisData.products[0].raw.duration || '';
@@ -207,9 +209,17 @@ export async function POST(request: NextRequest) {
                 departure_notice: automationDates.departure_notice,
                 phone_notice: automationDates.phone_notice,
                 happy_call: automationDates.happy_call,
+                inquiry_info_backup: JSON.stringify({
+                    destination,
+                    departureDate,
+                    returnDate,
+                    duration,
+                    productName,
+                    productUrl: url,
+                }),
             },
             timestamp: kstNow.toISOString(),
-            visitor_id: body.visitorId || 'admin-analyzer',
+            visitor_id: body.visitorId || `admin-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
         };
 
         const success = await appendConsultationToSheet(consultationData);
