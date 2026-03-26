@@ -371,6 +371,33 @@
     font-size: 0.82rem;
     color: #64748b;
     line-height: 1.5;
+    transition: all 0.3s ease;
+}
+
+.activity-desc.collapsed {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.see-more-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 2px;
+    cursor: pointer;
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
+.see-more-btn:hover {
+    color: #64748b;
+    opacity: 1;
 }
 
 /* 교통 정보 카드 개선 */
@@ -386,33 +413,63 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
-.summary-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    font-size: 1.1rem;
-}
-
 .day-summary-box {
     margin-top: 24px;
-    padding: 18px;
-    background: #f8fafc;
-    border-radius: 12px;
-    border: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .summary-row {
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    gap: 14px;
+    background: #fff;
+    border: 1.2px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 14px 16px;
+    transition: all 0.2s ease;
 }
 
-.summary-row + .summary-row {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px dashed #e2e8f0;
+.summary-row:active {
+    background: #f8fafc;
+    transform: scale(0.98);
+}
+
+.summary-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #f8fafc;
+    border-radius: 8px;
+    color: #64748b;
+}
+
+.summary-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.summary-label {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.summary-value {
+    font-size: 0.88rem;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.summary-chevron {
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
 }
 
 /* 파일 다운로드 */
@@ -1222,10 +1279,10 @@
     padding: 16px;
 }
 
-.landmark-hero-info h3 {
-    font-size: 1.05rem;
-    font-weight: 800;
-    margin: 0 0 4px;
+.landmark-hero-info h4 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin: 0 0 2px;
     color: #1e293b;
 }
 
@@ -1726,12 +1783,12 @@
 .roaming-opt-card {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
+    gap: 14px;
     background: #fff;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 14px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .r-opt-badge {
@@ -1769,9 +1826,10 @@
 .custom-sub-section {
     background: #fff;
     border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 12px;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
 .css-title {
@@ -1797,17 +1855,18 @@
 }
 
 .css-step-num {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: #3b82f6;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: #fff;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 800;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
 }
 
 .css-step-label {

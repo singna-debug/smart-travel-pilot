@@ -296,6 +296,52 @@ const PinchZoomModal = ({ src, onClose, footer, isPdf }: { src: string, onClose:
     );
 };
 
+const DayActivityItem = ({ 
+    item, 
+    ai, 
+    cleanLine 
+}: { 
+    item: string; 
+    ai: number; 
+    cleanLine: (s: string) => string;
+}) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const lines = item.split('\n');
+    const header = lines[0];
+    const details = lines.slice(1);
+    const hasDetails = details.length > 0;
+    
+    // 장소인지 활동인지 판단용 아이콘 로직 (간단화)
+    const isLocation = cleanLine(header).includes('가이드') || cleanLine(header).includes('위치') || header.includes('>') || header.includes('예술단지');
+
+    return (
+        <div className="day-activity-item">
+            <div className={`timeline-dot ${isLocation ? 'location' : ''}`}>
+                {isLocation && (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                )}
+            </div>
+            <div className="activity-text">
+                <div className="activity-header" dangerouslySetInnerHTML={{ __html: cleanLine(header) }} />
+                
+                {hasDetails && (
+                    <div className="activity-desc-wrapper">
+                        <div 
+                            className={`activity-desc ${isExpanded ? 'expanded' : 'collapsed'}`}
+                            dangerouslySetInnerHTML={{ __html: cleanLine(details.join('\n')) }}
+                        />
+                        {details.join('\n').length > 80 && (
+                            <button className="see-more-btn" onClick={() => setIsExpanded(!isExpanded)}>
+                                {isExpanded ? '닫기' : '더보기'}
+                            </button>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 export default function ConfirmationViewerPage() {
     const params = useParams();
     const id = params.id as string;
@@ -595,6 +641,7 @@ export default function ConfirmationViewerPage() {
                                 {doc.flight.airline && (
                                     <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '10px' }}>
                                         항공사: <strong style={{ color: '#1e293b' }}>{doc.flight.airline}</strong>
+                                        {doc.flight.departureFlightNumber && ` (${doc.flight.departureFlightNumber})`}
                                         {doc.flight.departureAirport && ` · ${doc.flight.departureAirport} 출발`}
                                     </div>
                                 )}
@@ -603,7 +650,10 @@ export default function ConfirmationViewerPage() {
                                         <div className="mc-flight-row">
                                             <div className="flight-time">
                                                 <div className="ft-time">{formatFlightTime(doc.flight.departureTime)}</div>
-                                                <div className="ft-airport">{doc.flight.departureAirport || '출발'}</div>
+                                                <div className="ft-airport">
+                                                    {doc.flight.departureAirport || '출발'}
+                                                    {doc.flight.departureFlightNumber && <div style={{ fontSize: '0.65rem', color: '#0ea5e9', fontWeight: 600 }}>{doc.flight.departureFlightNumber}</div>}
+                                                </div>
                                             </div>
                                             <div style={{ display: 'flex', justifyContent: 'center' }}>
                                                 <OutboundFlightIcon />
@@ -618,7 +668,10 @@ export default function ConfirmationViewerPage() {
                                         <div className="mc-flight-row">
                                             <div className="flight-time">
                                                 <div className="ft-time">{formatFlightTime(doc.flight.returnDepartureTime)}</div>
-                                                <div className="ft-airport">{doc.trip.destination || '출발'}</div>
+                                                <div className="ft-airport">
+                                                    {doc.trip.destination || '출발'}
+                                                    {doc.flight.returnFlightNumber && <div style={{ fontSize: '0.65rem', color: '#0ea5e9', fontWeight: 600 }}>{doc.flight.returnFlightNumber}</div>}
+                                                </div>
                                             </div>
                                             <div style={{ display: 'flex', justifyContent: 'center' }}>
                                                 <InboundFlightIcon />
@@ -766,19 +819,32 @@ export default function ConfirmationViewerPage() {
                         {doc.itinerary && doc.itinerary.length > 0 && (
                             <div className="mc-section">
                                 <div className="mc-section-title">
-                                    <span className="sec-icon">🗓️</span> 상세 일정
+                                    <span className="sec-icon">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                    </span> 상세 일정
                                 </div>
                                 <div className="mc-itinerary">
                                     {doc.itinerary.map((day: any, i: number) => {
                                         const isOpen = expandedDays[i] !== false; // 기본: 열림
+                                        const formattedDate = day.date ? day.date.split('T')[0] : '';
+
+                                        const cleanLine = (t: string) => {
+                                            if (typeof t !== 'string') return t;
+                                            return t
+                                                .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(dec))
+                                                .replace(/<(?!b|\/b|font|\/font)[^>]*>/g, '') // Allow <b> and <font>
+                                                .replace('>', '') 
+                                                .trim();
+                                        };
+
                                         return (
                                             <div key={i} className={`mc-day-card ${isOpen ? 'open' : 'closed'}`}>
                                                 <div className="day-header" onClick={() => toggleDay(i)}>
                                                     <div className="day-number">
                                                         {typeof day === 'string' ? `${i + 1}일차` : (day.day || `${i + 1}일차`)}
-                                                        {day.date && <span className="day-date">{day.date}</span>}
+                                                        {formattedDate && <span className="day-date">{formattedDate}</span>}
                                                     </div>
-                                                    {day.title && <div className="day-title">{day.title}</div>}
+                                                    {day.title && <div className="day-title">{cleanLine(day.title)}</div>}
                                                     <div className={`day-chevron ${isOpen ? 'open' : ''}`}>
                                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                                                     </div>
@@ -793,7 +859,7 @@ export default function ConfirmationViewerPage() {
                                                                     <div className="mc-flight-row" style={{ padding: '8px 0' }}>
                                                                         <div className="flight-time">
                                                                             <div className="ft-time" style={{ fontSize: '1rem' }}>{day.transport.departureTime}</div>
-                                                                            <div className="ft-airport" style={{ color: '#64748b', fontSize: '0.75rem' }}>{day.transport.departureCity} 출발</div>
+                                                                            <div className="ft-airport" style={{ color: '#64748b', fontSize: '0.75rem' }}>{cleanLine(day.transport.departureCity)} 출발</div>
                                                                         </div>
                                                                         <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
                                                                             <OutboundFlightIcon />
@@ -803,11 +869,11 @@ export default function ConfirmationViewerPage() {
                                                                         </div>
                                                                         <div className="flight-time right-align">
                                                                             <div className="ft-time" style={{ fontSize: '1rem' }}>{day.transport.arrivalTime}</div>
-                                                                            <div className="ft-airport" style={{ color: '#64748b', fontSize: '0.75rem' }}>{day.transport.arrivalCity} 도착</div>
+                                                                            <div className="ft-airport" style={{ color: '#64748b', fontSize: '0.75rem' }}>{cleanLine(day.transport.arrivalCity)} 도착</div>
                                                                         </div>
                                                                     </div>
                                                                     <div style={{ padding: '8px 12px 0', fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center', borderTop: '1px dashed #f1f5f9', marginTop: '10px' }}>
-                                                                        {day.transport.airline} {day.transport.flightNo && `(${day.transport.flightNo})`}
+                                                                        {cleanLine(day.transport.airline)} {day.transport.flightNo && `(${cleanLine(day.transport.flightNo)})`}
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -816,44 +882,36 @@ export default function ConfirmationViewerPage() {
                                                                 <div className="day-transport">
                                                                     <span className="trans-icon">
                                                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px'}}><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
-                                                                    </span> {day.transportation}
+                                                                    </span> {cleanLine(day.transportation)}
                                                                 </div>
                                                             )
                                                         )}
 
                                                         <div className="day-content">
-                                                            {typeof day === 'string' ? day : (
-                                                                <div className="activity-list">
-                                                                    {day.activities && Array.isArray(day.activities) ? (
-                                                                        day.activities.map((act: string, ai: number) => {
-                                                                            const lines = act.split('\n');
-                                                                            const isLocation = lines[0].includes('>') || lines[0].includes('예술단지') || lines[0].includes('공공기관');
-
-                                                                            return (
-                                                                                <div key={ai} className="day-activity-item">
-                                                                                    <div className={`timeline-dot ${isLocation ? 'location' : ''}`}>
-                                                                                        {isLocation && (
-                                                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                                                                                        )}
-                                                                                    </div>
-                                                                                    <div className="activity-text">
-                                                                                        {lines.map((line, li) => (
-                                                                                            <div key={li} className={li === 0 ? 'activity-header' : 'activity-desc'}>
-                                                                                                {line.replace('>', '').trim()}
-                                                                                                {li === 0 && line.includes('>') && (
-                                                                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{color: '#94a3b8', marginLeft: '4px'}}><polyline points="9 18 15 12 9 6"></polyline></svg>
-                                                                                                )}
-                                                                                            </div>
-                                                                                        ))}
-                                                                                    </div>
+                                                            <div className="activity-list">
+                                                                {(Array.isArray(day.activities) ? day.activities : (typeof (day.activities || day.description || day.content) === 'string' ? (day.activities || day.description || day.content || '').split('\n').filter((s: string) => s.trim().length > 0) : [])).map((item: string, ai: number) => {
+                                                                    // item might be a multi-line string if it came from a specific format
+                                                                    const lines = item.split('\n');
+                                                                    return lines.map((line, li) => {
+                                                                        const isLocation = cleanLine(line).includes('가이드') || cleanLine(line).includes('위치') || line.includes('>') || line.includes('예술단지');
+                                                                        return (
+                                                                            <div key={`${ai}-${li}`} className="day-activity-item">
+                                                                                <div className={`timeline-dot ${isLocation ? 'location' : ''}`}>
+                                                                                    {isLocation && (
+                                                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                                                                    )}
                                                                                 </div>
-                                                                            );
-                                                                        })
-                                                                    ) : (
-                                                                        <div className="day-activity">{day.description || day.content || ''}</div>
-                                                                    )}
-                                                                </div>
-                                                            )}
+                                                                                <div className="activity-text">
+                                                                                    <div 
+                                                                                        className={li === 0 ? 'activity-header' : 'activity-desc'}
+                                                                                        dangerouslySetInnerHTML={{ __html: cleanLine(line) }}
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    });
+                                                                })}
+                                                            </div>
                                                         </div>
 
                                                         {/* 하단 통합 정보 박스 (숙소/식사) */}
@@ -1084,7 +1142,7 @@ export default function ConfirmationViewerPage() {
                                             <img src={sr.landmarks[0].imageUrl} alt={safeStr(sr.landmarks[0].name)} className="landmark-hero-img" />
                                         )}
                                         <div className="landmark-hero-info">
-                                            <h3>{safeStr(sr.landmarks[0].name)}</h3>
+                                            <h4>{safeStr(sr.landmarks[0].name)}</h4>
                                             {sr.landmarks[0].nameLocal && <span className="landmark-local">{safeStr(sr.landmarks[0].nameLocal)}</span>}
                                             <p>{safeStr(sr.landmarks[0].description)}</p>
                                         </div>
@@ -1115,32 +1173,165 @@ export default function ConfirmationViewerPage() {
                                 isOpen={expandedSections['customs'] || false}
                                 onToggle={toggleSection}
                             >
-                                {/* 경고 카드 */}
-                                <div className="customs-warning-card">
-                                    <div className="cw-icon">
-                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                                    </div>
-                                    <h3>{safeStr(sr.customs.warningTitle)}</h3>
-                                    <p>{safeStr(sr.customs.warningContent)}</p>
-                                </div>
+                                 {/* (1) 국가별 핵심 경보 (식품류 등) - 이미지 최상단 스타일 */}
+                                 {sr.customs?.majorAlert && sr.customs.majorAlert.title && (
+                                     <div style={{ marginBottom: '20px', border: '1.5px solid #fecaca', background: '#fff', padding: '20px', borderRadius: '16px' }}>
+                                         <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#dc2626', marginBottom: '12px', textAlign: 'center' }}>
+                                             {safeStr(sr.customs.majorAlert.title)}
+                                         </div>
+                                         <div style={{ fontSize: '0.88rem', color: '#7f1d1d', lineHeight: 1.6, marginBottom: '14px', textAlign: 'center', wordBreak: 'keep-all' }}>
+                                             {safeStr(sr.customs.majorAlert.content)}
+                                         </div>
+                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#dc2626', fontSize: '0.82rem', fontWeight: 700, background: '#fef2f2', padding: '8px 12px', borderRadius: '8px', border: '1px solid #fee2e2' }}>
+                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                             {safeStr(sr.customs.majorAlert.penalty || '위반 시 벌금 부과 또는 압수 조치')}
+                                         </div>
+                                     </div>
+                                 )}
 
-                                {/* 미성년자 입국 */}
-                                <div className="customs-info-card">
-                                    <div className="ci-header">미성년자 입국 규정</div>
-                                    <p>{safeStr(sr.customs.minorEntry)}</p>
-                                </div>
+                                 {/* (2) 반입 금지/제한 품목 - 이미지 스타일 매칭 (Red Theme) */}
+                                 {sr.customs?.prohibitedItems && sr.customs.prohibitedItems.length > 0 && (
+                                     <div style={{ marginBottom: '24px', border: '1.5px solid #fee2e2', background: '#fff5f5', borderRadius: '16px', overflow: 'hidden' }}>
+                                         <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                                             <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#dc2626' }}>반입 금지 • 제한 품목</span>
+                                         </div>
+                                         <div style={{ padding: '0 18px 18px 18px' }}>
+                                             {sr.customs?.prohibitedItems?.map((pi, pii) => (
+                                                 <div key={pii} style={{ marginBottom: '16px' }}>
+                                                     <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#991b1b', marginBottom: '8px' }}>{safeStr(pi.category)}</div>
+                                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                                         {pi.items.map((it, iti) => (
+                                                             <span key={iti} style={{ fontSize: '0.78rem', background: '#fff', color: '#dc2626', border: '1px solid #fee2e2', padding: '4px 12px', borderRadius: '20px', fontWeight: 700 }}>
+                                                                 {safeStr(it)}
+                                                             </span>
+                                                         ))}
+                                                     </div>
+                                                 </div>
+                                             ))}
+                                         </div>
+                                     </div>
+                                 )}
 
-                                {/* 면세 / 여권 2컬럼 */}
-                                <div className="customs-dual-cards">
-                                    <div className="customs-mini-card">
-                                        <div className="cm-header">면세 한도</div>
-                                        <p>{safeStr(sr.customs.dutyFree)}</p>
-                                    </div>
-                                    <div className="customs-mini-card">
-                                        <div className="cm-header">여권 유의사항</div>
-                                        <p>{safeStr(sr.customs.passportNote)}</p>
-                                    </div>
-                                </div>
+                                 {/* (3) 면세 한도 & 여권 유의사항 - 이미지 2컬럼 카드 스타일 */}
+                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '24px' }}>
+                                     <div style={{ background: '#f0f9ff', border: '1.5px solid #bae6fd', borderRadius: '16px', padding: '16px' }}>
+                                         <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0369a1', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> 면세 한도
+                                         </div>
+                                         <div style={{ fontSize: '0.78rem', color: '#075985', lineHeight: 1.5, wordBreak: 'keep-all' }}>
+                                             {safeStr(sr.customs?.dutyFree || '담배 1보루, 주류 1리터 등')}
+                                         </div>
+                                     </div>
+                                     <div style={{ background: '#f5f3ff', border: '1.5px solid #ddd6fe', borderRadius: '16px', padding: '16px' }}>
+                                         <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#6d28d9', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg> 여권 유의사항
+                                         </div>
+                                         <div style={{ fontSize: '0.78rem', color: '#5b21b6', lineHeight: 1.5, wordBreak: 'keep-all' }}>
+                                             {safeStr(sr.customs?.passportNote || '만료일 6개월 이상 권장')}
+                                         </div>
+                                     </div>
+                                 </div>
+
+                                 {/* (4) 입국 절차 - 이미지 번호 리스트 스타일 */}
+                                 {sr.customs?.arrivalProcedure && sr.customs.arrivalProcedure.steps?.length > 0 && (
+                                     <div style={{ marginBottom: '24px', border: '1.5px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden', background: '#fff' }}>
+                                         <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                             <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1e293b' }}>{safeStr(sr.customs.arrivalProcedure.title || '괌 입국 절차')}</span>
+                                         </div>
+                                         <div style={{ padding: '0 18px 18px 18px' }}>
+                                             <div style={{ background: '#e0f2fe', color: '#0369a1', padding: '8px 12px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
+                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                                 미리 준비하면 편리합니다.
+                                             </div>
+                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                                 {sr.customs?.arrivalProcedure?.steps?.map((st, i) => (
+                                                     <div key={i} style={{ display: 'flex', gap: '14px' }}>
+                                                         <div style={{ background: '#0284c7', color: '#fff', width: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, flexShrink: 0, marginTop: '2px' }}>{i + 1}</div>
+                                                         <div>
+                                                             <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a', marginBottom: '2px' }}>{safeStr(st.step)}</div>
+                                                             <div style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: 1.4 }}>{safeStr(st.description)}</div>
+                                                         </div>
+                                                     </div>
+                                                 ))}
+                                             </div>
+                                         </div>
+                                     </div>
+                                 )}
+
+                                 {/* (5) 미성년자 자녀 입국 규정 - 이미지 스타일 매칭 */}
+                                 {(sr.customs?.minorEntry || sr.customs?.minorDetail) && (
+                                     <div style={{ marginBottom: '24px', background: '#fffde7', border: '1.5px solid #fef08a', borderRadius: '16px', overflow: 'hidden' }}>
+                                         <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '8px', color: '#854d0e' }}>
+                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                             <span style={{ fontSize: '0.92rem', fontWeight: 800 }}>미성년자 입국 규정</span>
+                                         </div>
+                                         <div style={{ padding: '0 18px 18px 18px' }}>
+                                             <div style={{ fontSize: '0.85rem', color: '#713f12', lineHeight: 1.6, marginBottom: '14px', wordBreak: 'keep-all' }}>
+                                                 {safeStr(sr.customs.minorEntry)}
+                                             </div>
+                                             {sr.customs.minorDetail && (
+                                                 <div style={{ background: '#fff', border: '1px solid #fdf4ff', borderRadius: '12px', padding: '16px', borderLeft: '4px solid #facc15' }}>
+                                                     <div style={{ color: '#854d0e', fontSize: '0.82rem', lineHeight: 1.6, display: 'flex', gap: '10px' }}>
+                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0, marginTop: '2px' }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                                         <span style={{ wordBreak: 'keep-all' }}>{safeStr(sr.customs.minorDetail)}</span>
+                                                     </div>
+                                                 </div>
+                                             )}
+                                         </div>
+                                     </div>
+                                 )}
+
+                                 {/* (6) 공식 사이트 퀵링크 - 이미지 스타일 매칭 (Dark Blue Header) */}
+                                 {sr.customs?.links && sr.customs.links.length > 0 && (
+                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
+                                         <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                                             사전 입국 준비 사항
+                                         </div>
+                                         {sr.customs?.links?.map((link, li) => (
+                                             <div key={li} style={{ border: '1.5px solid #005a96', borderRadius: '16px', overflow: 'hidden', background: '#fff' }}>
+                                                 <div style={{ background: '#005a96', padding: '14px 20px', display: 'flex', alignItems: 'center', color: '#fff', gap: '14px' }}>
+                                                     <span style={{ background: '#fff', color: '#005a96', padding: '6px 12px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                                                         {link.type === 'visa' ? '비자/ETA' : (link.type === 'customs' ? '세관신고' : '입국신고')}
+                                                     </span>
+                                                     <span style={{ fontSize: '1.05rem', fontWeight: 800, lineHeight: 1.3, marginTop: '4px', wordBreak: 'keep-all' }}>{safeStr(link.label)}</span>
+                                                 </div>
+                                                 <div style={{ padding: '24px' }}>
+                                                     <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '18px', marginBottom: '20px' }}>
+                                                         <div style={{ fontSize: '0.9rem', color: '#334155', lineHeight: 1.7, wordBreak: 'keep-all' }}>
+                                                             {safeStr(link.description) || "한국 국적자가 해당 국가에 입국하기 위해 사전 준비가 필요한 절차입니다. 세부 내용을 확인해 주세요."}
+                                                         </div>
+                                                     </div>
+                                                     <div style={{ marginBottom: '20px' }}>
+                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0284c7', fontSize: '0.88rem', fontWeight: 800, marginBottom: '8px' }}>
+                                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                                             신청 방법
+                                                         </div>
+                                                         <div style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: 1.6 }}>
+                                                             공식 홈페이지({link.url.replace('https://', '').split('/')[0]})에 접속하여 여권 정보 및 체류지 주소를 입력하고 제출합니다. 승인 후 안내에 따라 절차를 완료합니다.
+                                                         </div>
+                                                     </div>
+                                                     <a
+                                                         href={link.url}
+                                                         target="_blank"
+                                                         rel="noopener noreferrer"
+                                                         style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(to right, #00ace2, #008ebc)', color: '#fff', padding: '16px', borderRadius: '14px', fontWeight: 800, gap: '10px', fontSize: '1rem', boxShadow: '0 4px 12px rgba(0, 172, 226, 0.2)' }}
+                                                     >
+                                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                                         공식 사이트 바로가기
+                                                     </a>
+                                                 </div>
+                                             </div>
+                                         ))}
+                                     </div>
+                                 )}
+
+                                 <div className="customs-warning-card" style={{ marginTop: '10px', opacity: 0.6 }}>
+                                     <h3>기타 기본 유의사항</h3>
+                                     <p>{safeStr(sr.customs.warningContent)}</p>
+                                 </div>
                             </GuideAccordion>
 
                             {/* ── 환전 & 계산기 ── */}
@@ -1249,22 +1440,22 @@ export default function ConfirmationViewerPage() {
                                                     <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg> SKT
                                                     </div>
-                                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>1599-2011</div>
-                                                    <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>02-6343-9000</div>
+                                                    <a href="tel:02-6343-9000" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '4px' }}>02-6343-9000</a>
+                                                    <a href="tel:1599-2011" style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', textDecoration: 'none' }}>1599-2011</a>
                                                 </div>
                                                 <div style={{ background: '#f8fafc', padding: '12px 4px', borderRadius: '10px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
                                                     <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg> KT
                                                     </div>
-                                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>1588-0608</div>
-                                                    <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>02-2190-0901</div>
+                                                    <a href="tel:02-2190-0901" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '4px' }}>02-2190-0901</a>
+                                                    <a href="tel:1588-0608" style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', textDecoration: 'none' }}>1588-0608</a>
                                                 </div>
                                                 <div style={{ background: '#f8fafc', padding: '12px 4px', borderRadius: '10px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
                                                     <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg> LG U+
                                                     </div>
-                                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>1544-0010</div>
-                                                    <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>02-3416-7010</div>
+                                                    <a href="tel:02-3416-7010" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '4px' }}>02-3416-7010</a>
+                                                    <a href="tel:1544-0010" style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', textDecoration: 'none' }}>1544-0010</a>
                                                 </div>
                                             </div>
                                         </div>
