@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { formatProductInfo, crawlForConfirmation, crawlTravelProduct, crawlForBooking } from '@/lib/url-crawler';
+import { formatProductInfo, crawlForConfirmation, crawlTravelProduct, crawlForBooking, crawlForReservationGuide } from '@/lib/url-crawler';
 
 export const preferredRegion = 'icn1';
 export const runtime = 'nodejs';
@@ -27,12 +27,19 @@ export async function POST(req: NextRequest) {
         }
 
         let result = null;
-        if (effectiveMode === 'confirmation') {
-            result = await crawlForConfirmation(url);
-        } else if (effectiveMode === 'booking') {
-            result = await crawlForBooking(url);
-        } else {
-            result = await crawlTravelProduct(url);
+        switch (effectiveMode) {
+            case 'confirmation':
+            case 'deep':
+                result = await crawlForConfirmation(url);
+                break;
+            case 'booking':
+                result = await crawlForBooking(url);
+                break;
+            case 'reservation_guide':
+                result = await crawlForReservationGuide(url);
+                break;
+            default:
+                result = await crawlTravelProduct(url);
         }
 
         if (!result) {

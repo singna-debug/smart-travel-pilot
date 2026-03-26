@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
             const analyzeResponse = await fetch(`${baseUrl}/api/crawl-analyze`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: confirmedProductUrl }),
+                body: JSON.stringify({ url: confirmedProductUrl, mode: 'booking' }),
             });
 
             const analyzeData = await analyzeResponse.json();
