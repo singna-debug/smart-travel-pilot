@@ -1,12 +1,25 @@
-import puppeteer from 'puppeteer';
-
 // 데스크탑 User-Agent (일반적인 크롬)
 const DESKTOP_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
-export async function scrapeWithBrowser(url: string): Promise<string | null> {
-    console.log(`[Browser] 데스크탑 모드 시작: ${url}`);
+export interface ScrapeOptions {
+    skipClicks?: boolean;
+}
+
+export async function scrapeWithBrowser(url: string, options: ScrapeOptions = {}): Promise<string | null> {
+    const isVercel = process.env.VERCEL === '1';
+    if (isVercel) {
+        console.log('[Browser] Vercel 환경에서는 Puppeteer 실행이 불가능하므로 스킵합니다.');
+        return null;
+    }
+
+    const { skipClicks = false } = options;
+    console.log(`[Browser] 데스크탑 모드 시작: ${url} (skipClicks: ${skipClicks})`);
+    
     let browser;
     try {
+        // Vercel 서버리스 크래시 방지를 위해 동적 임포트 사용
+        const puppeteer = (await import('puppeteer')).default;
+        
         // Singleton 제거하고 매번 깨끗한 브라우저 실행 (안정성 확보)
         browser = await puppeteer.launch({
             headless: true,
@@ -69,8 +82,9 @@ export async function scrapeWithBrowser(url: string): Promise<string | null> {
             console.log('[Browser] 전체 콘텐츠 로딩 대기 실패 (시간 초과), 계속 진행');
         }
 
-        console.log('[Browser] 숨겨진 정보(더보기, 호텔정보 등) 로딩을 위한 클릭 처리...');
-        try {
+        if (!skipClicks) {
+            console.log('[Browser] 숨겨진 정보(더보기, 호텔정보 등) 로딩을 위한 클릭 처리...');
+            try {
             await page.evaluate(async () => {
                 // 클릭할 키워드 목록
                 const keywords = ['더보기', '자세히 보기', '자세히보기', '펼치기', '상세보기', '상세', '호텔정보', '호텔 정보', '숙박정보', '포함', '불포함', '일정'];
@@ -109,17 +123,48 @@ export async function scrapeWithBrowser(url: string): Promise<string | null> {
             });
             // 모달이나 추가 콘텐츠가 로드될 시간 대기
             await new Promise(resolve => setTimeout(resolve, 2000));
-        } catch (e) {
-            console.log('[Browser] 클릭 처리 중 오류 발생 (무시하고 진행)', e);
+            } catch (e) {
+                console.log('[Browser] 클릭 처리 중 오류 발생 (무시하고 진행)', e);
+            }
+        } else {
+            console.log('[Browser] skipClicks=true이므로 클릭 처리를 건너뜁니다.');
         }
 
-        console.log('[Browser] 텍스트 및 속성 추출...');
         const content = await page.evaluate(() => {
+            // 상품포인트/특약 등 핵심 섹션 추출 강화
+            const keywords = ['상품 POINT', '상품포인트', '상품 핵심 포인트', '핵심포인트', '특전', '여행 필수 정보'];
+            let highlights = '';
+            
+            // 1. 키워드 기반 섹션 찾기
+            const allElements = Array.from(document.querySelectorAll('div, section, article, h2, h3'));
+            const sections = allElements.filter(el => 
+                keywords.some(k => (el as HTMLElement).innerText?.includes(k))
+            );
+            
+            sections.forEach(s => {
+                const text = (s as HTMLElement).innerText;
+                if (text.length > 50 && text.length < 5000) {
+                    highlights += `\n--- [섹션: ${keywords.find(k => text.includes(k))}] ---\n${text}\n----------------\n`;
+                }
+            });
+
+            // 2. 기호(♥, #, ★)로 시작하는 의미 있는 문장들 수집
+            const bodyText = document.body.innerText;
+            const lines = bodyText.split('\n');
+            const markers = ['♥', '★', '■', '#', '[특전]', '▶'];
+            const importantLines = lines.filter(line => 
+                markers.some(m => line.trim().startsWith(m)) && line.trim().length > 5
+            ).slice(0, 30);
+            
+            if (importantLines.length > 0) {
+                highlights += `\n--- [주요 특징 추출] ---\n${importantLines.join('\n')}\n----------------\n\n`;
+            }
+
             // img 태그를 제외한 스크립트, 스타일 등만 제거
             const scripts = document.querySelectorAll('script, style, noscript, svg, header, footer');
             scripts.forEach(s => s.remove());
 
-            // 페이지 내 모든 이미지 수집 (숨겨진 모달 이미지 포함)
+            // 페이지 내 모든 이미지 수집
             const images = document.querySelectorAll('img');
             const imageUrls = new Set<string>();
             images.forEach(img => {
@@ -133,7 +178,7 @@ export async function scrapeWithBrowser(url: string): Promise<string | null> {
 
             // 텍스트와 이미지 결합
             const imgBlock = Array.from(imageUrls).join('\n');
-            return `${document.title}\n\n${visibleText}\n\n--- [페이지 내 발견된 이미지 목록] ---\n${imgBlock}`;
+            return `${document.title}\n\n${highlights}${visibleText}\n\n--- [페이지 내 발견된 이미지 목록] ---\n${imgBlock}`;
         });
 
         console.log(`[Browser] 추출 완료: ${content.length}자`);
