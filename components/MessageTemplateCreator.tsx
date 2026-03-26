@@ -22,11 +22,19 @@ interface ProductInfo {
     price: string;
     destination: string;
     departureDate: string;
+    returnDate?: string;
     airline: string;
+    flightCode?: string;
     duration: string;
     departureAirport: string;
+    departureTime?: string;
+    arrivalTime?: string;
+    returnDepartureTime?: string;
+    returnArrivalTime?: string;
+    meetingInfo?: any[];
     keyPoints: string[];
     exclusions: string[];
+    specialTerms?: string;
 }
 
 type TemplateType = 'remind' | 'booking' | 'dotcom' | 'pre_4w' | 'balance' | 'ticket' | 'confirmation' | 'departure' | 'happy_call';
@@ -78,9 +86,10 @@ export default function MessageTemplateCreator() {
     const [bankAccount, setBankAccount] = useState('신한은행 : 56217390843309');
     const [bankHolder, setBankHolder] = useState('모두투어네트워크');
     const [excludedCosts, setExcludedCosts] = useState('');
-    const [depositPerPerson, setDepositPerPerson] = useState('');
+    const [depositPerPerson, setDepositPerPerson] = useState('800000');
     const [confirmationLink, setConfirmationLink] = useState('');
     const [reviewLink, setReviewLink] = useState('');
+    const [specialTerms, setSpecialTerms] = useState('');
 
     const [generatedText, setGeneratedText] = useState('');
     const [copied, setCopied] = useState(false);
@@ -116,6 +125,9 @@ export default function MessageTemplateCreator() {
         if (product?.exclusions && product.exclusions.length > 0) {
             setExcludedCosts(product.exclusions.join(', '));
         }
+        if (product?.specialTerms) {
+            setSpecialTerms(product.specialTerms);
+        }
     }, [product]);
 
     async function fetchCustomers() {
@@ -136,15 +148,24 @@ export default function MessageTemplateCreator() {
     async function fetchProductInfo() {
         if (!url) return;
         setLoadingProduct(true);
+        // 기존 데이터 초기화
+        setSpecialTerms('');
+        setExcludedCosts('');
+
         try {
             const res = await fetch('/api/analyze-url', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url }),
+                body: JSON.stringify({ url, mode: 'reservation_guide' }),
             });
             const data = await res.json();
             if (data.success && data.data?.raw) {
-                setProduct(data.data.raw);
+                const p = data.data.raw;
+                setProduct(p);
+                if (p.specialTerms) setSpecialTerms(p.specialTerms);
+                if (p.exclusions && p.exclusions.length > 0) {
+                    setExcludedCosts(p.exclusions.join(', '));
+                }
             }
         } catch (e) {
             console.error('상품 정보 로딩 실패:', e);
@@ -169,14 +190,22 @@ export default function MessageTemplateCreator() {
         const today = new Date();
         const todayStr = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
-        // 항공사(공항) 포맷
-        const airlineDisplay = airline + (depAirport ? `(${depAirport})` : '');
+        // 항공사 포맷
+        const airlineDisplay = airline;
 
-        // 잔금 자동 계산: 인당가격 * 인원수
+        // 기본 정보 계산
+        const travelersNum = extractPriceNumber(travelers) || 1; // 최소 1명으로 가정
         const priceNum = extractPriceNumber(price);
-        const travelersNum = parseInt(travelers, 10) || 0;
+        
+        // 상품가 및 잔금 총액 계산
         const totalPrice = priceNum * travelersNum;
         const totalPriceStr = totalPrice > 0 ? `${formatPrice(totalPrice)}원` : '';
+
+        // 계약금 총액 계산
+        const depositPP = parseInt(depositPerPerson.replace(/[^0-9]/g, ''), 10) || 0;
+        const totalDeposit = depositPP * travelersNum;
+        const totalDepositStr = totalDeposit > 0 ? `${formatPrice(totalDeposit)}원` : '';
+        const depositDisplay = deposit;
 
         let text = '';
 
@@ -209,8 +238,9 @@ export default function MessageTemplateCreator() {
                 break;
 
             case 'booking':
-                const bookingPriceCalc = `성인 ${price}(계약금 입금 시 요금으로 확정됩니다.)
-+ 0(유류 할증료 매월 변동되며 잔금 시 최종 확정 적용됩니다.)${travelersNum > 0 && priceNum > 0 ? ` = ${price} * ${travelersNum}명 = ${totalPriceStr}` : ''}`;
+                const bookingPriceCalc = `성인 ${price}
+(상품가는 유류항증료가 포함된 가격입니다. 유류 할증료 매월 변동되며 잔금 시 최종 확정 적용됩니다.)
+${travelersNum > 0 && priceNum > 0 ? ` = ${price} * ${travelersNum}명 = ${totalPriceStr}` : ''}`;
 
                 text = `✈️ [모두투어] 여행 예약 안내 (담당: ${AGENT_NAME})
 
@@ -227,11 +257,12 @@ export default function MessageTemplateCreator() {
 - 예약/여행자 : ${name}님 ${phone}${travelersNum > 0 ? ` 일행 ${travelersNum}분` : ''}
 - 예약번호 : ${bookingNumber || '(예약번호)'}
 - 출 발 일 : ${departureDate}
-- 상품제목 : ${title}
-- 상세일정 : ${url}
-(위 주소를 클릭하시면. 일정, 호텔 등 세부 사항을 확인할 수 있습니다.)
-
+- 귀 국 일 : ${p?.returnDate || ''}
 - 항 공 사 :  ${airlineDisplay}
+- 상세일정 : ${url}
+(위 주소를 클릭하시면 일정, 호텔 등 세부 사항을 확인할 수 있습니다.)
+
+- 계  약  금: ${depositDisplay}${depositDeadline ? ` (${depositDeadline}까지)` : ''}
 
 ──────────────────
 
@@ -255,6 +286,7 @@ ${bookingPriceCalc}
 2) 가상계좌
 ${bankAccount}
 예  금  주 : ${bankHolder}
+
 ──────────────────
 
 Ⅱ. 취소 규정 및 계약 진행 일정
@@ -266,13 +298,13 @@ ${bankAccount}
 여행자의 여행계약 해제 요청 시 취소료
 여행약관에 의거하여 다음과 같이 취소료가 부과됩니다.
 [특별약관]
-■ 여행자의 여행계약 해제 요청 시 여행약관에 의거하여 취소료가 부과됩니다.
+${specialTerms || `■ 여행자의 여행계약 해제 요청 시 여행약관에 의거하여 취소료가 부과됩니다.
 - 여행개시(출발일) ~30일전까지 취소 통보 시 - 계약금 환급
 - 여행개시(출발일) 29~20일전까지 취소 통보 시 - 여행경비의 10% 배상
 - 여행개시(출발일) 19~10일전까지 취소 통보 시 - 여행경비의 15% 배상
 - 여행개시(출발일) 9~8일전까지 취소 통보 시 - 여행경비의 20% 배상
 - 여행개시(출발일) 7~1일전까지 취소 통보 시 - 여행경비의 30% 배상
-- 여행개시(출발일) 당일 취소 통보 시 - 여행경비의 50% 배상
+- 여행개시(출발일) 당일 취소 통보 시 - 여행경비의 50% 배상`}
 
 여행 취소 접수 안내
 - 취소는 업무시간 내 접수 시 확인 및 적용이 가능합니다.
@@ -584,23 +616,16 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                             value={url}
                             onChange={(e) => setUrl(e.target.value)}
                         />
-                        <button
-                            className="msg-fetch-btn"
-                            onClick={fetchProductInfo}
-                            disabled={!url || loadingProduct}
-                        >
-                            {loadingProduct ? '분석중...' : '추출'}
-                        </button>
+                        {templateType === 'booking' && (
+                            <button
+                                className="msg-fetch-btn"
+                                onClick={fetchProductInfo}
+                                disabled={!url || loadingProduct}
+                            >
+                                {loadingProduct ? '분석중...' : '추출'}
+                            </button>
+                        )}
                     </div>
-                    {product && (
-                        <div className="msg-product-info" style={{ marginTop: '8px' }}>
-                            <strong>{product.title}</strong><br />
-                            💰 {product.price} · ✈️ {product.airline}{product.departureAirport ? `(${product.departureAirport})` : ''} · 📅 {product.departureDate}
-                            {product.exclusions && product.exclusions.length > 0 && (
-                                <><br />🚫 불포함: {product.exclusions.join(', ')}</>
-                            )}
-                        </div>
-                    )}
                 </div>
 
                 {/* 템플릿 유형 */}
@@ -709,6 +734,17 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                     onChange={(e) => setExcludedCosts(e.target.value)}
                                 />
                             </div>
+                            <div className="msg-field full">
+                                <label className="msg-field-label">[특별약관] 취소 규정 {product?.specialTerms ? ' (URL에서 자동 추출됨)' : ''}</label>
+                                <textarea
+                                    className="msg-field-input"
+                                    style={{ height: '120px', resize: 'vertical', paddingTop: '8px' }}
+                                    placeholder="취소료 규정 입력..."
+                                    value={specialTerms}
+                                    onChange={(e) => setSpecialTerms(e.target.value)}
+                                />
+                            </div>
+
                         </div>
                     </div>
                 )}

@@ -143,12 +143,21 @@ export interface DetailedProductInfo {
   hashtags: string;
   hasNoOption: boolean;
   hasFreeSchedule: boolean;
+  flightCode?: string;
+  departureFlightNumber?: string;
+  returnFlightNumber?: string;
+  departureTime?: string;
+  arrivalTime?: string;
+  returnDepartureTime?: string;
+  returnArrivalTime?: string;
   returnDate?: string;
   isProduct?: boolean;
   index?: number;
   meetingInfo?: MeetingInfo[];
   description?: string;
   notices?: string[];
+  specialTerms?: string;
+  baggageNote?: string;
 }
 
 // URL 분석기 단일 결과 타입
@@ -226,8 +235,10 @@ export interface ConfirmationDocument {
   flight: {
     airline: string;
     departureAirport: string;
+    departureFlightNumber?: string;
     departureTime: string;
     arrivalTime: string;
+    returnFlightNumber?: string;
     returnDepartureTime: string;
     returnArrivalTime: string;
   };
@@ -274,14 +285,48 @@ export interface SecondaryResearch {
   roaming: {
     carriers: string;
     simEsim: string;
+    roamingTip?: string;          // 통신 꿀팁 (예: 산간지역 신호 약함)
+  };
+  // 날씨 및 복장
+  weather?: {
+    month: string;
+    temperature: string;
+    clothing: string;
   };
   // 입국·세관
   customs: {
     warningTitle: string;        // 예: "전자담배 절대 반입 금지"
     warningContent: string;      // 경고 상세
-    minorEntry: string;          // 미성년자 입국 서류
+    minorEntry: string;          // 미성년자 입국 서류 (간략)
+    minorDetail?: string;        // 미성년자 상세 서류/공증 가이드
     dutyFree: string;            // 면세 한도
     passportNote: string;        // 여권 유의사항
+    links?: {
+      label: string;
+      url: string;
+      type: 'visa' | 'arrival_card' | 'customs' | 'other';
+      description?: string;     // 어떨 때 필요한지 (When)
+      howTo?: string;           // 신청 방법 (How)
+    }[];
+    // 추가된 정밀 필드
+    majorAlert?: {
+      title: string;             // 예: "육류 가공품 반입 절대 금지"
+      content: string;
+      penalty?: string;          // 예: "최소 20만 TWD 벌금"
+    };
+    prohibitedItems?: {
+      category: string;         // 예: "절대 반입 금지 (검역 대상)"
+      items: string[];
+      note?: string;
+    }[];
+    arrivalProcedure?: {
+      title: string;            // 예: "온라인 입국신고서 (Arrival Card)"
+      timing?: string;          // 예: "입국일 기준 3일 이내"
+      steps: {
+        step: string;
+        description: string;
+      }[];
+    };
   };
   // 여행지·관광지 소개
   landmarks: LandmarkInfo[];

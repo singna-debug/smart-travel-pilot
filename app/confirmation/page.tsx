@@ -106,6 +106,8 @@ export default function ConfirmationPage() {
 
     // 항공
     const [airline, setAirline] = useState('');
+    const [departureFlightNumber, setDepartureFlightNumber] = useState('');
+    const [returnFlightNumber, setReturnFlightNumber] = useState('');
     const [departureAirport, setDepartureAirport] = useState('');
     const [departureTime, setDepartureTime] = useState('');
     const [arrivalTime, setArrivalTime] = useState('');
@@ -247,6 +249,9 @@ export default function ConfirmationPage() {
                 // ---- 항공 상세 ----
                 if (raw.airline) setAirline(raw.airline);
                 if (raw.departureAirport) setDepartureAirport(raw.departureAirport);
+                if (raw.departureFlightNumber) setDepartureFlightNumber(raw.departureFlightNumber);
+                if (raw.returnFlightNumber) setReturnFlightNumber(raw.returnFlightNumber);
+                if (raw.flightCode && !raw.departureFlightNumber) setDepartureFlightNumber(raw.flightCode);
                 
                 // 시간 정보는 raw.departureTime 등이 문자열일 수도 있고 객체일 수도 있으므로 유연하게 처리
                 if (raw.departureTime) setDepartureTime(raw.departureTime);
@@ -419,6 +424,9 @@ export default function ConfirmationPage() {
         setResearchLoading(true);
         setResearchError('');
         try {
+            const monthMatch = departureDate.match(/-(\d{2})-/);
+            const travelMonth = monthMatch ? `${parseInt(monthMatch[1])}월` : '';
+
             const res = await fetch('/api/confirmation/secondary-research', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -427,6 +435,8 @@ export default function ConfirmationPage() {
                     airline,
                     airport: departureAirport,
                     customGuides: customGuideInputs.filter(g => g.trim()),
+                    travelMonth,
+                    baggageNote: (analysisResult as any)?.baggageNote || '',
                 }),
             });
             const json = await res.json();
@@ -471,6 +481,15 @@ export default function ConfirmationPage() {
         });
     };
 
+    const updateSRCustomsLink = (index: number, field: string, value: string) => {
+        setSecondaryResearch((prev: any) => {
+            if (!prev || !prev.customs || !prev.customs.links) return prev;
+            const newLinks = [...prev.customs.links];
+            newLinks[index] = { ...newLinks[index], [field]: value };
+            return { ...prev, customs: { ...prev.customs, links: newLinks } };
+        });
+    };
+
     // 확정서 생성
     const generateConfirmation = async () => {
         if (!customerName) {
@@ -489,8 +508,8 @@ export default function ConfirmationPage() {
                 },
                 flight: {
                     airline, departureAirport,
-                    departureTime, arrivalTime,
-                    returnDepartureTime, returnArrivalTime,
+                    departureFlightNumber, departureTime, arrivalTime,
+                    returnFlightNumber, returnDepartureTime, returnArrivalTime,
                 },
                 hotels: hotels.map(h => ({
                     ...h,
@@ -706,6 +725,14 @@ export default function ConfirmationPage() {
                         <input value={departureAirport} onChange={e => setDepartureAirport(e.target.value)} placeholder="인천" />
                     </div>
                     <div className="confirm-field">
+                        <label>가는편 편명</label>
+                        <input value={departureFlightNumber} onChange={e => setDepartureFlightNumber(e.target.value)} placeholder="KE123" />
+                    </div>
+                    <div className="confirm-field">
+                        <label>오는편 편명</label>
+                        <input value={returnFlightNumber} onChange={e => setReturnFlightNumber(e.target.value)} placeholder="KE124" />
+                    </div>
+                    <div className="confirm-field">
                         <label>가는편 출발</label>
                         <input value={departureTime} onChange={e => setDepartureTime(e.target.value)} placeholder="09:00" />
                     </div>
@@ -888,7 +915,7 @@ export default function ConfirmationPage() {
                             </div>
                             <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1e293b', marginBottom: '6px' }}>{day.title}</div>
                             <div style={{ fontSize: '0.82rem', color: '#475569', whiteSpace: 'pre-wrap' }}>
-                                {Array.isArray(day.activities) ? day.activities.join(' · ') : day.activities}
+                                {Array.isArray(day.activities) ? day.activities.join('\n') : day.activities}
                             </div>
                             {(day.meals || day.hotel) && (
                                 <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #cbd5e1', fontSize: '0.75rem', color: '#94a3b8', display: 'flex', gap: '10px' }}>
@@ -1001,25 +1028,72 @@ export default function ConfirmationPage() {
                                     <textarea rows={2} value={secondaryResearch.roaming?.carriers || ''} onChange={e => updateSRField('roaming', 'carriers', e.target.value)} />
                                 </div>
                                 <div className="confirm-field">
-                                    <label style={{ color: 'var(--text-secondary)' }}>유심/eSIM 추천</label>
+                                    <label style={{ color: 'var(--text-secondary)' }}>유하/eSIM 추천</label>
                                     <textarea rows={2} value={secondaryResearch.roaming?.simEsim || ''} onChange={e => updateSRField('roaming', 'simEsim', e.target.value)} />
+                                </div>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>통신 꿀팁</label>
+                                    <textarea rows={2} value={secondaryResearch.roaming?.roamingTip || ''} onChange={e => updateSRField('roaming', 'roamingTip', e.target.value)} />
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* 세관 */}
+                    {/* 날씨 및 복장 */}
                     {secondaryResearch && (
                         <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
-                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>🛃 입국·세관</div>
+                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>🌡️ 날씨 및 복장</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>해당 월</label>
+                                    <input value={secondaryResearch.weather?.month || ''} onChange={e => updateSRField('weather', 'month', e.target.value)} />
+                                </div>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>기온/기후</label>
+                                    <textarea rows={2} value={secondaryResearch.weather?.temperature || ''} onChange={e => updateSRField('weather', 'temperature', e.target.value)} />
+                                </div>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>추천 복장</label>
+                                    <textarea rows={2} value={secondaryResearch.weather?.clothing || ''} onChange={e => updateSRField('weather', 'clothing', e.target.value)} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 세관 및 입국 */}
+                    {secondaryResearch && (
+                        <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
+                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>🛃 입국·세관 · 공식 링크</div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 <div className="confirm-field">
                                     <label style={{ color: 'var(--text-secondary)' }}>주요 경고 제목</label>
                                     <input value={secondaryResearch.customs?.warningTitle || ''} onChange={e => updateSRField('customs', 'warningTitle', e.target.value)} />
                                 </div>
                                 <div className="confirm-field">
-                                    <label style={{ color: 'var(--text-secondary)' }}>미성년자 안내</label>
+                                    <label style={{ color: 'var(--text-secondary)' }}>핵심 경고 제목 (레퍼런스형)</label>
+                                    <input value={secondaryResearch.customs?.majorAlert?.title || ''} onChange={e => {
+                                        setSecondaryResearch((prev: any) => ({
+                                            ...prev,
+                                            customs: { ...prev.customs, majorAlert: { ...prev.customs.majorAlert, title: e.target.value } }
+                                        }));
+                                    }} />
+                                </div>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>핵심 경고 벌금/내용</label>
+                                    <input value={secondaryResearch.customs?.majorAlert?.penalty || ''} onChange={e => {
+                                        setSecondaryResearch((prev: any) => ({
+                                            ...prev,
+                                            customs: { ...prev.customs, majorAlert: { ...prev.customs.majorAlert, penalty: e.target.value } }
+                                        }));
+                                    }} />
+                                </div>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>미성년자 안내 (간략)</label>
                                     <textarea rows={2} value={secondaryResearch.customs?.minorEntry || ''} onChange={e => updateSRField('customs', 'minorEntry', e.target.value)} />
+                                </div>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>미성년자 상세 서류/공증 가이드</label>
+                                    <textarea rows={3} value={secondaryResearch.customs?.minorDetail || ''} onChange={e => updateSRField('customs', 'minorDetail', e.target.value)} />
                                 </div>
                                 <div className="confirm-field">
                                     <label style={{ color: 'var(--text-secondary)' }}>면세 한도</label>
@@ -1028,6 +1102,66 @@ export default function ConfirmationPage() {
                                 <div className="confirm-field">
                                     <label style={{ color: 'var(--text-secondary)' }}>여권 유의사항</label>
                                     <textarea rows={2} value={secondaryResearch.customs?.passportNote || ''} onChange={e => updateSRField('customs', 'passportNote', e.target.value)} />
+                                </div>
+
+                                {/* 입국 절차 상세 */}
+                                <div style={{ marginTop: '12px', padding: '12px', background: 'var(--bg-tertiary)', borderRadius: '8px' }}>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '8px' }}>📝 입국 절차 (단계별)</div>
+                                    <div className="confirm-field">
+                                        <label style={{ color: 'var(--text-secondary)' }}>절차 제목</label>
+                                        <input value={secondaryResearch.customs?.arrivalProcedure?.title || ''} onChange={e => {
+                                            setSecondaryResearch((prev: any) => ({
+                                                ...prev,
+                                                customs: { ...prev.customs, arrivalProcedure: { ...prev.customs.arrivalProcedure, title: e.target.value } }
+                                            }));
+                                        }} />
+                                    </div>
+                                    {secondaryResearch.customs?.arrivalProcedure?.steps?.map((step: any, idx: number) => (
+                                        <div key={idx} style={{ 
+                                            display: 'grid', 
+                                            gridTemplateColumns: 'minmax(120px, 1fr) 2fr', 
+                                            gap: '12px', 
+                                            marginBottom: '10px', 
+                                            background: 'var(--bg-tertiary)', 
+                                            padding: '12px', 
+                                            borderRadius: '8px',
+                                            border: '1px solid var(--border-color)' 
+                                        }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>단계명</label>
+                                                <input value={step.step} placeholder="단계명" style={{ width: '100%', fontSize: '0.8rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '6px 10px', color: '#fff' }} onChange={e => {
+                                                    const newSteps = [...(secondaryResearch.customs?.arrivalProcedure?.steps || [])];
+                                                    newSteps[idx] = { ...newSteps[idx], step: e.target.value };
+                                                    setSecondaryResearch((prev: any) => ({
+                                                        ...prev,
+                                                        customs: { ...prev.customs, arrivalProcedure: { ...(prev.customs?.arrivalProcedure || {}), steps: newSteps } }
+                                                    }));
+                                                }} />
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>상세 가이드</label>
+                                                <textarea rows={2} value={step.description} placeholder="상세 내용" style={{ width: '100%', fontSize: '0.8rem', padding: '8px 10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff', resize: 'vertical' }} onChange={e => {
+                                                    const newSteps = [...(secondaryResearch.customs?.arrivalProcedure?.steps || [])];
+                                                    newSteps[idx] = { ...newSteps[idx], description: e.target.value };
+                                                    setSecondaryResearch((prev: any) => ({
+                                                        ...prev,
+                                                        customs: { ...prev.customs, arrivalProcedure: { ...(prev.customs?.arrivalProcedure || {}), steps: newSteps } }
+                                                    }));
+                                                }} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                
+                                {/* 링크 관리 */}
+                                <div style={{ marginTop: '8px' }}>
+                                    <label style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '8px', display: 'block' }}>공식 링크 (비자, 신고서 등)</label>
+                                    {secondaryResearch.customs?.links?.map((link: any, idx: number) => (
+                                        <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', marginBottom: '8px' }}>
+                                            <input value={link.label} onChange={e => updateSRCustomsLink(idx, 'label', e.target.value)} placeholder="링크명" style={{ fontSize: '0.8rem' }} />
+                                            <input value={link.url} onChange={e => updateSRCustomsLink(idx, 'url', e.target.value)} placeholder="URL" style={{ fontSize: '0.8rem' }} />
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
