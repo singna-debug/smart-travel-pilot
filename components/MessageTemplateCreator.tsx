@@ -31,7 +31,7 @@ interface ProductInfo {
     arrivalTime?: string;
     returnDepartureTime?: string;
     returnArrivalTime?: string;
-    meetingInfo?: any[];
+    itinerary?: any[];
     keyPoints: string[];
     exclusions: string[];
     specialTerms?: string;
@@ -258,7 +258,20 @@ ${travelersNum > 0 && priceNum > 0 ? ` = ${price} * ${travelersNum}명 = ${total
 - 예약번호 : ${bookingNumber || '(예약번호)'}
 - 출 발 일 : ${departureDate}
 - 귀 국 일 : ${p?.returnDate || ''}
-- 항 공 사 :  ${airlineDisplay}
+- 항 공 사 : ${airlineDisplay}
+${(() => {
+    if (!p?.itinerary || p.itinerary.length === 0) return '';
+    const out = p.itinerary[0]?.transport;
+    const ret = p.itinerary[p.itinerary.length - 1]?.transport;
+    let flightText = '';
+    if (out && out.departureTime) {
+        flightText += `- 가는편 : ${out.airline || ''} ${out.flightNo || ''} (${out.departureTime} 출발 → ${out.arrivalTime || ''} 도착)\n`;
+    }
+    if (ret && ret.departureTime && p.itinerary.length > 1) {
+        flightText += `- 오는편 : ${ret.airline || ''} ${ret.flightNo || ''} (${ret.departureTime} 출발 → ${ret.arrivalTime || ''} 도착)\n`;
+    }
+    return flightText.trim() ? flightText : '';
+})()}
 - 상세일정 : ${url}
 (위 주소를 클릭하시면 일정, 호텔 등 세부 사항을 확인할 수 있습니다.)
 

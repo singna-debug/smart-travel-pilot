@@ -14,12 +14,12 @@ import { scrapeWithBrowser } from '../browser-crawler';
 export async function crawlForReservationGuide(url: string): Promise<DetailedProductInfo | null> {
     console.log(`[ReservationGuideCrawler] Start. URL=${url}`);
 
-    // 1. 데이터 확보 (빠른 응답을 위해 Native API 우선 활용)
+    // 1. 데이터 확보
     const { text, nextData, nativeData } = await fetchContent(url, { isSummaryOnly: false, skipHtml: false });
     
     // 2. 예약 안내 전용 프롬프트 구성
     const prompt = `고객에게 보낼 '예약 및 결제 안내' 메시지를 작성하기 위해 다음 여행 상품 정보를 추출하세요.
-고객이 안심하고 예약할 수 있도록 핵심적인 혜택과 주의사항을 포함해야 합니다.
+고객이 안심하고 예약할 수 있도록 핵심적인 혜택과 주의사항, 그리고 정확한 항공 일정을 포함해야 합니다.
 
 URL: ${url}
 ${nativeData ? `--- [Native API 정보] ---\n${JSON.stringify(nativeData)}\n` : ''}
@@ -34,6 +34,17 @@ ${nativeData ? `--- [Native API 정보] ---\n${JSON.stringify(nativeData)}\n` : 
   "airline": "항공사명",
   "duration": "X박 Y일",
   "destination": "여행 지역",
+  "itinerary": [
+    { 
+      "day": "1일차", 
+      "transport": { 
+        "airline": "항공사", 
+        "flightNo": "편명", 
+        "departureTime": "HH:mm", 
+        "arrivalTime": "HH:mm" 
+      } 
+    }
+  ],
   "keyPoints": [
     "고객이 매력을 느낄만한 핵심 포인트 1",
     "포인트 2",
@@ -45,11 +56,12 @@ ${nativeData ? `--- [Native API 정보] ---\n${JSON.stringify(nativeData)}\n` : 
 }
 
 [RULES]
-1. keyPoints는 고객 안내용으로 가장 매력적인 3~4개를 추출하세요.
-2. specialTerms는 예약 시점에 꼭 알아야 할 취소료 규정을 포함하세요.
+1. 항공권 정보(출도착 시간, 편명)를 아주 정확하게 추출하세요. 
+2. keyPoints는 고객 안내용으로 가장 매력적인 3~4개를 추출하세요.
+3. specialTerms는 예약 시점에 꼭 알아야 할 취소료 규정을 반드시 포함하세요.
 
 입력 데이터:
-${text.substring(0, 20000)}`;
+${text.substring(0, 25000)}`;
 
     // 3. AI 분석 실행
     const result = await analyzeWithGemini(prompt, url, false, nextData);
@@ -59,6 +71,7 @@ ${text.substring(0, 20000)}`;
             // Native 데이터로 보강
             if (!result.price) result.price = nativeData.price;
             if (!result.airline) result.airline = nativeData.airline;
+            if (!result.itinerary || result.itinerary.length === 0) result.itinerary = nativeData.itinerary;
             if (nativeData.keyPoints && (!result.keyPoints || result.keyPoints.length === 0)) {
                 result.keyPoints = nativeData.keyPoints.slice(0, 4);
             }
