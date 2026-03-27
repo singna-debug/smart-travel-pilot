@@ -28,8 +28,9 @@ export async function POST(request: NextRequest) {
 
         try {
             // 내부 crawl-analyze 요청
+            // 내부 analyze-url 요청 (로컬/배포 호환성 위해 상대 경로 대신 절대 경로 baseUrl 사용 권장되나, 서버사이드 fetch이므로 baseUrl 필요)
             const baseUrl = process.env.NEXTAUTH_URL || process.env.VERCEL_URL || 'http://localhost:3000';
-            const analyzeResponse = await fetch(`${baseUrl}/api/crawl-analyze`, {
+            const analyzeResponse = await fetch(`${baseUrl}/api/analyze-url`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: confirmedProductUrl, mode: 'booking' }),

@@ -150,7 +150,7 @@ export default function ManualConsultationForm() {
                 // 주요 정보가 비어있거나 '미정'인 경우 자동 분석 시도
                 if (!form.destination || form.destination === '미정' || !form.departureDate) {
                     try {
-                        const res = await fetch('/api/crawl-analyze', {
+                        const res = await fetch('/api/analyze-url', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ url, mode: 'booking' })
