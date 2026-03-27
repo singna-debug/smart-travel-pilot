@@ -444,10 +444,24 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
 export function formatDateString(dateStr: string): string {
     if (!dateStr || dateStr.trim() === '미정') return dateStr;
     let cleanDate = dateStr.trim();
+    
+    // T 구분값 제거 (ISO 형식 대응)
     if (cleanDate.includes('T')) cleanDate = cleanDate.split('T')[0];
+    
+    // 이미 YYYY-MM-DD 형식이면 반환
     if (/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) return cleanDate;
     
-    const match = cleanDate.match(/(\d{2,4})[-\.\/년]\s*(\d{1,2})[-\.\/월]\s*(\d{1,2})/);
+    // 8자리/12자리 연속된 숫자 처리 (20260412 or 202604120000)
+    const digitsOnly = cleanDate.replace(/[^0-9]/g, '');
+    if (digitsOnly.length >= 8 && /^\d+$/.test(digitsOnly)) {
+        const year = digitsOnly.substring(0, 4);
+        const month = digitsOnly.substring(4, 6);
+        const day = digitsOnly.substring(6, 8);
+        return `${year}-${month}-${day}`;
+    }
+    
+    // 구분자가 있는 경우 (2026.04.12, 26/04/12 등)
+    const match = cleanDate.match(/(\d{2,4})[-\.\/년\s]?\s*(\d{1,2})[-\.\/월\s]?\s*(\d{1,2})/);
     if (match) {
         let year = match[1];
         if (year.length === 2) year = `20${year}`;
@@ -455,6 +469,7 @@ export function formatDateString(dateStr: string): string {
         const day = match[3].padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
+    
     return dateStr;
 }
 

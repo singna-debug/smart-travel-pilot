@@ -115,10 +115,16 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
 
     // 3. 분석 수행
     const result = await analyzeWithGemini(prompt, url, false, nextData);
+    console.log(`[ConfirmationCrawler] Gemini Analysis Result:`, result ? 'Success' : 'Failed');
     
     if (result) {
-        return refineData(result, text, url);
+        console.log(`[ConfirmationCrawler] Raw Gemini Output:`, JSON.stringify(result, null, 2));
+        const refined = refineData(result, text, url);
+        console.log(`[ConfirmationCrawler] Refined Result:`, JSON.stringify(refined, null, 2));
+        return refined;
     }
     
-    return nativeData ? refineData(nativeData, text, url) : null;
+    const finalResult = nativeData ? refineData(nativeData, text, url) : null;
+    console.log(`[ConfirmationCrawler] Fallback to Native Result:`, !!finalResult);
+    return finalResult;
 }
