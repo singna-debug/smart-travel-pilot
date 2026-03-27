@@ -59,16 +59,22 @@ ${text.substring(0, 25000)}`;
 
     // 3. AI 분석 실행
     const result = await analyzeWithGemini(prompt, url, false, nextData);
-    
+    console.log(`[BookingCrawler] Gemini Analysis Result:`, result ? 'Success' : 'Failed');
     if (result) {
+        console.log(`[BookingCrawler] Raw Gemini Output:`, JSON.stringify(result, null, 2));
         // Native 데이터가 있다면 보강
         if (nativeData) {
+            console.log(`[BookingCrawler] Merging with NativeData`);
             if (!result.itinerary || result.itinerary.length === 0) result.itinerary = nativeData.itinerary;
             if (!result.price) result.price = nativeData.price;
             if (!result.airline) result.airline = nativeData.airline;
         }
-        return refineData(result, text, url);
+        const refined = refineData(result, text, url);
+        console.log(`[BookingCrawler] Refined Result:`, JSON.stringify(refined, null, 2));
+        return refined;
     }
     
-    return nativeData ? refineData(nativeData, text, url) : null;
+    const finalResult = nativeData ? refineData(nativeData, text, url) : null;
+    console.log(`[BookingCrawler] Fallback to Native Result:`, !!finalResult);
+    return finalResult;
 }

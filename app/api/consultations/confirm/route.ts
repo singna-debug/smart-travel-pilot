@@ -33,6 +33,9 @@ export async function POST(request: NextRequest) {
             const info = await crawlForBooking(confirmedProductUrl);
             
             if (info) {
+                // [로그 강화] 추출된 모든 데이터를 로그로 남겨 배포 환경 분석 지원
+                console.log('[Confirm] Raw Extracted Info:', JSON.stringify(info, null, 2));
+                
                 departureDate = info.departureDate || '';
                 returnDate = info.returnDate || '';
                 destination = info.destination || '';
