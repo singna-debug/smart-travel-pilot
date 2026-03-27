@@ -325,8 +325,7 @@ export default function UrlAnalyzer() {
         setSingleResult(null);
 
         try {
-            const isLocal = process.env.NODE_ENV === 'development';
-            const apiUrl = isLocal ? '/api/analyze-url' : '/api/crawl-analyze';
+            const apiUrl = '/api/analyze-url';
 
             const response = await fetch(apiUrl, {
                 method: 'POST',

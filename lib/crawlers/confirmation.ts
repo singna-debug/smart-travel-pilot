@@ -22,8 +22,8 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
     let nativeData: any = null;
 
     if (!text) {
-        console.log('[ConfirmationCrawler] No text provided. Using Browser Scraper for high precision...');
-        // 병렬로 브라우저 스크레핑과 Native API 호출 진행 (모두투어 등 대응)
+        console.log('[ConfirmationCrawler] No text provided. Attempting Browser Scraper and Native API...');
+        // 병렬로 브라우저 스크레핑과 Native API 호출 진행
         const [browserText, fetchedNative] = await Promise.all([
             scrapeWithBrowser(url, { skipClicks: false }),
             fetchModeTourNative(url).catch(() => null)
@@ -32,10 +32,12 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
         text = browserText || '';
         nativeData = fetchedNative;
         
-        if (!text && nativeData) {
-            console.log('[ConfirmationCrawler] Browser scraping failed, falling back to Native Data text.');
-            const { text: fallbackText } = await fetchContent(url, { isSummaryOnly: false });
+        // [수정] text가 없으면 nativeData 여부와 상관없이 fetchContent로 재시도
+        if (!text) {
+            console.log('[ConfirmationCrawler] Falling back to fetchContent (Regular Fetch)...');
+            const { text: fallbackText, nativeData: fallbackNative } = await fetchContent(url, { isSummaryOnly: false });
             text = fallbackText;
+            if (!nativeData) nativeData = fallbackNative;
         }
     }
     

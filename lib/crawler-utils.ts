@@ -218,6 +218,17 @@ export function htmlToText(html: string, url?: string): string {
     const airlineMatch = html.match(/(제주항공|대한항공|아시아나항공|진에어|티웨이|이스타|에어서울|에어부산|비엣젯|필리핀항공)/);
     if (airlineMatch) targetAirline = airlineMatch[1];
 
+    let targetDeparture = '';
+    let targetReturn = '';
+    const datePattern = /(\d{4})[-\.\/](\d{1,2})[-\.\/](\d{1,2})/;
+    const dateMatches = html.match(new RegExp(datePattern.source, 'g'));
+    if (dateMatches && dateMatches.length >= 2) {
+        targetDeparture = dateMatches[0];
+        targetReturn = dateMatches[dateMatches.length - 1];
+    } else if (dateMatches && dateMatches.length === 1) {
+        targetDeparture = dateMatches[0];
+    }
+
     const cleanBody = html
         .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
         .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
@@ -232,6 +243,8 @@ export function htmlToText(html: string, url?: string): string {
 TARGET_TITLE: "${finalTitle}"
 TARGET_PRICE: "${targetPrice}"
 TARGET_AIRLINE: "${targetAirline}"
+TARGET_DEPARTURE_DATE: "${targetDeparture}"
+TARGET_RETURN_DATE: "${targetReturn}"
 URL: "${url}"
 ==== TARGET METADATA END ====`;
 

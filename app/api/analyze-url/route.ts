@@ -3,6 +3,8 @@ import { crawlTravelProduct, formatProductInfo, generateRecommendation, compareP
 import type { TravelProductInfo, DetailedProductInfo } from '@/types';
 
 // URL 분석 API (단일 및 다중 URL 지원)
+export const preferredRegion = 'icn1';
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {

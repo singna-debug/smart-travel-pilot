@@ -213,7 +213,7 @@ export default function ConfirmationPage() {
 
         try {
             const isLocal = process.env.NODE_ENV === 'development';
-            const apiUrl = isLocal ? '/api/analyze-url' : '/api/crawl-analyze';
+            const apiUrl = '/api/analyze-url';
 
             const res = await fetch(apiUrl, {
                 method: 'POST',
