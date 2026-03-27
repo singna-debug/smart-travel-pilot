@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateConsultationConfirmation } from '@/lib/google-sheets';
+import { crawlForBooking } from '@/lib/url-crawler';
 
 /**
  * POST /api/consultations/confirm
@@ -27,29 +28,21 @@ export async function POST(request: NextRequest) {
         let destination = '';
 
         try {
-            // 내부 crawl-analyze 요청
-            // 내부 analyze-url 요청 (로컬/배포 호환성 위해 상대 경로 대신 절대 경로 baseUrl 사용 권장되나, 서버사이드 fetch이므로 baseUrl 필요)
-            const baseUrl = process.env.NEXTAUTH_URL || process.env.VERCEL_URL || 'http://localhost:3000';
-            const analyzeResponse = await fetch(`${baseUrl}/api/analyze-url`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: confirmedProductUrl, mode: 'booking' }),
-            });
-
-            const analyzeData = await analyzeResponse.json();
+            // [개정] 내부 API 호출 대신 직접 라이브러리 함수 호출하여 안정성 확보 (Vercel 네트워크 이슈 방지)
+            console.log(`[Confirm] Starting direct analysis for: ${confirmedProductUrl}`);
+            const info = await crawlForBooking(confirmedProductUrl);
             
-            if (analyzeData.success && analyzeData.data?.raw) {
-                const raw = analyzeData.data.raw;
-                departureDate = raw.departureDate || '';
-                returnDate = raw.returnDate || '';
-                destination = raw.destination || '';
-                console.log(`[Confirm] Extracted: departure=${departureDate}, return=${returnDate}, dest=${destination}`);
+            if (info) {
+                departureDate = info.departureDate || '';
+                returnDate = info.returnDate || '';
+                destination = info.destination || '';
+                console.log(`[Confirm] Analysis Success: dep=${departureDate}, ret=${returnDate}, dest=${destination}`);
             } else {
-                console.warn('[Confirm] URL analysis failed, proceeding without date extraction:', analyzeData.error);
+                console.warn('[Confirm] Crawler returned null. Native API or Gemini might have failed.');
             }
         } catch (analyzeError: any) {
-            console.error('[Confirm] URL analysis error:', analyzeError.message);
-            // URL 분석 실패해도 확정 처리는 계속 진행
+            console.error('[Confirm] Direct analysis error:', analyzeError.message);
+            // 분석 실패해도 프로세스는 계속 진행
         }
 
         // 2. 날짜 자동 계산

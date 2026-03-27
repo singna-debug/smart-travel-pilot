@@ -93,13 +93,24 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false): P
         const responses = await Promise.all(fetchTasks);
         console.log(`[Native] Response statuses: ${responses.map(r => r.status).join(', ')}`);
         
-        if (responses[0].ok) dataDetail = await responses[0].json();
+        if (responses[0].ok) {
+            dataDetail = await responses[0].json();
+            console.log(`[Native] dataDetail received. Success: ${!!dataDetail?.result}`);
+        } else {
+            const errText = await responses[0].text();
+            console.warn(`[Native] dataDetail failed. Status: ${responses[0].status}, Body: ${errText.substring(0, 100)}`);
+        }
+        
         if (responses[1].ok) dataPoints = await responses[1].json();
         if (responses[2].ok) dataSchedule = await responses[2].json();
 
         if (!dataDetail?.result) {
+            console.log(`[Native] Main result missing, trying SimpleDetail for Product No: ${productNo}`);
             const resSimple = await fetch(`https://b2c-api.modetour.com/Package/GetProductSimpleDetail?productNo=${productNo}`, { headers });
-            if (resSimple.ok) dataDetail = await resSimple.json();
+            if (resSimple.ok) {
+                dataDetail = await resSimple.json();
+                console.log(`[Native] SimpleDetail Result: ${!!dataDetail?.result}`);
+            }
         }
     } catch (e: any) {}
 
