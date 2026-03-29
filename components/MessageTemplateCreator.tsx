@@ -90,6 +90,8 @@ export default function MessageTemplateCreator() {
     const [confirmationLink, setConfirmationLink] = useState('');
     const [reviewLink, setReviewLink] = useState('');
     const [specialTerms, setSpecialTerms] = useState('');
+    const [airline, setAirline] = useState('');
+    const [departureDate, setDepartureDate] = useState('');
 
     const [generatedText, setGeneratedText] = useState('');
     const [copied, setCopied] = useState(false);
@@ -117,6 +119,7 @@ export default function MessageTemplateCreator() {
         if (selectedCustomer) {
             if (selectedCustomer.url) setUrl(selectedCustomer.url);
             if (selectedCustomer.travelersCount) setTravelers(selectedCustomer.travelersCount);
+            if (selectedCustomer.departureDate) setDepartureDate(selectedCustomer.departureDate);
         }
     }, [selectedCustomer]);
 
@@ -127,6 +130,12 @@ export default function MessageTemplateCreator() {
         }
         if (product?.specialTerms) {
             setSpecialTerms(product.specialTerms);
+        }
+        if (product?.departureDate) {
+            setDepartureDate(product.departureDate);
+        }
+        if (product?.airline) {
+            setAirline(product.airline);
         }
     }, [product]);
 
@@ -151,6 +160,8 @@ export default function MessageTemplateCreator() {
         // 기존 데이터 초기화
         setSpecialTerms('');
         setExcludedCosts('');
+        setDepartureDate('');
+        setAirline('');
 
         try {
             const res = await fetch('/api/analyze-url', {
@@ -162,13 +173,20 @@ export default function MessageTemplateCreator() {
             if (data.success && data.data?.raw) {
                 const p = data.data.raw;
                 setProduct(p);
-                if (p.specialTerms) setSpecialTerms(p.specialTerms);
-                if (p.exclusions && p.exclusions.length > 0) {
-                    setExcludedCosts(p.exclusions.join(', '));
-                }
+                // 상세정보 필드 자동 채우기 (데이터가 없을 경우 기본값 제공)
+                setSpecialTerms(p.specialTerms || '현지 가이드 안내 및 상품 페이지 내 약관 규정 내용에 따름');
+
+                const excl = Array.isArray(p.exclusions) ? p.exclusions.join(', ') : (p.exclusions || '');
+                setExcludedCosts(excl || '가이드팁, 매너 팁, 개인 경비');
+
+                setDepartureDate(p.departureDate || selectedCustomer?.departureDate || '');
+                setAirline(p.airline || '');
             }
         } catch (e) {
             console.error('상품 정보 로딩 실패:', e);
+            // 에러 시에도 기본값은 세팅 (사용자 편의)
+            setExcludedCosts('가이드팁, 매너 팁, 개인 경비');
+            setSpecialTerms('상품 페이지 내 약관 규정 내용에 따름');
         } finally {
             setLoadingProduct(false);
         }
@@ -183,20 +201,16 @@ export default function MessageTemplateCreator() {
         const dest = p?.destination || customer?.destination || '';
         const title = p?.title || customer?.productName || '';
         const price = p?.price || '';
-        const airline = p?.airline || '';
-        const departureDate = p?.departureDate || customer?.departureDate || '';
+        const airlineDisplay = airline || p?.airline || '';
+        const departureDateDisplay = departureDate || p?.departureDate || customer?.departureDate || '';
         const duration = p?.duration || customer?.duration || '';
         const depAirport = p?.departureAirport || '';
         const today = new Date();
         const todayStr = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
-        // 항공사 포맷
-        const airlineDisplay = airline;
-
-        // 기본 정보 계산
         const travelersNum = extractPriceNumber(travelers) || 1; // 최소 1명으로 가정
         const priceNum = extractPriceNumber(price);
-        
+
         // 상품가 및 잔금 총액 계산
         const totalPrice = priceNum * travelersNum;
         const totalPriceStr = totalPrice > 0 ? `${formatPrice(totalPrice)}원` : '';
@@ -239,7 +253,8 @@ export default function MessageTemplateCreator() {
 
             case 'booking':
                 const bookingPriceCalc = `성인 ${price}
-(상품가는 유류항증료가 포함된 가격입니다. 유류 할증료 매월 변동되며 잔금 시 최종 확정 적용됩니다.)
+(계약금 입금 시 요금으로 확정됩니다.)
++ 0(유류 할증료 매월 변동되며 잔금 시 최종 확정 적용됩니다.) 
 ${travelersNum > 0 && priceNum > 0 ? ` = ${price} * ${travelersNum}명 = ${totalPriceStr}` : ''}`;
 
                 text = `✈️ [모두투어] 여행 예약 안내 (담당: ${AGENT_NAME})
@@ -256,22 +271,22 @@ ${travelersNum > 0 && priceNum > 0 ? ` = ${price} * ${travelersNum}명 = ${total
 - 예약일자 : ${todayStr}
 - 예약/여행자 : ${name}님 ${phone}${travelersNum > 0 ? ` 일행 ${travelersNum}분` : ''}
 - 예약번호 : ${bookingNumber || '(예약번호)'}
-- 출 발 일 : ${departureDate}
+- 출 발 일 : ${departureDateDisplay}
 - 귀 국 일 : ${p?.returnDate || ''}
 - 항 공 사 : ${airlineDisplay}
 ${(() => {
-    if (!p?.itinerary || p.itinerary.length === 0) return '';
-    const out = p.itinerary[0]?.transport;
-    const ret = p.itinerary[p.itinerary.length - 1]?.transport;
-    let flightText = '';
-    if (out && out.departureTime) {
-        flightText += `- 가는편 : ${out.airline || ''} ${out.flightNo || ''} (${out.departureTime} 출발 → ${out.arrivalTime || ''} 도착)\n`;
-    }
-    if (ret && ret.departureTime && p.itinerary.length > 1) {
-        flightText += `- 오는편 : ${ret.airline || ''} ${ret.flightNo || ''} (${ret.departureTime} 출발 → ${ret.arrivalTime || ''} 도착)\n`;
-    }
-    return flightText.trim() ? flightText : '';
-})()}
+                        if (!p?.itinerary || p.itinerary.length === 0) return '';
+                        const out = p.itinerary[0]?.transport;
+                        const ret = p.itinerary[p.itinerary.length - 1]?.transport;
+                        let flightText = '';
+                        if (out && out.departureTime) {
+                            flightText += `- 가는편 : ${out.airline || ''} ${out.flightNo || ''} (${out.departureTime} 출발 → ${out.arrivalTime || ''} 도착)\n`;
+                        }
+                        if (ret && ret.departureTime && p.itinerary.length > 1) {
+                            flightText += `- 오는편 : ${ret.airline || ''} ${ret.flightNo || ''} (${ret.departureTime} 출발 → ${ret.arrivalTime || ''} 도착)\n`;
+                        }
+                        return flightText.trim() ? flightText : '';
+                    })()}
 - 상세일정 : ${url}
 (위 주소를 클릭하시면 일정, 호텔 등 세부 사항을 확인할 수 있습니다.)
 
@@ -345,7 +360,7 @@ ${name} 고객님, 안녕하세요! 😊
 
 📋 예약 확인 내역
 • 여 행 지 : ${dest}
-• 출 발 일 : ${departureDate}
+• 출 발 일 : ${departureDateDisplay}
 • 인      원: 총 ${travelersNum > 0 ? travelersNum : '(미정)'}명
 • 예약상품 : ${url || '(일정표 링크)'}
 
@@ -725,6 +740,24 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                     placeholder="2월 9일"
                                     value={depositDeadline}
                                     onChange={(e) => setDepositDeadline(e.target.value)}
+                                />
+                            </div>
+                            <div className="msg-field">
+                                <label className="msg-field-label">출발일</label>
+                                <input
+                                    className="msg-field-input"
+                                    placeholder="2024-05-20"
+                                    value={departureDate}
+                                    onChange={(e) => setDepartureDate(e.target.value)}
+                                />
+                            </div>
+                            <div className="msg-field">
+                                <label className="msg-field-label">항공사</label>
+                                <input
+                                    className="msg-field-input"
+                                    placeholder="대한항공"
+                                    value={airline}
+                                    onChange={(e) => setAirline(e.target.value)}
                                 />
                             </div>
                             <div className="msg-field full">

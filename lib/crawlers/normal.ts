@@ -1,13 +1,7 @@
-
 import type { DetailedProductInfo } from '../../types';
-import { 
-    fetchContent, 
-    analyzeWithGemini, 
-    refineData, 
-    fallbackParse, 
-    scrapeWithScrapingBee,
-    htmlToText
-} from '../crawler-utils';
+import { analyzeWithGemini, htmlToText, fallbackParse } from '../crawler-base-utils';
+import { fetchContent, scrapeWithScrapingBee } from './fetcher';
+import { refineData } from './refiner';
 import { scrapeWithBrowser } from '../browser-crawler';
 
 /**

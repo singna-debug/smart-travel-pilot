@@ -73,10 +73,7 @@ export async function POST(request: NextRequest) {
                 departureTime: '', arrivalTime: '',
                 returnDepartureTime: '', returnArrivalTime: '',
             },
-            hotel: body.hotel || {
-                name: '', address: '', checkIn: '', checkOut: '',
-            },
-            hotels: body.hotels || (body.hotel ? [body.hotel] : []),
+            hotels: body.hotels || [],
             itinerary: body.itinerary || [],
             inclusions: body.inclusions || [],
             exclusions: body.exclusions || [],
@@ -84,9 +81,9 @@ export async function POST(request: NextRequest) {
             checklist: body.checklist || '',
             cancellationPolicy: body.cancellationPolicy || '',
             files: body.files || [],
-            productData: body.productData,
-            secondaryResearch: body.secondaryResearch || undefined,
             meetingInfo: body.meetingInfo || [],
+            productData: body.productData,
+            secondaryResearch: body.secondaryResearch,
         };
 
         await confirmationStore.set(id, doc);

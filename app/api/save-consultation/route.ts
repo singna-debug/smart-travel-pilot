@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
                 travelers_count: travelersCount || '', // New field: 총인원
             },
             summary: summaryText.substring(0, 50000),
-            source: formSource || '수동등록',
+            source: formSource || '수동상담',
             automation: {
                 status: status,
                 next_followup: automationDates.next_followup,

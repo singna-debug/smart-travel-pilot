@@ -62,7 +62,7 @@ export default function ManualConsultationForm() {
         duration: '',
         returnDate: '',
         notes: '',
-        source: '전화',
+        source: '수동상담',
         status: '상담중',
         confirmedProduct: '',
         confirmedDate: '',
@@ -210,7 +210,7 @@ export default function ManualConsultationForm() {
                     confirmedDate: form.confirmedDate,
                     recurringCustomer: form.recurringCustomer,
                     inquirySource: form.inquirySource,
-                    source: form.source,
+                    source: '수동상담',
                     isComparison: false,
                     analysisData: { raw: { url: form.productUrl, title: form.productName } }
                 }),
@@ -231,7 +231,7 @@ export default function ManualConsultationForm() {
                     duration: '',
                     returnDate: '',
                     notes: '',
-                    source: '전화',
+                    source: '수동상담',
                     status: '상담중',
                     confirmedProduct: '',
                     confirmedDate: '',
@@ -315,22 +315,6 @@ export default function ManualConsultationForm() {
             </div>
 
             <form onSubmit={handleSubmit}>
-                {/* Row 0: 상담 채널 (수동 상담 고유 필드) */}
-                <div className="form-group" style={{ marginBottom: '20px' }}>
-                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '600', marginBottom: '8px' }}>상담 채널 *</label>
-                    <select
-                        value={form.source}
-                        onChange={(e) => updateForm('source', e.target.value)}
-                        className="analyzer-input"
-                        style={{ width: '100%', appearance: 'none', cursor: 'pointer' }}
-                    >
-                        <option value="전화">전화</option>
-                        <option value="방문">방문</option>
-                        <option value="이메일">이메일</option>
-                        <option value="문자">문자</option>
-                        <option value="기타">기타</option>
-                    </select>
-                </div>
 
                 {/* Row 1: 고객명, 연락처, 총인원, 여행지, 재방문 여부, 유입 경로 */}
                 <div className="analyzer-form-grid-3">
@@ -410,6 +394,7 @@ export default function ManualConsultationForm() {
                             <option value="지인소개">지인소개</option>
                             <option value="기존고객">기존고객</option>
                             <option value="전화문의">전화문의</option>
+                            <option value="매장방문">매장방문</option>
                             <option value="기타">기타</option>
                         </select>
                     </div>

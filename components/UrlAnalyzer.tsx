@@ -481,7 +481,7 @@ export default function UrlAnalyzer() {
                     recurringCustomer,
                     inquirySource,
                     travelersCount: travelersCount === '' ? null : Number(travelersCount),
-                    source: '수동등록',
+                    source: '수동상담',
                     memo,
                     analysisData,
                     isComparison: isComparison,
@@ -668,6 +668,7 @@ export default function UrlAnalyzer() {
                         <option value="지인소개">지인소개</option>
                         <option value="기존고객">기존고객</option>
                         <option value="전화문의">전화문의</option>
+                        <option value="매장방문">매장방문</option>
                         <option value="기타">기타</option>
                     </select>
                 </div>

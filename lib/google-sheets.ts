@@ -33,14 +33,14 @@ export function autoFormatDateString(val: string | undefined): string {
     } else if (/^\d{6}(\s*\(.*\))?$/.test(cleanStr)) {
         return cleanStr.replace(/^(\d{2})(\d{2})(\d{2})(.*)$/, '20$1-$2-$3$4').trim();
     } else if (/^\d{4}\.\d{1,2}\.\d{1,2}(\s*\(.*\))?$/.test(cleanStr)) {
-        return cleanStr.replace(/^(\d{4})\.(\d{1,2})\.(\d{1,2})(.*)$/, (_, y, m, d, rest) => 
+        return cleanStr.replace(/^(\d{4})\.(\d{1,2})\.(\d{1,2})(.*)$/, (_, y, m, d, rest) =>
             `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}${rest}`
         ).trim();
     }
     return cleanStr;
 }
 
-function getGoogleSheetsClient() {
+export function getGoogleSheetsClient() {
     try {
         let auth;
 
@@ -111,7 +111,7 @@ function getGoogleSheetsClient() {
 /**
  * 시트명이 'Sheet1' 또는 '시트1' 등으로 다를 수 있어 동적으로 확인합니다.
  */
-async function getSheetTitles(sheets: any, spreadsheetId: string) {
+export async function getSheetTitles(sheets: any, spreadsheetId: string) {
     try {
         const response = await sheets.spreadsheets.get({ spreadsheetId });
         const sheetList = response.data.sheets || [];
@@ -252,7 +252,7 @@ async function getOrCreateMonthlySheet(sheets: any, spreadsheetId: string, month
 /**
  * 상담단계 열(K열)에 드롭다운 데이터 유효성 검사를 추가합니다.
  */
-async function applyDropdownValidation(sheets: any, spreadsheetId: string, sheetGid: number) {
+export async function applyDropdownValidation(sheets: any, spreadsheetId: string, sheetGid: number) {
     try {
         await sheets.spreadsheets.batchUpdate({
             spreadsheetId,
@@ -319,11 +319,16 @@ async function applyDropdownValidation(sheets: any, spreadsheetId: string, sheet
                                 condition: {
                                     type: 'ONE_OF_LIST',
                                     values: [
-                                        { userEnteredValue: '블로그' },
+                                        { userEnteredValue: '네이버 블로그' },
+                                        { userEnteredValue: '카카오톡 채널' },
+                                        { userEnteredValue: '인스타그램 및 페이스북' },
+                                        { userEnteredValue: '당근마켓' },
+                                        { userEnteredValue: '닷컴' },
                                         { userEnteredValue: '지인소개' },
-                                        { userEnteredValue: '카카오톡채널' },
-                                        { userEnteredValue: '인스타그램' },
-                                        { userEnteredValue: '매장방문' }
+                                        { userEnteredValue: '기존고객' },
+                                        { userEnteredValue: '전화문의' },
+                                        { userEnteredValue: '매장방문' },
+                                        { userEnteredValue: '기타' }
                                     ]
                                 },
                                 showCustomUi: true,
@@ -399,7 +404,7 @@ export async function appendConsultationToSheet(data: ConsultationData): Promise
             data.trip.url,                      // L: 상품URL (11)
             data.summary || '',                 // M: 상담요약 (12)
             data.automation.status,             // N: 상담단계 (13)
-            data.source || '수동등록',           // O: 등록방식 (14)
+            data.source || '수동상담',           // O: 등록방식 (14)
             data.automation.next_followup,      // P: 팔로업일 (15)
             data.automation.confirmed_product || '', // Q: 확정상품 (16)
             data.automation.confirmed_date || '',    // R: 예약확정일 (17)
@@ -532,7 +537,7 @@ export async function upsertConsultationToSheet(data: ConsultationData): Promise
             data.trip.url,                      // L: 상품URL (11)
             data.summary || updatedSummary,     // M: 상담요약 (12)
             data.automation.status,             // N: 상담단계 (13)
-            data.source || '수동등록',           // O: 등록방식 (14)
+            data.source || '수동상담',           // O: 등록방식 (14)
             data.automation.next_followup,      // P: 팔로업일 (15)
             data.automation.confirmed_product || '', // Q: 확정상품 (16)
             data.automation.confirmed_date || '',    // R: 예약확정일 (17)
@@ -726,11 +731,16 @@ export async function initializeSheetHeaders(): Promise<boolean> {
                         condition: {
                             type: 'ONE_OF_LIST',
                             values: [
-                                { userEnteredValue: '블로그' },
+                                { userEnteredValue: '네이버 블로그' },
+                                { userEnteredValue: '카카오톡 채널' },
+                                { userEnteredValue: '인스타그램 및 페이스북' },
+                                { userEnteredValue: '당근마켓' },
+                                { userEnteredValue: '닷컴' },
                                 { userEnteredValue: '지인소개' },
-                                { userEnteredValue: '카카오톡채널' },
-                                { userEnteredValue: '인스타그램' },
-                                { userEnteredValue: '매장방문' }
+                                { userEnteredValue: '기존고객' },
+                                { userEnteredValue: '전화문의' },
+                                { userEnteredValue: '매장방문' },
+                                { userEnteredValue: '기타' }
                             ]
                         },
                         showCustomUi: true,
@@ -873,7 +883,7 @@ async function fetchAllSheetData(forceRefresh = false): Promise<any[]> {
     const { monthlySheets, consultationsSheet: fallbackSheet, sheetList } = await getSheetTitles(sheets, sheetId);
     // 월별 시트가 있으면 최신순(역순)으로 정렬하여 읽기
     const sheetsToRead = monthlySheets.length > 0 ? [...monthlySheets].sort().reverse() : [fallbackSheet];
-    
+
     // BatchGet을 사용하여 모든 시트 데이터를 한 번의 API 호출로 가져옴
     const ranges = sheetsToRead.map(s => `${s}!A:Z`);
     const resp = await sheets.spreadsheets.values.batchGet({
@@ -915,7 +925,7 @@ async function fetchAllSheetData(forceRefresh = false): Promise<any[]> {
 export async function getAllConsultations(forceRefresh = false): Promise<ConsultationData[]> {
     try {
         if (!cleanEnv('GOOGLE_SHEET_ID')) return [];
-        
+
         const allRows = await fetchAllSheetData(forceRefresh);
 
         const consultations: ConsultationData[] = [];
@@ -1150,7 +1160,7 @@ export async function updateConsultationStatus(rowIndex: number, status: string,
         const resetStatuses = ['상담중', '견적제공', '취소', '취소/보류', '상담완료'];
         if (resetStatuses.includes(status)) {
             console.log(`[Google Sheets] 상태가 ${status}로 변경되어 모든 예약/일정 정보(Q-Y)를 초기화합니다.`);
-            
+
             // AA열(백업)에서 원래 정보를 읽어와 복원 시도 (상담중으로 되돌릴 때만)
             if (status === '상담중') {
                 try {
@@ -1160,18 +1170,18 @@ export async function updateConsultationStatus(rowIndex: number, status: string,
                     });
                     const row = resp.data.values?.[0];
                     const backupJson = row?.[26]; // AA: index 26
-                    
+
                     if (backupJson) {
                         const backup = JSON.parse(backupJson);
                         console.log('[Google Sheets] 원본 정보 복원:', backup);
                         data.push({
                             range: `${targetSheetName}!G${rowIndex}:L${rowIndex}`,
                             values: [[
-                                backup.destination || '', 
-                                backup.departureDate || '', 
-                                backup.returnDate || '', 
-                                backup.duration || '', 
-                                backup.productName || '', 
+                                backup.destination || '',
+                                backup.departureDate || '',
+                                backup.returnDate || '',
+                                backup.duration || '',
+                                backup.productName || '',
                                 backup.productUrl || ''
                             ]]
                         });
@@ -1183,7 +1193,7 @@ export async function updateConsultationStatus(rowIndex: number, status: string,
 
             data.push({
                 range: `${targetSheetName}!Q${rowIndex}:Y${rowIndex}`,
-                values: [['', '', '', '', '', '', '', '', '']] 
+                values: [['', '', '', '', '', '', '', '', '']]
                 // Q=확정상품, R=예약확정일, S=선금일, T=출발전안내(4주), U=잔금일, V=확정서, W=출발안내, X=전화안내, Y=해피콜
             });
         }

@@ -138,7 +138,7 @@ export interface DetailedProductInfo {
   specialOffers: string[];
   inclusions: string[];
   exclusions: string[];
-  itinerary: any[];
+  itinerary: ItineraryDay[];
   keyPoints: string[];
   hashtags: string;
   hasNoOption: boolean;
@@ -289,9 +289,18 @@ export interface SecondaryResearch {
   };
   // 날씨 및 복장
   weather?: {
-    month: string;
-    temperature: string;
-    clothing: string;
+    summary: string;
+    forecast: {
+      date: string;
+      tempMin: string;
+      tempMax: string;
+      description: string;
+    }[];
+    clothingTips: {
+      title: string;
+      content: string;
+    }[];
+    packingSummary: string;
   };
   // 입국·세관
   customs: {
@@ -334,6 +343,31 @@ export interface SecondaryResearch {
   baggage: BaggageInfo;
   // 커스텀 가이드 섹션들
   customGuides: CustomGuideSection[];
+}
+
+export interface ItineraryStep {
+  title: string;
+  description?: string;
+  icon?: 'location' | 'flight' | 'meal' | 'note' | 'default';
+  isBold?: boolean;
+}
+
+export interface ItineraryDay {
+  day: number | string;
+  title: string;
+  date?: string;   // 예: "2026/06/26(금)"
+  route?: string;  // 예: "인천 -> 도야"
+  timeline: (string | ItineraryStep)[]; // 하이브리드 지원 (구조화 데이터 우선)
+  summary: {
+    attraction: string;
+    hotel: string;
+    meal: string;
+    transport: string;
+  };
+  // 호환성을 위한 구 필드 보관
+  activities?: string[];
+  transport?: any;
+  meals?: any;
 }
 
 export interface LandmarkInfo {
