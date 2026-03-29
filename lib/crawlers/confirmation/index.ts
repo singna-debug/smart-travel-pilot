@@ -71,6 +71,10 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
     const isNativeGood = nativeData && nativeData.title && nativeData.price && nativeData.itinerary?.length > 0;
     
     let contextText = '';
+    const hotelsStr = Array.isArray(nativeData?.hotels) ? nativeData.hotels.map((h: any) => h.name).join(', ') : '정보없음';
+    const meetingStr = Array.isArray(nativeData?.meetingInfo) ? nativeData.meetingInfo.map((m: any) => `${m.location} (${m.time})`).join(' | ') : '정보없음';
+    const itineraryStr = Array.isArray(nativeData?.itinerary) ? JSON.stringify(nativeData.itinerary).substring(0, 15000) : '[]';
+
     const nativeSummary = nativeData ? 
         `--- [AI-Ready Native API Data] ---\n` +
         `상품명: ${nativeData.title}\n` +
@@ -78,10 +82,10 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
         `항공: ${nativeData.airline} (${nativeData.departureAirport} 출발)\n` +
         `편명: 가는편(${nativeData.departureFlightNumber}), 오는편(${nativeData.returnFlightNumber})\n` +
         `시간: 가는편(${nativeData.departureTime} 출발), 오는편(${nativeData.returnDepartureTime} 출발)\n` +
-        `호텔: ${nativeData.hotels?.map((h: any) => h.name).join(', ') || '정보없음'}\n` +
-        `미팅: ${nativeData.meetingInfo?.map((m: any) => `${m.location} (${m.time})`).join(' | ') || '정보없음'}\n` +
+        `호텔: ${hotelsStr}\n` +
+        `미팅: ${meetingStr}\n` +
         `취소규정: ${nativeData.cancellationPolicy?.substring(0, 1000) || '정보없음'}\n` +
-        `일정표데이터: ${JSON.stringify(nativeData.itinerary).substring(0, 15000)}\n` +
+        `일정표데이터: ${itineraryStr}\n` +
         `----------------------------------\n\n` : '';
 
     if (isNativeGood) {

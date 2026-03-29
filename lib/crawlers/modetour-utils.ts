@@ -46,7 +46,10 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
         ];
 
         const responses = await Promise.all(fetchTasks);
-        console.log(`[Native] Response statuses: ${responses.map(r => r.status).join(', ')}`);
+        const statusStr = Array.isArray(responses) 
+            ? responses.map(r => r ? r.status : 'null').join(', ')
+            : 'Not an Array';
+        console.log(`[Native] Response statuses: ${statusStr}`);
         
         if (responses[0].ok) {
             dataDetail = await responses[0].json();
@@ -150,7 +153,12 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
         // 4. 취소 규정 (d.CancelRuleContent 또는 d.CancelRuleList)
         let cancelPolicy = d.CancelRuleContent || d.CancelRuleInfo || '';
         if (!cancelPolicy && Array.isArray(d.CancelRuleList)) {
-            cancelPolicy = d.CancelRuleList.map((c: any) => c.content || c.title || '').join('\n');
+            cancelPolicy = d.CancelRuleList
+                .filter((c: any) => c && typeof c === 'object')
+                .map((c: any) => c.content || c.title || '')
+                .join('\n');
+        } else if (!cancelPolicy && typeof d.CancelRuleList === 'string') {
+            cancelPolicy = d.CancelRuleList;
         }
         
         // 5. 항공 상세 정보 (가는편/오는편)
