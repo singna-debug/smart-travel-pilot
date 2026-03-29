@@ -52,12 +52,19 @@ export async function crawlTravelProduct(url: string, source?: string): Promise<
             `기간: ${nativeData.duration}\n` +
             `출발일: ${nativeData.departureDate} / 귀국일: ${nativeData.returnDate}\n` +
             `항공: ${nativeData.airline} (${nativeData.departureAirport} 출발)\n` +
-            `[상품 포인트(AI 기반 추출용)]: ${(nativeData.keyPoints || []).join(', ') || 'Native API에서 찾지 못함'}\n` +
+            `[원본 상품 포인트]:\n${(nativeData.keyPoints || []).map((p: string) => '- ' + p).join('\n') || 'Native API에서 찾지 못함'}\n` +
             `----------------------------------\n\n`;
-        contextText = nativeSummary + finalText;
+        // [초경량 AI 모드 전환] HTML 원본(finalText)을 전부 AI에 던지면 20~30초가 소요됩니다.
+        // Native API 데이터가 충분하다면, 원본 텍스트를 제거하고 요약본만 AI에 넘겨 1~2초만에 요약된 keyPoints를 받습니다.
+        if (nativeData.title && nativeData.price && nativeData.title.length > 5) {
+            console.log(`[NormalCrawler] Native 데이터가 충분하여 초경량 AI 모드(텍스트 90% 절삭)로 3초 이내 분석을 시도합니다.`);
+            contextText = nativeSummary; // HTML 텍스트 제외!
+        } else {
+            contextText = nativeSummary + finalText;
+        }
     }
 
-    // 4. Gemini 분석 (최적화된 프롬프트 사용)
+    // 4. Gemini 분석 (최적화된 프롬프트 사용 - 초경량 모드인 경우 1~2초 소요)
     const aiResult = await analyzeWithGemini(contextText, url, true, finalNextData);
     
     if (aiResult) {

@@ -33,7 +33,10 @@ export async function fetchContent(url: string, options: FetchOptions = {}): Pro
         console.log(`[Fetcher] ModeTour Fetch Status. NativeData: ${!!nativeData}, HTML Length: ${html.length}`);
 
         // [CRITICAL] 404/Queue-it 등으로 HTML을 못 가져왔을 경우 브라우저 스크래퍼(Puppeteer) 시도
-        if (!html || html.length < 500) {
+        // 🚀 그러나 이미 nativeData를 통해 완벽한 정보(상품명 길이 등)를 확보했다면, 무거운 Puppeteer로 fallback하지 않고 시간을 단축합니다.
+        const hasGoodNativeData = nativeData && nativeData.title && nativeData.title.length > 5;
+        
+        if (!hasGoodNativeData && (!html || html.length < 500)) {
             const isVercel = process.env.VERCEL === '1';
             if (!isVercel) {
                 console.warn(`[Fetcher] HTML Empty/Short. Falling back to Browser Scraper (Puppeteer)...`);
