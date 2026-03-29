@@ -56,10 +56,14 @@ export async function crawlTravelProduct(url: string, source?: string): Promise<
             `----------------------------------\n\n`;
         // [초경량 AI 모드 전환] HTML 원본(finalText)을 전부 AI에 던지면 20~30초가 소요됩니다.
         // Native API 데이터가 충분하다면, 원본 텍스트를 제거하고 요약본만 AI에 넘겨 1~2초만에 요약된 keyPoints를 받습니다.
-        if (nativeData.title && nativeData.price && nativeData.title.length > 5) {
-            console.log(`[NormalCrawler] Native 데이터가 충분하여 초경량 AI 모드(텍스트 90% 절삭)로 3초 이내 분석을 시도합니다.`);
+        // 🚀 [강화] 가격이 '0'이거나 비어있으면 데이터가 불완전한 것이므로 초경량 모드를 사용하지 않고 전체 분석을 수행합니다.
+        const isDataComplete = nativeData.title && nativeData.price && nativeData.price !== '0' && nativeData.title.length > 5;
+        
+        if (isDataComplete) {
+            console.log(`[NormalCrawler] Native 데이터가 완벽하여(가격:${nativeData.price}) 초경량 AI 모드로 3초 이내 분석을 시도합니다.`);
             contextText = nativeSummary; // HTML 텍스트 제외!
         } else {
+            console.log(`[NormalCrawler] Native 데이터 불충분(가격:${nativeData.price}). 심층 분석을 위해 전체 HTML을 포함합니다.`);
             contextText = nativeSummary + finalText;
         }
     }
@@ -70,13 +74,19 @@ export async function crawlTravelProduct(url: string, source?: string): Promise<
     if (aiResult) {
         const merged = { ...aiResult };
         if (nativeData) {
-            if (!merged.price || merged.price === '0') merged.price = nativeData.price;
-            if (!merged.airline) merged.airline = nativeData.airline;
-            if (!merged.departureDate) merged.departureDate = nativeData.departureDate;
-            if (!merged.returnDate) merged.returnDate = nativeData.returnDate;
-            if (!merged.departureAirport) merged.departureAirport = nativeData.departureAirport;
-            if (!merged.destination) merged.destination = nativeData.destination;
-            if (!merged.duration || merged.duration === '미정') merged.duration = nativeData.duration;
+            // [MASTER DATA 우선순위] Native API 데이터가 있다면 AI 결과보다 우선시합니다 (정확도 100%)
+            if (nativeData.price && nativeData.price !== '0') merged.price = nativeData.price;
+            if (nativeData.airline) merged.airline = nativeData.airline;
+            if (nativeData.departureDate) merged.departureDate = nativeData.departureDate;
+            if (nativeData.returnDate) merged.returnDate = nativeData.returnDate;
+            if (nativeData.departureAirport && nativeData.departureAirport !== '인천') {
+                merged.departureAirport = nativeData.departureAirport;
+            } else if (!merged.departureAirport) {
+                merged.departureAirport = nativeData.departureAirport || '인천';
+            }
+            if (nativeData.destination) merged.destination = nativeData.destination;
+            if (nativeData.duration && nativeData.duration !== '미정') merged.duration = nativeData.duration;
+            
             if ((!merged.keyPoints || merged.keyPoints.length < 3) && nativeData.keyPoints) {
                 merged.keyPoints = [...new Set([...(merged.keyPoints || []), ...nativeData.keyPoints])];
             }

@@ -30,7 +30,8 @@ export async function quickFetch(url: string, retries = 1): Promise<{ html: stri
                 'Referer': 'https://www.modetour.com/',
                 'Origin': 'https://www.modetour.com'
             },
-            signal: controller.signal
+            signal: controller.signal,
+            cache: 'no-store'
         });
 
         clearTimeout(timeout);
