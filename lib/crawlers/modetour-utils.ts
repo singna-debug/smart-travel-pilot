@@ -37,11 +37,12 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
     let dataSchedule: any = null;
 
     try {
-        console.log(`[Native] Fetching for Product No: ${productNo}`);
+        const ts = Date.now();
+        console.log(`[Native] Fetching for Product No: ${productNo} (ts: ${ts})`);
         const fetchTasks = [
-            fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`, { headers }),
-            fetch(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}`, { headers }),
-            fetch(`https://b2c-api.modetour.com/Package/GetScheduleList?productNo=${productNo}`, { headers })
+            fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}&_ts=${ts}`, { headers, cache: 'no-store' }),
+            fetch(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}&_ts=${ts}`, { headers, cache: 'no-store' }),
+            fetch(`https://b2c-api.modetour.com/Package/GetScheduleList?productNo=${productNo}&_ts=${ts}`, { headers, cache: 'no-store' })
         ];
 
         const responses = await Promise.all(fetchTasks);
@@ -55,9 +56,13 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
         if (responses[2].ok) dataSchedule = await responses[2].json();
 
         if (!dataDetail?.result) {
-            const resSimple = await fetch(`https://b2c-api.modetour.com/Package/GetProductSimpleDetail?productNo=${productNo}`, { headers });
+            console.log(`[Native] Product Detail missing result. Retrying Simple Detail...`);
+            const resSimple = await fetch(`https://b2c-api.modetour.com/Package/GetProductSimpleDetail?productNo=${productNo}&_ts=${Date.now()}`, { headers, cache: 'no-store' });
             if (resSimple.ok) {
                 dataDetail = await resSimple.json();
+                console.log(`[Native] Simple Detail Fetch success.`);
+            } else {
+                console.warn(`[Native] Simple Detail Fetch failed: ${resSimple.status}`);
             }
         }
     } catch (e: any) {}
