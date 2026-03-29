@@ -175,6 +175,7 @@ ${contextOrPrompt.substring(0, 30000)}
                     body: JSON.stringify({
                         contents: [{ parts: [{ text: prompt }] }],
                         generationConfig: {
+                            maxOutputTokens: 8192,
                             thinkingConfig: { thinkingBudget: 0 }
                         }
                     })

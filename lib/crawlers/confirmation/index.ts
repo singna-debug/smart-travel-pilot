@@ -1,4 +1,5 @@
-
+import * as fs from 'fs';
+import * as path from 'path';
 import type { DetailedProductInfo } from '../../../types';
 import { analyzeWithGemini } from '../../crawler-base-utils';
 import { fetchContent } from '../fetcher';
@@ -71,36 +72,41 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
     const isNativeGood = nativeData && nativeData.title && nativeData.price && nativeData.itinerary?.length > 0;
     
     let contextText = '';
+    // [시각적 실재성(Visual Truth) 극단적 강화전략 - The Nuclear Option]
+    // 1. 변종(Variation)에 따라 틀릴 수 있는 Native API의 항공 시각/편명/일정은 아예 전달하지 않습니다.
+    // 2. 오직 눈에 보이는 'Page Scraped Content'만 100% 신뢰하게 만듭니다.
+    // 3. Native API에서는 호텔 주소, 미팅 장소, 취소 규정 등 변하지 않는 '고급 정보'만 보조로 제공합니다.
+    
+    const visualTruthSection = `--- [CRITICAL: Visual Truth - Page Scraped Content (TRUST THIS FOR FLIGHTS/DATES/ITINERARY)] ---\n` +
+        `[지침] 아래 텍스트에 적힌 항공 편명, 출발/도착 시간, 일자별 일정을 100% 신뢰하여 추출하세요.\n\n` +
+        `${text.substring(0, 35000)}`;
+    
     const hotelsStr = Array.isArray(nativeData?.hotels) ? nativeData.hotels.map((h: any) => h.name).join(', ') : '정보없음';
     const meetingStr = Array.isArray(nativeData?.meetingInfo) ? nativeData.meetingInfo.map((m: any) => `${m.location} (${m.time})`).join(' | ') : '정보없음';
-    const itineraryStr = Array.isArray(nativeData?.itinerary) ? JSON.stringify(nativeData.itinerary).substring(0, 15000) : '[]';
 
-    const nativeSummary = nativeData ? 
-        `--- [AI-Ready Native API Data] ---\n` +
+    const secondaryNativeSummary = nativeData ? 
+        `--- [Secondary Reference Data (Use ONLY for missing supplementary info - DO NOT USE FOR FLIGHTS/DATES)] ---\n` +
         `상품명: ${nativeData.title}\n` +
-        `가격: ${nativeData.price}\n` +
-        `항공: ${nativeData.airline} (${nativeData.departureAirport} 출발)\n` +
-        `편명: 가는편(${nativeData.departureFlightNumber}), 오는편(${nativeData.returnFlightNumber})\n` +
-        `시간: 가는편(${nativeData.departureTime} 출발), 오는편(${nativeData.returnDepartureTime} 출발)\n` +
-        `호텔: ${hotelsStr}\n` +
-        `미팅: ${meetingStr}\n` +
-        `취소규정: ${nativeData.cancellationPolicy?.substring(0, 1000) || '정보없음'}\n` +
-        `일정표데이터: ${itineraryStr}\n` +
-        `----------------------------------\n\n` : '';
+        `기본가격: ${nativeData.price}\n` +
+        `호텔목록: ${hotelsStr}\n` +
+        `미팅정보: ${meetingStr}\n` +
+        `취소 및 환불규정: ${nativeData.cancellationPolicy?.substring(0, 2000) || '정보없음'}\n` +
+        `----------------------------------------------------` : '';
 
     if (isNativeGood) {
-        console.log('[Confirmation/Index] Native 데이터가 완벽하여 Lite AI 모드로 정밀 분석을 수행합니다.');
-        contextText = nativeSummary; // 7만자 HTML 대신 요약본만!
+        console.log('[Confirmation/Index] Visual Truth 극단적 분석 모드(Nuclear Option)로 실행합니다.');
+        contextText = `${visualTruthSection}\n\n${secondaryNativeSummary}`;
     } else {
-        console.log('[Confirmation/Index] Native 데이터 불충분. HTML 전체 분석을 수행합니다.');
-        contextText = nativeSummary + text.substring(0, 50000); // 7만 -> 5만으로 약간 축소
+        console.log('[Confirmation/Index] Native 데이터 불충분. 전체 본문 분석을 수행합니다.');
+        contextText = `${visualTruthSection}\n\n${text.substring(35000, 60000)}\n\n${secondaryNativeSummary}`;
     }
 
-    const fullPrompt = `${CONFIRMATION_PROMPT}
-    
-    입력된 데이터:
-    URL: ${url}
-    ${contextText}`;
+    const fullPrompt = `${CONFIRMATION_PROMPT}\n\n분석 데이터:\nURL: ${url}\n${contextText}`;
+
+    if (process.env.DEBUG_CONFIRMATION_PROMPT) {
+        fs.writeFileSync(path.join(process.cwd(), 'debug_prompt.txt'), fullPrompt, 'utf-8');
+        console.log('[Confirmation/Index] Dumped prompt to debug_prompt.txt');
+    }
 
     // 2. 분석 수행
     const result = await analyzeWithGemini(fullPrompt, url, false, nextData);
