@@ -45,15 +45,14 @@ export async function crawlTravelProduct(url: string, source?: string): Promise<
     // 3. 컨텍스트 구성
     let contextText = finalText;
     if (nativeData) {
-        const nativeSummary = `--- [중요: 여행 상품 핵심 정보] ---\n` +
+        const nativePoints = Array.isArray(nativeData.keyPoints) ? nativeData.keyPoints : (typeof nativeData.keyPoints === 'string' ? [nativeData.keyPoints] : []);
+        const nativeSummary = nativeData ? 
+            `--- [Native API Data Summary] ---\n` +
             `상품명: ${nativeData.title}\n` +
             `가격: ${nativeData.price}\n` +
-            `지역: ${nativeData.destination}\n` +
-            `기간: ${nativeData.duration}\n` +
-            `출발일: ${nativeData.departureDate} / 귀국일: ${nativeData.returnDate}\n` +
             `항공: ${nativeData.airline} (${nativeData.departureAirport} 출발)\n` +
-            `[원본 상품 포인트]:\n${(nativeData.keyPoints || []).map((p: string) => '- ' + p).join('\n') || 'Native API에서 찾지 못함'}\n` +
-            `----------------------------------\n\n`;
+            `[원본 상품 포인트]:\n${nativePoints.map((p: string) => '- ' + p).join('\n') || 'Native API에서 찾지 못함'}\n` +
+            `----------------------------------\n\n` : '';
         // 🚀 [강화] Native 데이터가 존재하더라도 그 형식이 객체가 아니거나 가격이 '0'이면 데이터가 불완전한 것입니다.
         const isNativeValid = nativeData && typeof nativeData === 'object' && !Array.isArray(nativeData);
         const isPriceValid = isNativeValid && nativeData.price && nativeData.price !== '0' && nativeData.price !== '';

@@ -91,9 +91,11 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
     }
 
     if (refined.keyPoints && Array.isArray(refined.keyPoints)) {
-        refined.keyPoints = refined.keyPoints.map((p: string) => 
-            p.replace(/^[#♥★■]\s*/, '').trim()
-        ).filter((p: string) => p.length > 2);
+        refined.keyPoints = refined.keyPoints
+            .filter((p: any) => typeof p === 'string' && p.length > 2)
+            .map((p: string) => p.replace(/^[#♥★■]\s*/, '').trim());
+    } else {
+        refined.keyPoints = [];
     }
 
     refined.url = url;
