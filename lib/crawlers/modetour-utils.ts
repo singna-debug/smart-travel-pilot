@@ -147,6 +147,20 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             });
         }
 
+        // 4. 취소 규정 (d.CancelRuleContent 또는 d.CancelRuleList)
+        let cancelPolicy = d.CancelRuleContent || d.CancelRuleInfo || '';
+        if (!cancelPolicy && Array.isArray(d.CancelRuleList)) {
+            cancelPolicy = d.CancelRuleList.map((c: any) => c.content || c.title || '').join('\n');
+        }
+        
+        // 5. 항공 상세 정보 (가는편/오는편)
+        const depFlight = d.DepartureFlightNo || d.CarrierFlightNoDepart || d.FlightNoDepart || '';
+        const retFlight = d.ArrivalFlightNo || d.CarrierFlightNoReturn || d.FlightNoReturn || '';
+        const depTime = d.DepartureTimeDepart || d.DepartureTime || '';
+        const arrTime = d.ArrivalTimeDepart || d.ArrivalTime || '';
+        const retDepTime = d.DepartureTimeReturn || '';
+        const retArrTime = d.ArrivalTimeReturn || '';
+
         return {
             isProduct: true,
             title: cleanTitle,
@@ -156,30 +170,44 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             returnDate: d.arrivalDate || d.end_dt || d.arr_dt || '',
             departureAirport: d.departureCityName || d.departureCity || '인천',
             airline: d.transportName || d.carrier_nm || '',
+            departureFlightNumber: depFlight,
+            returnFlightNumber: retFlight,
+            departureTime: depTime,
+            arrivalTime: arrTime,
+            returnDepartureTime: retDepTime,
+            returnArrivalTime: retArrTime,
             duration: d.travelPeriod || d.prd_day_cnt || d.period || '',
             url: url,
             keyPoints: keyPoints,
             itinerary: (function() {
                 const scheduleList = Array.isArray(dataSchedule?.result) ? dataSchedule.result : (Array.isArray(dataSchedule) ? dataSchedule : []);
-                if (isSummaryOnly) {
-                    return scheduleList.map((day: any) => ({
-                        day: day?.day || day?.dayNo,
-                        title: day?.title || day?.scheduleTitle || '',
-                        date: day?.date || '',
-                        route: day?.route || '',
-                        timeline: []
+                return scheduleList.map((day: any) => {
+                    const dayNo = day?.day || day?.dayNo;
+                    const dateStr = day?.date || '';
+                    const title = day?.title || day?.scheduleTitle || '';
+                    
+                    // 상세 활동(timeline) 사전 가공
+                    const details = Array.isArray(day?.ScheduleDetailList) ? day.ScheduleDetailList : [];
+                    const timeline = details.map((dt: any) => ({
+                        type: (dt.title?.includes('미팅') || dt.title?.includes('집합')) ? 'default' : 'location',
+                        title: dt.title || '',
+                        description: dt.content || ''
                     }));
-                } else {
-                    return scheduleList.map((day: any) => ({
-                        ...(day || {}),
-                        timeline: day?.timeline || []
-                    }));
-                }
+
+                    return {
+                        day: dayNo,
+                        date: dateStr,
+                        title: title,
+                        transport: day?.transport || null,
+                        timeline: timeline.length > 0 ? timeline : (day?.timeline || [])
+                    };
+                });
             })(),
             hotels: hotels,
             inclusions: inclusions,
             exclusions: exclusions,
             meetingInfo: meetingInfo,
+            cancellationPolicy: cancelPolicy,
             features: []
         } as any;
     }
