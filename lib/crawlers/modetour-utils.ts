@@ -4,27 +4,18 @@ import type { DetailedProductInfo } from '../../types';
 export async function fetchModeTourNative(url: string, isSummaryOnly = false, html?: string): Promise<DetailedProductInfo | null> {
     let productNo = '';
     
-    // 1. URL에서 추출 시도
-    const productNoMatch = url.match(/package\/(\d+)/i) || 
-                           url.match(/goodsNo=(\d+)/i) || 
-                           url.match(/productNo=(\d+)/i) || 
-                           url.match(/Pnum=(\d+)/i) || 
-                           url.match(/\/(\d+)\?/);
-    
-    if (productNoMatch) {
-        productNo = productNoMatch[1];
-    } else if (html) {
-        // 2. HTML 본문에서 추출 시도 (NEXT_DATA 등)
-        const htmlMatch = html.match(/"productNo":\s*(\d+)/) || 
-                          html.match(/productNo=(\d+)/) ||
-                          html.match(/productNo\s*:\s*["'](\d+)["']/);
-        if (htmlMatch) productNo = htmlMatch[1];
-    }
+    const urlObj = new URL(url);
+    const sno = urlObj.searchParams.get('sno') || urlObj.searchParams.get('sNo') || '';
+    const ano = urlObj.searchParams.get('ano') || urlObj.searchParams.get('aNo') || '';
+    const pnum = urlObj.searchParams.get('pnum') || urlObj.searchParams.get('Pnum') || '';
+    const goodsNo = urlObj.searchParams.get('goodsNo') || '';
 
     if (!productNo) {
         console.warn(`[Native] Product No not found: ${url}`);
         return null;
     }
+    
+    console.log(`[Native] Extracted Params for ${productNo}: sno=${sno}, ano=${ano}, pnum=${pnum}`);
 
     const headers = {
         'modewebapireqheader': '{"WebSiteNo":2,"CompanyNo":81202,"DeviceType":"DVTPC","ApiKey":"jm9i5RUzKPMPdklHzDKqNzwZYy0IGV5hTyKkCcpxO0IGIgVS+8Z7NnbzbARv5w7Bn90KT13Gq79XZMow6TYvwQ=="}',
@@ -39,10 +30,14 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
     try {
         const ts = Date.now();
         console.log(`[Native] Fetching for Product No: ${productNo} (ts: ${ts})`);
+        
+        // 상세 상세 식별자 연동
+        const baseParams = `productNo=${productNo}&sno=${sno}&ano=${ano}&pnum=${pnum}&_ts=${ts}`;
+        
         const fetchTasks = [
-            fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}&_ts=${ts}`, { headers, cache: 'no-store' }),
-            fetch(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}&_ts=${ts}`, { headers, cache: 'no-store' }),
-            fetch(`https://b2c-api.modetour.com/Package/GetScheduleList?productNo=${productNo}&_ts=${ts}`, { headers, cache: 'no-store' })
+            fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?${baseParams}`, { headers, cache: 'no-store' }),
+            fetch(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?${baseParams}`, { headers, cache: 'no-store' }),
+            fetch(`https://b2c-api.modetour.com/Package/GetScheduleList?${baseParams}`, { headers, cache: 'no-store' })
         ];
 
         const responses = await Promise.all(fetchTasks);
@@ -74,6 +69,15 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
 
     if (dataDetail?.result || dataDetail?.isOK || dataDetail?.productName) {
         const d = dataDetail.result || dataDetail;
+        
+        // --- [과거 데이터 환각 방지] ---
+        const depDateRaw = d.departureDate || d.start_dt || d.dep_dt || '';
+        const isHistorical = depDateRaw && depDateRaw.startsWith('2024'); // 2024년 데이터면 환각으로 의심
+        
+        if (isHistorical) {
+            console.warn(`[Native] Historical data detected (Year 2024). Filtering out potentially stale flights/itinerary.`);
+        }
+
         // --- [1] Native API 원본 데이터 (CCTV 1) ---
         const dataType = Array.isArray(d) ? 'Array' : typeof d;
         console.log(`--- [1] Native API 원본 데이터 (${dataType}) ---`, JSON.stringify(d).substring(0, 300));
@@ -174,20 +178,22 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             title: cleanTitle,
             destination: destination,
             price: rawPrice.replace(/[^0-9]/g, ''),
-            departureDate: d.departureDate || d.start_dt || d.dep_dt || '',
+            departureDate: depDateRaw,
             returnDate: d.arrivalDate || d.end_dt || d.arr_dt || '',
             departureAirport: d.departureCityName || d.departureCity || '인천',
-            airline: d.transportName || d.carrier_nm || '',
-            departureFlightNumber: depFlight,
-            returnFlightNumber: retFlight,
-            departureTime: depTime,
-            arrivalTime: arrTime,
-            returnDepartureTime: retDepTime,
-            returnArrivalTime: retArrTime,
+            airline: isHistorical ? '' : (d.transportName || d.carrier_nm || ''),
+            departureFlightNumber: isHistorical ? '' : depFlight,
+            returnFlightNumber: isHistorical ? '' : retFlight,
+            departureTime: isHistorical ? '' : depTime,
+            arrivalTime: isHistorical ? '' : arrTime,
+            returnDepartureTime: isHistorical ? '' : retDepTime,
+            returnArrivalTime: isHistorical ? '' : retArrTime,
             duration: d.travelPeriod || d.prd_day_cnt || d.period || '',
             url: url,
             keyPoints: keyPoints,
             itinerary: (function() {
+                // 2024년 데이터면 빈 배열을 반환하여 AI가 Scraped Content에서 분석하도록 유도
+                if (isHistorical) return []; 
                 const scheduleList = Array.isArray(dataSchedule?.result) ? dataSchedule.result : (Array.isArray(dataSchedule) ? dataSchedule : []);
                 return scheduleList.map((day: any) => {
                     const dayNo = day?.day || day?.dayNo;
