@@ -122,7 +122,7 @@ export async function analyzeWithGemini(contextOrPrompt: string, url: string, is
     if (apiKeys.length === 0) return null;
 
     let prompt = contextOrPrompt;
-    
+
     if (isSummaryOnly) {
         const instruction = `
 [MISSION]
@@ -178,7 +178,7 @@ ${contextOrPrompt.substring(0, 30000)}
                         }
                     })
                 });
-                
+
                 if (!response.ok) {
                     const errBody = await response.text();
                     console.error(`[Gemini Error] HTTP ${response.status}: ${errBody.substring(0, 200)}`);
@@ -220,7 +220,7 @@ export function formatDateString(dateStr: string): string {
     let cleanDate = dateStr.trim();
     if (cleanDate.includes('T')) cleanDate = cleanDate.split('T')[0];
     if (/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) return cleanDate;
-    
+
     const digitsOnly = cleanDate.replace(/[^0-9]/g, '');
     if (digitsOnly.length >= 8 && /^\d+$/.test(digitsOnly)) {
         const year = digitsOnly.substring(0, 4);
@@ -228,7 +228,7 @@ export function formatDateString(dateStr: string): string {
         const day = digitsOnly.substring(6, 8);
         return `${year}-${month}-${day}`;
     }
-    
+
     const match = cleanDate.match(/(\d{2,4})[-\.\/년\s]?\s*(\d{1,2})[-\.\/월\s]?\s*(\d{1,2})/);
     if (match) {
         let year = match[1];
@@ -272,9 +272,9 @@ export const AIRLINE_MAP: Record<string, string> = {
 export function fallbackParse(text: string): DetailedProductInfo {
     const titleMatch = text.match(/TARGET_TITLE:\s*"([^"]+)"/);
     const airlineMatch = text.match(/TARGET_AIRLINE:\s*"([^"]+)"/);
-    return { 
-        title: titleMatch ? titleMatch[1] : '추출 실패', 
+    return {
+        title: titleMatch ? titleMatch[1] : '추출 실패',
         airline: airlineMatch ? airlineMatch[1] : '',
-        url: '' 
+        url: ''
     } as any;
 }
