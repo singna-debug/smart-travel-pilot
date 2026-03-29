@@ -91,10 +91,16 @@ export async function crawlTravelProduct(url: string, source?: string): Promise<
                 merged.keyPoints = [...new Set([...(merged.keyPoints || []), ...nativeData.keyPoints])];
             }
         }
-        return refineData(merged, contextText, url);
+        const finalResult = refineData(merged, contextText, url);
+        // --- [3] 최종 반환 데이터 (CCTV 3) ---
+        console.log('--- [3] 최종 반환 데이터 ---', JSON.stringify(finalResult).substring(0, 300));
+        return finalResult;
     }
     
-    return nativeData 
+    const finalFallback = nativeData 
         ? refineData(nativeData, contextText, url) 
         : refineData(fallbackParse(finalText), finalText, url);
+    // --- [3] 최종 반환 데이터 (CCTV 3 - Fallback) ---
+    console.log('--- [3] 최종 반환 데이터 (Fallback) ---', JSON.stringify(finalFallback).substring(0, 300));
+    return finalFallback;
 }

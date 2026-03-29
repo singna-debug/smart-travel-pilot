@@ -65,10 +65,14 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                 console.warn(`[Native] Simple Detail Fetch failed: ${resSimple.status}`);
             }
         }
-    } catch (e: any) {}
+    } catch (e: any) {
+        console.error(`[Native] Fetch Error: ${e.message}`);
+    }
 
     if (dataDetail?.result || dataDetail?.isOK || dataDetail?.productName) {
         const d = dataDetail.result || dataDetail;
+        // --- [1] Native API 원본 데이터 (CCTV 1) ---
+        console.log('--- [1] Native API 원본 데이터 ---', JSON.stringify(d).substring(0, 200));
         let cleanTitle = d.productName || '';
         const destination = d.category2 ? `${d.category2}, ${d.category3 || ''}` : (d.category3 || '');
         
