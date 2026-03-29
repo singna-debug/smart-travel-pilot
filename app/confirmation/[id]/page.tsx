@@ -101,6 +101,114 @@ const GuideAccordion = ({
     );
 };
 
+const TimelineItem = ({ item }: { item: any }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const contentRef = useRef<HTMLDivElement>(null);
+    const [needsCollapse, setNeedsCollapse] = useState(false);
+
+    useEffect(() => {
+        if (contentRef.current) {
+            // 대략 3줄(60px) 이상이면 더보기 버튼 노출
+            setNeedsCollapse(contentRef.current.scrollHeight > 64);
+        }
+    }, [item.description]);
+
+    const isLocation = item.type === 'location';
+
+    return (
+        <div className="timeline-item-wrapper" style={{ display: 'flex', gap: '14px', marginBottom: '24px', position: 'relative' }}>
+            {/* 좌측 타임라인 라인 및 아이콘 */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '24px', flexShrink: 0 }}>
+                <div style={{ 
+                    width: isLocation ? '24px' : '10px', 
+                    height: isLocation ? '24px' : '10px', 
+                    borderRadius: '50%', 
+                    background: isLocation ? 'transparent' : '#cbd5e1',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2,
+                    marginTop: isLocation ? '0' : '6px'
+                }}>
+                    {isLocation ? (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                    ) : null}
+                </div>
+                {/* 연결 선 */}
+                <div style={{ position: 'absolute', top: '24px', bottom: '-28px', left: '11px', width: '2px', background: '#f1f5f9', zIndex: 1 }}></div>
+            </div>
+
+            {/* 우측 콘텐츠 영역 */}
+            <div style={{ flex: 1, paddingTop: isLocation ? '2px' : '0' }}>
+                <div 
+                    style={{ 
+                        fontSize: '0.95rem', 
+                        fontWeight: 700, 
+                        color: '#1e293b', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '4px',
+                        cursor: needsCollapse ? 'pointer' : 'default',
+                        lineHeight: 1.4
+                    }} 
+                    onClick={() => needsCollapse && setIsExpanded(!isExpanded)}
+                >
+                    <span dangerouslySetInnerHTML={{ __html: item.title }} />
+                    {isLocation && <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 400, marginLeft: '2px' }}>›</span>}
+                </div>
+                
+                {item.subtitle && (
+                    <div style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600, marginTop: '4px', lineHeight: 1.4 }}>
+                        <span dangerouslySetInnerHTML={{ __html: item.subtitle }} />
+                    </div>
+                )}
+
+                {item.description && (
+                    <div style={{ marginTop: '6px', position: 'relative' }}>
+                        <div 
+                            ref={contentRef}
+                            style={{ 
+                                fontSize: '0.82rem', 
+                                color: '#64748b', 
+                                lineHeight: '1.6',
+                                overflow: 'hidden',
+                                display: '-webkit-box',
+                                WebkitLineClamp: isExpanded ? 'unset' : '3',
+                                WebkitBoxOrient: 'vertical',
+                                transition: 'max-height 0.3s ease-in-out'
+                            }}
+                            dangerouslySetInnerHTML={{ __html: item.description }}
+                        />
+                        {needsCollapse && (
+                            <div 
+                                onClick={() => setIsExpanded(!isExpanded)}
+                                style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '4px', 
+                                    fontSize: '0.75rem', 
+                                    color: '#94a3b8', 
+                                    marginTop: '6px', 
+                                    cursor: 'pointer',
+                                    fontWeight: 600
+                                }}
+                            >
+                                {isExpanded ? '접기' : '더보기'}
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 const PinchZoomModal = ({ src, onClose, footer, isPdf }: { src: string, onClose: () => void, footer?: React.ReactNode, isPdf?: boolean }) => {
     const [scale, setScale] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -296,51 +404,178 @@ const PinchZoomModal = ({ src, onClose, footer, isPdf }: { src: string, onClose:
     );
 };
 
-const DayActivityItem = ({ 
-    item, 
-    ai, 
-    cleanLine 
-}: { 
-    item: string; 
-    ai: number; 
-    cleanLine: (s: string) => string;
-}) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    const lines = item.split('\n');
-    const header = lines[0];
-    const details = lines.slice(1);
-    const hasDetails = details.length > 0;
+import { AIRLINE_MAP, CITY_CODE_MAP } from '@/lib/constants/travel-data';
+
+const simplifyDestination = (dest: string | undefined) => {
+    if (!dest) return '도착';
+    const firstPart = dest.split(',')[0].trim();
+    const words = firstPart.split(' ');
+    // 단어 배열의 마지막 요소를 선택하여 '일본 삿포로' 같은 경우 '삿포로'만 추출
+    return words[words.length - 1];
+};
+
+const getExtraTransportation = (day: any) => {
+    if (day.transportation) {
+        const matchOld = day.transportation.match(/비행기\s*([A-Z0-9]*)\s*\((.+?)\s+(\d{2}:\d{2})\s*출발,\s*(.+?)\s+(\d{2}:\d{2})\s*도착,\s*(.+?)\s*소요\)(?:,\s*(.+))?/);
+        const matchNew = day.transportation.match(/([가-힣a-zA-Z]+항공|[가-힣a-zA-Z]+에어)\s*([A-Za-z0-9]+)?,\s*출발\s*(\d{2}:\d{2}),\s*도착\s*(\d{2}:\d{2}),\s*소요(?:시간)?\s*(.+)/);
+        
+        if (matchOld) {
+            return matchOld[7] ? matchOld[7] : null; // extra text
+        } else if (matchNew) {
+            return null; // new formats don't have extra text in the same capture group
+        }
+        return day.transportation; // full text since it's not a flight
+    }
+    return null;
+};
+
+const getAirlineInfo = (codeOrName: string) => {
+    if (!codeOrName) return { name: '항공편', logoUrl: null, color: '#3b82f6' };
     
-    // 장소인지 활동인지 판단용 아이콘 로직 (간단화)
-    const isLocation = cleanLine(header).includes('가이드') || cleanLine(header).includes('위치') || header.includes('>') || header.includes('예술단지');
+    const code2 = codeOrName.slice(0, 2).toUpperCase();
+    if (AIRLINE_MAP[code2]) return AIRLINE_MAP[code2];
+    
+    const byName = Object.values(AIRLINE_MAP).find(v => codeOrName.includes(v.name));
+    if (byName) return byName;
+    
+    return { name: codeOrName, logoUrl: null, color: '#3b82f6' };
+};
+
+const ParsedFlightCard = ({ day }: { day: any }) => {
+    let flightInfo: any = null;
+    let extraText: string | null = null;
+
+    if (day.transport) {
+        const t = day.transport;
+        const isPlaceholder = 
+            (t.airline === '항공편' || t.airline === '항공사' || t.airline === 'null' || !t.airline) && 
+            (t.flightNo === '비행편명' || t.flightNo === 'null' || t.flightNo === '없음' || !t.flightNo);
+
+        if (!isPlaceholder) {
+            flightInfo = {
+                flightNo: t.flightNo && t.flightNo !== 'null' ? t.flightNo : '',
+                airline: t.airline && t.airline !== 'null' ? t.airline : '',
+                departureCity: t.departureCity && t.departureCity !== 'null' && t.departureCity !== '출발도시명' ? t.departureCity : '출발지',
+                departureTime: t.departureTime && t.departureTime !== 'null' ? t.departureTime : '',
+                arrivalCity: t.arrivalCity && t.arrivalCity !== 'null' && t.arrivalCity !== '도착도시명' ? t.arrivalCity : '도착지',
+                arrivalTime: t.arrivalTime && t.arrivalTime !== 'null' ? t.arrivalTime : '',
+                duration: t.duration && t.duration !== 'null' ? t.duration : '',
+            };
+        }
+    }
+    
+    if (!flightInfo && day.transportation) {
+        // 기존 패턴 (Booking 모드 등에서 넘어온 형식)
+        const matchOld = day.transportation.match(/비행기\s*([A-Z0-9]*)\s*\((.+?)\s+(\d{2}:\d{2})\s*출발,\s*(.+?)\s+(\d{2}:\d{2})\s*도착,\s*(.+?)\s*소요\)(?:,\s*(.+))?/);
+        // 새로운 AI 포맷 (Normal 모드 등)
+        const matchNew = day.transportation.match(/([가-힣a-zA-Z]+항공|[가-힣a-zA-Z]+에어)\s*([A-Za-z0-9]+)?,\s*출발\s*(\d{2}:\d{2}),\s*도착\s*(\d{2}:\d{2}),\s*소요(?:시간)?\s*(.+)/);
+        
+        if (matchOld) {
+            flightInfo = {
+                flightNo: matchOld[1],
+                airline: '',
+                departureCity: matchOld[2],
+                departureTime: matchOld[3],
+                arrivalCity: matchOld[4],
+                arrivalTime: matchOld[5],
+                duration: matchOld[6],
+            };
+            if (matchOld[7]) extraText = matchOld[7];
+        } else if (matchNew) {
+            let dept = '출발지';
+            let arr = '도착지';
+            if (day.title) {
+                const parts = day.title.split(/->|-|→|>|▶/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                const cityParts = parts.filter((p: string) => !p.includes('일차'));
+                if (cityParts.length >= 2) {
+                    dept = simplifyDestination(cityParts[0]);
+                    arr = simplifyDestination(cityParts[cityParts.length - 1]);
+                } else if (cityParts.length === 1) {
+                    dept = simplifyDestination(cityParts[0]);
+                }
+            }
+
+            flightInfo = {
+                airline: matchNew[1],
+                flightNo: matchNew[2] || '',
+                departureCity: dept,
+                departureTime: matchNew[3],
+                arrivalCity: arr,
+                arrivalTime: matchNew[4],
+                duration: matchNew[5],
+            };
+        }
+    }
+    
+    if (!flightInfo) return null;
+
+    const planeSrc = flightInfo.airline || flightInfo.flightNo;
+    const info = getAirlineInfo(planeSrc);
+    const dateStr = day.date || '';
+
+    const deptCityText = flightInfo.departureCity.trim();
+    const arrCityText = flightInfo.arrivalCity.trim();
+    
+    const deptCode = CITY_CODE_MAP[deptCityText] ? ` (${CITY_CODE_MAP[deptCityText]})` : '';
+    const arrCode = CITY_CODE_MAP[arrCityText] ? ` (${CITY_CODE_MAP[arrCityText]})` : '';
 
     return (
-        <div className="day-activity-item">
-            <div className={`timeline-dot ${isLocation ? 'location' : ''}`}>
-                {isLocation && (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                )}
-            </div>
-            <div className="activity-text">
-                <div className="activity-header" dangerouslySetInnerHTML={{ __html: cleanLine(header) }} />
-                
-                {hasDetails && (
-                    <div className="activity-desc-wrapper">
-                        <div 
-                            className={`activity-desc ${isExpanded ? 'expanded' : 'collapsed'}`}
-                            dangerouslySetInnerHTML={{ __html: cleanLine(details.join('\n')) }}
-                        />
-                        {details.join('\n').length > 80 && (
-                            <button className="see-more-btn" onClick={() => setIsExpanded(!isExpanded)}>
-                                {isExpanded ? '닫기' : '더보기'}
-                            </button>
-                        )}
+        <div style={{ marginBottom: '16px' }}>
+            <div style={{
+                background: '#fff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                padding: '24px 20px',
+                position: 'relative',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    
+                    {/* 왼쪽: 출발 정보 */}
+                    <div style={{ textAlign: 'left', width: '30%', minWidth: '90px' }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{deptCityText}{deptCode} 출발</div>
+                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{dateStr}</div>}
+                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{flightInfo.departureTime}</div>
                     </div>
-                )}
+
+                    {/* 중앙: 아이콘, 노선, 시간 */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                            {info.logoUrl ? (
+                                <img src={info.logoUrl} alt={info.name} style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                            ) : (
+                                <div style={{ width: '16px', height: '16px', background: info.color, color: 'white', fontSize: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '3px' }}>
+                                    {info.name.slice(0, 1)}
+                                </div>
+                            )}
+                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#111' }}>{info.name}</span>
+                        </div>
+
+                        {/* 타임라인 바 */}
+                        <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
+                            <div style={{ flex: 1, height: '1.5px', background: '#cbd5e1' }}></div>
+                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
+                        </div>
+
+                        <div style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 600, marginTop: '8px' }}>
+                            {flightInfo.duration} 소요
+                        </div>
+                    </div>
+
+                    {/* 오른쪽: 도착 정보 */}
+                    <div style={{ textAlign: 'right', width: '30%', minWidth: '90px' }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{arrCityText}{arrCode} 도착</div>
+                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{dateStr}</div>}
+                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{flightInfo.arrivalTime}</div>
+                    </div>
+
+                </div>
             </div>
         </div>
     );
 };
+
 
 export default function ConfirmationViewerPage() {
     const params = useParams();
@@ -645,43 +880,95 @@ export default function ConfirmationViewerPage() {
                                         {doc.flight.departureAirport && ` · ${doc.flight.departureAirport} 출발`}
                                     </div>
                                 )}
-                                <div className="mc-flight-card">
-                                    {doc.flight.departureTime && (
-                                        <div className="mc-flight-row">
-                                            <div className="flight-time">
-                                                <div className="ft-time">{formatFlightTime(doc.flight.departureTime)}</div>
-                                                <div className="ft-airport">
-                                                    {doc.flight.departureAirport || '출발'}
-                                                    {doc.flight.departureFlightNumber && <div style={{ fontSize: '0.65rem', color: '#0ea5e9', fontWeight: 600 }}>{doc.flight.departureFlightNumber}</div>}
+                                <div style={{
+                                    background: '#fff',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: '12px',
+                                    padding: '24px 20px',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '24px'
+                                }}>
+                                    {doc.flight.departureTime && (() => {
+                                        const deptCityText = simplifyDestination(doc.flight.departureAirport?.trim() || '출발');
+                                        const arrCityText = simplifyDestination(doc.trip.destination?.trim());
+                                        const deptCode = CITY_CODE_MAP[deptCityText] ? ` (${CITY_CODE_MAP[deptCityText]})` : '';
+                                        const arrCode = CITY_CODE_MAP[arrCityText] ? ` (${CITY_CODE_MAP[arrCityText]})` : '';
+                                        return (
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            {/* 왼쪽: 출발 정보 */}
+                                            <div style={{ textAlign: 'left', width: '30%', minWidth: '90px' }}>
+                                                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{formatFlightTime(doc.flight.departureTime)}</div>
+                                                <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '4px', wordBreak: 'keep-all' }}>{deptCityText}{deptCode}</div>
+                                                {doc.flight.departureFlightNumber && <div style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 600, marginTop: '2px' }}>{doc.flight.departureFlightNumber}</div>}
+                                            </div>
+
+                                            {/* 중앙: 아이콘, 노선, 시간 */}
+                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px' }}>
+                                                {/* 타임라인 바 */}
+                                                <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', marginTop: '10px' }}>
+                                                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
+                                                    <div style={{ flex: 1, height: '1.5px', borderTop: '1.5px dashed #cbd5e1' }}></div>
+                                                    <div style={{ position: 'absolute', top: '-11px', color: '#0ea5e9', background: '#fff', padding: '0 4px' }}>
+                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform: 'rotate(45deg)'}}>
+                                                            <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 3.6c-.1.4.1.9.5 1.1L9 14.5l-3.5 3.5-2.8-.8c-.4-.1-.8.2-1 .6L1 19.5l4.5 1 1 4.5c.1.4.4.7.9.6l1.8-.7c.4-.2.6-.6.5-1l-.8-2.8 3.5-3.5 2.9 6c.2.4.7.6 1.1.5l3.6-1.2c.5-.2.8-.6.7-1.1z"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
                                                 </div>
+                                                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '8px' }}>가는 편</div>
                                             </div>
-                                            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                                <OutboundFlightIcon />
-                                            </div>
-                                            <div className="flight-time right-align">
-                                                <div className="ft-time">{formatFlightTime(doc.flight.arrivalTime)}</div>
-                                                <div className="ft-airport">{doc.trip.destination || '도착'}</div>
+
+                                            {/* 오른쪽: 도착 정보 */}
+                                            <div style={{ textAlign: 'right', width: '30%', minWidth: '90px' }}>
+                                                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{formatFlightTime(doc.flight.arrivalTime)}</div>
+                                                <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '4px', wordBreak: 'keep-all' }}>{arrCityText}{arrCode}</div>
                                             </div>
                                         </div>
+                                    )})()}
+                                    
+                                    {doc.flight.returnDepartureTime && doc.flight.departureTime && (
+                                        <div style={{ width: '100%', height: '1px', borderTop: '1px dashed #e2e8f0' }} />
                                     )}
-                                    {doc.flight.returnDepartureTime && (
-                                        <div className="mc-flight-row">
-                                            <div className="flight-time">
-                                                <div className="ft-time">{formatFlightTime(doc.flight.returnDepartureTime)}</div>
-                                                <div className="ft-airport">
-                                                    {doc.trip.destination || '출발'}
-                                                    {doc.flight.returnFlightNumber && <div style={{ fontSize: '0.65rem', color: '#0ea5e9', fontWeight: 600 }}>{doc.flight.returnFlightNumber}</div>}
+
+                                    {doc.flight.returnDepartureTime && (() => {
+                                        const deptCityText = simplifyDestination(doc.trip.destination?.trim());
+                                        const arrCityText = simplifyDestination(doc.flight.departureAirport?.trim() || '도착');
+                                        const deptCode = CITY_CODE_MAP[deptCityText] ? ` (${CITY_CODE_MAP[deptCityText]})` : '';
+                                        const arrCode = CITY_CODE_MAP[arrCityText] ? ` (${CITY_CODE_MAP[arrCityText]})` : '';
+                                        return (
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            {/* 왼쪽: 출발 정보 */}
+                                            <div style={{ textAlign: 'left', width: '30%', minWidth: '90px' }}>
+                                                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{formatFlightTime(doc.flight.returnDepartureTime)}</div>
+                                                <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '4px', wordBreak: 'keep-all' }}>{deptCityText}{deptCode}</div>
+                                                {doc.flight.returnFlightNumber && <div style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 600, marginTop: '2px' }}>{doc.flight.returnFlightNumber}</div>}
+                                            </div>
+
+                                            {/* 중앙: 아이콘, 노선, 시간 */}
+                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px' }}>
+                                                {/* 타임라인 바 */}
+                                                <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', marginTop: '10px' }}>
+                                                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
+                                                    <div style={{ flex: 1, height: '1.5px', borderTop: '1.5px dashed #cbd5e1' }}></div>
+                                                    <div style={{ position: 'absolute', top: '-11px', color: '#0ea5e9', background: '#fff', padding: '0 4px' }}>
+                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform: 'rotate(-135deg)'}}>
+                                                            <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 3.6c-.1.4.1.9.5 1.1L9 14.5l-3.5 3.5-2.8-.8c-.4-.1-.8.2-1 .6L1 19.5l4.5 1 1 4.5c.1.4.4.7.9.6l1.8-.7c.4-.2.6-.6.5-1l-.8-2.8 3.5-3.5 2.9 6c.2.4.7.6 1.1.5l3.6-1.2c.5-.2.8-.6.7-1.1z"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
                                                 </div>
+                                                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '8px' }}>오는 편</div>
                                             </div>
-                                            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                                <InboundFlightIcon />
-                                            </div>
-                                            <div className="flight-time right-align">
-                                                <div className="ft-time">{formatFlightTime(doc.flight.returnArrivalTime)}</div>
-                                                <div className="ft-airport">{doc.flight.departureAirport || '도착'}</div>
+
+                                            {/* 오른쪽: 도착 정보 */}
+                                            <div style={{ textAlign: 'right', width: '30%', minWidth: '90px' }}>
+                                                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{formatFlightTime(doc.flight.returnArrivalTime)}</div>
+                                                <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '4px', wordBreak: 'keep-all' }}>{arrCityText}{arrCode}</div>
                                             </div>
                                         </div>
-                                    )}
+                                    )})()}
                                 </div>
                             </div>
                         )}
@@ -815,122 +1102,99 @@ export default function ConfirmationViewerPage() {
                             </div>
                         ) : null}
 
-                        {/* 일정별 아코디언 */}
+                        {/* 일정표 */}
                         {doc.itinerary && doc.itinerary.length > 0 && (
                             <div className="mc-section">
                                 <div className="mc-section-title">
-                                    <span className="sec-icon">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                    </span> 상세 일정
+                                    <span className="sec-icon"></span> 상세 일정
                                 </div>
                                 <div className="mc-itinerary">
                                     {doc.itinerary.map((day: any, i: number) => {
                                         const isOpen = expandedDays[i] !== false; // 기본: 열림
-                                        const formattedDate = day.date ? day.date.split('T')[0] : '';
-
-                                        const cleanLine = (t: string) => {
-                                            if (typeof t !== 'string') return t;
-                                            return t
-                                                .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(dec))
-                                                .replace(/<(?!b|\/b|font|\/font)[^>]*>/g, '') // Allow <b> and <font>
-                                                .replace('>', '') 
-                                                .trim();
-                                        };
-
                                         return (
                                             <div key={i} className={`mc-day-card ${isOpen ? 'open' : 'closed'}`}>
                                                 <div className="day-header" onClick={() => toggleDay(i)}>
                                                     <div className="day-number">
-                                                        {typeof day === 'string' ? `${i + 1}일차` : (day.day || `${i + 1}일차`)}
-                                                        {formattedDate && <span className="day-date">{formattedDate}</span>}
+                                                        {typeof day === 'string' ? `Day ${i + 1}` : (day.day || `Day ${i + 1}`)}
+                                                        {day.date && <span className="day-date">{day.date}</span>}
                                                     </div>
-                                                    {day.title && <div className="day-title">{cleanLine(day.title)}</div>}
-                                                    <div className={`day-chevron ${isOpen ? 'open' : ''}`}>
-                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                                                    </div>
+                                                    {day.title && <div className="day-title">{day.title}</div>}
+                                                    <div className={`day-chevron ${isOpen ? 'open' : ''}`}>›</div>
                                                 </div>
 
                                                 {isOpen && (
                                                     <div className="day-body">
-                                                        {/* 일별 교통 정보 (구조화된 데이터 우선) */}
-                                                        {day.transport ? (
-                                                            <div className="day-transport-card">
-                                                                <div className="mc-flight-card compact">
-                                                                    <div className="mc-flight-row" style={{ padding: '8px 0' }}>
-                                                                        <div className="flight-time">
-                                                                            <div className="ft-time" style={{ fontSize: '1rem' }}>{day.transport.departureTime}</div>
-                                                                            <div className="ft-airport" style={{ color: '#64748b', fontSize: '0.75rem' }}>{cleanLine(day.transport.departureCity)} 출발</div>
-                                                                        </div>
-                                                                        <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
-                                                                            <OutboundFlightIcon />
-                                                                            <div style={{ position: 'absolute', bottom: '-12px', fontSize: '0.65rem', color: '#10b981', fontWeight: 600 }}>
-                                                                                {day.transport.duration && `${day.transport.duration} 소요`}
+                                                        <ParsedFlightCard day={day} />
+                                                        <div className="day-content" style={{ marginTop: '16px' }}>
+                                                            {day.timeline && Array.isArray(day.timeline) && day.timeline.length > 0 ? (
+                                                                <div className="timeline-list" style={{ paddingLeft: '4px' }}>
+                                                                    {day.timeline.map((item: any, ti: number) => (
+                                                                        <TimelineItem key={ti} item={item} />
+                                                                    ))}
+                                                                </div>
+                                                            ) : day.activities && Array.isArray(day.activities) ? (
+                                                                <div className="activity-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                                    {day.activities.flatMap((act: string) => act.split('\n')).map((line: string, ai: number) => {
+                                                                        let cleanText = line.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+                                                                        if (!cleanText) return null;
+                                                                        
+                                                                        // 개조식 명사형 종결 변환 (하위 호환용)
+                                                                        cleanText = cleanText.replace(/(이동|구경|감상|산책|관람|방문|체크인|진행|제공|이용|탑승|출발|도착|해산|귀환|관광|쇼핑|체험|시식|식사|숙박|휴식)합니다\.?$/, '$1');
+                                                                        cleanText = cleanText.replace(/(을|를)\s*가집니다\.?$/, ' 진행');
+                                                                        cleanText = cleanText.trim();
+                                                                        
+                                                                        return (
+                                                                            <div key={ai} className="day-activity-item">
+                                                                                <div className="timeline-dot"></div>
+                                                                                <div className="activity-text">
+                                                                                    <div className="activity-header">{cleanText}</div>
+                                                                                </div>
                                                                             </div>
-                                                                        </div>
-                                                                        <div className="flight-time right-align">
-                                                                            <div className="ft-time" style={{ fontSize: '1rem' }}>{day.transport.arrivalTime}</div>
-                                                                            <div className="ft-airport" style={{ color: '#64748b', fontSize: '0.75rem' }}>{cleanLine(day.transport.arrivalCity)} 도착</div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div style={{ padding: '8px 12px 0', fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center', borderTop: '1px dashed #f1f5f9', marginTop: '10px' }}>
-                                                                        {cleanLine(day.transport.airline)} {day.transport.flightNo && `(${cleanLine(day.transport.flightNo)})`}
-                                                                    </div>
+                                                                        );
+                                                                    })}
                                                                 </div>
-                                                            </div>
-                                                        ) : (
-                                                            day.transportation && (
-                                                                <div className="day-transport">
-                                                                    <span className="trans-icon">
-                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px'}}><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
-                                                                    </span> {cleanLine(day.transportation)}
-                                                                </div>
-                                                            )
-                                                        )}
-
-                                                        <div className="day-content">
-                                                            <div className="activity-list">
-                                                                {(Array.isArray(day.activities) ? day.activities : (typeof (day.activities || day.description || day.content) === 'string' ? (day.activities || day.description || day.content || '').split('\n\n').filter((s: string) => s.trim().length > 0) : [])).map((item: string, ai: number) => (
-                                                                    <DayActivityItem 
-                                                                        key={ai} 
-                                                                        item={item} 
-                                                                        ai={ai} 
-                                                                        cleanLine={cleanLine} 
-                                                                    />
-                                                                ))}
-                                                            </div>
+                                                            ) : (
+                                                                <div className="day-activity" dangerouslySetInnerHTML={{ __html: day.description || day.content || '' }} />
+                                                            )}
                                                         </div>
 
-                                                        {/* 하단 통합 정보 박스 (숙소/식사) */}
-                                                        <div className="day-summary-box">
+                                                        {/* 하단 통합 정보 박스 (숙소/식사/교통) */}
+                                                        <div className="day-summary-box" style={{ marginTop: '20px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                                             {(day.hotel || day.hotelDetails?.name) && (
-                                                                <div className="summary-row" onClick={() => { 
-                                                                    const hIdx = doc.hotels?.findIndex((h: any) => h.name === (day.hotel || day.hotelDetails?.name));
-                                                                    if (hIdx !== -1) { setSelectedHotelIdx(hIdx); setShowHotelModal(true); }
-                                                                }}>
-                                                                    <div className="summary-icon">
-                                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                                                <div className="summary-row" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                                                                    <div className="summary-icon" style={{ marginTop: '2px' }}>
+                                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>
                                                                     </div>
-                                                                    <div className="summary-content">
-                                                                        <div className="summary-label">숙소 (Hotels)</div>
-                                                                        <div className="summary-value">{day.hotel || day.hotelDetails?.name}</div>
+                                                                    <div className="summary-content" style={{ flex: 1 }}>
+                                                                        <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '2px' }}>예정호텔</div>
+                                                                        <div style={{ fontSize: '0.85rem', color: '#1e293b', fontWeight: 600, lineHeight: 1.4 }}>{day.hotel || day.hotelDetails?.name}</div>
                                                                     </div>
-                                                                    <div className="summary-chevron">›</div>
                                                                 </div>
                                                             )}
-                                                            {(day.meals && (day.meals.breakfast || day.meals.lunch || day.meals.dinner)) && (
-                                                                <div className="summary-row">
-                                                                    <div className="summary-icon">
-                                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5"/><path d="M10 10V5a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5"/><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5"/><path d="M14 11V5"/><path d="M6 11V5"/><path d="M22 11H2"/><path d="M3 11l2 10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2l2-10"/></svg>
+                                                            {day.meals && (
+                                                                <div className="summary-row" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                                                                    <div className="summary-icon" style={{ marginTop: '2px' }}>
+                                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
                                                                     </div>
-                                                                    <div className="summary-content">
-                                                                        <div className="summary-label">식사 (Meals)</div>
-                                                                        <div className="summary-value">
-                                                                            {[
-                                                                                day.meals.breakfast && day.meals.breakfast !== '불포함' && `조식: ${day.meals.breakfast}`,
-                                                                                day.meals.lunch && day.meals.lunch !== '불포함' && `중식: ${day.meals.lunch}`,
-                                                                                day.meals.dinner && day.meals.dinner !== '불포함' && `석식: ${day.meals.dinner}`
-                                                                            ].filter(Boolean).join(' · ') || '현지식'}
+                                                                    <div className="summary-content" style={{ flex: 1 }}>
+                                                                        <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '2px' }}>식사</div>
+                                                                        <div style={{ fontSize: '0.85rem', color: '#1e293b', fontWeight: 500, lineHeight: 1.4, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                                            {day.meals.breakfast && day.meals.breakfast !== '불포함' && <div>조식: {day.meals.breakfast}</div>}
+                                                                            {day.meals.lunch && day.meals.lunch !== '불포함' && <div>중식: {day.meals.lunch}</div>}
+                                                                            {day.meals.dinner && day.meals.dinner !== '불포함' && <div>석식: {day.meals.dinner}</div>}
+                                                                            {(!day.meals.breakfast || day.meals.breakfast === '불포함') && (!day.meals.lunch || day.meals.lunch === '불포함') && (!day.meals.dinner || day.meals.dinner === '불포함') && <div>현지 자유식</div>}
                                                                         </div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {getExtraTransportation(day) && (
+                                                                <div className="summary-row" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                                                                    <div className="summary-icon" style={{ marginTop: '2px' }}>
+                                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+                                                                    </div>
+                                                                    <div className="summary-content" style={{ flex: 1 }}>
+                                                                        <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '2px' }}>교통</div>
+                                                                        <div style={{ fontSize: '0.85rem', color: '#1e293b', fontWeight: 500, lineHeight: 1.4 }}>{getExtraTransportation(day)}</div>
                                                                     </div>
                                                                 </div>
                                                             )}
@@ -938,15 +1202,14 @@ export default function ConfirmationViewerPage() {
 
                                                         {/* 일별 유의사항 */}
                                                         {day.dailyNotices && day.dailyNotices.length > 0 && (
-                                                            <div className="day-notices">
-                                                                {day.dailyNotices.map((note: string, ni: number) => (
-                                                                    <div key={ni} className="day-notice-item">
-                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginTop: '2px', flexShrink: 0}}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                                                                        <span>{note}</span>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        )}
+                                                                <div className="day-notices">
+                                                                    {day.dailyNotices.map((note: string, ni: number) => (
+                                                                        <div key={ni} className="day-notice-item">
+                                                                            <span className="dn-bullet">안내</span> {note}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
                                                     </div>
                                                 )}
                                             </div>
@@ -1116,6 +1379,67 @@ export default function ConfirmationViewerPage() {
                                 <div className="guide-header-label">TRAVEL GUIDE</div>
                                 <h2>{safeStr(doc.trip.destination)} 맞춤 가이드</h2>
                             </div>
+
+                            {/* ── 현지 날씨 & 복장 ── */}
+                            <GuideAccordion
+                                id="weather"
+                                title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><path d="M12 2v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="M20 12h2"></path><path d="m19.07 4.93-1.41 1.41"></path><path d="M15.94 14.94a1.5 1.5 0 0 1-2.12 0 1.5 1.5 0 0 1 0-2.12l5.53-5.53a2.5 2.5 0 0 1 3.54 0 2.5 2.5 0 0 1 0 3.54Z"></path><path d="M15 12V9a2 2 0 0 0-2-2c-.73 0-1.38.4-1.73 1.02"></path><path d="M7 10a2 2 0 0 0-2 2c0 1.1.9 2 2 2h7a2 2 0 0 0 2-2c0-1.1-.9-2-2-2Z"></path></svg> 현지 날씨 & 복장</>}
+                                isOpen={expandedSections['weather'] !== false}
+                                onToggle={toggleSection}
+                            >
+                                <div className="weather-guide-wrap">
+                                    <div style={{ marginBottom: '20px', background: '#f8fafc', padding: '16px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
+                                        <p style={{ fontSize: '0.9rem', color: '#334155', lineHeight: 1.6, wordBreak: 'keep-all', margin: 0 }}>
+                                            {safeStr(sr.weather?.summary)}
+                                        </p>
+                                    </div>
+
+                                    {/* 일별 예보 카드 */}
+                                    <div style={{ marginBottom: '24px' }}>
+                                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                            일별 기온 및 날씨
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '8px', WebkitOverflowScrolling: 'touch' }}>
+                                            {sr.weather?.forecast?.map((day: any, i: number) => (
+                                                <div key={i} style={{ minWidth: '120px', background: '#fff', border: '1px solid #f1f5f9', borderRadius: '12px', padding: '12px', textAlign: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
+                                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '6px' }}>{day.date}</div>
+                                                    <div style={{ fontSize: '1rem', fontWeight: 800, color: '#1e293b', marginBottom: '4px' }}>
+                                                        <span style={{ color: '#ef4444' }}>{day.tempMax}</span>
+                                                        <span style={{ color: '#cbd5e1', margin: '0 4px', fontWeight: 400 }}>/</span>
+                                                        <span style={{ color: '#3b82f6' }}>{day.tempMin}</span>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>{day.description}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* 추천 복장 리스트 */}
+                                    <div style={{ marginBottom: '24px' }}>
+                                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.62 1.96v.18A2 2 0 0 0 3 7.5V19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7.5a2 2 0 0 0 1-1.9v-.18a2 2 0 0 0-1.62-1.96Z"></path><path d="M12 21V7"></path><path d="M16 21V11"></path><path d="M8 21V11"></path></svg>
+                                            의류 및 준비물 가이드
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                            {sr.weather?.clothingTips?.map((tip: any, i: number) => (
+                                                <div key={i} style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+                                                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#1e293b', marginBottom: '4px' }}>{tip.title}</div>
+                                                    <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4, wordBreak: 'keep-all' }}>{tip.content}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* 최종 요약 */}
+                                    <div style={{ background: '#eff6ff', border: '1px solid #dbeafe', borderRadius: '12px', padding: '14px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                        <div style={{ fontSize: '1.2rem' }}>🎒</div>
+                                        <div style={{ fontSize: '0.82rem', color: '#1e40af', fontWeight: 600, lineHeight: 1.5, wordBreak: 'keep-all' }}>
+                                            {safeStr(sr.weather?.packingSummary)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </GuideAccordion>
 
                             {/* ── 관광지 소개 ── */}
                             <GuideAccordion
@@ -1405,6 +1729,8 @@ export default function ConfirmationViewerPage() {
                                 </div>
                             </GuideAccordion>
 
+
+
                             {/* ── 로밍·통신 ── */}
                             <GuideAccordion
                                 id="roaming"
@@ -1481,7 +1807,7 @@ export default function ConfirmationViewerPage() {
                                 </div>
                             </GuideAccordion>
 
-                            {/* ── 커스텀 가이드 (구조화) ── */}
+
                             {sr.customGuides?.map((guide, gi) => (
                                 <GuideAccordion
                                     key={gi}

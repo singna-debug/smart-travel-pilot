@@ -841,7 +841,7 @@ export default function ChatsPage() {
                                                                 <EditableField label="연락처" value={chat.visitorPhone} field="visitorPhone" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingCustomerChatId === chat.id} />
                                                                 <EditableField label="총인원" value={chat.travelersCount} field="travelersCount" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingCustomerChatId === chat.id} />
                                                                 <EditableField label="재방문여부" value={chat.recurringCustomer} field="recurringCustomer" chatId={chat.id} onSave={handleFieldUpdate} options={['신규고객', '재방문', '장기미방문', '정보없음']} forceEditMode={editingCustomerChatId === chat.id} />
-                                                                <EditableField label="유입경로" value={chat.inquirySource} field="inquirySource" chatId={chat.id} onSave={handleFieldUpdate} options={['네이버 블로그', '카카오톡 채널', '인스타그램 및 페이스북', '당근마켓', '닷컴', '지인소개', '기존고객', '전화문의', '기타']} forceEditMode={editingCustomerChatId === chat.id} />
+                                                                <EditableField label="유입경로" value={chat.inquirySource} field="inquirySource" chatId={chat.id} onSave={handleFieldUpdate} options={['네이버 블로그', '카카오톡 채널', '인스타그램 및 페이스북', '당근마켓', '닷컴', '지인소개', '기존고객', '전화문의', '매장방문', '기타']} forceEditMode={editingCustomerChatId === chat.id} />
                                                                 <InfoCell label="등록방식" value={chat.source || '-'} highlight={chat.source === '카카오톡' ? '#fbbf24' : '#a78bfa'} />
                                                             </div>
 

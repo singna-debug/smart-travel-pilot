@@ -1,10 +1,7 @@
-
 import type { DetailedProductInfo } from '../../types';
-import { 
-    fetchContent, 
-    analyzeWithGemini, 
-    refineData
-} from '../crawler-utils';
+import { analyzeWithGemini } from '../crawler-base-utils';
+import { fetchContent } from './fetcher';
+import { refineData } from './refiner';
 import { scrapeWithBrowser } from '../browser-crawler';
 
 /**
@@ -66,18 +63,153 @@ ${text.substring(0, 25000)}`;
     // 3. AI 분석 실행
     const result = await analyzeWithGemini(prompt, url, false, nextData);
     
-    if (result) {
-        if (nativeData) {
-            // Native 데이터로 보강
-            if (!result.price) result.price = nativeData.price;
-            if (!result.airline) result.airline = nativeData.airline;
-            if (!result.itinerary || result.itinerary.length === 0) result.itinerary = nativeData.itinerary;
-            if (nativeData.keyPoints && (!result.keyPoints || result.keyPoints.length === 0)) {
-                result.keyPoints = nativeData.keyPoints.slice(0, 4);
+    // 최종 결과 객체 준비
+    let finalInfo: DetailedProductInfo | null = result;
+
+    if (!finalInfo) {
+        console.warn(`[ReservationGuideCrawler] Gemini Failed. Falling back to NativeData.`);
+        finalInfo = nativeData ? { ...nativeData } : null;
+    }
+
+    if (finalInfo) {
+        console.log(`[ReservationGuideCrawler] Base Info Extracted. Merging/Refining...`);
+        
+        // 4. 데이터 보강 (Gemini 결과가 부족할 때 Native 데이터 또는 정규식 활용)
+        
+        // 가격(price) 보강
+        if (!finalInfo.price || finalInfo.price === '0' || finalInfo.price === '추출 실패' || finalInfo.price === '') {
+            if (nativeData?.price && nativeData.price !== '0') {
+                finalInfo.price = nativeData.price;
+            } else {
+                // 본문 텍스트에서 가격 패턴 직접 검색 (마지막 수단)
+                const pricePatterns = [
+                    /([0-9,]{4,10})\s*원/g,
+                    /판매가\s*[:\s]*([0-9,]{4,10})/i,
+                    /성인\s*[:\s]*([0-9,]{4,10})/i
+                ];
+                for (const reg of pricePatterns) {
+                    const match = text.match(reg);
+                    if (match) {
+                        const digits = match[0].replace(/[^0-9]/g, '');
+                        if (digits.length >= 4) {
+                            finalInfo.price = digits;
+                            console.log(`[ReservationGuideCrawler] Price Found via Regex: ${finalInfo.price}`);
+                            break;
+                        }
+                    }
+                }
             }
         }
-        return refineData(result, text, url);
+
+        // 항공사(airline) 보강
+        if (!finalInfo.airline || finalInfo.airline === '추출 실패' || finalInfo.airline.length < 2) {
+            if (nativeData?.airline) {
+                finalInfo.airline = nativeData.airline;
+            } else {
+                const airlineMatch = text.match(/(제주항공|대한항공|아시아나항공|진에어|티웨이|이스타|에어서울|에어부산|비엣젯|필리핀항공|베트남항공|캐세이|타이항공)/);
+                if (airlineMatch) {
+                    finalInfo.airline = airlineMatch[1];
+                    console.log(`[ReservationGuideCrawler] Airline Found via Regex: ${finalInfo.airline}`);
+                }
+            }
+        }
+
+        // 일정(itinerary) 보강
+        if ((!finalInfo.itinerary || finalInfo.itinerary.length === 0) && nativeData?.itinerary) {
+            finalInfo.itinerary = nativeData.itinerary;
+        }
+
+        // 핵심포인트(keyPoints) 보강
+        if ((!finalInfo.keyPoints || finalInfo.keyPoints.length === 0) && nativeData?.keyPoints) {
+            finalInfo.keyPoints = nativeData.keyPoints.slice(0, 4);
+        }
+
+        const refinedResult = refineData(finalInfo, text, url);
+
+        // 5. 추가 보강: 불포함 사항(exclusions) 및 특별약관(specialTerms)
+        if (!refinedResult.exclusions || refinedResult.exclusions.length === 0) {
+            console.log(`[ReservationGuideCrawler] Exclusions empty. Searching via regex...`);
+            const exclusionMatch = text.match(/불포함\s*사항\s*[:\s]*([\s\S]{10,300}?)(?=\n\n|\n[가-힣]+:|\n[#■●]|참고사항|$)/);
+            if (exclusionMatch) {
+                const items = exclusionMatch[1].split(/,|\n/).map(s => s.replace(/^[-\s]*|[*]/g, '').trim()).filter(s => s.length > 2);
+                if (items.length > 0) {
+                    refinedResult.exclusions = items;
+                    console.log(`[ReservationGuideCrawler] Exclusions Found via Regex:`, items);
+                }
+            }
+        }
+
+        if (!refinedResult.specialTerms || refinedResult.specialTerms.length < 10) {
+            console.log(`[ReservationGuideCrawler] SpecialTerms empty. Searching via regex...`);
+            const termsMatch = text.match(/(취소\s*규정|특별\s*약관|취소\s*수수료)\s*[:\s]*([\s\S]{20,800}?)(?=\n\n|\n[#■●]|참고사항|$)/);
+            if (termsMatch) {
+                refinedResult.specialTerms = termsMatch[2].trim();
+                console.log(`[ReservationGuideCrawler] SpecialTerms Found via Regex (Length=${refinedResult.specialTerms.length})`);
+            }
+        }
+
+        // 6. 추가 보강: 항공 일정 (itinerary) - 더 유연한 패턴 추가
+        if (!refinedResult.itinerary || refinedResult.itinerary.length === 0) {
+            console.log(`[ReservationGuideCrawler] Itinerary empty. Searching via multiple regex patterns...`);
+            const flights: any[] = [];
+            
+            // 패턴 1: 한 줄에 항공사, 편명, 시간 다 있는 경우
+            const fullPattern = /(?:가는편|출발편|오는편|귀국편)?\s*([가-힣]{2,6}항공|[A-Z]{2,3})\s*([A-Z0-9]{3,6})?\s*\(?\s*([가-힣\w\s]*?)\s*(\d{2}:\d{2})\s*(?:출발|->|~)\s*([가-힣\w\s]*?)\s*(\d{2}:\d{2})\s*(?:도착)?\s*\)?/g;
+            
+            // 패턴 2: 출발/도착 키워드가 별도로 있는 경우
+            const splitPattern = /(?:출발|인천|현지)?\s*(\d{2}:\d{2})\s*(?:출발|~)\s*(?:도착|현지|인천)?\s*(\d{2}:\d{2})\s*(?:도착)?/g;
+            
+            // 항공사 정보 먼저 확보
+            const currentAirline = refinedResult.airline || '';
+
+            let match;
+            // 우선 패턴 1 시도
+            while ((match = fullPattern.exec(text)) !== null) {
+                flights.push({
+                    day: flights.length === 0 ? "1일차" : "마지막날",
+                    transport: {
+                        airline: match[1]?.trim() || currentAirline,
+                        flightNo: match[2]?.trim() || '',
+                        departureTime: match[4],
+                        arrivalTime: match[6]
+                    }
+                });
+                if (flights.length >= 2) break;
+            }
+
+            // 패턴 1 실패 시 패턴 2 시도
+            if (flights.length === 0) {
+                let match2;
+                while ((match2 = splitPattern.exec(text)) !== null) {
+                    flights.push({
+                        day: flights.length === 0 ? "1일차" : "마지막날",
+                        transport: {
+                            airline: currentAirline,
+                            flightNo: '',
+                            departureTime: match2[1],
+                            arrivalTime: match2[2]
+                        }
+                    });
+                    if (flights.length >= 2) break;
+                }
+            }
+
+            if (flights.length > 0) {
+                refinedResult.itinerary = flights;
+                console.log(`[ReservationGuideCrawler] Flights Found via Regex:`, flights.map(f => `${f.transport.departureTime}->${f.transport.arrivalTime}`));
+            }
+        }
+
+        console.log(`[ReservationGuideCrawler] Final Refined Result:`, {
+            title: refinedResult.title,
+            price: refinedResult.price,
+            airline: refinedResult.airline,
+            departureDate: refinedResult.departureDate,
+            itineraryCount: refinedResult.itinerary?.length,
+            hasSpecialTerms: !!refinedResult.specialTerms
+        });
+        return refinedResult;
     }
     
-    return nativeData ? refineData(nativeData, text, url) : null;
+    return null;
 }

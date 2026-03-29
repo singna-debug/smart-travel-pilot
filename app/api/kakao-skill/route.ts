@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         );
 
         consultationData.visitor_id = visitorId;
-        consultationData.source = '카카오톡';
+        consultationData.source = '카카톡';
         consultationData.automation.inquiry_info_backup = JSON.stringify({
             destination: consultationData.trip.destination,
             departureDate: consultationData.trip.departure_date,
@@ -233,7 +233,7 @@ async function processBackgroundTask(body: KakaoSkillRequest, callbackUrl: strin
     }
 
     consultationData.visitor_id = visitorId;
-    consultationData.source = '카카오톡';
+    consultationData.source = '카카톡';
     consultationData.automation.inquiry_info_backup = JSON.stringify({
         destination: consultationData.trip.destination,
         departureDate: consultationData.trip.departure_date,

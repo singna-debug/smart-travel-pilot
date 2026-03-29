@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
                 instructions: [
                     { scroll_to: "bottom" },
                     { wait: 1500 },
-                    { evaluate: "document.querySelectorAll('button, a, div, span').forEach(el => { const txt = el.innerText || ''; if(['상세', '전체', '펼치기', '더보기', '일정'].some(w => txt.includes(w))) { try { el.click(); } catch(e){} } })" },
+                    { evaluate: "document.querySelectorAll('button, a, div, span').forEach(el => { const txt = el.innerText || ''; if(['간략', '요약', 'Summary'].some(w => txt.includes(w))) { try { el.click(); } catch(e){} } })" },
                     { wait: 1500 },
                     { scroll_to: "bottom" }
                 ]
