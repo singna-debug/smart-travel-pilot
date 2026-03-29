@@ -72,7 +72,8 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
     if (dataDetail?.result || dataDetail?.isOK || dataDetail?.productName) {
         const d = dataDetail.result || dataDetail;
         // --- [1] Native API 원본 데이터 (CCTV 1) ---
-        console.log('--- [1] Native API 원본 데이터 ---', JSON.stringify(d).substring(0, 200));
+        const dataType = Array.isArray(d) ? 'Array' : typeof d;
+        console.log(`--- [1] Native API 원본 데이터 (${dataType}) ---`, JSON.stringify(d).substring(0, 300));
         let cleanTitle = d.productName || '';
         const destination = d.category2 ? `${d.category2}, ${d.category3 || ''}` : (d.category3 || '');
         
@@ -119,17 +120,23 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
         const meetingInfo: any[] = [];
 
         // 1. 호텔 정보 (d.HotelList 또는 d.SummaryHotelList)
-        const rawHotels = d.HotelList || d.SummaryHotelList || [];
+        const rawHotels = Array.isArray(d.HotelList) ? d.HotelList : (Array.isArray(d.SummaryHotelList) ? d.SummaryHotelList : []);
         rawHotels.slice(0, 5).forEach((h: any) => {
-            if (h.hotelName) hotels.push({ name: h.hotelName, address: h.hotelAddress || '' });
+            if (h && h.hotelName) hotels.push({ name: h.hotelName, address: h.hotelAddress || '' });
         });
-
+        
         // 2. 포함/불포함 (d.InclusionList/ExclusionList)
-        if (d.InclusionList) d.InclusionList.forEach((i: any) => inclusions.push(i.content || i.title || i));
-        if (d.ExclusionList) d.ExclusionList.forEach((e: any) => exclusions.push(e.content || e.title || e));
+        if (Array.isArray(d.InclusionList)) d.InclusionList.forEach((i: any) => {
+            const val = i.content || i.title || (typeof i === 'string' ? i : '');
+            if (val) inclusions.push(val);
+        });
+        if (Array.isArray(d.ExclusionList)) d.ExclusionList.forEach((e: any) => {
+            const val = e.content || e.title || (typeof e === 'string' ? e : '');
+            if (val) exclusions.push(val);
+        });
         
         // 3. 미팅 정보 (d.SummaryMeetingList)
-        if (d.SummaryMeetingList) {
+        if (Array.isArray(d.SummaryMeetingList)) {
             d.SummaryMeetingList.forEach((m: any) => {
                 meetingInfo.push({
                     type: m.title || '미팅안내',
@@ -152,16 +159,23 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             duration: d.travelPeriod || d.prd_day_cnt || d.period || '',
             url: url,
             keyPoints: keyPoints,
-            itinerary: isSummaryOnly ? (dataSchedule?.result || dataSchedule || []).map((day: any) => ({
-                day: day.day || day.dayNo,
-                title: day.title || day.scheduleTitle || '',
-                date: day.date || '',
-                route: day.route || '',
-                timeline: []
-            })) : (dataSchedule?.result || dataSchedule || []).map((day: any) => ({
-                ...day,
-                timeline: day.timeline || []
-            })),
+            itinerary: (function() {
+                const scheduleList = Array.isArray(dataSchedule?.result) ? dataSchedule.result : (Array.isArray(dataSchedule) ? dataSchedule : []);
+                if (isSummaryOnly) {
+                    return scheduleList.map((day: any) => ({
+                        day: day?.day || day?.dayNo,
+                        title: day?.title || day?.scheduleTitle || '',
+                        date: day?.date || '',
+                        route: day?.route || '',
+                        timeline: []
+                    }));
+                } else {
+                    return scheduleList.map((day: any) => ({
+                        ...(day || {}),
+                        timeline: day?.timeline || []
+                    }));
+                }
+            })(),
             hotels: hotels,
             inclusions: inclusions,
             exclusions: exclusions,

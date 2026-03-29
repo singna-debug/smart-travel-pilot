@@ -54,16 +54,16 @@ export async function crawlTravelProduct(url: string, source?: string): Promise<
             `항공: ${nativeData.airline} (${nativeData.departureAirport} 출발)\n` +
             `[원본 상품 포인트]:\n${(nativeData.keyPoints || []).map((p: string) => '- ' + p).join('\n') || 'Native API에서 찾지 못함'}\n` +
             `----------------------------------\n\n`;
-        // [초경량 AI 모드 전환] HTML 원본(finalText)을 전부 AI에 던지면 20~30초가 소요됩니다.
-        // Native API 데이터가 충분하다면, 원본 텍스트를 제거하고 요약본만 AI에 넘겨 1~2초만에 요약된 keyPoints를 받습니다.
-        // 🚀 [강화] 가격이 '0'이거나 비어있으면 데이터가 불완전한 것이므로 초경량 모드를 사용하지 않고 전체 분석을 수행합니다.
-        const isDataComplete = nativeData.title && nativeData.price && nativeData.price !== '0' && nativeData.title.length > 5;
+        // 🚀 [강화] Native 데이터가 존재하더라도 그 형식이 객체가 아니거나 가격이 '0'이면 데이터가 불완전한 것입니다.
+        const isNativeValid = nativeData && typeof nativeData === 'object' && !Array.isArray(nativeData);
+        const isPriceValid = isNativeValid && nativeData.price && nativeData.price !== '0' && nativeData.price !== '';
+        const isDataComplete = isNativeValid && isPriceValid && nativeData.title && nativeData.title.length > 5;
         
         if (isDataComplete) {
             console.log(`[NormalCrawler] Native 데이터가 완벽하여(가격:${nativeData.price}) 초경량 AI 모드로 3초 이내 분석을 시도합니다.`);
             contextText = nativeSummary; // HTML 텍스트 제외!
         } else {
-            console.log(`[NormalCrawler] Native 데이터 불충분(가격:${nativeData.price}). 심층 분석을 위해 전체 HTML을 포함합니다.`);
+            console.log(`[NormalCrawler] Native 데이터 불충분/오류(가격:${nativeData?.price || 'null'}). 심층 분석을 위해 전체 HTML을 포함합니다.`);
             contextText = nativeSummary + finalText;
         }
     }
