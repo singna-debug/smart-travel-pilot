@@ -840,15 +840,15 @@ export default function ConfirmationPage() {
                         </div>
                         <div className="confirm-field">
                             <label>시간</label>
-                            <input value={m.time || ''} onChange={e => updateMeetingInfo(i, 'time', e.target.value)} placeholder="08:00" />
+                            <input value={m.time} onChange={e => updateMeetingInfo(i, 'time', e.target.value)} placeholder="08:00" />
                         </div>
                         <div className="confirm-field" style={{ gridColumn: '1 / -1' }}>
                             <label>장소/카운터명</label>
-                            <input value={m.location || ''} onChange={e => updateMeetingInfo(i, 'location', e.target.value)} placeholder="인천공항 제1여객터미널 3층 A카운터" />
+                            <input value={m.location} onChange={e => updateMeetingInfo(i, 'location', e.target.value)} placeholder="인천공항 제1여객터미널 3층 A카운터" />
                         </div>
                         <div className="confirm-field" style={{ gridColumn: '1 / -1' }}>
                             <label>상세 설명</label>
-                            <textarea value={m.description || ''} onChange={e => updateMeetingInfo(i, 'description', e.target.value)} rows={2} placeholder="여권을 지참하고 담당자(김호기: 010-1234-5678)를 찾아주세요." />
+                            <textarea value={m.description} onChange={e => updateMeetingInfo(i, 'description', e.target.value)} rows={2} placeholder="여권을 지참하고 담당자(김호기: 010-1234-5678)를 찾아주세요." />
                         </div>
                         <div className="confirm-field" style={{ gridColumn: '1 / -1' }}>
                             <label>관련 이미지 URL (선택, 모바일 뷰어 렌더링용)</label>
