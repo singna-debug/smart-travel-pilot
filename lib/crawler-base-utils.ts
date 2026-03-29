@@ -189,6 +189,8 @@ ${contextOrPrompt.substring(0, 30000)}
                 const data = await response.json();
                 if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
                     const resText = data.candidates[0].content.parts[0].text;
+                    // --- [2] Gemini 원본 응답 텍스트 (CCTV 2) ---
+                    console.log('--- [2] Gemini 원본 응답 텍스트 ---', resText);
                     const jsonStr = resText.replace(/```json\s*|\s*```/g, '').trim();
                     try {
                         return JSON.parse(jsonStr);
