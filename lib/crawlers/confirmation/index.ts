@@ -67,13 +67,36 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
     // [진단 로그]
     logDiagnostic(url, text, nativeData);
 
+    // [Lite AI 모드 적용] Normal 모드와 동일하게 Native 데이터가 충분하면 HTML 전송을 최소화합니다.
+    const isNativeGood = nativeData && nativeData.title && nativeData.price && nativeData.itinerary?.length > 0;
+    
+    let contextText = '';
+    const nativeSummary = nativeData ? 
+        `--- [AI-Ready Native API Data] ---\n` +
+        `상품명: ${nativeData.title}\n` +
+        `가격: ${nativeData.price}\n` +
+        `항공: ${nativeData.airline} (${nativeData.departureAirport} 출발)\n` +
+        `편명: 가는편(${nativeData.departureFlightNumber}), 오는편(${nativeData.returnFlightNumber})\n` +
+        `시간: 가는편(${nativeData.departureTime} 출발), 오는편(${nativeData.returnDepartureTime} 출발)\n` +
+        `호텔: ${nativeData.hotels?.map((h: any) => h.name).join(', ') || '정보없음'}\n` +
+        `미팅: ${nativeData.meetingInfo?.map((m: any) => `${m.location} (${m.time})`).join(' | ') || '정보없음'}\n` +
+        `취소규정: ${nativeData.cancellationPolicy?.substring(0, 1000) || '정보없음'}\n` +
+        `일정표데이터: ${JSON.stringify(nativeData.itinerary).substring(0, 15000)}\n` +
+        `----------------------------------\n\n` : '';
+
+    if (isNativeGood) {
+        console.log('[Confirmation/Index] Native 데이터가 완벽하여 Lite AI 모드로 정밀 분석을 수행합니다.');
+        contextText = nativeSummary; // 7만자 HTML 대신 요약본만!
+    } else {
+        console.log('[Confirmation/Index] Native 데이터 불충분. HTML 전체 분석을 수행합니다.');
+        contextText = nativeSummary + text.substring(0, 50000); // 7만 -> 5만으로 약간 축소
+    }
+
     const fullPrompt = `${CONFIRMATION_PROMPT}
     
-    입력된 데이터(HTML 텍스트 요약 및 Native API 데이터):
+    입력된 데이터:
     URL: ${url}
-    ${nativeData ? `--- [Native API Data] ---\n${JSON.stringify(nativeData)}\n` : ''}
-    --- [Page Scraped Content] ---
-    ${text.substring(0, 70000)}`;
+    ${contextText}`;
 
     // 2. 분석 수행
     const result = await analyzeWithGemini(fullPrompt, url, false, nextData);
