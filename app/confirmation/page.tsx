@@ -1207,6 +1207,7 @@ export default function ConfirmationPage() {
                                     <input value={secondaryResearch.customs?.warningTitle || ''} onChange={e => updateSRField('customs', 'warningTitle', e.target.value)} />
                                 </div>
                                 <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>핵심 경고 제목 (레퍼런스형)</label>
                                     <input value={secondaryResearch.customs?.majorAlert?.title || ''} onChange={e => {
                                         setSecondaryResearch((prev: any) => {
                                             if (!prev) return prev;
@@ -1328,7 +1329,7 @@ export default function ConfirmationPage() {
                     {secondaryResearch && (
                         <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
                             <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>🏛️ 관광지 ({secondaryResearch.landmarks?.length || 0}개)</div>
-                            {secondaryResearch.landmarks?.length ? (
+                            {Array.isArray(secondaryResearch.landmarks) && secondaryResearch.landmarks.length > 0 ? (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                     {secondaryResearch.landmarks.map((lm: any, i: number) => (
                                         <div key={i} style={{ padding: '16px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: '10px' }}>
@@ -1395,12 +1396,12 @@ export default function ConfirmationPage() {
                     )}
 
                     {/* 커스텀 가이드 */}
-                    {secondaryResearch?.customGuides && secondaryResearch.customGuides.length > 0 && (
+                    {Array.isArray(secondaryResearch?.customGuides) && secondaryResearch.customGuides.length > 0 && (
                         <>
                             {secondaryResearch.customGuides.map((guide, i) => (
                                 <div key={i} style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
                                     <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>{safeStr(guide.icon)} {safeStr(guide.topic)} ({guide.sections?.length || 0}개 섹션)</div>
-                                    {guide.sections?.map((sec, si) => (
+                                    {Array.isArray(guide.sections) && guide.sections.map((sec, si) => (
                                         <div key={si} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                                             • <strong>{safeStr(sec.title)}</strong> [{sec.type}]
                                         </div>
