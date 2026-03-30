@@ -8,6 +8,7 @@
 
 import type { DetailedProductInfo } from '../../../types';
 import { formatDateString } from '../../crawler-base-utils';
+import { CITY_CODE_MAP } from '../../constants/travel-data';
 
 export function refineConfirmationData(info: DetailedProductInfo, originalText: string, url: string): DetailedProductInfo {
     const refined = { ...info };
@@ -55,27 +56,49 @@ export function refineConfirmationData(info: DetailedProductInfo, originalText: 
     if (refined.departureDate) refined.departureDate = formatDateString(refined.departureDate);
     if (refined.returnDate) refined.returnDate = formatDateString(refined.returnDate);
     
-    if (!refined.duration || refined.duration === '미정') {
-        const durationMatch = (refined.title + ' ' + originalText).match(/(\d+)\s*박\s*(\d+)\s*일/);
-        if (durationMatch) {
-            refined.duration = `${durationMatch[1]}박 ${durationMatch[2]}일`;
-        }
-    }
+    // --- [목적지(Destination) 정제 및 보강] ---
     const forbiddenWords = ['노팁', '노쇼핑', '노옵션', '출발', '확정', '특가', '단독', '기획', '모객', '특전', '스마일', '명부터', '예약', '마감', '할인', '이벤트', '시그니처', '선착순', '베스트', '홈쇼핑'];
 
-    if (refined.title.includes('/')) {
-        const titleMatchRegex = /([가-힣]{2,5}(?:\/[가-힣]{2,5})+)/g;
-        let match;
-        let bestDest = '';
-        while ((match = titleMatchRegex.exec(refined.title)) !== null) {
-            const candidate = match[1].replace(/\//g, ', ');
-            const isForbidden = forbiddenWords.some(w => candidate.includes(w));
-            if (!isForbidden && candidate.length > bestDest.length) {
-                bestDest = candidate;
+    // 1. 기존 목적지 오염 제거 (할루시네이션 방어)
+    if (refined.destination && forbiddenWords.some(w => refined.destination.includes(w))) {
+        refined.destination = ''; 
+    }
+
+    // 2. UI 직접 추출 (TARGET_DESTINATION) 우선 순위
+    const targetDestMatch = originalText.match(/TARGET_DESTINATION:\s*([^\n\r]+)/);
+    if (targetDestMatch) {
+        const extracted = targetDestMatch[1].trim();
+        if (extracted.length > 1 && !forbiddenWords.some(w => extracted.includes(w))) {
+            refined.destination = extracted;
+        }
+    }
+
+    // 3. CITY_CODE_MAP 기반 키워드 매칭 (제목에서 직접 찾기)
+    if (!refined.destination || refined.destination.length < 2) {
+        // 긴 도시명부터 순차적으로 검색하여 매칭률 향상
+        const cities = Object.keys(CITY_CODE_MAP).sort((a, b) => b.length - a.length);
+        for (const city of cities) {
+            if (refined.title.includes(city)) {
+                refined.destination = city;
+                break;
             }
         }
-        if (bestDest && (!refined.destination || refined.destination.length < bestDest.length)) {
-            refined.destination = bestDest;
+    }
+
+    // 4. 슬래시(/) 및 대괄호([]) 패턴 (기존 로직 보완)
+    if (!refined.destination || refined.destination.length < 2) {
+        if (refined.title.includes('/')) {
+            const titleMatchRegex = /([가-힣]{2,5}(?:\/[가-힣]{2,5})+)/g;
+            let match;
+            let bestDest = '';
+            while ((match = titleMatchRegex.exec(refined.title)) !== null) {
+                const candidate = match[1].replace(/\//g, ', ');
+                const isForbidden = forbiddenWords.some(w => candidate.includes(w));
+                if (!isForbidden && candidate.length > bestDest.length) {
+                    bestDest = candidate;
+                }
+            }
+            if (bestDest) refined.destination = bestDest;
         }
     }
     
@@ -89,6 +112,13 @@ export function refineConfirmationData(info: DetailedProductInfo, originalText: 
                 refined.destination = candidate;
                 break;
             }
+        }
+    }
+
+    if (!refined.duration || refined.duration === '미정') {
+        const durationMatch = (refined.title + ' ' + originalText).match(/(\d+)\s*박\s*(\d+)\s*일/);
+        if (durationMatch) {
+            refined.duration = `${durationMatch[1]}박 ${durationMatch[2]}일`;
         }
     }
 

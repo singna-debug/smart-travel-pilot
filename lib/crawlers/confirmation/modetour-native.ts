@@ -103,7 +103,13 @@ export async function fetchConfirmationNative(url: string): Promise<DetailedProd
         console.log(`[Confirm/Native] productName="${d.productName}", price=${d.sellingPriceAdultTotalAmount}`);
         
         let cleanTitle = d.productName || '';
-        const destination = d.category2 ? `${d.category2}, ${d.category3 || ''}` : (d.category3 || '');
+        let destination = d.category2 ? `${d.category2}, ${d.category3 || ''}` : (d.category3 || '');
+        
+        // 목적지 오염 필터링 (노팁/노쇼핑 등)
+        const forbiddenWords = ['노팁', '노쇼핑', '노옵션', '출발', '확정', '특가', '단독', '기획', '모객', '특전', '스마일', '명부터', '예약', '마감', '할인', '이벤트', '시그니처', '선착순', '베스트', '홈쇼핑'];
+        if (destination && forbiddenWords.some(w => destination.includes(w))) {
+            destination = '';
+        }
         
         // Key Points 추출
         let keyPoints: string[] = [];
