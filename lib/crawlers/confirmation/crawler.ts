@@ -178,12 +178,17 @@ export async function scrapeForConfirmation(url: string): Promise<string | null>
                 }
             });
 
-            // 하이라이트 섹션
-            const keywords = ['상품 POINT', '상품포인트', '특전', '여행 필수 정보', '항공여정', '항공 정보', '미팅 정보'];
+            // 하이라이트 섹션 (여행도시 포함)
+            const keywords = ['상품 POINT', '상품포인트', '특전', '여행 필수 정보', '항공여정', '항공 정보', '미팅 정보', '여행도시'];
             let highlights = '';
-            $('div, section, article, h2, h3').each((_, el) => {
+            $('div, section, article, h2, h3, dt, th, span').each((_, el) => {
                 const text = $(el).text().trim();
-                if (keywords.some(k => text.includes(k)) && text.length > 50 && text.length < 5000) {
+                // "여행도시" 텍스트를 찾으면 그 옆의 텍스트를 강제로 추출
+                if (text === '여행도시') {
+                    const parentText = $(el).parent().text().replace('여행도시', '').trim();
+                    if (parentText) highlights += `\nTARGET_DESTINATION: ${parentText}\n`;
+                }
+                if (keywords.some(k => text.includes(k)) && text.length > 2 && text.length < 5000) {
                     highlights += `\n--- [섹션] ---\n${text}\n`;
                 }
             });
@@ -269,13 +274,17 @@ export async function scrapeForConfirmation(url: string): Promise<string | null>
                 }
             });
 
-            // 항공/미팅/불포함 키워드 섹션 (남은 여유분으로)
+            // 항공/미팅/불포함/여행도시 키워드 섹션 (남은 여유분으로)
             if (result.length < MAX_TOTAL) {
-                const keywords = ['항공여정', '항공 정보', '미팅 정보', '상품 POINT', '특전', '불포함', '포함사항'];
-                document.querySelectorAll('div, section').forEach(el => {
+                const keywords = ['항공여정', '항공 정보', '미팅 정보', '상품 POINT', '특전', '불포함', '포함사항', '여행도시'];
+                document.querySelectorAll('div, section, dt, th, span').forEach(el => {
                     if (result.length >= MAX_TOTAL) return;
                     const t = (el as HTMLElement).innerText || '';
-                    if (t.length > 30 && t.length < 5000 && keywords.some(k => t.includes(k))) {
+                    if (t.trim() === '여행도시') {
+                        const parentText = (el.parentElement?.innerText || '').replace('여행도시', '').trim();
+                        if (parentText) result += `\nTARGET_DESTINATION: ${parentText}\n`;
+                    }
+                    if (t.length > 2 && t.length < 5000 && keywords.some(k => t.includes(k))) {
                         const remaining = MAX_TOTAL - result.length;
                         result += `\n[섹션]\n${t.substring(0, remaining)}\n`;
                     }
