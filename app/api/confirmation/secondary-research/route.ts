@@ -192,8 +192,8 @@ export async function POST(request: NextRequest) {
                 name: 'creative',
                 prompt: `
 컨텍스트: ${context}
-위 여행지의 대표 관광지 5곳을 소개하고, 요청된 가이드 항목에 대한 답변을 작성하세요.
-${customGuides && customGuides.length > 0 ? `요청 가이드 주제: ${customGuides.join(', ')}` : '요청 가이드 주제 없음'}
+1. 위 여행지의 대표 관광지(Landmarks) 5곳을 소개하세요. 
+2. ${customGuides && customGuides.length > 0 ? `[추가 가이드 요청 사항]: ${customGuides.join(', ')} 에 대한 상세 가이드북 내용을 작성하세요.` : '추가 가이드 요청 사항이 없습니다. 오직 landmarks만 채우고 customGuides는 반드시 빈 배열 []로 반환하세요.'}
 (마크다운 없이 순수 JSON만 반환)
 {
   "landmarks": [
@@ -215,11 +215,11 @@ ${customGuides && customGuides.length > 0 ? `요청 가이드 주제: ${customGu
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        systemInstruction: { 
-                            parts: [{ text: "당신은 능숙한 여행 가이드북 작성 인공지능입니다. 제공된 [요청된 여행지/도시]를 기준으로 환전, 날씨, 세관, 관광지 정보를 풍부하게 작성하세요. [상품명/설명 대상] 내의 값이 없거나 '일반' 형태이더라도, 거절하지 말고 해당 도시(여행지)의 일반적인 여행 정보를 기준으로 반드시 모든 필드를 채워야 합니다. 다른 국가(예: 중국 청도인데 베트남으로 착각)로 착각하는 현상만 주의하세요." }] 
+                        system_instruction: { 
+                            parts: [{ text: "당신은 능숙한 여행 가이드북 작성 인공지능입니다. 제공된 [요청된 여행지/도시]를 기준으로 환전, 날씨, 세관, 관광지 정보를 풍부하게 작성하세요. [상품명/설명 대상] 내의 값이 없거나 '일반' 형태이더라도, 거절하지 말고 해당 도시(여행지)의 일반적인 여행 정보를 기준으로 반드시 모든 필드를 채워야 합니다. 다른 국가(예: 중국 청도인데 베트남으로 착각)로 착각하는 현상만 주의하세요. landmarks와 customGuides는 절대 섞지 마세요." }] 
                         },
                         contents: [{ parts: [{ text: task.prompt }] }],
-                        generationConfig: { temperature: 0.3 }
+                        generationConfig: { temperature: 0.1 }
                     })
                 });
 
