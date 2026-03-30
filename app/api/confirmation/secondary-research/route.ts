@@ -106,7 +106,7 @@ function getHardcodedLinks(destination: string) {
         '발리': '인도네시아', '자카르타': '인도네시아',
         '쿠알라룸푸르': '말레이시아', '코타키나발루': '말레이시아', '조호르바루': '말레이시아',
         '싱가포르': '싱가포르', '싱가폴': '싱가포르',
-        '베이징': '중국', '상하이': '중국', '칭다오': '중국', '장자지에': '중국', '장가계': '중국',
+        '베이징': '중국', '상하이': '중국', '칭다오': '중국', '청도': '중국', '장자지에': '중국', '장가계': '중국',
 
         // 미주 / 오세아니아 (추가)
         '괌': '괌', '사이판': '사이판',
@@ -125,13 +125,13 @@ function getHardcodedLinks(destination: string) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { destination, travelMonth, airline, baggageNote, customGuides } = body;
+        const { title, destination, travelMonth, airline, baggageNote, customGuides } = body;
 
         if (!destination) {
             return NextResponse.json({ success: false, error: '여행지 정보가 필요합니다.' }, { status: 400 });
         }
 
-        const context = `여행지: ${destination}, 시기: ${travelMonth || '현재'}, 항공사: ${airline || '비명시'}, 수하물규정: ${baggageNote || '비명시'}`;
+        const context = `[상품명/설명]: ${title || '비명시'}\n[요청된 여행지/도시]: ${destination}\n[여행 시기]: ${travelMonth || '현재'}\n[이용 항공사]: ${airline || '비명시'}\n[수하물 규정]: ${baggageNote || '비명시'}`;
 
         const tasks = [
             // ✨ Task 1: UI용 고급 날씨 구조 복구
@@ -214,7 +214,13 @@ ${customGuides && customGuides.length > 0 ? `요청 가이드 주제: ${customGu
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: task.prompt }] }] })
+                    body: JSON.stringify({ 
+                        systemInstruction: { 
+                            parts: [{ text: "당신은 최고의 여행 리서치 전문가입니다. 반드시 [상품명/설명]과 [요청된 여행지/도시]를 최우선으로 참고하여 해당 장소에 대한 정보만 분석하세요. 주어진 지명(예: 중국 청도)을 엉뚱한 해외(예: 베트남)나 엉뚱한 국내(예: 제주도)로 착각하여 할루시네이션(환각)을 발생시키는 것을 절대 금지합니다. 정확한 정보만 제공하세요." }] 
+                        },
+                        contents: [{ parts: [{ text: task.prompt }] }],
+                        generationConfig: { temperature: 0.2 }
+                    })
                 });
 
                 if (!res.ok) {
