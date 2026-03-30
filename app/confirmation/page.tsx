@@ -927,7 +927,7 @@ export default function ConfirmationPage() {
                 </div>
                 <div className="itinerary-preview-header">
                     <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                        URL 분석 결과 추출된 {itinerary.length}일간의 일정입니다.
+                        URL 분석 결과 추출된 {duration || `${itinerary.length}일`}간의 일정입니다.
                         {!itinerary.length && " URL 분석을 먼저 진행해 주세요."}
                     </p>
                 </div>

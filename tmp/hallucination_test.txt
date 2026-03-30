@@ -1,0 +1,6 @@
+﻿{
+    "elapsed":  22.807779,
+    "day1_kumamotocastle_desc":  {
+
+                                 }
+}

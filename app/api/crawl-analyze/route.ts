@@ -3,6 +3,7 @@ import { formatProductInfo, crawlForConfirmation, crawlTravelProduct, crawlForBo
 
 export const preferredRegion = 'icn1';
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 const VERSION = "2026-03-23-V13-STABLE";
 

@@ -1,0 +1,1 @@
+fetch("https://www.modetour.com/package/105792840?MLoc=99&Pnum=105792840&ANO=81440&sno=C117876&thru=crs", {headers: {"User-Agent": "Mozilla/5.0"}}).then(r => r.text()).then(html => { const m = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/); console.log("Length:", html.length); console.log("Match:", m ? m[1].substring(0,200) : "NO MATCH"); })

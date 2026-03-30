@@ -70,11 +70,20 @@ export async function fetchContent(url: string, options: FetchOptions = {}): Pro
     return { text, nextData };
 }
 
-export const scrapeWithScrapingBee = async (url: string): Promise<string | null> => {
-    const apiKey = process.env.SCRAPINGBEE_API_KEY?.trim();
-    if (!apiKey) return null;
+export const scrapeWithStealthFetch = async (url: string): Promise<string | null> => {
     try {
-        const response = await fetch(`https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=true`);
+        const response = await fetch(url, {
+            headers: {
+                'referer': 'https://www.google.com/',
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+                'sec-ch-ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+            },
+            cache: 'no-store'
+        });
         if (response.ok) return htmlToText(await response.text(), url);
     } catch (e) {}
     return null;

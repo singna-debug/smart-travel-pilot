@@ -1,0 +1,10 @@
+﻿{
+    "depFlight":  null,
+    "title":  "[출발확정][온천in큐슈] 후쿠오카/구마모토/유후인/벳부/아소 3일 (신상료칸온천호텔/가족탕/특식)",
+    "depTime":  null,
+    "price":  919000,
+    "dest":  "일본",
+    "depCity":  "인천",
+    "depDate":  "2026-04-15",
+    "airline":  "제주항공"
+}

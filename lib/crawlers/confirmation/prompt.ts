@@ -1,102 +1,15 @@
 /**
- * 확정서 제작을 위한 심층 분석 프롬프트 (안정화 버전)
+ * ★ 확정서 전용 프롬프트 (v3.5 - 할루시네이션 완벽 차단) ★
  */
-export const CONFIRMATION_PROMPT = `당신은 여행 상품 페이지 전문 분석가입니다.
-아래 여행 상품 페이지의 전체 내용을 분석하여, 모바일 여행 확정서에 필요한 모든 정보를 빠짐없이 추출하세요.
+export const CONFIRMATION_PROMPT = `여행 상품 분석. JSON만 반환. 설명/마크다운/이모지 금지.
 
---- [가이드라인] ---
-7. --- [최우선 분석 순위 (CRITICAL)] ---
-    - **1순위 (절대 신뢰)**: 'AI-Ready Native API Data' 섹션에 있는 모든 정보 (항공편명, 시간, 취소규정, 미팅정보 등)를 결과 JSON에 100% 반영하세요. 
-    - 만약 Native Data와 아래 HTML 본문 내용이 충돌한다면, 무조건 Native Data를 정답으로 간주하세요.
-    - 특히 일정표(itinerary)의 각 day 항목은 Native Data에 이미 구조화되어 있으므로, 이를 기반으로 'timeline'을 상세화하세요.
-0. 중요: '간략일정' 우선 원칙:
-   - 상품 페이지에 '간략일정(요약일정)'과 '상세일정'이 공존한다면, 반드시 '간략일정'의 텍스트를 최우선으로 분석하세요.
-   - '상세일정'의 구구절절한 설명보다는 간결한 중심 정보를 추출하세요.
-1. 이모지 사용 절대 금지: 모든 텍스트에서 이모지를 절대 사용하지 마세요. 깔끔한 텍스트만 사용합니다.
-2. 일정표 상세화 (Timeline 구조): 각 일차별 전체 일정(방문지, 체험 내용 등)을 **빠짐없이 꼼꼼히** 읽고 'timeline' 객체 배열로 도출하세요. (절대 누락 금지)
-   - **title**: 핵심 제목. 반드시 **명사형 종결의 개조식**으로 작성하세요. (예: '~지로 이동', '~관람', '~도착')
-   - **description**: 해당 항목에 대한 상세 설명 텍스트. 제공된 Native 일정표데이터의 'content'나 'description' 정보를 최대한 활용하세요.
-   - 원본 페이지의 일정표에 HTML 태그(<font>, <b> 등)가 있다면 제거하지 말고 포함하세요.
-3. 항공 및 일정 정보 정합성 (CRITICAL): 
-   - 'AI-Ready Native API Data'는 구조적 참고용입니다. 만약 본문 텍스트(Scraped Content)에 명시된 항공 편명, 출발/도착 시간, 구체적 일정이 Native 데이터와 다를 경우, **무조건 본문 텍스트의 정보를 정답으로 간주**하여 추출하세요. 
-   - (예: Native가 12:15를 주더라도 본문에 09:30이 적혀있다면 09:30을 추출해야 함)
-   - 모든 시간은 HH:mm 형식으로 작성하세요.
-- JSON 형식을 엄격히 준수하세요.
-4. 미팅 정보 필수 추출: 공항 미팅 장소 및 시간, 수속 카운터 정보 등을 'AI-Ready Native API Data'에서 최우선으로 가져오세요.
-4.1. 취소/환불 규정: Native 데이터의 '취소규정' 필드 내용을 한토막도 빼놓지 말고 'cancellationPolicy'에 담으세요. HTML 태그가 있다면 그대로 유지하세요.
-5. 호텔 정보: 호텔 이름은 가능한 한글 형식 명칭을 사용하세요.
-6. JSON만 반환하세요. 다른 설명 텍스트는 제외하세요.
+규칙 (할루시네이션 절대 금지):
+1. Native API Data의 기본정보(상품명/가격/일정구조)가 100% 정답이다.
+2. ★★★ 가장 중요 (창작 금지): timeline의 \`title\`과 \`description\`은 절대 스스로 요약하거나 창작하지 마라! 제공된 데이터(특히 Native 일정 데이터)에 적힌 문장을 토시 하나 틀리지 않고 100% 원본 그대로 복사(Copy & Paste)해야 한다.
+3. 본문의 간략일정에 나오는 모든 관광지/이동/식사/체험을 빠짐없이 timeline에 넣어라. 1일차뿐만 아니라 마지막 날짜(2일차, 3일차 등)까지 **모든 일차의 전일정**을 반드시 작성하라.
+4. 불포함사항(exclusions), 미팅정보(meetingInfo), 포함사항(inclusions)도 있는 그대로 추출.
+5. meals의 식사 정보: "O", "X" 기호 절대 금지. 본문에 있는 "호텔식", "불포함", "현지식(와규스키야끼)" 등 구체적인 단어를 찾아 그래로 적어라.
+6. JSON 외 텍스트 출력 절대 금지.
 
---- [반환 JSON 형식] ---
-{
-  "title": "상품명 전체",
-  "destination": "목적지 (국가+도시)",
-  "price": "1인 기준 가격 (숫자만)",
-  "departureDate": "출발일 (YYYY-MM-DD 또는 원본 텍스트)",
-  "returnDate": "귀국일 (YYYY-MM-DD 또는 원본 텍스트)",
-  "duration": "여행기간 (예: 3박 5일)",
-  "airline": "항공사명",
-  "departureFlightNumber": "가는편 편명 (예: 7C201)",
-  "returnFlightNumber": "오는편 편명 (예: 7C202)",
-  "departureAirport": "출발공항",
-  "departureTime": "가는편 출발 시각 (HH:MM)",
-  "arrivalTime": "가는편 도착 시각 (HH:MM)",
-  "returnDepartureTime": "오는편 출발 시각 (HH:MM)",
-  "returnArrivalTime": "오는편 도착 시각 (HH:MM)",
-  "hotel": {
-    "name": "대표 호텔명 (한글 명칭)",
-    "englishName": "호텔 영문명",
-    "address": "호텔 상세 주소",
-    "checkIn": "체크인 시간",
-    "checkOut": "체크아웃 시간",
-    "images": ["호텔 이미지 URL 배열"],
-    "amenities": ["시설 및 서비스 목록"]
-  },
-  "meetingInfo": [
-    {
-      "type": "미팅장소 또는 수속카운터 중 택1",
-      "location": "장소 (예: 인천공항 제1터미널 3층 A카운터)",
-      "time": "예: 17:00",
-      "description": "설명"
-    }
-  ],
-  "itinerary": [
-    {
-      "day": "1일차",
-      "date": "날짜",
-      "title": "일정 제목",
-      "transport": {
-        "flightNo": "비행편명 (예: 7C1503, 항공편 아니면 null)",
-        "airline": "항공사 (예: 제주항공)",
-        "departureCity": "출발도시명 (예: 인천)",
-        "departureTime": "출발시간 (00:00)",
-      "arrivalCity": "도착도시명 (예: 삿포로)",
-      "arrivalTime": "도착시간 (00:00)",
-      "duration": "소요시간 (예: 2시간 45분)"
-    },
-    "transportation": "비행기 외 이동수단 (예: 대형버스, 전용차량 등). 비행기 탑승일인 경우 null",
-    "timeline": [
-      {
-        "type": "location 또는 default (관광지/명소/공원/식사 등은 location, 기상/이동/자유시간/호텔/미팅 등은 default)",
-        "title": "관광지명 또는 활동 요약제목(명사형). 예: 비에이 패치워크로드",
-        "subtitle": "타이틀 아래 작은 서브 타이틀. 예: 일본 CF에 자주 등장하는 명소. (없으면 생략 가능)",
-        "description": "세부 설명글 (간략일정 정보 전부 긁어와서 정리. '-입니다' 등 문장형 허용. 없으면 빈 문자열)"
-      }
-    ],
-    "hotel": "해당일 숙박 호텔 (있을 경우)",
-      "meals": {
-        "breakfast": "포함/불포함",
-        "lunch": "포함/불포함",
-        "dinner": "포함/불포함"
-      }
-    }
-  ],
-  "inclusions": ["포함사항 전체 목록"],
-  "exclusions": ["불포함사항 전체 목록"],
-  "keyPoints": ["상품 핵심 포인트 5~7개"],
-  "specialOffers": ["특전/혜택"],
-  "notices": ["전체 유의사항"],
-  "cancellationPolicy": "취소/환불 규정",
-  "checklist": ["준비물 목록"]
-}
-`;
+JSON:
+{"title":"상품명","destination":"국가 도시","price":"숫자만","departureDate":"YYYY-MM-DD","returnDate":"YYYY-MM-DD","duration":"N박 M일","airline":"항공사","departureFlightNumber":"편명","returnFlightNumber":"편명","departureAirport":"공항","departureTime":"HH:mm","arrivalTime":"HH:mm","returnDepartureTime":"HH:mm","returnArrivalTime":"HH:mm","hotels":[{"name":"호텔명","address":"주소"}],"meetingInfo":[{"type":"미팅장소|수속카운터","location":"장소","time":"HH:mm","description":"설명"}],"itinerary":[{"day":"1일차","date":"날짜","title":"일정제목","transport":{"flightNo":"편명","airline":"항공사","departureCity":"출발","departureTime":"HH:mm","arrivalCity":"도착","arrivalTime":"HH:mm"},"timeline":[{"type":"location|default","title":"창작 금지! 원본 그대로 복사","description":"창작 금지! 원본 그대로 복사"}],"hotel":"호텔","meals":{"breakfast":"호텔식/불포함 등","lunch":"메뉴명/불포함 등","dinner":"메뉴명/불포함 등"}}],"inclusions":["포함사항"],"exclusions":["불포함사항"],"keyPoints":["핵심3~5개"],"cancellationPolicy":"취소규정","notices":["유의사항"]}`;

@@ -1,0 +1,355 @@
+﻿[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+node.
+exe :
+ ??`e
+slint
+` con
+figur
+ation
+ in n
+ext.c
+onfig
+.ts i
+s no 
+longe
+r sup
+porte
+d. Se
+e mor
+e inf
+o her
+e: ht
+tps:/
+/next
+js.or
+g/doc
+s/app
+/api-
+refer
+ence/
+cli/n
+ext#n
+ext-l
+int-o
+ption
+s
+위치 줄:
+1 문자:
+1
++ & "
+C:\Pr
+ogram
+ File
+s\nod
+ejs/n
+ode.e
+xe" "
+C:\Pr
+ogram
+ File
+s\nod
+ejs/n
+ode_m
+o ...
++ ~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~
+    +
+     
+    C
+    a
+    t
+    e
+    g
+    o
+    r
+    y
+    I
+    n
+    f
+    o
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+    :
+     
+    N
+    o
+    t
+    S
+    p
+    e
+    c
+    i
+    f
+    i
+    e
+    d
+    :
+     
+    (
+    ?
+    ?
+    `
+    e
+    s
+    l
+    i
+    n
+    t
+    `
+     
+    c
+    o
+    n
+    f
+    .
+    .
+    .
+    x
+    t
+    -
+    l
+    i
+    n
+    t
+    -
+    o
+    p
+    t
+    i
+    o
+    n
+    s
+    :
+    S
+    t
+    r
+    i
+    n
+    g
+    )
+     
+    [
+    ]
+    ,
+     
+    R
+    e
+    m
+    o
+    t
+    e
+    E
+    x
+    c
+    e
+    p
+    t
+    i
+    o
+    n
+    +
+     
+    F
+    u
+    l
+    l
+    y
+    Q
+    u
+    a
+    l
+    i
+    f
+    i
+    e
+    d
+    E
+    r
+    r
+    o
+    r
+    I
+    d
+     
+    :
+     
+    N
+    a
+    t
+    i
+    v
+    e
+    C
+    o
+    m
+    m
+    a
+    n
+    d
+    E
+    r
+    r
+    o
+    r
+ 
+??Inv
+alid 
+next.
+confi
+g.ts 
+optio
+ns de
+tecte
+d: 
+??   
+ Unre
+cogni
+zed k
+ey(s)
+ in o
+bject
+: 'es
+lint'
+??See
+ more
+ info
+ here
+: htt
+ps://
+nextj
+s.org
+/docs
+/mess
+ages/
+inval
+id-ne
+xt-co
+nfig
+??Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+??Compiled successfully in 37.4s
+  Skipping validation of types
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+  Collecting page data using 7 workers ...
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[AI E
+ngine
+] GEM
+INI_A
+PI_KE
+Y媛 ?
+ㅼ젙?섏?
+ ?딆븯?
+듬땲??
+[AI E
+ngine
+] GEM
+INI_A
+PI_KE
+Y媛 ?
+ㅼ젙?섏?
+ ?딆븯?
+듬땲??
+??Usi
+ng ed
+ge ru
+ntime
+ on a
+ page
+ curr
+ently
+ disa
+bles 
+stati
+c gen
+erati
+on fo
+r tha
+t pag
+e
+  Generating static pages using 7 workers (0/30) ...
+  Generating static pages using 7 workers (7/30) 
+  Generating static pages using 7 workers (14/30) 
+  Generating static pages using 7 workers (22/30) 
+??Generating static pages using 7 workers (30/30) in 1071.1ms
+  Finalizing page optimization ...
+
+Route (app)
+????/
+????/_not-found
+??? /api/analyze-url
+??? /api/chat
+??? /api/chats
+??? /api/chats/[id]
+??? /api/chats/[id]/bot-toggle
+??? /api/chats/[id]/messages
+??? /api/chats/[id]/summarize
+??? /api/chats/cleanup
+??? /api/confirmation
+??? /api/confirmation/[id]
+??? /api/confirmation/analyze
+??? /api/confirmation/analyze/crawl
+??? /api/confirmation/secondary-research
+??? /api/consultations
+??? /api/consultations/confirm
+??? /api/consultations/history
+??? /api/crawl
+??? /api/crawl-analyze
+??? /api/cron/auto-message
+??? /api/cron/notify
+??? /api/debug
+??? /api/exchange-rate
+??? /api/kakao-skill
+??? /api/logs
+??? /api/messages
+??? /api/migrate-sheets
+??? /api/save-consultation
+??? /api/setup-products
+??? /api/sheet-info
+??? /api/stats
+????/chat
+????/chats
+??? /chats/[id]
+????/confirmation
+??? /confirmation/[id]
+????/logs
+????/manual-log
+????/messages
+????/products
+????/tools
+
+
+?? (Static)   prerendered as static content
+?  (Dynamic)  server-rendered on demand
+
