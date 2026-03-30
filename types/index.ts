@@ -150,6 +150,8 @@ export interface DetailedProductInfo {
   arrivalTime?: string;
   returnDepartureTime?: string;
   returnArrivalTime?: string;
+  flightDuration?: string;
+  returnFlightDuration?: string;
   returnDate?: string;
   isProduct?: boolean;
   index?: number;
@@ -240,9 +242,11 @@ export interface ConfirmationDocument {
     departureFlightNumber?: string;
     departureTime: string;
     arrivalTime: string;
+    flightDuration?: string;
     returnFlightNumber?: string;
     returnDepartureTime: string;
     returnArrivalTime: string;
+    returnFlightDuration?: string;
   };
 
   // 숙박 정보
