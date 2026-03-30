@@ -109,13 +109,31 @@ export async function scrapeForConfirmation(url: string): Promise<string | null>
                     try {
                         const d = resDetail?.result || {};
                         cleanDetail += `상품명: ${d.productName || ''}\n`;
+                        cleanDetail += `항공사: ${d.airline || d.airlineName || d.prefix || ''}\n`;
+                        cleanDetail += `가는편(출발편): ${d.departureFlight || ''} / 출발시간: ${d.departureTime || ''}\n`;
+                        cleanDetail += `오는편(귀국편): ${d.arrivalFlight || d.returnFlight || ''} / 도착시간: ${d.arrivalTime || d.returnTime || ''}\n`;
                         cleanDetail += `미팅장소: ${d.meetingPlace2 || ''}\n`;
                         cleanDetail += `미팅시간: ${d.meetingTime || ''}\n`;
                         const inc = d.includedNote ? d.includedNote.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
                         const uninc = d.unincludedNote ? d.unincludedNote.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
                         cleanDetail += `포함사항: ${inc}\n`;
                         cleanDetail += `불포함사항: ${uninc}\n`;
-                    } catch(e) { cleanDetail = '상세 파싱 실패'; }
+                    } catch(e) { cleanDetail += '\n상세 파싱 실패'; }
+
+                    try {
+                        // 추가로 resSch의 listAirRouteInfo 에서 상세 시간 추출
+                        const s = resSch?.result?.scheduleItemList || [];
+                        let fInfo = '\n<항공 일정 내역>\n';
+                        s.forEach((day:any) => {
+                            if(day.listAirRouteInfo && day.listAirRouteInfo.item) {
+                                day.listAirRouteInfo.item.forEach((air:any) => {
+                                    if(air.transportCode) fInfo += `[${air.transportName || ''} ${air.departureFlight || ''}] ${air.arrivalCityName||''} 도착시간: ${air.arrivalTime||''}\n`;
+                                    if(!air.transportCode && air.departureCityName) fInfo += `[출발지역] ${air.departureCityName} 출발시간: ${air.departureTime||''}\n`;
+                                });
+                            }
+                        });
+                        cleanDetail += fInfo;
+                    } catch (e) {}
 
                     internalApiData = `\n--- [Internal API DATA (CLEANED)] ---\n<여행 상세 정보>\n${cleanDetail}\n\n<일정표 정보>\n${cleanSchedule}\n----------------\n`;
                     console.log(`[Confirmation/Crawler] Internal API fetched: ${internalApiData.length} chars`);
