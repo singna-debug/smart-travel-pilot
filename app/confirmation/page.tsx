@@ -474,14 +474,16 @@ export default function ConfirmationPage() {
     const updateSRField = (section: string, field: string, value: string) => {
         setSecondaryResearch((prev: any) => {
             if (!prev) return prev;
-            return { ...prev, [section]: { ...prev[section], [field]: value } };
+            const sectionData = prev[section] || {};
+            return { ...prev, [section]: { ...sectionData, [field]: value } };
         });
     };
     const updateSRLandmark = (index: number, field: string, value: string) => {
         setSecondaryResearch((prev: any) => {
             if (!prev || !prev.landmarks) return prev;
             const newLandmarks = [...prev.landmarks];
-            newLandmarks[index] = { ...newLandmarks[index], [field]: value };
+            const item = newLandmarks[index] || {};
+            newLandmarks[index] = { ...item, [field]: value };
             return { ...prev, landmarks: newLandmarks };
         });
     };
@@ -489,7 +491,8 @@ export default function ConfirmationPage() {
         setSecondaryResearch((prev: any) => {
             if (!prev || !prev.weather || !prev.weather.forecast) return prev;
             const newForecast = [...prev.weather.forecast];
-            newForecast[index] = { ...newForecast[index], [field]: value };
+            const item = newForecast[index] || {};
+            newForecast[index] = { ...item, [field]: value };
             return { ...prev, weather: { ...prev.weather, forecast: newForecast } };
         });
     };
@@ -498,7 +501,8 @@ export default function ConfirmationPage() {
         setSecondaryResearch((prev: any) => {
             if (!prev || !prev.weather || !prev.weather.clothingTips) return prev;
             const newTips = [...prev.weather.clothingTips];
-            newTips[index] = { ...newTips[index], [field]: value };
+            const item = newTips[index] || {};
+            newTips[index] = { ...item, [field]: value };
             return { ...prev, weather: { ...prev.weather, clothingTips: newTips } };
         });
     };
@@ -516,7 +520,8 @@ export default function ConfirmationPage() {
         setSecondaryResearch((prev: any) => {
             if (!prev || !prev.customs || !prev.customs.links) return prev;
             const newLinks = [...prev.customs.links];
-            newLinks[index] = { ...newLinks[index], [field]: value };
+            const item = newLinks[index] || {};
+            newLinks[index] = { ...item, [field]: value };
             return { ...prev, customs: { ...prev.customs, links: newLinks } };
         });
     };
@@ -769,23 +774,23 @@ export default function ConfirmationPage() {
                     </div>
                     <div className="confirm-field">
                         <label>가는편 도착</label>
-                        <input value={arrivalTime} onChange={e => setArrivalTime(e.target.value)} placeholder="12:30" />
+                        <input value={arrivalTime} onChange={e => setArrivalTime(e.target.value)} placeholder="12:30" style={{ color: '#ffffff' }} />
                     </div>
                     <div className="confirm-field">
                         <label>가는편 소요시간</label>
-                        <input value={flightDuration} onChange={e => setFlightDuration(e.target.value)} placeholder="02:05 소요" />
+                        <input value={flightDuration} onChange={e => setFlightDuration(e.target.value)} placeholder="02:05 소요" style={{ color: '#ffffff' }} />
                     </div>
                     <div className="confirm-field">
                         <label>오는편 출발</label>
-                        <input value={returnDepartureTime} onChange={e => setReturnDepartureTime(e.target.value)} placeholder="14:00" />
+                        <input value={returnDepartureTime} onChange={e => setReturnDepartureTime(e.target.value)} placeholder="14:00" style={{ color: '#ffffff' }} />
                     </div>
                     <div className="confirm-field">
                         <label>오는편 도착</label>
-                        <input value={returnArrivalTime} onChange={e => setReturnArrivalTime(e.target.value)} placeholder="21:00" />
+                        <input value={returnArrivalTime} onChange={e => setReturnArrivalTime(e.target.value)} placeholder="21:00" style={{ color: '#ffffff' }} />
                     </div>
                     <div className="confirm-field">
                         <label>오는편 소요시간</label>
-                        <input value={returnFlightDuration} onChange={e => setReturnFlightDuration(e.target.value)} placeholder="02:30 소요" />
+                        <input value={returnFlightDuration} onChange={e => setReturnFlightDuration(e.target.value)} placeholder="02:30 소요" style={{ color: '#ffffff' }} />
                     </div>
                 </div>
                 {hotels.map((h, i) => (
@@ -1202,22 +1207,31 @@ export default function ConfirmationPage() {
                                     <input value={secondaryResearch.customs?.warningTitle || ''} onChange={e => updateSRField('customs', 'warningTitle', e.target.value)} />
                                 </div>
                                 <div className="confirm-field">
-                                    <label style={{ color: 'var(--text-secondary)' }}>핵심 경고 제목 (레퍼런스형)</label>
                                     <input value={secondaryResearch.customs?.majorAlert?.title || ''} onChange={e => {
-                                        setSecondaryResearch((prev: any) => ({
-                                            ...prev,
-                                            customs: { ...prev.customs, majorAlert: { ...prev.customs.majorAlert, title: e.target.value } }
-                                        }));
-                                    }} />
+                                        setSecondaryResearch((prev: any) => {
+                                            if (!prev) return prev;
+                                            const customs = prev.customs || {};
+                                            const majorAlert = customs.majorAlert || {};
+                                            return {
+                                                ...prev,
+                                                customs: { ...customs, majorAlert: { ...majorAlert, title: e.target.value } }
+                                            };
+                                        });
+                                    }} style={{ color: '#ffffff' }} />
                                 </div>
                                 <div className="confirm-field">
                                     <label style={{ color: 'var(--text-secondary)' }}>핵심 경고 벌금/내용</label>
                                     <input value={secondaryResearch.customs?.majorAlert?.penalty || ''} onChange={e => {
-                                        setSecondaryResearch((prev: any) => ({
-                                            ...prev,
-                                            customs: { ...prev.customs, majorAlert: { ...prev.customs.majorAlert, penalty: e.target.value } }
-                                        }));
-                                    }} />
+                                        setSecondaryResearch((prev: any) => {
+                                            if (!prev) return prev;
+                                            const customs = prev.customs || {};
+                                            const majorAlert = customs.majorAlert || {};
+                                            return {
+                                                ...prev,
+                                                customs: { ...customs, majorAlert: { ...majorAlert, penalty: e.target.value } }
+                                            };
+                                        });
+                                    }} style={{ color: '#ffffff' }} />
                                 </div>
                                 <div className="confirm-field">
                                     <label style={{ color: 'var(--text-secondary)' }}>미성년자 안내 (간략)</label>
@@ -1242,11 +1256,16 @@ export default function ConfirmationPage() {
                                     <div className="confirm-field">
                                         <label style={{ color: 'var(--text-secondary)' }}>절차 제목</label>
                                         <input value={secondaryResearch.customs?.arrivalProcedure?.title || ''} onChange={e => {
-                                            setSecondaryResearch((prev: any) => ({
-                                                ...prev,
-                                                customs: { ...prev.customs, arrivalProcedure: { ...prev.customs.arrivalProcedure, title: e.target.value } }
-                                            }));
-                                        }} />
+                                            setSecondaryResearch((prev: any) => {
+                                                if (!prev) return prev;
+                                                const customs = prev.customs || {};
+                                                const arrivalProcedure = customs.arrivalProcedure || {};
+                                                return {
+                                                    ...prev,
+                                                    customs: { ...customs, arrivalProcedure: { ...arrivalProcedure, title: e.target.value } }
+                                                };
+                                            });
+                                        }} style={{ color: '#ffffff' }} />
                                     </div>
                                     {secondaryResearch.customs?.arrivalProcedure?.steps?.map((step: any, idx: number) => (
                                         <div key={idx} style={{ 
@@ -1262,23 +1281,29 @@ export default function ConfirmationPage() {
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                 <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>단계명</label>
                                                 <input value={step.step} placeholder="단계명" style={{ width: '100%', fontSize: '0.8rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '6px 10px', color: '#fff' }} onChange={e => {
-                                                    const newSteps = [...(secondaryResearch.customs?.arrivalProcedure?.steps || [])];
-                                                    newSteps[idx] = { ...newSteps[idx], step: e.target.value };
-                                                    setSecondaryResearch((prev: any) => ({
-                                                        ...prev,
-                                                        customs: { ...prev.customs, arrivalProcedure: { ...(prev.customs?.arrivalProcedure || {}), steps: newSteps } }
-                                                    }));
+                                                    setSecondaryResearch((prev: any) => {
+                                                        if (!prev || !prev.customs || !prev.customs.arrivalProcedure || !prev.customs.arrivalProcedure.steps) return prev;
+                                                        const newSteps = [...prev.customs.arrivalProcedure.steps];
+                                                        newSteps[idx] = { ...newSteps[idx], step: e.target.value };
+                                                        return {
+                                                            ...prev,
+                                                            customs: { ...prev.customs, arrivalProcedure: { ...prev.customs.arrivalProcedure, steps: newSteps } }
+                                                        };
+                                                    });
                                                 }} />
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                 <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>상세 가이드</label>
                                                 <textarea rows={2} value={step.description} placeholder="상세 내용" style={{ width: '100%', fontSize: '0.8rem', padding: '8px 10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff', resize: 'vertical' }} onChange={e => {
-                                                    const newSteps = [...(secondaryResearch.customs?.arrivalProcedure?.steps || [])];
-                                                    newSteps[idx] = { ...newSteps[idx], description: e.target.value };
-                                                    setSecondaryResearch((prev: any) => ({
-                                                        ...prev,
-                                                        customs: { ...prev.customs, arrivalProcedure: { ...(prev.customs?.arrivalProcedure || {}), steps: newSteps } }
-                                                    }));
+                                                    setSecondaryResearch((prev: any) => {
+                                                        if (!prev || !prev.customs || !prev.customs.arrivalProcedure || !prev.customs.arrivalProcedure.steps) return prev;
+                                                        const newSteps = [...prev.customs.arrivalProcedure.steps];
+                                                        newSteps[idx] = { ...newSteps[idx], description: e.target.value };
+                                                        return {
+                                                            ...prev,
+                                                            customs: { ...prev.customs, arrivalProcedure: { ...prev.customs.arrivalProcedure, steps: newSteps } }
+                                                        };
+                                                    });
                                                 }} />
                                             </div>
                                         </div>
