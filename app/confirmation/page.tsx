@@ -111,8 +111,10 @@ export default function ConfirmationPage() {
     const [departureAirport, setDepartureAirport] = useState('');
     const [departureTime, setDepartureTime] = useState('');
     const [arrivalTime, setArrivalTime] = useState('');
+    const [flightDuration, setFlightDuration] = useState('');
     const [returnDepartureTime, setReturnDepartureTime] = useState('');
     const [returnArrivalTime, setReturnArrivalTime] = useState('');
+    const [returnFlightDuration, setReturnFlightDuration] = useState('');
 
     // 숙박 (다중 지원)
     const [hotels, setHotels] = useState<any[]>([{
@@ -264,8 +266,10 @@ export default function ConfirmationPage() {
                 // 시간 정보는 raw.departureTime 등이 문자열일 수도 있고 객체일 수도 있으므로 유연하게 처리
                 if (raw.departureTime) setDepartureTime(raw.departureTime);
                 if (raw.arrivalTime) setArrivalTime(raw.arrivalTime);
+                if (raw.flightDuration) setFlightDuration(raw.flightDuration);
                 if (raw.returnDepartureTime) setReturnDepartureTime(raw.returnDepartureTime);
                 if (raw.returnArrivalTime) setReturnArrivalTime(raw.returnArrivalTime);
+                if (raw.returnFlightDuration) setReturnFlightDuration(raw.returnFlightDuration);
                 
                 // 편명/코드 (필요시 추가 매핑)
                 // if (raw.flightCode) ... (현재 state에 flightCode가 없으면 생략 가능)
@@ -768,12 +772,20 @@ export default function ConfirmationPage() {
                         <input value={arrivalTime} onChange={e => setArrivalTime(e.target.value)} placeholder="12:30" />
                     </div>
                     <div className="confirm-field">
+                        <label>가는편 소요시간</label>
+                        <input value={flightDuration} onChange={e => setFlightDuration(e.target.value)} placeholder="02:05 소요" />
+                    </div>
+                    <div className="confirm-field">
                         <label>오는편 출발</label>
                         <input value={returnDepartureTime} onChange={e => setReturnDepartureTime(e.target.value)} placeholder="14:00" />
                     </div>
                     <div className="confirm-field">
                         <label>오는편 도착</label>
                         <input value={returnArrivalTime} onChange={e => setReturnArrivalTime(e.target.value)} placeholder="21:00" />
+                    </div>
+                    <div className="confirm-field">
+                        <label>오는편 소요시간</label>
+                        <input value={returnFlightDuration} onChange={e => setReturnFlightDuration(e.target.value)} placeholder="02:30 소요" />
                     </div>
                 </div>
                 {hotels.map((h, i) => (
@@ -822,7 +834,7 @@ export default function ConfirmationPage() {
                         </div>
                     </div>
                 ))}
-                <button onClick={addHotel} className="btn-add-hotel" style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px dashed var(--border-color)', borderRadius: '8px', cursor: 'pointer', fontWeight: 500 }}>+ 호텔 추가</button>
+                <button onClick={addHotel} className="btn-add-hotel" style={{ width: '100%', padding: '12px', background: 'var(--bg-secondary)', border: '1px dashed var(--border-color)', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, color: 'var(--text-primary)' }}>+ 호텔 추가</button>
             </div>
 
             {/* 미팅 및 수속 정보 */}
@@ -1160,7 +1172,7 @@ export default function ConfirmationPage() {
                                                     rows={2} 
                                                     value={tip.content} 
                                                     onChange={e => updateSRWeatherClothing(idx, 'content', e.target.value)}
-                                                    style={{ width: '100%', fontSize: '0.8rem', padding: '6px 8px', marginTop: '4px', background: 'transparent', border: 'none', resize: 'none' }}
+                                                    style={{ width: '100%', fontSize: '0.82rem', padding: '8px 10px', marginTop: '4px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '6px', resize: 'none', color: '#ffffff' }}
                                                 />
                                             </div>
                                         ))}

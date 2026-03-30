@@ -47,10 +47,12 @@ export function mergeNativeData(result: DetailedProductInfo, nativeData: any): D
     if (!isPopulated(result.departureFlightNumber)) result.departureFlightNumber = nativeData.departureFlightNumber;
     if (!isPopulated(result.departureTime)) result.departureTime = nativeData.departureTime;
     if (!isPopulated(result.arrivalTime)) result.arrivalTime = nativeData.arrivalTime;
+    if (!isPopulated(result.flightDuration)) result.flightDuration = nativeData.flightDuration;
     
     if (!isPopulated(result.returnFlightNumber)) result.returnFlightNumber = nativeData.returnFlightNumber;
     if (!isPopulated(result.returnDepartureTime)) result.returnDepartureTime = nativeData.returnDepartureTime;
     if (!isPopulated(result.returnArrivalTime)) result.returnArrivalTime = nativeData.returnArrivalTime;
+    if (!isPopulated(result.returnFlightDuration)) result.returnFlightDuration = nativeData.returnFlightDuration;
 
     // 3. 일정표 보강 (AI가 일부 일차만 생성했을 때 Native로 보충)
     const nativeItinerary = nativeData.itinerary || [];
