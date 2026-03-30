@@ -1,0 +1,2 @@
+﻿NORMAL: title=[ì¶ë°íì ][ì¨ì²iníì]... price=919,000ì airport=ì¸ì² airline=ì ì£¼í­ê³µ
+CONFIRM: title=[ì¶ë°íì ][ì¨ì²iníì]... price=919,000ì airport=ì¸ì² airline=ì ì£¼í­ê³µ itinerary=3 duration=2ë° 3ì¼

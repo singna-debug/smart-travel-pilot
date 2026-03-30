@@ -1,6 +1,6 @@
 import type { DetailedProductInfo } from '../../types';
 import { analyzeWithGemini, htmlToText, fallbackParse } from '../crawler-base-utils';
-import { fetchContent, scrapeWithScrapingBee } from './fetcher';
+import { fetchContent, scrapeWithStealthFetch } from './fetcher';
 import { refineData } from './refiner';
 import { scrapeWithBrowser } from '../browser-crawler';
 
@@ -25,18 +25,15 @@ export async function crawlTravelProduct(url: string, source?: string): Promise<
                 console.log(`[NormalCrawler] Scraping with Browser for more data...`);
                 const browserHtml = await scrapeWithBrowser(url, { skipClicks: true });
                 if (browserHtml) {
-                    // browserHtml은 이미 browser-crawler에서 텍스트 기반으로 가공되어 있음
                     if (browserHtml.length > finalText.length) finalText = browserHtml;
                 }
             } catch (e) {}
-        } else if (process.env.SCRAPINGBEE_API_KEY) {
+        } else {
             try {
-                console.log(`[NormalCrawler] Scraping with ScrapingBee...`);
-                const beeHtml = await scrapeWithScrapingBee(url);
-                if (beeHtml) {
-                    // ScrapingBee 결과는 HTML이므로 htmlToText 필요
-                    const beeText = htmlToText(beeHtml, url);
-                    if (beeText.length > finalText.length) finalText = beeText;
+                console.log(`[NormalCrawler] Scraping with Stealth Fetch (Fallback)...`);
+                const stealthHtml = await scrapeWithStealthFetch(url);
+                if (stealthHtml) {
+                    if (stealthHtml.length > finalText.length) finalText = stealthHtml;
                 }
             } catch (e) {}
         }
@@ -78,10 +75,9 @@ export async function crawlTravelProduct(url: string, source?: string): Promise<
             if (nativeData.airline) merged.airline = nativeData.airline;
             if (nativeData.departureDate) merged.departureDate = nativeData.departureDate;
             if (nativeData.returnDate) merged.returnDate = nativeData.returnDate;
-            if (nativeData.departureAirport && nativeData.departureAirport !== '인천') {
+            // ★ [수정] 출발공항: 항상 Native 데이터를 우선 적용 ("인천"도 유효한 값)
+            if (nativeData.departureAirport) {
                 merged.departureAirport = nativeData.departureAirport;
-            } else if (!merged.departureAirport) {
-                merged.departureAirport = nativeData.departureAirport || '인천';
             }
             if (nativeData.destination) merged.destination = nativeData.destination;
             if (nativeData.duration && nativeData.duration !== '미정') merged.duration = nativeData.duration;

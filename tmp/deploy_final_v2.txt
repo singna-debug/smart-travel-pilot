@@ -1,0 +1,1053 @@
+﻿[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+[Fix] Hostname temporarily patched to "Travel-Pilot-PC"
+node.
+exe :
+ Retr
+ievin
+g pro
+ject?
+?Depl
+oying
+ jina
+s-pro
+jects
+-fd1e
+c36b/
+clubm
+ode
+위치 줄:
+1 문자:
+1
++ & "
+C:\Pr
+ogram
+ File
+s\nod
+ejs/n
+ode.e
+xe" "
+C:\Pr
+ogram
+ File
+s\nod
+ejs/n
+ode_m
+o ...
++ ~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~~~~~
+~
+    +
+     
+    C
+    a
+    t
+    e
+    g
+    o
+    r
+    y
+    I
+    n
+    f
+    o
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+    :
+     
+    N
+    o
+    t
+    S
+    p
+    e
+    c
+    i
+    f
+    i
+    e
+    d
+    :
+     
+    (
+    R
+    e
+    t
+    r
+    i
+    e
+    v
+    i
+    n
+    g
+     
+    p
+    r
+    o
+    j
+    .
+    .
+    .
+    1
+    e
+    c
+    3
+    6
+    b
+    /
+    c
+    l
+    u
+    b
+    m
+    o
+    d
+    e
+    :
+    S
+    t
+    r
+    i
+    n
+    g
+    )
+     
+    [
+    ]
+    ,
+     
+    R
+    e
+    m
+    o
+    t
+    e
+    E
+    x
+    c
+    e
+    p
+    t
+    i
+    o
+    n
+    +
+     
+    F
+    u
+    l
+    l
+    y
+    Q
+    u
+    a
+    l
+    i
+    f
+    i
+    e
+    d
+    E
+    r
+    r
+    o
+    r
+    I
+    d
+     
+    :
+     
+    N
+    a
+    t
+    i
+    v
+    e
+    C
+    o
+    m
+    m
+    a
+    n
+    d
+    E
+    r
+    r
+    o
+    r
+ 
+Uploa
+ding 
+[----
+-----
+-----
+-----
+-] (0
+.0B/3
+3KB)
+Uploa
+ding 
+[====
+=----
+-----
+-----
+-] (9
+.6KB/
+33KB)
+Uploa
+ding 
+[====
+=====
+==---
+-----
+-] (1
+9.2KB
+/33KB
+)
+Uploa
+ding 
+[====
+=====
+=====
+===--
+-] (2
+9.5KB
+/33KB
+)
+Uploa
+ding 
+[====
+=====
+=====
+=====
+=] (3
+3.0KB
+/33KB
+)
+Inspe
+ct: h
+ttps:
+//ver
+cel.c
+om/ji
+nas-p
+rojec
+ts-fd
+1ec36
+b/clu
+bmode
+/Dj8g
+W9J1p
+vq2Ru
+7N6as
+DvBY1
+ZmpQ 
+[3s]
+Produ
+ction
+: htt
+ps://
+clubm
+ode-3
+a7qge
+rre-j
+inas-
+proje
+cts-f
+d1ec3
+6b.ve
+rcel.
+app [
+3s]
+Build
+ing..
+.
+Build
+ing..
+.
+Build
+ing: 
+Runni
+ng bu
+ild i
+n Was
+hingt
+on, D
+.C., 
+USA (
+East)
+ ??ia
+d1
+Build
+ing: 
+Build
+ mach
+ine c
+onfig
+urati
+on: 2
+ core
+s, 8 
+GB
+Build
+ing: 
+Retri
+eving
+ list
+ of d
+eploy
+ment 
+files
+...
+Build
+ing: 
+Downl
+oadin
+g 686
+ depl
+oymen
+t fil
+es...
+Build
+ing: 
+Resto
+red b
+uild 
+cache
+ from
+ prev
+ious 
+deplo
+yment
+ (Dp4
+7sLzG
+N9Ebg
+r6XKG
+hWrku
+eduCx
+)
+Build
+ing: 
+Runni
+ng "v
+ercel
+ buil
+d"
+Build
+ing: 
+Verce
+l CLI
+ 50.3
+7.1
+Build
+ing: 
+Insta
+lling
+ depe
+ndenc
+ies..
+.
+Build
+ing: 
+up to
+ date
+ in 1
+s
+Build
+ing: 
+187 p
+ackag
+es ar
+e loo
+king 
+for f
+undin
+g
+Build
+ing: 
+run `
+npm f
+und` 
+for d
+etail
+s
+Build
+ing: 
+Detec
+ted N
+ext.j
+s ver
+sion:
+ 16.1
+.6
+Build
+ing: 
+Runni
+ng "n
+pm ru
+n bui
+ld"
+Build
+ing: 
+> sma
+rt-tr
+avel-
+pilot
+@0.1.
+0 bui
+ld
+Build
+ing: 
+> nex
+t bui
+ld
+Build
+ing: 
+??`es
+lint`
+ conf
+igura
+tion 
+in ne
+xt.co
+nfig.
+ts is
+ no l
+onger
+ supp
+orted
+. See
+ more
+ info
+ here
+: htt
+ps://
+nextj
+s.org
+/docs
+/app/
+api-r
+efere
+nce/c
+li/ne
+xt#ne
+xt-li
+nt-op
+tions
+Build
+ing: 
+??Inv
+alid 
+next.
+confi
+g.ts 
+optio
+ns de
+tecte
+d:
+Build
+ing: 
+??   
+ Unre
+cogni
+zed k
+ey(s)
+ in o
+bject
+: 'es
+lint'
+Build
+ing: 
+??See
+ more
+ info
+ here
+: htt
+ps://
+nextj
+s.org
+/docs
+/mess
+ages/
+inval
+id-ne
+xt-co
+nfig
+Build
+ing: 
+??Nex
+t.js 
+16.1.
+6 (Tu
+rbopa
+ck)
+Build
+ing: 
+Creat
+ing a
+n opt
+imize
+d pro
+ducti
+on bu
+ild .
+..
+Build
+ing: 
+??Com
+piled
+ succ
+essfu
+lly i
+n 35.
+1s
+Build
+ing: 
+Skipp
+ing v
+alida
+tion 
+of ty
+pes
+Build
+ing: 
+Colle
+cting
+ page
+ data
+ usin
+g 1 w
+orker
+ ...
+Build
+ing: 
+??Usi
+ng ed
+ge ru
+ntime
+ on a
+ page
+ curr
+ently
+ disa
+bles 
+stati
+c gen
+erati
+on fo
+r tha
+t pag
+e
+Build
+ing: 
+Gener
+ating
+ stat
+ic pa
+ges u
+sing 
+1 wor
+ker (
+0/30)
+ ...
+Build
+ing: 
+Gener
+ating
+ stat
+ic pa
+ges u
+sing 
+1 wor
+ker (
+7/30)
+Build
+ing: 
+Gener
+ating
+ stat
+ic pa
+ges u
+sing 
+1 wor
+ker (
+14/30
+)
+Build
+ing: 
+Gener
+ating
+ stat
+ic pa
+ges u
+sing 
+1 wor
+ker (
+22/30
+)
+Build
+ing: 
+??Gen
+erati
+ng st
+atic 
+pages
+ usin
+g 1 w
+orker
+ (30/
+30) i
+n 312
+.8ms
+Build
+ing: 
+Final
+izing
+ page
+ opti
+mizat
+ion .
+..
+Build
+ing: 
+Route
+ (app
+)
+Build
+ing: 
+????/
+Build
+ing: 
+????/
+_not-
+found
+Build
+ing: 
+??? /
+api/a
+nalyz
+e-url
+Build
+ing: 
+??? /
+api/c
+hat
+Build
+ing: 
+??? /
+api/c
+hats
+Build
+ing: 
+??? /
+api/c
+hats/
+[id]
+Build
+ing: 
+??? /
+api/c
+hats/
+[id]/
+bot-t
+oggle
+Build
+ing: 
+??? /
+api/c
+hats/
+[id]/
+messa
+ges
+Build
+ing: 
+??? /
+api/c
+hats/
+[id]/
+summa
+rize
+Build
+ing: 
+??? /
+api/c
+hats/
+clean
+up
+Build
+ing: 
+??? /
+api/c
+onfir
+matio
+n
+Build
+ing: 
+??? /
+api/c
+onfir
+matio
+n/[id
+]
+Build
+ing: 
+??? /
+api/c
+onfir
+matio
+n/ana
+lyze
+Build
+ing: 
+??? /
+api/c
+onfir
+matio
+n/ana
+lyze/
+crawl
+Build
+ing: 
+??? /
+api/c
+onfir
+matio
+n/sec
+ondar
+y-res
+earch
+Build
+ing: 
+??? /
+api/c
+onsul
+tatio
+ns
+Build
+ing: 
+??? /
+api/c
+onsul
+tatio
+ns/co
+nfirm
+Build
+ing: 
+??? /
+api/c
+onsul
+tatio
+ns/hi
+story
+Build
+ing: 
+??? /
+api/c
+rawl
+Build
+ing: 
+??? /
+api/c
+rawl-
+analy
+ze
+Build
+ing: 
+??? /
+api/c
+ron/a
+uto-m
+essag
+e
+Build
+ing: 
+??? /
+api/c
+ron/n
+otify
+Build
+ing: 
+??? /
+api/d
+ebug
+Build
+ing: 
+??? /
+api/e
+xchan
+ge-ra
+te
+Build
+ing: 
+??? /
+api/k
+akao-
+skill
+Build
+ing: 
+??? /
+api/l
+ogs
+Build
+ing: 
+??? /
+api/m
+essag
+es
+Build
+ing: 
+??? /
+api/m
+igrat
+e-she
+ets
+Build
+ing: 
+??? /
+api/s
+ave-c
+onsul
+tatio
+n
+Build
+ing: 
+??? /
+api/s
+etup-
+produ
+cts
+Build
+ing: 
+??? /
+api/s
+heet-
+info
+Build
+ing: 
+??? /
+api/s
+tats
+Build
+ing: 
+????/
+chat
+Build
+ing: 
+????/
+chats
+Build
+ing: 
+??? /
+chats
+/[id]
+Build
+ing: 
+????/
+confi
+rmati
+on
+Build
+ing: 
+??? /
+confi
+rmati
+on/[i
+d]
+Build
+ing: 
+????/
+logs
+Build
+ing: 
+????/
+manua
+l-log
+Build
+ing: 
+????/
+messa
+ges
+Build
+ing: 
+????/
+produ
+cts
+Build
+ing: 
+????/
+tools
+Build
+ing: 
+?? (S
+tatic
+)   p
+reren
+dered
+ as s
+tatic
+ cont
+ent
+Build
+ing: 
+?  (D
+ynami
+c)  s
+erver
+-rend
+ered 
+on de
+mand
+Build
+ing: 
+Trace
+d Nex
+t.js 
+serve
+r fil
+es in
+: 35.
+12ms
+Build
+ing: 
+Creat
+ed al
+l ser
+verle
+ss fu
+nctio
+ns in
+: 870
+.877m
+s
+Build
+ing: 
+Colle
+cted 
+stati
+c fil
+es (p
+ublic
+/, st
+atic/
+, .ne
+xt/st
+atic)
+: 3.9
+08ms
+Build
+ing: 
+Build
+ Comp
+leted
+ in /
+verce
+l/out
+put [
+43s]
+Build
+ing: 
+Deplo
+ying 
+outpu
+ts...
+Build
+ing: 
+Deplo
+yment
+ comp
+leted
+Build
+ing: 
+Creat
+ing b
+uild 
+cache
+...
+[2K
+[1A[
+2K[G
+Produ
+ction
+: htt
+ps://
+clubm
+ode-3
+a7qge
+rre-j
+inas-
+proje
+cts-f
+d1ec3
+6b.ve
+rcel.
+app [
+1m]
+Compl
+eting
+...
+Alias
+ed: h
+ttps:
+//clu
+bmode
+.verc
+el.ap
+p [1m
+]
+
+Commo
+n nex
+t com
+mands
+:
+- `ve
+rcel 
+inspe
+ct cl
+ubmod
+e-3a7
+qgerr
+e-jin
+as-pr
+oject
+s-fd1
+ec36b
+.verc
+el.ap
+p --l
+ogs`
+- `ve
+rcel 
+redep
+loy c
+lubmo
+de-3a
+7qger
+re-ji
+nas-p
+rojec
+ts-fd
+1ec36
+b.ver
+cel.a
+pp`
+https://clubmode-3a7qgerre-jinas-projects-fd1ec36b.vercel.app[Fix] Hostname temporarily patched to "Travel-Pilot-PC"

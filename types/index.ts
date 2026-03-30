@@ -158,6 +158,8 @@ export interface DetailedProductInfo {
   notices?: string[];
   specialTerms?: string;
   baggageNote?: string;
+  cancellationPolicy?: string;
+  checklist?: string[];
 }
 
 // URL 분석기 단일 결과 타입
