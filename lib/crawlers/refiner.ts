@@ -56,21 +56,34 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
             refined.duration = `${durationMatch[1]}박 ${durationMatch[2]}일`;
         }
     }
-    
+    const forbiddenWords = ['노팁', '노쇼핑', '노옵션', '출발', '확정', '특가', '단독', '기획', '모객', '특전', '스마일', '명부터', '예약', '마감', '할인', '이벤트', '시그니처', '선착순', '베스트', '홈쇼핑'];
+
     if (refined.title.includes('/')) {
-        const titleCities = refined.title.match(/([가-힣]{2,5}(?:\/[가-힣]{2,5})+)/);
-        if (titleCities) {
-            const cities = titleCities[1].replace(/\//g, ', ');
-            if (!refined.destination || refined.destination.length < cities.length) {
-                refined.destination = cities;
+        const titleMatchRegex = /([가-힣]{2,5}(?:\/[가-힣]{2,5})+)/g;
+        let match;
+        let bestDest = '';
+        while ((match = titleMatchRegex.exec(refined.title)) !== null) {
+            const candidate = match[1].replace(/\//g, ', ');
+            const isForbidden = forbiddenWords.some(w => candidate.includes(w));
+            if (!isForbidden && candidate.length > bestDest.length) {
+                bestDest = candidate;
             }
+        }
+        if (bestDest && (!refined.destination || refined.destination.length < bestDest.length)) {
+            refined.destination = bestDest;
         }
     }
     
     if (!refined.destination || refined.destination.length < 2) {
-        const destMatch = refined.title.match(/\[(.*?)\]/);
-        if (destMatch && destMatch[1].length > 1 && destMatch[1].length < 10) {
-            refined.destination = destMatch[1];
+        const titleMatchRegex = /\[(.*?)\]/g;
+        let match;
+        while ((match = titleMatchRegex.exec(refined.title)) !== null) {
+            const candidate = match[1];
+            const isForbidden = forbiddenWords.some(w => candidate.includes(w));
+            if (!isForbidden && candidate.length > 1 && candidate.length < 10) {
+                refined.destination = candidate;
+                break;
+            }
         }
     }
 
