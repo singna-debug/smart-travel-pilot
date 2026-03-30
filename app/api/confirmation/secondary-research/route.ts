@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: '여행지 정보가 필요합니다.' }, { status: 400 });
         }
 
-        const context = `[상품명/설명]: ${title || '비명시'}\n[요청된 여행지/도시]: ${destination}\n[여행 시기]: ${travelMonth || '현재'}\n[이용 항공사]: ${airline || '비명시'}\n[수하물 규정]: ${baggageNote || '비명시'}`;
+        const context = `[요청된 여행지/국가/도시]: ${destination} (★★★오직 이 장소를 기준으로 날씨/환전/관광지 정보 작성, 다른 나라로 착각 절대 금지)\n[상품명/설명 대상]: ${title || '일반 패키지 여행 (상품명이 없어도 이 도시의 일반적인 정보를 꼭 작성할 것)'}\n[여행 시기]: ${travelMonth || '일반 시즌'}\n[이용 항공사]: ${airline || '개별 예약'}\n[수하물 규정 참고]: ${baggageNote || '일반 규정'}`;
 
         const tasks = [
             // ✨ Task 1: UI용 고급 날씨 구조 복구
@@ -216,10 +216,10 @@ ${customGuides && customGuides.length > 0 ? `요청 가이드 주제: ${customGu
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         systemInstruction: { 
-                            parts: [{ text: "당신은 최고의 여행 리서치 전문가입니다. 반드시 [상품명/설명]과 [요청된 여행지/도시]를 최우선으로 참고하여 해당 장소에 대한 정보만 분석하세요. 주어진 지명(예: 중국 청도)을 엉뚱한 해외(예: 베트남)나 엉뚱한 국내(예: 제주도)로 착각하여 할루시네이션(환각)을 발생시키는 것을 절대 금지합니다. 정확한 정보만 제공하세요." }] 
+                            parts: [{ text: "당신은 능숙한 여행 가이드북 작성 인공지능입니다. 제공된 [요청된 여행지/도시]를 기준으로 환전, 날씨, 세관, 관광지 정보를 풍부하게 작성하세요. [상품명/설명 대상] 내의 값이 없거나 '일반' 형태이더라도, 거절하지 말고 해당 도시(여행지)의 일반적인 여행 정보를 기준으로 반드시 모든 필드를 채워야 합니다. 다른 국가(예: 중국 청도인데 베트남으로 착각)로 착각하는 현상만 주의하세요." }] 
                         },
                         contents: [{ parts: [{ text: task.prompt }] }],
-                        generationConfig: { temperature: 0.2 }
+                        generationConfig: { temperature: 0.3 }
                     })
                 });
 
