@@ -439,6 +439,7 @@ export default function ConfirmationPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    title: (analysisResult as any)?.title || '',
                     destination,
                     airline,
                     airport: departureAirport,
