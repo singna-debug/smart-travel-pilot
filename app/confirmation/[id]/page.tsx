@@ -468,81 +468,93 @@ const FlightInfoCard = ({
     const deptCode = CITY_CODE_MAP[deptCityText] ? ` (${CITY_CODE_MAP[deptCityText]})` : '';
     const arrCode = CITY_CODE_MAP[arrCityText] ? ` (${CITY_CODE_MAP[arrCityText]})` : '';
 
-    const cleanDuration = duration ? (duration.includes('소요') ? duration : `${duration} 소요`) : '';
+    const cleanDuration = (dur: string | undefined): string => {
+        if (!dur) return '';
+        let d = dur.trim();
+        // '소요'가 중복으로 들어있거나 끝에 이미 붙어있는 경우 처리
+        d = d.replace(/소요/g, '').trim();
+        return d ? `${d} 소요` : '';
+    };
+
+    const durationText = cleanDuration(duration);
 
     return (
-        <div style={{ marginBottom: '16px', width: '100%' }}>
+        <div className="mc-flight-card" style={{ marginBottom: '16px', width: '100%', padding: '0', background: 'transparent', border: 'none', boxShadow: 'none' }}>
             <div style={{
                 background: '#fff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
+                border: '1.5px solid #f1f5f9',
+                borderRadius: '16px',
                 padding: '24px 20px',
                 position: 'relative',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                boxShadow: '0 4px 20px rgba(0,0,0,0.04)'
             }}>
-                {label && (
+                {/* 상단 헤더: 라벨 및 날짜 */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     <div style={{ 
-                        position: 'absolute', 
-                        top: '-10px', 
-                        left: '20px', 
-                        background: '#0ea5e9', 
+                        background: info.color || '#0ea5e9', 
                         color: '#fff', 
                         fontSize: '0.7rem', 
                         fontWeight: 800, 
-                        padding: '2px 8px', 
-                        borderRadius: '4px',
-                        boxShadow: '0 2px 4px rgba(14,165,233,0.3)'
+                        padding: '3px 10px', 
+                        borderRadius: '20px',
+                        display: 'inline-block'
                     }}>
-                        {label}
+                        {label || '항공편'}
                     </div>
-                )}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    {date && (
+                        <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
+                            {date}
+                        </div>
+                    )}
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     
-                    {/* 왼쪽: 출발 정보 */}
-                    <div style={{ textAlign: 'left', width: '30%', minWidth: '90px' }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{deptCityText}{deptCode} 출발</div>
-                        {date && <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '2px' }}>{date}</div>}
-                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{formatFlightTime(departureTime)}</div>
-                        {flightNo && <div style={{ fontSize: '0.7rem', color: '#0ea5e9', fontWeight: 700, marginTop: '2px' }}>{flightNo}</div>}
+                    {/* 출발 정보 */}
+                    <div style={{ textAlign: 'left', flex: 1 }}>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1e293b', marginBottom: '2px' }}>
+                            {deptCityText}
+                            <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600, marginLeft: '4px' }}>{deptCode.replace(/[()]/g, '').trim()}</span>
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>출발</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.5px' }}>{formatFlightTime(departureTime)}</div>
                     </div>
 
-                    {/* 중앙: 아이콘, 노선, 시간 */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                    {/* 중앙 타임라인 */}
+                    <div style={{ width: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
                             {info.logoUrl ? (
-                                <img src={info.logoUrl} alt={info.name} style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                                <img src={info.logoUrl} alt={info.name} style={{ height: '14px', width: 'auto', objectFit: 'contain' }} />
                             ) : (
-                                <div style={{ width: '16px', height: '16px', background: info.color, color: 'white', fontSize: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '3px' }}>
-                                    {info.name.slice(0, 1)}
-                                </div>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>{info.name}</span>
                             )}
-                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#111' }}>{info.name}</span>
                         </div>
 
-                        {/* 타임라인 바 */}
-                        <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
-                            <div style={{ flex: 1, height: '1.5px', background: '#cbd5e1' }}></div>
-                            <div style={{ position: 'absolute', color: '#0ea5e9', background: '#fff', padding: '0 4px' }}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform: 'rotate(90deg)'}}>
-                                    <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 3.6c-.1.4.1.9.5 1.1L9 14.5l-3.5 3.5-2.8-.8c-.4-.1-.8.2-1 .6L1 19.5l4.5 1 1 4.5c.1.4.4.7.9.6l1.8-.7c.4-.2.6-.6.5-1l-.8-2.8 3.5-3.5 2.9 6c.2.4.7.6 1.1.5l3.6-1.2c.5-.2.8-.6.7-1.1z"/>
+                        <div style={{ width: '100%', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ width: '100%', height: '2px', background: '#e2e8f0', borderRadius: '1px' }}></div>
+                            <div style={{ position: 'absolute', background: '#fff', padding: '0 4px', color: info.color || '#0ea5e9' }}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" transform="rotate(90 12 12)" />
                                 </svg>
                             </div>
-                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
                         </div>
 
-                        {cleanDuration && (
-                            <div style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 600, marginTop: '8px' }}>
-                                {cleanDuration}
+                        {durationText && (
+                            <div style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700, marginTop: '12px', background: '#f0fdf4', padding: '2px 8px', borderRadius: '10px', whiteSpace: 'nowrap' }}>
+                                {durationText}
                             </div>
                         )}
+                        {flightNo && <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginTop: '6px', fontWeight: 500 }}>{flightNo}</div>}
                     </div>
 
-                    {/* 오른쪽: 도착 정보 */}
-                    <div style={{ textAlign: 'right', width: '30%', minWidth: '90px' }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{arrCityText}{arrCode} 도착</div>
-                        {date && <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '2px' }}>{date}</div>}
-                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{formatFlightTime(arrivalTime)}</div>
+                    {/* 도착 정보 */}
+                    <div style={{ textAlign: 'right', flex: 1 }}>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1e293b', marginBottom: '2px' }}>
+                            {arrCityText}
+                            <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600, marginLeft: '4px' }}>{arrCode.replace(/[()]/g, '').trim()}</span>
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>도착</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.5px' }}>{formatFlightTime(arrivalTime)}</div>
                     </div>
 
                 </div>
@@ -939,6 +951,7 @@ export default function ConfirmationViewerPage() {
                                             arrivalCity={simplifyDestination(doc.trip.destination)}
                                             arrivalTime={doc.flight.arrivalTime || ''}
                                             duration={doc.flight.flightDuration}
+                                            date={doc.trip.departureDate}
                                         />
                                     )}
                                     
@@ -952,6 +965,7 @@ export default function ConfirmationViewerPage() {
                                             arrivalCity={simplifyDestination(doc.flight.departureAirport || '도착')}
                                             arrivalTime={doc.flight.returnArrivalTime || ''}
                                             duration={doc.flight.returnFlightDuration}
+                                            date={doc.trip.returnDate}
                                         />
                                     )}
                                 </div>

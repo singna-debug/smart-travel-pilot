@@ -9,7 +9,7 @@ export const CONFIRMATION_PROMPT = `여행 상품 분석. JSON만 반환. 설명
 3. ★창작 금지: timeline의 \`title\`과 \`description\`은 절대 스스로 요약하거나 창작하지 마라! 제공된 데이터 문장을 그대로 사용하되, 불필요한 서술만 제외해라.
 4. 본문의 간략일정에 나오는 모든 관광지/이동/식사/체험을 빠짐없이 timeline에 넣어라. 마지막 날짜까지 모든 일차를 반드시 작성하라.
 5. meals의 식사 정보: "O", "X" 기호 절대 금지. "호텔식", "불포함", "현지식" 등 구체적인 단어를 찾아 적어라.
-6. ★항공 소요시간 필수★: departureFlightNumber, returnFlightNumber 외에 **duration** (예: "02:05 소요", "1시간 20분") 필드를 반드시 채워라. <항공 일정 내역>에서 "소요" 라는 단어 옆의 시간을 찾아라.
+6. ★항공 소요시간 필수★: departureFlightNumber, returnFlightNumber 외에 **duration** (예: "02:05", "1시간 20분") 필드를 반드시 채워라. <항공 일정 내역>에서 비행 시간을 찾아라.
 7. HH:mm 형식의 출발/도착 시간(departureTime 등)을 누락 없이 채워라.
 8. JSON 외 텍스트 출력 절대 금지.
 

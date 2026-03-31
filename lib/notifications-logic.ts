@@ -69,15 +69,33 @@ export async function getTodayNotificationMessage(): Promise<string | null> {
             if (cat.list.length > 0) {
                 message += `[${cat.emoji} ${cat.label}]\n`;
                 cat.list.forEach((item, idx) => {
-                    const truncatedProduct = item.trip.product_name.length > 15 
-                        ? item.trip.product_name.substring(0, 15) + '...' 
-                        : item.trip.product_name;
+                    const productNames = (item.trip.product_name || '').split(',').map(s => s.trim()).filter(Boolean);
+                    const urls = (item.trip.url || '').split(',').map(s => s.trim()).filter(Boolean);
 
                     message += `<b>${idx + 1}. 고객명 : ${item.customer.name}</b>\n`;
                     message += `   연락처 : ${item.customer.phone || '미정'}\n`;
                     message += `   출발일 : ${item.trip.departure_date || '미정'}\n`;
-                    message += `   상품명 : ${truncatedProduct}\n`;
-                    message += `   URL : ${item.trip.url || '없음'}\n\n`;
+                    
+                    if (productNames.length > 1) {
+                        message += `   상품명 :\n`;
+                        productNames.forEach((pn, pIdx) => {
+                            const pTrunc = pn.length > 20 ? pn.substring(0, 20) + '...' : pn;
+                            message += `     ${pIdx + 1}. ${pTrunc}\n`;
+                        });
+                    } else {
+                        const pTrunc = (productNames[0] || '').length > 30 ? (productNames[0] || '').substring(0, 30) + '...' : (productNames[0] || '');
+                        message += `   상품명 : ${pTrunc || '미정'}\n`;
+                    }
+
+                    if (urls.length > 1) {
+                        message += `   URL :\n`;
+                        urls.forEach((u, uIdx) => {
+                            message += `     ${uIdx + 1}. ${u}\n`;
+                        });
+                    } else {
+                        message += `   URL : ${urls[0] || '없음'}\n`;
+                    }
+                    message += `\n`;
                 });
                 message += `\n`;
             }
