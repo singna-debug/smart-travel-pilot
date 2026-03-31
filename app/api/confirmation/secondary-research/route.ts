@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
 const apiKey = (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY || '').replace(/[\x00-\x1F\x7F]/g, '').trim();
-const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-1.5-flash';
+const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash';
 
 /* ── 국가별 필수 입국/세관 절차 참조 데이터 ── */
 const ENTRY_REQUIREMENTS: Record<string, { links: { label: string; url: string; type: 'visa' | 'arrival_card' | 'customs' | 'other'; description: string; howTo: string }[] }> = {
