@@ -123,7 +123,6 @@ export default function MessageTemplateCreator() {
         }
     }, [selectedCustomer]);
 
-    // 상품 정보 로드 시 불포함사항 자동 입력
     useEffect(() => {
         if (product?.exclusions && product.exclusions.length > 0) {
             setExcludedCosts(product.exclusions.join(', '));
@@ -138,6 +137,16 @@ export default function MessageTemplateCreator() {
             setAirline(product.airline);
         }
     }, [product]);
+
+    // 멘트 자동 생성 (실시간 반영)
+    useEffect(() => {
+        generateMessage();
+    }, [
+        selectedCustomer, product, templateType, url, 
+        bookingNumber, travelers, deposit, depositDeadline, 
+        bankAccount, bankHolder, excludedCosts, depositPerPerson, 
+        confirmationLink, reviewLink, specialTerms, airline, departureDate
+    ]);
 
     async function fetchCustomers() {
         setLoadingCustomers(true);

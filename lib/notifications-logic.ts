@@ -69,8 +69,15 @@ export async function getTodayNotificationMessage(): Promise<string | null> {
             if (cat.list.length > 0) {
                 message += `[${cat.emoji} ${cat.label}]\n`;
                 cat.list.forEach((item, idx) => {
-                    message += `${idx + 1}. ${item.customer.name} (${item.customer.phone})\n`;
-                    message += `   - ${item.trip.destination} (${item.trip.product_name})\n`;
+                    const truncatedProduct = item.trip.product_name.length > 40 
+                        ? item.trip.product_name.substring(0, 40) + '...' 
+                        : item.trip.product_name;
+
+                    message += `<b>${idx + 1}. 고객명 : ${item.customer.name}</b>\n`;
+                    message += `   연락처 : ${item.customer.phone || '미정'}\n`;
+                    message += `   출발일 : ${item.trip.departure_date || '미정'}\n`;
+                    message += `   상품명 : ${truncatedProduct}\n`;
+                    message += `   URL : ${item.trip.url || '없음'}\n\n`;
                 });
                 message += `\n`;
             }
