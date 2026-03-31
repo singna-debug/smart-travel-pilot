@@ -96,8 +96,27 @@ export function getGoogleSheetsClient() {
             }
         }
 
+        // 방법 3: 개별 환경변수 (Email, Private Key) - 가장 권장하는 방식
+        if (!auth && process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
+            try {
+                const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL.trim();
+                const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n').trim();
+                
+                auth = new google.auth.GoogleAuth({
+                    credentials: {
+                        client_email: clientEmail,
+                        private_key: privateKey,
+                    },
+                    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+                });
+                console.log('[Google Sheets] Using individual env variables for Auth');
+            } catch (e: any) {
+                console.error('[Google Sheets] Individual Env Auth Error:', e.message);
+            }
+        }
+
         if (!auth) {
-            throw new Error('Google 인증 정보를 찾을 수 없습니다. google-credentials.json 파일 또는 GOOGLE_SERVICE_ACCOUNT_JSON 환경변수가 필요합니다.');
+            throw new Error('Google 인증 정보를 찾을 수 없습니다. GOOGLE_SERVICE_ACCOUNT_JSON 또는 GOOGLE_SERVICE_ACCOUNT_EMAIL/PRIVATE_KEY 환경변수가 필요합니다.');
         }
 
         const sheetsClient = google.sheets({ version: 'v4', auth });
