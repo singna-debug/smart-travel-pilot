@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { SecondaryResearch } from '@/types'; // 불필요한 타입 임포트 제거 (에러 방지)
+import type { SecondaryResearch } from '@/types';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
 const apiKey = (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY || '').replace(/[\x00-\x1F\x7F]/g, '').trim();
-const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash';
+const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-1.5-flash';
 
 /* ── 국가별 필수 입국/세관 절차 참조 데이터 ── */
 const ENTRY_REQUIREMENTS: Record<string, { links: { label: string; url: string; type: 'visa' | 'arrival_card' | 'customs' | 'other'; description: string; howTo: string }[] }> = {
@@ -43,7 +43,7 @@ const ENTRY_REQUIREMENTS: Record<string, { links: { label: string; url: string; 
     },
     '베트남': {
         links: [
-            { label: '베트남 e-Visa 신청 (45일 초과 시)', url: 'https://evisa.xuatnhapcanh.gov.vn/', type: 'visa', description: '한국 국적자는 45일 이내 무비자 입국이 가능합니다. 단, 45일 이상 체류 시 반드시 e-Visa를 사전 신청해야 합니다.', howTo: '공식 사이트에서 여권 정보와 입국 예정일을 입력하고 수수료를 결제합니다. 약 3영업일 내 승인 결과를 이메일로 받습니다.' },
+            { label: '베트남 e-Visa 신청 (45일 초과 시)', url: 'https://evisa.xuatnhapcanh.gov.cn/', type: 'visa', description: '한국 국적자는 45일 이내 무비자 입국이 가능합니다. 단, 45일 이상 체류 시 반드시 e-Visa를 사전 신청해야 합니다.', howTo: '공식 사이트에서 여권 정보와 입국 예정일을 입력하고 수수료를 결제합니다. 약 3영업일 내 승인 결과를 이메일로 받습니다.' },
         ]
     },
     '태국': {
@@ -97,7 +97,6 @@ function getHardcodedLinks(destination: string) {
     
     // 주요 도시별 국가 매핑 (매칭 확률 향상)
     const cityMap: Record<string, string> = {
-        // 동남아 / 동아시아 (기존)
         '도쿄': '일본', '오사카': '일본', '후쿠오카': '일본', '삿포로': '일본', '나고야': '일본', '오키나와': '일본',
         '다낭': '베트남', '나트랑': '베트남', '푸꾸옥': '베트남', '하노이': '베트남', '호치민': '베트남', '달랏': '베트남', '판랑': '베트남',
         '방콕': '태국', '푸켓': '태국', '치앙마이': '태국', '파타야': '태국',
@@ -107,8 +106,6 @@ function getHardcodedLinks(destination: string) {
         '쿠알라룸푸르': '말레이시아', '코타키나발루': '말레이시아', '조호르바루': '말레이시아',
         '싱가포르': '싱가포르', '싱가폴': '싱가포르',
         '베이징': '중국', '상하이': '중국', '칭다오': '중국', '청도': '중국', '장자지에': '중국', '장가계': '중국',
-
-        // 미주 / 오세아니아 (추가)
         '괌': '괌', '사이판': '사이판',
         '하와이': '미국', '호놀룰루': '미국', '뉴욕': '미국', 'LA': '미국', '로스앤젤레스': '미국', '샌프란시스코': '미국', '시애틀': '미국', '라스베가스': '미국', '라스베이거스': '미국',
         '시드니': '호주', '멜버른': '호주', '브리즈번': '호주', '골드코스트': '호주', '퍼스': '호주',
@@ -127,6 +124,11 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { title, destination, travelMonth, airline, baggageNote, customGuides } = body;
 
+        if (!apiKey) {
+            console.error('[SecondaryResearch] Missing GEMINI_API_KEY');
+            return NextResponse.json({ success: false, error: 'GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.' }, { status: 500 });
+        }
+
         if (!destination) {
             return NextResponse.json({ success: false, error: '여행지 정보가 필요합니다.' }, { status: 400 });
         }
@@ -134,7 +136,6 @@ export async function POST(request: NextRequest) {
         const context = `[요청된 여행지/국가/도시]: ${destination} (★★★오직 이 장소를 기준으로 날씨/환전/관광지 정보 작성, 다른 나라로 착각 절대 금지)\n[상품명/설명 대상]: ${title || '일반 패키지 여행 (상품명이 없어도 이 도시의 일반적인 정보를 꼭 작성할 것)'}\n[여행 시기]: ${travelMonth || '일반 시즌'}\n[이용 항공사]: ${airline || '개별 예약'}\n[수하물 규정 참고]: ${baggageNote || '일반 규정'}`;
 
         const tasks = [
-            // ✨ Task 1: UI용 고급 날씨 구조 복구
             {
                 name: 'basics',
                 prompt: `
@@ -161,7 +162,6 @@ export async function POST(request: NextRequest) {
   }
 }`
             },
-            // ✨ Task 2: 수하물 및 세관 (오류 방지)
             {
                 name: 'rules',
                 prompt: `
@@ -206,77 +206,94 @@ export async function POST(request: NextRequest) {
             }
         ];
 
-        console.log('[SecondaryResearch] Generating answers using parallel tasks...');
-        console.time('[SecondaryResearch] Parallel Calls');
+        console.log(`[SecondaryResearch] Start parallel tasks for: ${destination}`);
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 28000);
 
-        const results = await Promise.all(tasks.map(async (task) => {
-            try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        system_instruction: { 
-                            parts: [{ text: "당신은 능숙한 여행 가이드북 작성 인공지능입니다. 제공된 [요청된 여행지/도시]를 기준으로 환전, 날씨, 세관, 관광지 정보를 풍부하게 작성하세요. [상품명/설명 대상] 내의 값이 없거나 '일반' 형태이더라도, 거절하지 말고 해당 도시(여행지)의 일반적인 여행 정보를 기준으로 반드시 모든 필드를 채워야 합니다. 다른 국가(예: 중국 청도인데 베트남으로 착각)로 착각하는 현상만 주의하세요. landmarks와 customGuides는 절대 섞지 마세요." }] 
-                        },
-                        contents: [{ parts: [{ text: task.prompt }] }],
-                        generationConfig: { temperature: 0.1 }
-                    })
-                });
+        try {
+            const results = await Promise.all(tasks.map(async (task) => {
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            system_instruction: { 
+                                parts: [{ text: "당신은 능숙한 여행 가이드북 작성 인공지능입니다. 제공된 [요청된 여행지/도시]를 기준으로 환전, 날씨, 세관, 관광지 정보를 풍부하게 작성하세요. 모든 필드를 채워야 하며, 마크다운 기호 없이 오직 JSON 객체만 반환하세요." }] 
+                            },
+                            contents: [{ parts: [{ text: task.prompt }] }],
+                            generationConfig: { temperature: 0.1 }
+                        }),
+                        signal: controller.signal
+                    });
 
-                if (!res.ok) {
-                    const errText = await res.text();
-                    console.error(`[Gemini Error - ${task.name}] HTTP ${res.status}: ${errText}`);
-                    return { name: task.name, error: errText };
-                }
-
-                const data = await res.json();
-                const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-                const jsonMatch = text.match(/\{[\s\S]*\}/);
-                if (jsonMatch) {
-                    try {
-                        return { name: task.name, data: JSON.parse(jsonMatch[0]) };
-                    } catch (e) {
-                        return { name: task.name, error: 'JSON Parse Error' };
+                    if (!res.ok) {
+                        const errText = await res.text();
+                        console.error(`[Gemini Error - ${task.name}] ${res.status}: ${errText}`);
+                        return { name: task.name, error: `AI 응답 실패 (${res.status})` };
                     }
+
+                    const data = await res.json();
+                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    const jsonMatch = text.match(/\{[\s\S]*\}/);
+                    
+                    if (jsonMatch) {
+                        try {
+                            return { name: task.name, data: JSON.parse(jsonMatch[0]) };
+                        } catch (e) {
+                            return { name: task.name, error: 'JSON 파싱 실패' };
+                        }
+                    }
+                    return { name: task.name, error: 'JSON을 찾을 수 없음' };
+                } catch (e: any) {
+                    console.error(`[Task Error - ${task.name}]`, e.message);
+                    return { name: task.name, error: e.name === 'AbortError' ? '시간 초과' : e.message };
                 }
-                return { name: task.name, error: 'No JSON found' };
-            } catch (e: any) {
-                return { name: task.name, error: e.message };
+            }));
+
+            clearTimeout(timeoutId);
+
+            let finalResearch: any = {
+                currency: {}, roaming: {}, weather: { summary: "", forecast: [], clothingTips: [], packingSummary: "" },
+                customs: { links: [], majorAlert: {}, prohibitedItems: [], arrivalProcedure: {} },
+                baggage: { additionalNotes: [] },
+                landmarks: [], customGuides: []
+            };
+
+            let successCount = 0;
+            results.forEach(r => {
+                if (r.data) {
+                    successCount++;
+                    if (r.data.currency) finalResearch.currency = { ...finalResearch.currency, ...r.data.currency };
+                    if (r.data.roaming) finalResearch.roaming = { ...finalResearch.roaming, ...r.data.roaming };
+                    if (r.data.weather) finalResearch.weather = { ...finalResearch.weather, ...r.data.weather };
+                    if (r.data.customs) finalResearch.customs = { ...finalResearch.customs, ...r.data.customs };
+                    if (r.data.baggage) finalResearch.baggage = { ...finalResearch.baggage, ...r.data.baggage };
+                    if (r.data.landmarks) finalResearch.landmarks = r.data.landmarks;
+                    if (r.data.customGuides) finalResearch.customGuides = r.data.customGuides;
+                }
+            });
+
+            if (successCount === 0) {
+                const errors = results.map(r => `[${r.name}] ${r.error}`).join(', ');
+                return NextResponse.json({ success: false, error: `AI 조사가 실패했습니다: ${errors}` }, { status: 504 });
             }
-        }));
 
-        console.timeEnd('[SecondaryResearch] Parallel Calls');
-
-        // ✨ 에러 방지를 위한 초기 객체 세팅
-        let finalResearch: any = {
-            currency: {}, roaming: {}, weather: { summary: "", forecast: [], clothingTips: [], packingSummary: "" },
-            customs: { links: [], majorAlert: {}, prohibitedItems: [], arrivalProcedure: {} },
-            baggage: { additionalNotes: [] },
-            landmarks: [], customGuides: []
-        };
-
-        results.forEach(r => {
-            if (r.data) {
-                if (r.data.currency) finalResearch.currency = { ...finalResearch.currency, ...r.data.currency };
-                if (r.data.roaming) finalResearch.roaming = { ...finalResearch.roaming, ...r.data.roaming };
-                if (r.data.weather) finalResearch.weather = { ...finalResearch.weather, ...r.data.weather };
-                if (r.data.customs) finalResearch.customs = { ...finalResearch.customs, ...r.data.customs };
-                if (r.data.baggage) finalResearch.baggage = { ...finalResearch.baggage, ...r.data.baggage };
-                if (r.data.landmarks) finalResearch.landmarks = r.data.landmarks;
-                if (r.data.customGuides) finalResearch.customGuides = r.data.customGuides;
+            const verifiedLinks = getHardcodedLinks(destination);
+            if (verifiedLinks) {
+                finalResearch.customs.links = verifiedLinks;
             }
-        });
 
-        const verifiedLinks = getHardcodedLinks(destination);
-        if (verifiedLinks) {
-            finalResearch.customs.links = verifiedLinks;
+            return NextResponse.json({ success: true, data: finalResearch as SecondaryResearch });
+        } finally {
+            clearTimeout(timeoutId);
         }
 
-        return NextResponse.json({ success: true, data: finalResearch as SecondaryResearch });
-
     } catch (error: any) {
-        console.error('[Secondary Research API] Final Error:', error.message);
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+        console.error('[Secondary Research API] Final Catch Error:', error.message);
+        return NextResponse.json({ 
+            success: false, 
+            error: `서버 오류가 발생했습니다: ${error.message}` 
+        }, { status: 500 });
     }
 }
