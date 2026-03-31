@@ -69,8 +69,8 @@ export async function getTodayNotificationMessage(): Promise<string | null> {
             if (cat.list.length > 0) {
                 message += `[${cat.emoji} ${cat.label}]\n`;
                 cat.list.forEach((item, idx) => {
-                    const truncatedProduct = item.trip.product_name.length > 40 
-                        ? item.trip.product_name.substring(0, 40) + '...' 
+                    const truncatedProduct = item.trip.product_name.length > 15 
+                        ? item.trip.product_name.substring(0, 15) + '...' 
                         : item.trip.product_name;
 
                     message += `<b>${idx + 1}. 고객명 : ${item.customer.name}</b>\n`;
