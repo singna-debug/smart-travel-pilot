@@ -51,9 +51,7 @@ export async function getTodayNotificationMessage(): Promise<string | null> {
 
         const totalCount = Object.values(categories).reduce((acc, cat) => acc + cat.list.length, 0);
 
-        if (totalCount === 0) {
-            return null;
-        }
+
 
         let message = `<b>오늘(${today})의 챙겨야 할 스케줄 요약</b>\n\n`;
         
