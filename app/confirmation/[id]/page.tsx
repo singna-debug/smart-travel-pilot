@@ -441,9 +441,118 @@ const getAirlineInfo = (codeOrName: string) => {
     return { name: codeOrName, logoUrl: null, color: '#3b82f6' };
 };
 
+const FlightInfoCard = ({ 
+    airline, 
+    flightNo, 
+    departureCity, 
+    departureTime, 
+    arrivalCity, 
+    arrivalTime, 
+    duration, 
+    date,
+    label // '가는 편', '오는 편' 등
+}: { 
+    airline?: string, 
+    flightNo?: string, 
+    departureCity: string, 
+    departureTime: string, 
+    arrivalCity: string, 
+    arrivalTime: string, 
+    duration?: string, 
+    date?: string,
+    label?: string
+}) => {
+    const info = getAirlineInfo(airline || flightNo || '');
+    const deptCityText = departureCity.trim();
+    const arrCityText = arrivalCity.trim();
+    const deptCode = CITY_CODE_MAP[deptCityText] ? ` (${CITY_CODE_MAP[deptCityText]})` : '';
+    const arrCode = CITY_CODE_MAP[arrCityText] ? ` (${CITY_CODE_MAP[arrCityText]})` : '';
+
+    const cleanDuration = duration ? (duration.includes('소요') ? duration : `${duration} 소요`) : '';
+
+    return (
+        <div style={{ marginBottom: '16px', width: '100%' }}>
+            <div style={{
+                background: '#fff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                padding: '24px 20px',
+                position: 'relative',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+            }}>
+                {label && (
+                    <div style={{ 
+                        position: 'absolute', 
+                        top: '-10px', 
+                        left: '20px', 
+                        background: '#0ea5e9', 
+                        color: '#fff', 
+                        fontSize: '0.7rem', 
+                        fontWeight: 800, 
+                        padding: '2px 8px', 
+                        borderRadius: '4px',
+                        boxShadow: '0 2px 4px rgba(14,165,233,0.3)'
+                    }}>
+                        {label}
+                    </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    
+                    {/* 왼쪽: 출발 정보 */}
+                    <div style={{ textAlign: 'left', width: '30%', minWidth: '90px' }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{deptCityText}{deptCode} 출발</div>
+                        {date && <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '2px' }}>{date}</div>}
+                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{formatFlightTime(departureTime)}</div>
+                        {flightNo && <div style={{ fontSize: '0.7rem', color: '#0ea5e9', fontWeight: 700, marginTop: '2px' }}>{flightNo}</div>}
+                    </div>
+
+                    {/* 중앙: 아이콘, 노선, 시간 */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                            {info.logoUrl ? (
+                                <img src={info.logoUrl} alt={info.name} style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                            ) : (
+                                <div style={{ width: '16px', height: '16px', background: info.color, color: 'white', fontSize: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '3px' }}>
+                                    {info.name.slice(0, 1)}
+                                </div>
+                            )}
+                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#111' }}>{info.name}</span>
+                        </div>
+
+                        {/* 타임라인 바 */}
+                        <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
+                            <div style={{ flex: 1, height: '1.5px', background: '#cbd5e1' }}></div>
+                            <div style={{ position: 'absolute', color: '#0ea5e9', background: '#fff', padding: '0 4px' }}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform: 'rotate(90deg)'}}>
+                                    <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 3.6c-.1.4.1.9.5 1.1L9 14.5l-3.5 3.5-2.8-.8c-.4-.1-.8.2-1 .6L1 19.5l4.5 1 1 4.5c.1.4.4.7.9.6l1.8-.7c.4-.2.6-.6.5-1l-.8-2.8 3.5-3.5 2.9 6c.2.4.7.6 1.1.5l3.6-1.2c.5-.2.8-.6.7-1.1z"/>
+                                </svg>
+                            </div>
+                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
+                        </div>
+
+                        {cleanDuration && (
+                            <div style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 600, marginTop: '8px' }}>
+                                {cleanDuration}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 오른쪽: 도착 정보 */}
+                    <div style={{ textAlign: 'right', width: '30%', minWidth: '90px' }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{arrCityText}{arrCode} 도착</div>
+                        {date && <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '2px' }}>{date}</div>}
+                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{formatFlightTime(arrivalTime)}</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const ParsedFlightCard = ({ day }: { day: any }) => {
     let flightInfo: any = null;
-    let extraText: string | null = null;
 
     if (day.transport) {
         const t = day.transport;
@@ -480,7 +589,6 @@ const ParsedFlightCard = ({ day }: { day: any }) => {
                 arrivalTime: matchOld[5],
                 duration: matchOld[6],
             };
-            if (matchOld[7]) extraText = matchOld[7];
         } else if (matchNew) {
             let dept = '출발지';
             let arr = '도착지';
@@ -509,70 +617,17 @@ const ParsedFlightCard = ({ day }: { day: any }) => {
     
     if (!flightInfo) return null;
 
-    const planeSrc = flightInfo.airline || flightInfo.flightNo;
-    const info = getAirlineInfo(planeSrc);
-    const dateStr = day.date || '';
-
-    const deptCityText = flightInfo.departureCity.trim();
-    const arrCityText = flightInfo.arrivalCity.trim();
-    
-    const deptCode = CITY_CODE_MAP[deptCityText] ? ` (${CITY_CODE_MAP[deptCityText]})` : '';
-    const arrCode = CITY_CODE_MAP[arrCityText] ? ` (${CITY_CODE_MAP[arrCityText]})` : '';
-
     return (
-        <div style={{ marginBottom: '16px' }}>
-            <div style={{
-                background: '#fff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '24px 20px',
-                position: 'relative',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
-            }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    
-                    {/* 왼쪽: 출발 정보 */}
-                    <div style={{ textAlign: 'left', width: '30%', minWidth: '90px' }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{deptCityText}{deptCode} 출발</div>
-                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{dateStr}</div>}
-                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{flightInfo.departureTime}</div>
-                    </div>
-
-                    {/* 중앙: 아이콘, 노선, 시간 */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                            {info.logoUrl ? (
-                                <img src={info.logoUrl} alt={info.name} style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
-                            ) : (
-                                <div style={{ width: '16px', height: '16px', background: info.color, color: 'white', fontSize: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '3px' }}>
-                                    {info.name.slice(0, 1)}
-                                </div>
-                            )}
-                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#111' }}>{info.name}</span>
-                        </div>
-
-                        {/* 타임라인 바 */}
-                        <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
-                            <div style={{ flex: 1, height: '1.5px', background: '#cbd5e1' }}></div>
-                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
-                        </div>
-
-                        <div style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 600, marginTop: '8px' }}>
-                            {flightInfo.duration} 소요
-                        </div>
-                    </div>
-
-                    {/* 오른쪽: 도착 정보 */}
-                    <div style={{ textAlign: 'right', width: '30%', minWidth: '90px' }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{arrCityText}{arrCode} 도착</div>
-                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{dateStr}</div>}
-                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{flightInfo.arrivalTime}</div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
+        <FlightInfoCard 
+            airline={flightInfo.airline}
+            flightNo={flightInfo.flightNo}
+            departureCity={flightInfo.departureCity}
+            departureTime={flightInfo.departureTime}
+            arrivalCity={flightInfo.arrivalCity}
+            arrivalTime={flightInfo.arrivalTime}
+            duration={flightInfo.duration}
+            date={day.date}
+        />
     );
 };
 
@@ -873,106 +928,35 @@ export default function ConfirmationViewerPage() {
                                 <div className="mc-section-title">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 3.6c-.1.4.1.9.5 1.1L9 14.5l-3.5 3.5-2.8-.8c-.4-.1-.8.2-1 .6L1 19.5l4.5 1 1 4.5c.1.4.4.7.9.6l1.8-.7c.4-.2.6-.6.5-1l-.8-2.8 3.5-3.5 2.9 6c.2.4.7.6 1.1.5l3.6-1.2c.5-.2.8-.6.7-1.1z"></path></svg> 항공 정보
                                 </div>
-                                {doc.flight.airline && (
-                                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '10px' }}>
-                                        항공사: <strong style={{ color: '#1e293b' }}>{doc.flight.airline}</strong>
-                                        {doc.flight.departureFlightNumber && ` (${doc.flight.departureFlightNumber})`}
-                                        {doc.flight.departureAirport && ` · ${doc.flight.departureAirport} 출발`}
-                                    </div>
-                                )}
-                                <div style={{
-                                    background: '#fff',
-                                    border: '1px solid #e2e8f0',
-                                    borderRadius: '12px',
-                                    padding: '24px 20px',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: '24px'
-                                }}>
-                                    {doc.flight.departureTime && (() => {
-                                        const deptCityText = simplifyDestination(doc.flight.departureAirport?.trim() || '출발');
-                                        const arrCityText = simplifyDestination(doc.trip.destination?.trim());
-                                        const deptCode = CITY_CODE_MAP[deptCityText] ? ` (${CITY_CODE_MAP[deptCityText]})` : '';
-                                        const arrCode = CITY_CODE_MAP[arrCityText] ? ` (${CITY_CODE_MAP[arrCityText]})` : '';
-                                        return (
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            {/* 왼쪽: 출발 정보 */}
-                                            <div style={{ textAlign: 'left', width: '30%', minWidth: '90px' }}>
-                                                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{formatFlightTime(doc.flight.departureTime)}</div>
-                                                <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '4px', wordBreak: 'keep-all' }}>{deptCityText}{deptCode}</div>
-                                                {doc.flight.departureFlightNumber && <div style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 600, marginTop: '2px' }}>{doc.flight.departureFlightNumber}</div>}
-                                            </div>
-
-                                            {/* 중앙: 아이콘, 노선, 시간 */}
-                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px' }}>
-                                                {/* 타임라인 바 */}
-                                                <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', marginTop: '10px' }}>
-                                                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
-                                                    <div style={{ flex: 1, height: '1.5px', borderTop: '1.5px dashed #cbd5e1' }}></div>
-                                                    <div style={{ position: 'absolute', top: '-11px', color: '#0ea5e9', background: '#fff', padding: '0 4px' }}>
-                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform: 'rotate(45deg)'}}>
-                                                            <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 3.6c-.1.4.1.9.5 1.1L9 14.5l-3.5 3.5-2.8-.8c-.4-.1-.8.2-1 .6L1 19.5l4.5 1 1 4.5c.1.4.4.7.9.6l1.8-.7c.4-.2.6-.6.5-1l-.8-2.8 3.5-3.5 2.9 6c.2.4.7.6 1.1.5l3.6-1.2c.5-.2.8-.6.7-1.1z"/>
-                                                        </svg>
-                                                    </div>
-                                                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
-                                                </div>
-                                                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '8px' }}>가는 편</div>
-                                            </div>
-
-                                            {/* 오른쪽: 도착 정보 */}
-                                            <div style={{ textAlign: 'right', width: '30%', minWidth: '90px' }}>
-                                                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{formatFlightTime(doc.flight.arrivalTime)}</div>
-                                                <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '4px', wordBreak: 'keep-all' }}>{arrCityText}{arrCode}</div>
-                                            </div>
-                                        </div>
-                                    )})()}
-                                    
-                                    {doc.flight.returnDepartureTime && doc.flight.departureTime && (
-                                        <div style={{ width: '100%', height: '1px', borderTop: '1px dashed #e2e8f0' }} />
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    {doc.flight.departureTime && (
+                                        <FlightInfoCard 
+                                            label="가는 편"
+                                            airline={doc.flight.airline}
+                                            flightNo={doc.flight.departureFlightNumber}
+                                            departureCity={simplifyDestination(doc.flight.departureAirport || '출발')}
+                                            departureTime={doc.flight.departureTime}
+                                            arrivalCity={simplifyDestination(doc.trip.destination)}
+                                            arrivalTime={doc.flight.arrivalTime || ''}
+                                            duration={doc.flight.flightDuration}
+                                        />
                                     )}
-
-                                    {doc.flight.returnDepartureTime && (() => {
-                                        const deptCityText = simplifyDestination(doc.trip.destination?.trim());
-                                        const arrCityText = simplifyDestination(doc.flight.departureAirport?.trim() || '도착');
-                                        const deptCode = CITY_CODE_MAP[deptCityText] ? ` (${CITY_CODE_MAP[deptCityText]})` : '';
-                                        const arrCode = CITY_CODE_MAP[arrCityText] ? ` (${CITY_CODE_MAP[arrCityText]})` : '';
-                                        return (
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            {/* 왼쪽: 출발 정보 */}
-                                            <div style={{ textAlign: 'left', width: '30%', minWidth: '90px' }}>
-                                                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{formatFlightTime(doc.flight.returnDepartureTime)}</div>
-                                                <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '4px', wordBreak: 'keep-all' }}>{deptCityText}{deptCode}</div>
-                                                {doc.flight.returnFlightNumber && <div style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 600, marginTop: '2px' }}>{doc.flight.returnFlightNumber}</div>}
-                                            </div>
-
-                                            {/* 중앙: 아이콘, 노선, 시간 */}
-                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px' }}>
-                                                {/* 타임라인 바 */}
-                                                <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', marginTop: '10px' }}>
-                                                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
-                                                    <div style={{ flex: 1, height: '1.5px', borderTop: '1.5px dashed #cbd5e1' }}></div>
-                                                    <div style={{ position: 'absolute', top: '-11px', color: '#0ea5e9', background: '#fff', padding: '0 4px' }}>
-                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform: 'rotate(-135deg)'}}>
-                                                            <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 3.6c-.1.4.1.9.5 1.1L9 14.5l-3.5 3.5-2.8-.8c-.4-.1-.8.2-1 .6L1 19.5l4.5 1 1 4.5c.1.4.4.7.9.6l1.8-.7c.4-.2.6-.6.5-1l-.8-2.8 3.5-3.5 2.9 6c.2.4.7.6 1.1.5l3.6-1.2c.5-.2.8-.6.7-1.1z"/>
-                                                        </svg>
-                                                    </div>
-                                                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
-                                                </div>
-                                                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '8px' }}>오는 편</div>
-                                            </div>
-
-                                            {/* 오른쪽: 도착 정보 */}
-                                            <div style={{ textAlign: 'right', width: '30%', minWidth: '90px' }}>
-                                                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{formatFlightTime(doc.flight.returnArrivalTime)}</div>
-                                                <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '4px', wordBreak: 'keep-all' }}>{arrCityText}{arrCode}</div>
-                                            </div>
-                                        </div>
-                                    )})()}
+                                    
+                                    {doc.flight.returnDepartureTime && (
+                                        <FlightInfoCard 
+                                            label="오는 편"
+                                            airline={doc.flight.airline}
+                                            flightNo={doc.flight.returnFlightNumber}
+                                            departureCity={simplifyDestination(doc.trip.destination)}
+                                            departureTime={doc.flight.returnDepartureTime}
+                                            arrivalCity={simplifyDestination(doc.flight.departureAirport || '도착')}
+                                            arrivalTime={doc.flight.returnArrivalTime || ''}
+                                            duration={doc.flight.returnFlightDuration}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         )}
-
                         {/* 수하물 규정 (개요 탭으로 이동) */}
                         {doc.secondaryResearch?.baggage && (
                             <GuideAccordion
