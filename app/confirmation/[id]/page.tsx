@@ -408,8 +408,9 @@ import { AIRLINE_MAP, CITY_CODE_MAP } from '@/lib/constants/travel-data';
 
 const simplifyDestination = (dest: string | undefined) => {
     if (!dest) return '도착';
-    const firstPart = dest.split(',')[0].trim();
-    const words = firstPart.split(' ');
+    let result = dest.split(',')[0].trim();
+    result = result.split('/')[0].trim();
+    const words = result.split(' ');
     // 단어 배열의 마지막 요소를 선택하여 '일본 삿포로' 같은 경우 '삿포로'만 추출
     return words[words.length - 1];
 };
@@ -469,7 +470,30 @@ const FlightInfoCard = ({
     const arrCode = CITY_CODE_MAP[arrCityText] ? ` (${CITY_CODE_MAP[arrCityText]})` : '';
 
     const cleanDuration = (dur: string | undefined): string => {
-        if (!dur) return '';
+        if (!dur) {
+            // duration이 없을 경우 시간 문자열로 자동 계산 (예: 09:30, 11:00)
+            if (departureTime && arrivalTime && departureTime.includes(':') && arrivalTime.includes(':')) {
+                const [dh, dm] = departureTime.split(':').map(Number);
+                const [ah, am] = arrivalTime.split(':').map(Number);
+                if (!isNaN(dh) && !isNaN(dm) && !isNaN(ah) && !isNaN(am)) {
+                    let dMinutes = dh * 60 + dm;
+                    let aMinutes = ah * 60 + am;
+                    if (aMinutes < dMinutes) {
+                        aMinutes += 24 * 60; // 다음날 도착으로 간주
+                    }
+                    const diff = aMinutes - dMinutes;
+                    if (diff > 0 && diff < 24 * 60) {
+                        const hours = Math.floor(diff / 60);
+                        const mins = diff % 60;
+                        let text = '';
+                        if (hours > 0) text += `${String(hours).padStart(2, '0')}시간 `;
+                        if (mins > 0) text += `${String(mins).padStart(2, '0')}분`;
+                        return `${text.trim()} 소요`;
+                    }
+                }
+            }
+            return '';
+        }
         let d = dur.trim();
         // '소요'가 중복으로 들어있거나 끝에 이미 붙어있는 경우 처리
         d = d.replace(/소요/g, '').trim();
@@ -1438,7 +1462,7 @@ export default function ConfirmationViewerPage() {
                                 onToggle={toggleSection}
                             >
                                 {/* 첫 번째 랜드마크: 히어로 카드 */}
-                                {sr.landmarks?.[0] && (
+                                {sr.landmarks && sr.landmarks.length > 0 && (
                                     <div className="landmark-hero">
                                         {sr.landmarks[0].imageUrl && (
                                             // eslint-disable-next-line @next/next/no-img-element
@@ -1453,7 +1477,7 @@ export default function ConfirmationViewerPage() {
                                 )}
                                 {/* 나머지 랜드마크: 그리드 카드 */}
                                 <div className="landmark-grid">
-                                    {sr.landmarks?.slice(1).map((lm, i) => (
+                                    {(sr.landmarks || []).slice(1).map((lm: any, i: number) => (
                                         <div key={i} className="landmark-card">
                                             {lm.imageUrl && (
                                                 // eslint-disable-next-line @next/next/no-img-element
