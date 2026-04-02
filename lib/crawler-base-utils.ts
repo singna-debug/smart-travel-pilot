@@ -18,17 +18,25 @@ export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, 
 export async function quickFetch(url: string, retries = 1): Promise<{ html: string; title: string }> {
     try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 10000); // 10초로 증개
+        const timeout = setTimeout(() => controller.abort(), 12000); // 12초로 증대
 
         const response = await fetch(url, {
             headers: {
                 'User-Agent': getRandomUserAgent(),
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
                 'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
                 'Cache-Control': 'no-cache',
                 'Pragma': 'no-cache',
                 'Referer': 'https://www.modetour.com/',
-                'Origin': 'https://www.modetour.com'
+                'Origin': 'https://www.modetour.com',
+                'Sec-Ch-Ua': '"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+                'Sec-Ch-Ua-Mobile': '?0',
+                'Sec-Ch-Ua-Platform': '"Windows"',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'cross-site',
+                'Sec-Fetch-User': '?1',
+                'Upgrade-Insecure-Requests': '1'
             },
             signal: controller.signal
         });
@@ -63,7 +71,7 @@ export async function quickFetch(url: string, retries = 1): Promise<{ html: stri
         console.error(`[quickFetch] Error fetching ${url}: ${error.message || error}`);
         if (retries > 0) {
             console.log(`[quickFetch] Retrying... (${retries} left)`);
-            await sleep(1500);
+            await sleep(2000);
             return quickFetch(url, retries - 1);
         }
         return { html: '', title: '' };
@@ -75,28 +83,59 @@ export function htmlToText(html: string, url?: string): string {
     const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
     if (titleMatch) finalTitle = titleMatch[1].trim();
 
+    // [정밀 추출] 모두투어 전용 데이터 패턴 (날짜, 가격, 항공)
     let targetPrice = '';
-    const jsonPriceMatch = html.match(/["'](?:Price|SalePrice|goodsPrice|sellingPriceAdultTotalAmount)["']\s*[:=]\s*["']?(\d+)["']?/i);
-    if (jsonPriceMatch) targetPrice = jsonPriceMatch[1];
+    const pricePatterns = [
+        /["']sellingPriceAdultTotalAmount["']\s*[:=]\s*["']?(\d+)["']?/i,
+        /["']p_sellingprice["']\s*[:=]\s*["']?(\d+)["']?/i,
+        /["']salePrice["']\s*[:=]\s*["']?(\d+)["']?/i,
+        /TARGET_PRICE:\s*"(\d+)"/
+    ];
+    for (const p of pricePatterns) {
+        const m = html.match(p);
+        if (m) { targetPrice = m[1]; break; }
+    }
 
     let targetAirline = '';
     const airlineMatch = html.match(/(제주항공|대한항공|아시아나항공|진에어|티웨이|이스타|에어서울|에어부산|비엣젯|필리핀항공)/);
     if (airlineMatch) targetAirline = airlineMatch[1];
 
+    // [정밀 추출] 출발일/귀국일 (p_startday, p_endday 등 우선)
     let targetDeparture = '';
     let targetReturn = '';
-    const datePattern = /(\d{4})[-\.\/](\d{1,2})[-\.\/](\d{1,2})/;
-    const dateMatches = html.match(new RegExp(datePattern.source, 'g'));
-    if (dateMatches && dateMatches.length >= 2) {
-        targetDeparture = dateMatches[0];
-        targetReturn = dateMatches[dateMatches.length - 1];
-    } else if (dateMatches && dateMatches.length === 1) {
-        targetDeparture = dateMatches[0];
+    
+    // 1순위: JSON 데이터 패턴
+    const depMatch = html.match(/["'](?:p_startday|departureDate|startDay)["']\s*[:=]\s*["'](\d{4}-\d{2}-\d{2})["']/i);
+    const arrMatch = html.match(/["'](?:p_endday|arrivalDate|endDay)["']\s*[:=]\s*["'](\d{4}-\d{2}-\d{2})["']/i);
+    
+    if (depMatch) targetDeparture = depMatch[1];
+    if (arrMatch) targetReturn = arrMatch[1];
+
+    // 2순위: 8자리 연속 숫자 (YYYYMMDD) - 모두투어 API 특화
+    if (!targetDeparture || !targetReturn) {
+        const dateMatchLong = html.match(/["'](?:P_StartDay|P_EndDay)["']\s*[:=]\s*["'](\d{8})["']/gi);
+        if (dateMatchLong && dateMatchLong.length >= 2) {
+            const d1 = dateMatchLong[0].match(/\d{8}/)?.[0];
+            const d2 = dateMatchLong[dateMatchLong.length - 1].match(/\d{8}/)?.[0];
+            if (d1) targetDeparture = `${d1.slice(0, 4)}-${d1.slice(4, 6)}-${d1.slice(6, 8)}`;
+            if (d2) targetReturn = `${d2.slice(0, 4)}-${d2.slice(4, 6)}-${d2.slice(6, 8)}`;
+        }
+    }
+
+    // 3순위 (Fallback): 일반 날짜 패턴 (충돌 방지를 위해 본문 상단 20%만 검색)
+    if (!targetDeparture) {
+        const dateMatches = html.substring(0, 10000).match(/(\d{4})[-\.\/](\d{1,2})[-\.\/](\d{1,2})/g);
+        if (dateMatches && dateMatches.length >= 2) {
+            targetDeparture = dateMatches[0].replace(/[\.\/]/g, '-');
+            targetReturn = dateMatches[dateMatches.length - 1].replace(/[\.\/]/g, '-');
+        }
     }
 
     const cleanBody = html
         .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
         .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+        .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '') // 헤더 제거 (메뉴 등 잡음)
+        .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '') // 푸터 제거 (카피라이트 등 잡음)
         .replace(/<br\s*\/?>/gi, '\n')
         .replace(/<\/p>|<\/div>|<\/li>|<\/h\d>/gi, '\n')
         .replace(/<[^>]+>/g, ' ')
@@ -113,7 +152,7 @@ TARGET_RETURN_DATE: "${targetReturn}"
 URL: "${url}"
 ==== TARGET METADATA END ====`;
 
-    return `${metadata}\n\n${cleanBody.substring(0, 30000)}`;
+    return `${metadata}\n\n${cleanBody.substring(0, 40000)}`;
 }
 
 export async function analyzeWithGemini(contextOrPrompt: string, url: string, isSummaryOnly = false, nextData?: string): Promise<DetailedProductInfo | null> {
