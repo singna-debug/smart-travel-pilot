@@ -50,6 +50,24 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
     if (refined.departureDate) refined.departureDate = formatDateString(refined.departureDate);
     if (refined.returnDate) refined.returnDate = formatDateString(refined.returnDate);
     
+    // ★ [자가 치유] 날짜 0일 버그 수정 (출발일 === 귀국일인데 일정이 있는 경우)
+    if (refined.departureDate && refined.returnDate && refined.departureDate === refined.returnDate) {
+        const itineraryLen = Array.isArray(refined.itinerary) ? refined.itinerary.length : 0;
+        if (itineraryLen > 1) {
+            const depDate = new Date(refined.departureDate);
+            if (!isNaN(depDate.getTime())) {
+                const correctedArrDate = new Date(depDate);
+                // 3일 일정이면 2박 3일이므로 +2일을 해줌
+                correctedArrDate.setDate(depDate.getDate() + (itineraryLen - 1));
+                const year = correctedArrDate.getFullYear();
+                const month = String(correctedArrDate.getMonth() + 1).padStart(2, '0');
+                const day = String(correctedArrDate.getDate()).padStart(2, '0');
+                refined.returnDate = `${year}-${month}-${day}`;
+                console.log(`[Refiner] Date self-healed: ${refined.departureDate} ~ ${refined.returnDate} (${itineraryLen} days)`);
+            }
+        }
+    }
+
     // --- [목적지(Destination) 정제 및 보강] ---
     const forbiddenWords = ['노팁', '노쇼핑', '노옵션', '출발', '확정', '특가', '단독', '기획', '모객', '특전', '스마일', '명부터', '예약', '마감', '할인', '이벤트', '시그니처', '선착순', '베스트', '홈쇼핑'];
 
@@ -108,10 +126,15 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
         }
     }
 
-    if (!refined.duration || refined.duration === '미정') {
-        const durationMatch = (refined.title + ' ' + originalText).match(/(\d+)\s*박\s*(\d+)\s*일/);
-        if (durationMatch) {
-            refined.duration = `${durationMatch[1]}박 ${durationMatch[2]}일`;
+    if (!refined.duration || refined.duration === '미정' || refined.duration.includes('0일')) {
+        const itineraryLen = Array.isArray(refined.itinerary) ? refined.itinerary.length : 0;
+        if (itineraryLen > 1) {
+            refined.duration = `${itineraryLen - 1}박 ${itineraryLen}일`;
+        } else {
+            const durationMatch = (refined.title + ' ' + originalText).match(/(\d+)\s*박\s*(\d+)\s*일/);
+            if (durationMatch) {
+                refined.duration = `${durationMatch[1]}박 ${durationMatch[2]}일`;
+            }
         }
     }
 
