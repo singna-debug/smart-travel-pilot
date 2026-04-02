@@ -11,8 +11,8 @@ import { scrapeWithBrowser } from '../browser-crawler';
 export async function crawlForBooking(url: string): Promise<DetailedProductInfo | null> {
     console.log(`[BookingCrawler] Start. URL=${url}`);
 
-    // [개선] skipHtml: false로 변경하여 더 정확한 데이터 확보 (부킹 모드는 상세 정보가 중요함)
-    const { text, nextData, nativeData } = await fetchContent(url, { isSummaryOnly: false, skipHtml: false });
+    // [개정] 속도 최적화: skipHtml: true로 설정하여 불필요한 브라우저 크롤러 실행을 방지하고 Native API만 사용하여 3초 내 응답 보장
+    const { text, nextData, nativeData } = await fetchContent(url, { isSummaryOnly: false, skipHtml: true });
     
     // 2. 부킹 모드 전용 프롬프트 구성 (간략화 버전)
     const prompt = `다음 여행 상품 페이지에서 핵심 정보만 추출하여 JSON으로 반환하세요.
@@ -38,15 +38,17 @@ ${text.substring(0, 25000)}`;
     const result = await analyzeWithGemini(prompt, url, false, nextData);
     console.log(`[BookingCrawler] Gemini Analysis Result:`, result ? 'Success' : 'Failed');
     
-    if (result) {
-        // Native 데이터가 있다면 보강
-        if (nativeData) {
-            if (!result.title) result.title = nativeData.title;
-            if (!result.departureDate) result.departureDate = nativeData.departureDate;
-            if (!result.returnDate) result.returnDate = nativeData.returnDate;
-        }
-        return refineData(result, text, url);
+    // 최종 데이터 조합 (Native 우선 전략)
+    const finalResult = (result || { isProduct: true }) as DetailedProductInfo;
+    
+    if (nativeData) {
+        // AI가 놓친 정보를 Native에서 보충 (비어있으면 채움)
+        if (!finalResult.title || finalResult.title === '상품명') finalResult.title = nativeData.title || '';
+        if (!finalResult.departureDate) finalResult.departureDate = nativeData.departureDate || '';
+        if (!finalResult.returnDate) finalResult.returnDate = nativeData.returnDate || '';
+        if (!finalResult.price) finalResult.price = String(nativeData.price || '');
+        if (!finalResult.destination) finalResult.destination = nativeData.destination || '';
     }
     
-    return nativeData ? refineData(nativeData, text, url) : null;
+    return refineData(finalResult, text, url);
 }

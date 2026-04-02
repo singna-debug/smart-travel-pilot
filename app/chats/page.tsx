@@ -299,7 +299,7 @@ export default function ChatsPage() {
                 ));
                 setConfirmModal(null);
                 setConfirmUrl('');
-                alert(`예약확정 완료! 출발일: ${data.data.departureDate || '미정'}, 귀국일: ${data.data.returnDate || '미정'}`);
+                alert(`출발일: ${data.data.departureDate || '확인필요'}, 귀국일: ${data.data.returnDate || '확인필요'}`);
             } else {
                 alert('예약확정 실패: ' + data.error);
             }

@@ -60,11 +60,13 @@ export async function POST(request: NextRequest) {
         let confirmationSent = ''; // 확정서 발송: 출발일 - 14일
         let departureNotice = '';  // 출발안내: 출발일 - 3일
         let phoneNotice = '';      // 전화 안내: 출발일 - 1일
-        let happyCall = '';        // 해피콜: 귀국일 + 1일
-
+        let happyCall = '';        // 해피콜: 귀국일 + 2일
+ 
         if (departureDate) {
             const depDate = parseDate(departureDate);
             if (depDate) {
+                // [추가] 날짜 형식을 YYYY-MM-DD로 정규화
+                departureDate = formatDate(depDate);
                 noticeDate = formatDate(addDays(depDate, -28));
                 balanceDate = formatDate(addDays(depDate, -21));
                 confirmationSent = formatDate(addDays(depDate, -14));
@@ -76,7 +78,9 @@ export async function POST(request: NextRequest) {
         if (returnDate) {
             const retDate = parseDate(returnDate);
             if (retDate) {
-                happyCall = formatDate(addDays(retDate, 1));
+                // [추가] 날짜 형식을 YYYY-MM-DD로 정규화
+                returnDate = formatDate(retDate);
+                happyCall = formatDate(addDays(retDate, 2));
             }
         }
 

@@ -24,6 +24,9 @@ export function formatProductInfo(info: DetailedProductInfo, index?: number): st
     }
 
     r += `\n[전문 일정표 보기]\n(${info.url})\n\n`;
+    r += `※ 예약 전 확인사항\n\n`;
+    r += `상품가액은 예약시 출발일에 따라 변동될 수 있습니다.\n`;
+    r += `항공 좌석은 예약 시점에 다시 확인해야 합니다.`;
     return r;
 }
 
@@ -62,6 +65,10 @@ export function compareProducts(products: DetailedProductInfo[]): string {
             comparison += `------------------------------------------\n\n`;
         }
     });
+
+    comparison += `※ 예약 전 확인사항\n\n`;
+    comparison += `상품가액은 예약시 출발일에 따라 변동될 수 있습니다.\n`;
+    comparison += `항공 좌석은 예약 시점에 다시 확인해야 합니다.`;
 
     return comparison;
 }

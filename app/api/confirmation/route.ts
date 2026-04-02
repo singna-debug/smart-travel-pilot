@@ -70,8 +70,8 @@ export async function POST(request: NextRequest) {
             },
             flight: body.flight || {
                 airline: '', departureAirport: '',
-                departureTime: '', arrivalTime: '',
-                returnDepartureTime: '', returnArrivalTime: '',
+                departureTime: '', arrivalTime: '', departureDuration: '',
+                returnDepartureTime: '', returnArrivalTime: '', returnDuration: '',
             },
             hotels: body.hotels || [],
             itinerary: body.itinerary || [],

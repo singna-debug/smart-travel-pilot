@@ -150,8 +150,6 @@ export interface DetailedProductInfo {
   arrivalTime?: string;
   returnDepartureTime?: string;
   returnArrivalTime?: string;
-  flightDuration?: string;
-  returnFlightDuration?: string;
   returnDate?: string;
   isProduct?: boolean;
   index?: number;
@@ -160,8 +158,6 @@ export interface DetailedProductInfo {
   notices?: string[];
   specialTerms?: string;
   baggageNote?: string;
-  cancellationPolicy?: string;
-  checklist?: string[];
 }
 
 // URL 분석기 단일 결과 타입
@@ -242,11 +238,9 @@ export interface ConfirmationDocument {
     departureFlightNumber?: string;
     departureTime: string;
     arrivalTime: string;
-    flightDuration?: string;
     returnFlightNumber?: string;
     returnDepartureTime: string;
     returnArrivalTime: string;
-    returnFlightDuration?: string;
   };
 
   // 숙박 정보
