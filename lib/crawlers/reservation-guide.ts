@@ -34,6 +34,7 @@ ${nativeData ? `--- [Native API 정보] ---\n${JSON.stringify(nativeData)}\n` : 
   "itinerary": [
     { 
       "day": "1일차", 
+      "title": "일정 제목",
       "transport": { 
         "airline": "항공사", 
         "flightNo": "편명", 
@@ -42,20 +43,17 @@ ${nativeData ? `--- [Native API 정보] ---\n${JSON.stringify(nativeData)}\n` : 
       } 
     }
   ],
-  "keyPoints": [
-    "고객이 매력을 느낄만한 핵심 포인트 1",
-    "포인트 2",
-    "포인트 3"
-  ],
+  "hotels": [{ "name": "호텔명", "address": "주소" }],
   "inclusions": ["핵심 포함 사항 1", "2"],
   "exclusions": ["주요 불포함 사항 1", "2"],
+  "meetingInfo": [{ "type": "미팅안내", "location": "장소", "time": "시간", "description": "내용" }],
   "specialTerms": "취소 규정 및 예약 시 유의사항 요약"
 }
 
 [RULES]
-1. 항공권 정보(출도착 시간, 편명)를 아주 정확하게 추출하세요. 
+1. 항공권 정보(출도착 시간, 편명)와 호텔 정보(명칭, 주소)를 아주 정확하게 추출하세요. 
 2. keyPoints는 고객 안내용으로 가장 매력적인 3~4개를 추출하세요.
-3. specialTerms는 예약 시점에 꼭 알아야 할 취소료 규정을 반드시 포함하세요.
+3. Native API 정보가 있다면 이를 적극 활용하여 데이터의 신뢰도를 높이세요.
 
 입력 데이터:
 ${text.substring(0, 25000)}`;
@@ -76,6 +74,15 @@ ${text.substring(0, 25000)}`;
         
         // 4. 데이터 보강 (Gemini 결과가 부족할 때 Native 데이터 또는 정규식 활용)
         
+        // 리스트형 데이터 강제 병합 (Native에 데이터가 있다면 AI 결과가 비어있을 때 보강)
+        if (nativeData) {
+            if (!finalInfo.hotels || finalInfo.hotels.length === 0) finalInfo.hotels = nativeData.hotels || [];
+            if (!finalInfo.inclusions || finalInfo.inclusions.length === 0) finalInfo.inclusions = nativeData.inclusions || [];
+            if (!finalInfo.exclusions || finalInfo.exclusions.length === 0) finalInfo.exclusions = nativeData.exclusions || [];
+            if (!finalInfo.meetingInfo || finalInfo.meetingInfo.length === 0) finalInfo.meetingInfo = nativeData.meetingInfo || [];
+            if ((!finalInfo.itinerary || finalInfo.itinerary.length === 0)) finalInfo.itinerary = nativeData.itinerary || [];
+        }
+
         // 가격(price) 보강
         if (!finalInfo.price || finalInfo.price === '0' || finalInfo.price === '추출 실패' || finalInfo.price === '') {
             if (nativeData?.price && nativeData.price !== '0') {
@@ -93,7 +100,6 @@ ${text.substring(0, 25000)}`;
                         const digits = match[0].replace(/[^0-9]/g, '');
                         if (digits.length >= 4) {
                             finalInfo.price = digits;
-                            console.log(`[ReservationGuideCrawler] Price Found via Regex: ${finalInfo.price}`);
                             break;
                         }
                     }
@@ -109,42 +115,27 @@ ${text.substring(0, 25000)}`;
                 const airlineMatch = text.match(/(제주항공|대한항공|아시아나항공|진에어|티웨이|이스타|에어서울|에어부산|비엣젯|필리핀항공|베트남항공|캐세이|타이항공)/);
                 if (airlineMatch) {
                     finalInfo.airline = airlineMatch[1];
-                    console.log(`[ReservationGuideCrawler] Airline Found via Regex: ${finalInfo.airline}`);
                 }
             }
-        }
-
-        // 일정(itinerary) 보강
-        if ((!finalInfo.itinerary || finalInfo.itinerary.length === 0) && nativeData?.itinerary) {
-            finalInfo.itinerary = nativeData.itinerary;
-        }
-
-        // 핵심포인트(keyPoints) 보강
-        if ((!finalInfo.keyPoints || finalInfo.keyPoints.length === 0) && nativeData?.keyPoints) {
-            finalInfo.keyPoints = nativeData.keyPoints.slice(0, 4);
         }
 
         const refinedResult = refineData(finalInfo, text, url);
 
         // 5. 추가 보강: 불포함 사항(exclusions) 및 특별약관(specialTerms)
         if (!refinedResult.exclusions || refinedResult.exclusions.length === 0) {
-            console.log(`[ReservationGuideCrawler] Exclusions empty. Searching via regex...`);
             const exclusionMatch = text.match(/불포함\s*사항\s*[:\s]*([\s\S]{10,300}?)(?=\n\n|\n[가-힣]+:|\n[#■●]|참고사항|$)/);
             if (exclusionMatch) {
                 const items = exclusionMatch[1].split(/,|\n/).map(s => s.replace(/^[-\s]*|[*]/g, '').trim()).filter(s => s.length > 2);
                 if (items.length > 0) {
                     refinedResult.exclusions = items;
-                    console.log(`[ReservationGuideCrawler] Exclusions Found via Regex:`, items);
                 }
             }
         }
 
         if (!refinedResult.specialTerms || refinedResult.specialTerms.length < 10) {
-            console.log(`[ReservationGuideCrawler] SpecialTerms empty. Searching via regex...`);
             const termsMatch = text.match(/(취소\s*규정|특별\s*약관|취소\s*수수료)\s*[:\s]*([\s\S]{20,800}?)(?=\n\n|\n[#■●]|참고사항|$)/);
             if (termsMatch) {
                 refinedResult.specialTerms = termsMatch[2].trim();
-                console.log(`[ReservationGuideCrawler] SpecialTerms Found via Regex (Length=${refinedResult.specialTerms.length})`);
             }
         }
 
