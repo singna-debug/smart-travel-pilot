@@ -94,14 +94,14 @@ export async function GET() {
             isNotDone(c.automation.phone_notice) && isExactToday(c.automation.phone_notice)
         );
 
-        // 9. 해피콜 (happy_call): 귀국일로부터 하루전부터의 해당건 (해피콜이 완료되지 않은 것)
-        // today >= returnDate - 1 day => differenceInDays(today, returnDate - 1) >= 0 => differenceInDays(today, returnDate) >= -1
+        // 9. 해피콜 (happy_call): 귀국일 당일부터의 해당건 (해피콜이 완료되지 않은 것)
+        // today >= returnDate => differenceInDays(today, returnDate) >= 0
         const happyCall = consultations.filter(c => {
             if (!isNotDone(c.automation.happy_call)) return false; // 해피콜이 이미 완료된 경우 제외
             const rDate = parseD(c.trip.return_date);
             if (!rDate) return false;
             const diff = differenceInDays(todayObj, rDate);
-            return diff >= -1; // 귀국일 하루 전부터 계속 노출 (완료 누를 때까지)
+            return diff >= 0; // 귀국일 당일부터 계속 노출 (완료 누를 때까지)
         });
 
         // 10. 결제완료 (completedInquiries): 상태가 '선금완료', '잔금완료', '결제완료' 인 건

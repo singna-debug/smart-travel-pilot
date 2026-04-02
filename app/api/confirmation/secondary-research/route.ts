@@ -1,11 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { SecondaryResearch } from '@/types';
+import type { SecondaryResearch } from '@/types'; // 불필요한 타입 임포트 제거 (에러 방지)
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const apiKey = (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY || '').replace(/[\x00-\x1F\x7F]/g, '').trim();
 const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash';
+
+/**
+ * 초고속 실시간 날씨 데이터 가져오기 (wttr.in API 사용)
+ */
+async function fetchWeatherFromAPI(city: string) {
+    try {
+        console.log(`[WeatherAPI] Fetching for: ${city}`);
+        // format=j1 gives full JSON, lang=ko for descriptive text
+        const res = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=j1&lang=ko`, {
+            next: { revalidate: 3600 }
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        
+        return {
+            current: data.current_condition?.[0],
+            forecast: data.weather?.map((w: any, idx: number) => ({
+                date: `${idx + 1}일차`,
+                tempMin: w.mintempC,
+                tempMax: w.maxtempC,
+                // 시각별 데이터 중 중간 시간대의 한국어 설명 우선, 없으면 영어
+                desc: w.hourly?.reduce((prev: any, curr: any) => {
+                    const currKo = curr.lang_ko?.[0]?.value;
+                    const prevKo = prev.lang_ko?.[0]?.value;
+                    if (currKo && !prevKo) return curr;
+                    return prev;
+                }, w.hourly?.[4])?.lang_ko?.[0]?.value || w.hourly?.[Math.floor(w.hourly.length/2)]?.weatherDesc?.[0]?.value
+            }))
+        };
+    } catch (e) {
+        console.error('[WeatherAPI] Error:', e);
+        return null;
+    }
+}
 
 /* ── 국가별 필수 입국/세관 절차 참조 데이터 ── */
 const ENTRY_REQUIREMENTS: Record<string, { links: { label: string; url: string; type: 'visa' | 'arrival_card' | 'customs' | 'other'; description: string; howTo: string }[] }> = {
@@ -43,7 +77,7 @@ const ENTRY_REQUIREMENTS: Record<string, { links: { label: string; url: string; 
     },
     '베트남': {
         links: [
-            { label: '베트남 e-Visa 신청 (45일 초과 시)', url: 'https://evisa.xuatnhapcanh.gov.cn/', type: 'visa', description: '한국 국적자는 45일 이내 무비자 입국이 가능합니다. 단, 45일 이상 체류 시 반드시 e-Visa를 사전 신청해야 합니다.', howTo: '공식 사이트에서 여권 정보와 입국 예정일을 입력하고 수수료를 결제합니다. 약 3영업일 내 승인 결과를 이메일로 받습니다.' },
+            { label: '베트남 e-Visa 신청 (45일 초과 시)', url: 'https://evisa.xuatnhapcanh.gov.vn/', type: 'visa', description: '한국 국적자는 45일 이내 무비자 입국이 가능합니다. 단, 45일 이상 체류 시 반드시 e-Visa를 사전 신청해야 합니다.', howTo: '공식 사이트에서 여권 정보와 입국 예정일을 입력하고 수수료를 결제합니다. 약 3영업일 내 승인 결과를 이메일로 받습니다.' },
         ]
     },
     '태국': {
@@ -97,6 +131,7 @@ function getHardcodedLinks(destination: string) {
     
     // 주요 도시별 국가 매핑 (매칭 확률 향상)
     const cityMap: Record<string, string> = {
+        // 동남아 / 동아시아 (기존)
         '도쿄': '일본', '오사카': '일본', '후쿠오카': '일본', '삿포로': '일본', '나고야': '일본', '오키나와': '일본',
         '다낭': '베트남', '나트랑': '베트남', '푸꾸옥': '베트남', '하노이': '베트남', '호치민': '베트남', '달랏': '베트남', '판랑': '베트남',
         '방콕': '태국', '푸켓': '태국', '치앙마이': '태국', '파타야': '태국',
@@ -105,7 +140,9 @@ function getHardcodedLinks(destination: string) {
         '발리': '인도네시아', '자카르타': '인도네시아',
         '쿠알라룸푸르': '말레이시아', '코타키나발루': '말레이시아', '조호르바루': '말레이시아',
         '싱가포르': '싱가포르', '싱가폴': '싱가포르',
-        '베이징': '중국', '상하이': '중국', '칭다오': '중국', '청도': '중국', '장자지에': '중국', '장가계': '중국',
+        '베이징': '중국', '상하이': '중국', '칭다오': '중국', '장자지에': '중국', '장가계': '중국',
+
+        // 미주 / 오세아니아 (추가)
         '괌': '괌', '사이판': '사이판',
         '하와이': '미국', '호놀룰루': '미국', '뉴욕': '미국', 'LA': '미국', '로스앤젤레스': '미국', '샌프란시스코': '미국', '시애틀': '미국', '라스베가스': '미국', '라스베이거스': '미국',
         '시드니': '호주', '멜버른': '호주', '브리즈번': '호주', '골드코스트': '호주', '퍼스': '호주',
@@ -122,46 +159,90 @@ function getHardcodedLinks(destination: string) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { title, destination, travelMonth, airline, baggageNote, customGuides } = body;
-
-        if (!apiKey) {
-            console.error('[SecondaryResearch] Missing GEMINI_API_KEY');
-            return NextResponse.json({ success: false, error: 'GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.' }, { status: 500 });
-        }
+        const { destination, travelMonth, airline, baggageNote, customGuides, itinerary } = body;
 
         if (!destination) {
             return NextResponse.json({ success: false, error: '여행지 정보가 필요합니다.' }, { status: 400 });
         }
 
-        const context = `[요청된 여행지/국가/도시]: ${destination} (★★★오직 이 장소를 기준으로 날씨/환전/관광지 정보 작성, 다른 나라로 착각 절대 금지)\n[상품명/설명 대상]: ${title || '일반 패키지 여행 (상품명이 없어도 이 도시의 일반적인 정보를 꼭 작성할 것)'}\n[여행 시기]: ${travelMonth || '일반 시즌'}\n[이용 항공사]: ${airline || '개별 예약'}\n[수하물 규정 참고]: ${baggageNote || '일반 규정'}`;
+        const context = `여행지: ${destination}, 시기: ${travelMonth || '현재'}, 항공사: ${airline || '비명시'}, 수하물규정: ${baggageNote || '비명시'}`;
+
+        // --- 🌊 [핵심] 일자별 멀티 시티 날씨 로직 시작 ---
+        let dailyWeatherData: any[] = [];
+        try {
+            // 1. 일정(Itinerary)에서 일자별 주요 도시 추출
+            const itineraryArr = Array.isArray(itinerary) ? itinerary : [];
+            const dailyCities = itineraryArr.map((day: any) => {
+                // '도쿄/오사카/교토' 처럼 여러 도시가 있으면 첫 번째 도시 선택
+                const locations = (day.location || "").split(/[/,]/);
+                return locations[0]?.trim() || destination.split(/[/,]/)[0]?.trim();
+            });
+
+            // 2. 고유 도시 리스트 생성 (API 호출 최소화)
+            const uniqueCities = Array.from(new Set(dailyCities)).filter(Boolean);
+            const weatherCache: Record<string, any> = {};
+
+            // 3. 도시별 날씨 실시간 병렬 조회
+            await Promise.all(uniqueCities.map(async (city) => {
+                const w = await fetchWeatherFromAPI(city as string);
+                if (w) weatherCache[city as string] = w;
+            }));
+
+            // 4. 일자별로 날씨 데이터 매핑
+            dailyWeatherData = dailyCities.map((city, idx) => {
+                const cityWeather = weatherCache[city];
+                if (!cityWeather) return { date: `${idx + 1}일차`, city, tempMin: "-", tempMax: "-", desc: "정보 없음" };
+                
+                // wttr.in은 최대 14일치를 주지만, 보통 인덱스가 일치하지 않을 수 있으므로
+                // 안전하게 현시점의 forecast 정보를 idx에 맞춰 매칭
+                const forecast = cityWeather.forecast?.[idx] || cityWeather.current; 
+                return {
+                    date: `${idx + 1}일차`,
+                    city,
+                    tempMin: forecast?.tempMin || cityWeather.current?.temp_C,
+                    tempMax: forecast?.tempMax || cityWeather.current?.temp_C,
+                    desc: forecast?.desc || cityWeather.current?.weatherDesc?.[0]?.value
+                };
+            });
+        } catch (e) {
+            console.error('[MultiWeather] Error:', e);
+        }
+        // --- 🌊 멀티 시티 날씨 로직 끝 ---
 
         const tasks = [
+            // ✨ Task 1: UI용 고급 날씨 구조 복구 + [멀티 시티 데이터 주입]
             {
                 name: 'basics',
                 prompt: `
 컨텍스트: ${context}
-위 여행지에 대한 현지 정보를 아래 JSON 형식으로 반환하세요. (마크다운 없이 순수 JSON만 반환)
+실시간 일자별 도시 날씨 데이터: ${JSON.stringify(dailyWeatherData)}
+
+미션: 위 실시간 날씨 데이터(dailyWeatherData)를 바탕으로 **전체 일정(${dailyWeatherData.length}일)**에 대한 일별 기온을 JSON으로 작성하세요.
+공급된 데이터의 최고/최저 기온이 동일하거나(예: 27/27) 비현실적일 경우, 해당 도시의 해당 월 평균 기온을 참고하여 상식적인 범위로 보정하세요.
+각 일차별로 명시된 도시(city)의 날씨를 정확히 반영하여 조언을 작성하세요.
+모든 결과물은 반드시 한국어로 작성하며, 날씨 설명(description)은 '맑음', '흐림', '비'와 같이 핵심 상태만 짧게 표현하세요.
+
 {
   "currency": { "localCurrency": "예: JPY", "currencySymbol": "예: ¥", "calculationTip": "환산 팁 1줄", "exchangeTip": "환전 요령", "tipCulture": "팁 문화 유무" },
   "roaming": { "carriers": "통신사 로밍 안내", "simEsim": "유심/eSIM 추천", "roamingTip": "관련 꿀팁" },
   "weather": {
-    "summary": "해당 월 날씨 요약 (예: 낮에는 덥고 습도가 낮아 쾌적합니다.)",
+    "summary": "방문 도시별 날씨를 종합한 요약",
     "forecast": [
-      { "date": "1일차", "tempMin": "최저기온(숫자만)", "tempMax": "최고기온(숫자만)", "description": "날씨 간략 설명" },
-      { "date": "2일차", "tempMin": "최저기온(숫자만)", "tempMax": "최고기온(숫자만)", "description": "날씨 간략 설명" },
-      { "date": "3일차", "tempMin": "최저기온(숫자만)", "tempMax": "최고기온(숫자만)", "description": "날씨 간략 설명" },
-      { "date": "4일차", "tempMin": "최저기온(숫자만)", "tempMax": "최고기온(숫자만)", "description": "날씨 간략 설명" }
+      // 여기에 dailyWeatherData의 모든 일차(1일차 ~ ${dailyWeatherData.length}일차)를 빠짐없이 포함하세요.
+      { "date": "1일차", "tempMin": "숫자", "tempMax": "숫자", "description": "반드시 한국어로 날씨 상태만 짧게 작성 (예: '맑음', '흐림', '비', '소나기' 등. '베트남 푸꾸옥' 같은 도시명은 절대 포함하지 마세요)" }
     ],
     "clothingTips": [
       { "title": "상의 & 외투", "content": "옷차림 상세 조언" },
       { "title": "신발 & 기타", "content": "신발 및 필수 아이템" },
-      { "title": "하의 준비", "content": "사원 방문 등 하의 조언" },
-      { "title": "수영복", "content": "물놀이 관련 준비물" }
+      { "title": "하의 준비", "content": "하의 조언" },
+      { "title": "기타 준비물", "content": "선글라스, 우산 등" }
     ],
-    "packingSummary": "추천 짐싸기 요약 한 줄"
+    "packingSummary": "전체 조언 요약 한 줄 (예: 일교차가 크니 가벼운 겉옷을 준비하세요)"
   }
-}`
+}
+`
             },
+            // ✨ Task 2: 수하물 및 세관 (오류 방지)
             {
                 name: 'rules',
                 prompt: `
@@ -192,8 +273,8 @@ export async function POST(request: NextRequest) {
                 name: 'creative',
                 prompt: `
 컨텍스트: ${context}
-1. 위 여행지의 대표 관광지(Landmarks) 5곳을 소개하세요. 
-2. ${customGuides && customGuides.length > 0 ? `[추가 가이드 요청 사항]: ${customGuides.join(', ')} 에 대한 상세 가이드북 내용을 작성하세요.` : '추가 가이드 요청 사항이 없습니다. 오직 landmarks만 채우고 customGuides는 반드시 빈 배열 []로 반환하세요.'}
+위 여행지의 대표 관광지 5곳을 소개하고, 요청된 가이드 항목에 대한 답변을 작성하세요.
+${customGuides && customGuides.length > 0 ? `요청 가이드 주제: ${customGuides.join(', ')}` : '요청 가이드 주제 없음'}
 (마크다운 없이 순수 JSON만 반환)
 {
   "landmarks": [
@@ -206,94 +287,74 @@ export async function POST(request: NextRequest) {
             }
         ];
 
-        console.log(`[SecondaryResearch] Start parallel tasks for: ${destination}`);
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 28000);
+        console.log('[SecondaryResearch] Generating answers using parallel tasks...');
+        console.time('[SecondaryResearch] Parallel Calls');
 
-        try {
-            const results = await Promise.all(tasks.map(async (task) => {
-                try {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            system_instruction: { 
-                                parts: [{ text: "당신은 능숙한 여행 가이드북 작성 인공지능입니다. 제공된 [요청된 여행지/도시]를 기준으로 환전, 날씨, 세관, 관광지 정보를 풍부하게 작성하세요. 모든 필드를 채워야 하며, 마크다운 기호 없이 오직 JSON 객체만 반환하세요." }] 
-                            },
-                            contents: [{ parts: [{ text: task.prompt }] }],
-                            generationConfig: { temperature: 0.1 }
-                        }),
-                        signal: controller.signal
-                    });
+        const results = await Promise.all(tasks.map(async (task) => {
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: task.prompt }] }] })
+                });
 
-                    if (!res.ok) {
-                        const errText = await res.text();
-                        console.error(`[Gemini Error - ${task.name}] ${res.status}: ${errText}`);
-                        return { name: task.name, error: `AI 응답 실패 (${res.status})` };
-                    }
-
-                    const data = await res.json();
-                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                    const jsonMatch = text.match(/\{[\s\S]*\}/);
-                    
-                    if (jsonMatch) {
-                        try {
-                            return { name: task.name, data: JSON.parse(jsonMatch[0]) };
-                        } catch (e) {
-                            return { name: task.name, error: 'JSON 파싱 실패' };
-                        }
-                    }
-                    return { name: task.name, error: 'JSON을 찾을 수 없음' };
-                } catch (e: any) {
-                    console.error(`[Task Error - ${task.name}]`, e.message);
-                    return { name: task.name, error: e.name === 'AbortError' ? '시간 초과' : e.message };
+                if (!res.ok) {
+                    const errText = await res.text();
+                    console.error(`[Gemini Error - ${task.name}] HTTP ${res.status}: ${errText}`);
+                    return { name: task.name, error: errText };
                 }
-            }));
 
-            clearTimeout(timeoutId);
+                const data = await res.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-            let finalResearch: any = {
-                currency: {}, roaming: {}, weather: { summary: "", forecast: [], clothingTips: [], packingSummary: "" },
-                customs: { links: [], majorAlert: {}, prohibitedItems: [], arrivalProcedure: {} },
-                baggage: { additionalNotes: [] },
-                landmarks: [], customGuides: []
-            };
-
-            let successCount = 0;
-            results.forEach(r => {
-                if (r.data) {
-                    successCount++;
-                    if (r.data.currency) finalResearch.currency = { ...finalResearch.currency, ...r.data.currency };
-                    if (r.data.roaming) finalResearch.roaming = { ...finalResearch.roaming, ...r.data.roaming };
-                    if (r.data.weather) finalResearch.weather = { ...finalResearch.weather, ...r.data.weather };
-                    if (r.data.customs) finalResearch.customs = { ...finalResearch.customs, ...r.data.customs };
-                    if (r.data.baggage) finalResearch.baggage = { ...finalResearch.baggage, ...r.data.baggage };
-                    if (r.data.landmarks) finalResearch.landmarks = r.data.landmarks;
-                    if (r.data.customGuides) finalResearch.customGuides = r.data.customGuides;
+                const jsonMatch = text.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    try {
+                        return { name: task.name, data: JSON.parse(jsonMatch[0]) };
+                    } catch (e) {
+                        return { name: task.name, error: 'JSON Parse Error' };
+                    }
                 }
-            });
-
-            if (successCount === 0) {
-                const errors = results.map(r => `[${r.name}] ${r.error}`).join(', ');
-                return NextResponse.json({ success: false, error: `AI 조사가 실패했습니다: ${errors}` }, { status: 504 });
+                return { name: task.name, error: 'No JSON found' };
+            } catch (e: any) {
+                return { name: task.name, error: e.message };
             }
+        }));
 
-            const verifiedLinks = getHardcodedLinks(destination);
-            if (verifiedLinks) {
-                finalResearch.customs.links = verifiedLinks;
+        console.timeEnd('[SecondaryResearch] Parallel Calls');
+
+        // ✨ 에러 방지를 위한 초기 객체 세팅 (UI 요구사항에 맞춰 필드 강화)
+        let finalResearch: any = {
+            currency: { localCurrency: "-", currencySymbol: "", calculationTip: "-", exchangeTip: "-", tipCulture: "-" },
+            roaming: { carriers: "-", simEsim: "-", roamingTip: "-" },
+            weather: { summary: "날씨 정보를 불러오는 중입니다...", forecast: [], clothingTips: [], packingSummary: "-" },
+            customs: { links: [], warningTitle: "-", warningContent: "-", dutyFree: "-", passportNote: "-", majorAlert: {}, prohibitedItems: [], arrivalProcedure: {} },
+            baggage: { checkedWeight: "-", carryonWeight: "-", checkedNote: "-", carryonNote: "-", additionalNotes: [] },
+            landmarks: [],
+            customGuides: []
+        };
+
+        results.forEach(r => {
+            if (r.data) {
+                if (r.data.currency) finalResearch.currency = { ...finalResearch.currency, ...r.data.currency };
+                if (r.data.roaming) finalResearch.roaming = { ...finalResearch.roaming, ...r.data.roaming };
+                if (r.data.weather) finalResearch.weather = { ...finalResearch.weather, ...r.data.weather };
+                if (r.data.customs) finalResearch.customs = { ...finalResearch.customs, ...r.data.customs };
+                if (r.data.baggage) finalResearch.baggage = { ...finalResearch.baggage, ...r.data.baggage };
+                if (r.data.landmarks) finalResearch.landmarks = r.data.landmarks;
+                if (r.data.customGuides) finalResearch.customGuides = r.data.customGuides;
             }
+        });
 
-            return NextResponse.json({ success: true, data: finalResearch as SecondaryResearch });
-        } finally {
-            clearTimeout(timeoutId);
+        const verifiedLinks = getHardcodedLinks(destination);
+        if (verifiedLinks) {
+            finalResearch.customs.links = verifiedLinks;
         }
 
+        return NextResponse.json({ success: true, data: finalResearch as SecondaryResearch });
+
     } catch (error: any) {
-        console.error('[Secondary Research API] Final Catch Error:', error.message);
-        return NextResponse.json({ 
-            success: false, 
-            error: `서버 오류가 발생했습니다: ${error.message}` 
-        }, { status: 500 });
+        console.error('[Secondary Research API] Final Error:', error.message);
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }

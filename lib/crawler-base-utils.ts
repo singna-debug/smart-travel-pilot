@@ -30,8 +30,7 @@ export async function quickFetch(url: string, retries = 1): Promise<{ html: stri
                 'Referer': 'https://www.modetour.com/',
                 'Origin': 'https://www.modetour.com'
             },
-            signal: controller.signal,
-            cache: 'no-store'
+            signal: controller.signal
         });
 
         clearTimeout(timeout);
@@ -169,22 +168,16 @@ ${contextOrPrompt.substring(0, 30000)}
     try {
         for (const key of apiKeys) {
             try {
-                const geminiController = new AbortController();
-                const geminiTimeout = setTimeout(() => geminiController.abort(), 26000);
-
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         contents: [{ parts: [{ text: prompt }] }],
                         generationConfig: {
-                            maxOutputTokens: 8192,
                             thinkingConfig: { thinkingBudget: 0 }
                         }
-                    }),
-                    signal: geminiController.signal
+                    })
                 });
-                clearTimeout(geminiTimeout);
 
                 if (!response.ok) {
                     const errBody = await response.text();
@@ -195,8 +188,6 @@ ${contextOrPrompt.substring(0, 30000)}
                 const data = await response.json();
                 if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
                     const resText = data.candidates[0].content.parts[0].text;
-                    // --- [2] Gemini 원본 응답 텍스트 (CCTV 2) ---
-                    console.log('--- [2] Gemini 원본 응답 텍스트 ---', resText);
                     const jsonStr = resText.replace(/```json\s*|\s*```/g, '').trim();
                     try {
                         return JSON.parse(jsonStr);

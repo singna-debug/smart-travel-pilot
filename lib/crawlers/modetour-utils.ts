@@ -2,44 +2,34 @@
 import type { DetailedProductInfo } from '../../types';
 
 export async function fetchModeTourNative(url: string, isSummaryOnly = false, html?: string): Promise<DetailedProductInfo | null> {
+    let productNo = '';
     
-    const urlObj = new URL(url);
-    const sno = urlObj.searchParams.get('sno') || urlObj.searchParams.get('sNo') || '';
-    const ano = urlObj.searchParams.get('ano') || urlObj.searchParams.get('aNo') || urlObj.searchParams.get('ANO') || '';
-    const pnum = urlObj.searchParams.get('pnum') || urlObj.searchParams.get('Pnum') || '';
-    const goodsNo = urlObj.searchParams.get('goodsNo') || '';
+    // 1. URL에서 추출 시도
+    const productNoMatch = url.match(/package\/(\d+)/i) || 
+                           url.match(/goodsNo=(\d+)/i) || 
+                           url.match(/productNo=(\d+)/i) || 
+                           url.match(/Pnum=(\d+)/i) || 
+                           url.match(/\/(\d+)\?/);
     
-    // ★ [핵심 수정] productNo는 반드시 순수 숫자여야 합니다.
-    // sno는 'C117876' 같은 알파벳+숫자 코드이므로 productNo로 사용하면 API가 엉뚱한 상품을 반환합니다.
-    // pnum이 항상 올바른 상품 번호입니다.
-    const numericSno = /^\d+$/.test(sno) ? sno : '';
-    const numericAno = /^\d+$/.test(ano) ? ano : '';
-    let productNo = goodsNo || pnum || numericSno || numericAno || '';
+    if (productNoMatch) {
+        productNo = productNoMatch[1];
+    } else if (html) {
+        // 2. HTML 본문에서 추출 시도 (NEXT_DATA 등)
+        const htmlMatch = html.match(/"productNo":\s*(\d+)/) || 
+                          html.match(/productNo=(\d+)/) ||
+                          html.match(/productNo\s*:\s*["'](\d+)["']/);
+        if (htmlMatch) productNo = htmlMatch[1];
+    }
 
     if (!productNo) {
         console.warn(`[Native] Product No not found: ${url}`);
         return null;
     }
-    
-    console.log(`[Native] Extracted Params: productNo=${productNo}, sno=${sno}, ano=${ano}, pnum=${pnum}`);
 
-    const isVercel = process.env.VERCEL === '1';
-
-    // 브라우저 100% 위장을 위한 풀세트 헤더
-    const browserHeaders = {
+    const headers = {
         'modewebapireqheader': '{"WebSiteNo":2,"CompanyNo":81202,"DeviceType":"DVTPC","ApiKey":"jm9i5RUzKPMPdklHzDKqNzwZYy0IGV5hTyKkCcpxO0IGIgVS+8Z7NnbzbARv5w7Bn90KT13Gq79XZMow6TYvwQ=="}',
         'referer': 'https://www.modetour.com/',
-        'accept': 'application/json, text/plain, */*',
-        'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-        'cache-control': 'no-cache',
-        'pragma': 'no-cache',
-        'sec-ch-ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-site',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+        'accept': 'application/json'
     };
 
     let dataDetail: any = null;
@@ -47,57 +37,33 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
     let dataSchedule: any = null;
 
     try {
-        const ts = Date.now();
-        console.log(`[Native] Fetching for Product No: ${productNo} (Vercel: ${isVercel})`);
-        
-        const baseParams = `productNo=${productNo}&sno=${sno}&ano=${ano}&pnum=${pnum}&_ts=${ts}`;
-        const urls = [
-            `https://b2c-api.modetour.com/Package/GetProductDetailInfo?${baseParams}`,
-            `https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?${baseParams}`,
-            `https://b2c-api.modetour.com/Package/GetScheduleList?${baseParams}`
+        console.log(`[Native] Fetching for Product No: ${productNo}`);
+        const fetchTasks = [
+            fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`, { headers }),
+            fetch(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}`, { headers }),
+            fetch(`https://b2c-api.modetour.com/Package/GetScheduleList?productNo=${productNo}`, { headers })
         ];
 
-        // EUC-KR 대응을 위한 헬퍼 (필요시 사용)
-        const fetchJSON = async (targetUrl: string) => {
-            const res = await fetch(targetUrl, { headers: browserHeaders, cache: 'no-store' });
-            if (!res.ok) {
-                console.warn(`[Native] Fetch failed (${res.status}): ${targetUrl}`);
-                return null;
-            }
-            // API는 보통 JSON(UTF-8)이므로 일반 json() 사용, 한글 깨짐 발생 시 arrayBuffer 처리 고려
-            return await res.json();
-        };
-
-        const results = await Promise.all(urls.map(u => fetchJSON(u)));
-        dataDetail = results[0];
-        dataPoints = results[1];
-        dataSchedule = results[2];
-
-        console.log(`[Native] Fetch results - Detail: ${!!dataDetail}, Points: ${!!dataPoints}, Schedule: ${!!dataSchedule}`);
+        const responses = await Promise.all(fetchTasks);
+        console.log(`[Native] Response statuses: ${responses.map(r => r.status).join(', ')}`);
+        
+        if (responses[0].ok) {
+            dataDetail = await responses[0].json();
+        }
+        
+        if (responses[1].ok) dataPoints = await responses[1].json();
+        if (responses[2].ok) dataSchedule = await responses[2].json();
 
         if (!dataDetail?.result) {
-            console.log(`[Native] Product Detail missing result. Retrying Simple Detail...`);
-            const simpleUrl = `https://b2c-api.modetour.com/Package/GetProductSimpleDetail?productNo=${productNo}&_ts=${Date.now()}`;
-            dataDetail = await fetchJSON(simpleUrl);
+            const resSimple = await fetch(`https://b2c-api.modetour.com/Package/GetProductSimpleDetail?productNo=${productNo}`, { headers });
+            if (resSimple.ok) {
+                dataDetail = await resSimple.json();
+            }
         }
-    } catch (e: any) {
-        console.error(`[Native] Fetch Error: ${e.message}`);
-    }
+    } catch (e: any) {}
 
     if (dataDetail?.result || dataDetail?.isOK || dataDetail?.productName) {
         const d = dataDetail.result || dataDetail;
-        
-        // --- [과거 데이터 환각 방지] ---
-        const depDateRaw = d.departureDate || d.start_dt || d.dep_dt || '';
-        const isHistorical = depDateRaw && depDateRaw.startsWith('2024'); // 2024년 데이터면 환각으로 의심
-        
-        if (isHistorical) {
-            console.warn(`[Native] Historical data detected (Year 2024). Filtering out potentially stale flights/itinerary.`);
-        }
-
-        // --- [1] Native API 원본 데이터 (CCTV 1) ---
-        const dataType = Array.isArray(d) ? 'Array' : typeof d;
-        console.log(`--- [1] Native API 원본 데이터 (${dataType}) ---`, JSON.stringify(d).substring(0, 300));
         let cleanTitle = d.productName || '';
         const destination = d.category2 ? `${d.category2}, ${d.category3 || ''}` : (d.category3 || '');
         
@@ -144,23 +110,17 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
         const meetingInfo: any[] = [];
 
         // 1. 호텔 정보 (d.HotelList 또는 d.SummaryHotelList)
-        const rawHotels = Array.isArray(d.HotelList) ? d.HotelList : (Array.isArray(d.SummaryHotelList) ? d.SummaryHotelList : []);
+        const rawHotels = d.HotelList || d.SummaryHotelList || [];
         rawHotels.slice(0, 5).forEach((h: any) => {
-            if (h && h.hotelName) hotels.push({ name: h.hotelName, address: h.hotelAddress || '' });
+            if (h.hotelName) hotels.push({ name: h.hotelName, address: h.hotelAddress || '' });
         });
-        
+
         // 2. 포함/불포함 (d.InclusionList/ExclusionList)
-        if (Array.isArray(d.InclusionList)) d.InclusionList.forEach((i: any) => {
-            const val = i.content || i.title || (typeof i === 'string' ? i : '');
-            if (val) inclusions.push(val);
-        });
-        if (Array.isArray(d.ExclusionList)) d.ExclusionList.forEach((e: any) => {
-            const val = e.content || e.title || (typeof e === 'string' ? e : '');
-            if (val) exclusions.push(val);
-        });
+        if (d.InclusionList) d.InclusionList.forEach((i: any) => inclusions.push(i.content || i.title || i));
+        if (d.ExclusionList) d.ExclusionList.forEach((e: any) => exclusions.push(e.content || e.title || e));
         
         // 3. 미팅 정보 (d.SummaryMeetingList)
-        if (Array.isArray(d.SummaryMeetingList)) {
+        if (d.SummaryMeetingList) {
             d.SummaryMeetingList.forEach((m: any) => {
                 meetingInfo.push({
                     type: m.title || '미팅안내',
@@ -171,77 +131,43 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             });
         }
 
-        // 4. 취소 규정 (d.CancelRuleContent 또는 d.CancelRuleList)
-        let cancelPolicy = d.CancelRuleContent || d.CancelRuleInfo || '';
-        if (!cancelPolicy && Array.isArray(d.CancelRuleList)) {
-            cancelPolicy = d.CancelRuleList
-                .filter((c: any) => c && typeof c === 'object')
-                .map((c: any) => c.content || c.title || '')
-                .join('\n');
-        } else if (!cancelPolicy && typeof d.CancelRuleList === 'string') {
-            cancelPolicy = d.CancelRuleList;
-        }
-        
-        // 5. 항공 상세 정보 (가는편/오는편)
-        const depFlight = d.DepartureFlightNo || d.CarrierFlightNoDepart || d.FlightNoDepart || '';
-        const retFlight = d.ArrivalFlightNo || d.CarrierFlightNoReturn || d.FlightNoReturn || '';
-        const depTime = d.DepartureTimeDepart || d.DepartureTime || '';
-        const arrTime = d.ArrivalTimeDepart || d.ArrivalTime || '';
-        const retDepTime = d.DepartureTimeReturn || '';
-        const retArrTime = d.ArrivalTimeReturn || '';
+        // 일정표 데이터 안전하게 처리 (배열인지 확인)
+        const scheduleRaw = dataSchedule?.result || dataSchedule?.list || dataSchedule?.scheduleList || (Array.isArray(dataSchedule) ? dataSchedule : []);
+        const scheduleArray = Array.isArray(scheduleRaw) ? scheduleRaw : [];
+
+        const itinerary = scheduleArray.map((day: any) => {
+            if (isSummaryOnly) {
+                return {
+                    day: day.day || day.dayNo || '',
+                    title: day.title || day.scheduleTitle || '',
+                    date: day.date || '',
+                    route: day.route || '',
+                    timeline: []
+                };
+            }
+            return {
+                ...day,
+                timeline: day.timeline || []
+            };
+        });
 
         return {
             isProduct: true,
             title: cleanTitle,
             destination: destination,
             price: rawPrice.replace(/[^0-9]/g, ''),
-            departureDate: depDateRaw,
-            returnDate: d.arrivalDate || d.end_dt || d.arr_dt || '',
-            departureAirport: d.departureCityName || d.departureCity || '인천',
-            airline: isHistorical ? '' : (d.transportName || d.carrier_nm || ''),
-            departureFlightNumber: isHistorical ? '' : depFlight,
-            returnFlightNumber: isHistorical ? '' : retFlight,
-            departureTime: isHistorical ? '' : depTime,
-            arrivalTime: isHistorical ? '' : arrTime,
-            returnDepartureTime: isHistorical ? '' : retDepTime,
-            returnArrivalTime: isHistorical ? '' : retArrTime,
-            duration: d.travelPeriod || d.prd_day_cnt || d.period || '',
+            departureDate: d.departureDate || d.startDay || d.p_startday || d.P_StartDay || d.SDay || d.start_dt || d.dep_dt || (url.match(/depDate=(\d{4}-\d{2}-\d{2})/) || [])[1] || '',
+            returnDate: d.arrivalDate || d.endDay || d.p_endday || d.P_EndDay || d.EDay || d.end_dt || d.arr_dt || (url.match(/arrDate=(\d{4}-\d{2}-\d{2})/) || [])[1] || '',
+            departureAirport: d.departureCityName || d.departureCity || d.P_StartCityName || '인천',
+            airline: d.transportName || d.carrier_nm || d.CarrierName || '',
+            duration: d.travelPeriod || d.prd_day_cnt || d.period || d.P_Period || '',
             url: url,
             keyPoints: keyPoints,
-            itinerary: (function() {
-                // 2024년 데이터면 빈 배열을 반환하여 AI가 Scraped Content에서 분석하도록 유도
-                if (isHistorical) return []; 
-                const scheduleList = Array.isArray(dataSchedule?.result) ? dataSchedule.result : (Array.isArray(dataSchedule) ? dataSchedule : []);
-                
-                if (!Array.isArray(scheduleList)) return [];
-
-                return scheduleList.map((day: any) => {
-                    const dayNo = day?.day || day?.dayNo;
-                    const dateStr = day?.date || '';
-                    const title = day?.title || day?.scheduleTitle || '';
-                    
-                    // 상세 활동(timeline) 사전 가공
-                    const details = Array.isArray(day?.ScheduleDetailList) ? day.ScheduleDetailList : [];
-                    const timeline = Array.isArray(details) ? details.map((dt: any) => ({
-                        type: (dt.title?.includes('미팅') || dt.title?.includes('집합')) ? 'default' : 'location',
-                        title: dt.title || '',
-                        description: dt.content || ''
-                    })) : [];
-
-                    return {
-                        day: dayNo,
-                        date: dateStr,
-                        title: title,
-                        transport: day?.transport || null,
-                        timeline: timeline.length > 0 ? timeline : (day?.timeline || [])
-                    };
-                });
-            })(),
+            itinerary: itinerary,
             hotels: hotels,
             inclusions: inclusions,
             exclusions: exclusions,
             meetingInfo: meetingInfo,
-            cancellationPolicy: cancelPolicy,
             features: []
         } as any;
     }

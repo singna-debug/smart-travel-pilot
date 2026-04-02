@@ -83,10 +83,10 @@ export default function MessageTemplateCreator() {
     const [travelers, setTravelers] = useState('');
     const [deposit, setDeposit] = useState('1인 80만원');
     const [depositDeadline, setDepositDeadline] = useState('');
-    const [bankAccount, setBankAccount] = useState('신한은행 : 56217390843309');
+    const [bankAccount, setBankAccount] = useState('');
     const [bankHolder, setBankHolder] = useState('모두투어네트워크');
-    const [excludedCosts, setExcludedCosts] = useState('');
-    const [depositPerPerson, setDepositPerPerson] = useState('800000');
+    const [excludedCosts, setExcludedCosts] = useState('가이드 팁, 매너 팁, 개인 경비');
+    const [depositPerPerson, setDepositPerPerson] = useState('');
     const [confirmationLink, setConfirmationLink] = useState('');
     const [reviewLink, setReviewLink] = useState('');
     const [specialTerms, setSpecialTerms] = useState('');
@@ -369,8 +369,8 @@ ${specialTerms || `■ 여행자의 여행계약 해제 요청 시 여행약관�
 
             case 'dotcom':
                 text = `✈️  여행 예약 안내
-                
-${name} 고객님, 안녕하세요! 😊
+
+${name}(${phone}) 고객님, 안녕하세요! 😊
 이번 여행의 담당자로 배정된 모두투어 ${AGENT_NAME}입니다.
 
 신속한 예약을 위해 현재 항공, 호텔 확인 중이며,

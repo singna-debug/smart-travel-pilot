@@ -224,7 +224,7 @@ export async function fetchConfirmationNative(url: string): Promise<DetailedProd
                     const timeline = Array.isArray(details) ? details.map((dt: any) => ({
                         type: (dt.title?.includes('미팅') || dt.title?.includes('집합')) ? 'default' : 'location',
                         title: dt.title || '',
-                        description: dt.content || ''
+                        description: (dt.content && dt.content.length > 200) ? dt.content.substring(0, 200) + '...' : (dt.content || '')
                     })) : [];
                     return {
                         day: dayNo,

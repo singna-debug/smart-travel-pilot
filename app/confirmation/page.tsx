@@ -111,10 +111,10 @@ export default function ConfirmationPage() {
     const [departureAirport, setDepartureAirport] = useState('');
     const [departureTime, setDepartureTime] = useState('');
     const [arrivalTime, setArrivalTime] = useState('');
-    const [flightDuration, setFlightDuration] = useState('');
+    const [departureDuration, setDepartureDuration] = useState('');
     const [returnDepartureTime, setReturnDepartureTime] = useState('');
     const [returnArrivalTime, setReturnArrivalTime] = useState('');
-    const [returnFlightDuration, setReturnFlightDuration] = useState('');
+    const [returnDuration, setReturnDuration] = useState('');
 
     // 숙박 (다중 지원)
     const [hotels, setHotels] = useState<any[]>([{
@@ -225,6 +225,14 @@ export default function ConfirmationPage() {
             const isLocal = process.env.NODE_ENV === 'development';
             const apiUrl = '/api/analyze-url';
 
+            // [핵심] 초고속 28초 설계를 위한 병렬 트리거: NativeData나 URL에서 목적지가 추출되면 즉시 2차 조사 시작
+            // (분석 API를 기다리지 않고 스크래퍼 실행 중 병렬로 보냄)
+            const destHint = productUrl.includes('modetour.com') ? '분석 중...' : ''; 
+            // 실제 구현에서는 analyze-url 내부의 Native API 결과를 먼저 받아올 수 없으므로, 
+            // 2차 조사는 분석 결과가 나오자마자(t=15~20s) 실행되어도 이미 25~30s 타겟에 들어옴.
+            // 하지만 더 빨라지기 위해 analyze-url에서 'destination'만 먼저 주는 partial response를 고려할 수 있음.
+            // 여기서는 일단 AI 호출 최적화에 집중.
+
             const res = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -249,6 +257,14 @@ export default function ConfirmationPage() {
                 setAnalysisResult(raw);
                 setAnalysisStep('');
 
+                // [사용자 요청] 자동 2차 조사 비활성화
+                /*
+                if (raw.destination) {
+                    console.log("[Auto-Research] Analysis complete. Triggering secondary research...");
+                    runSecondaryResearchDirectly(raw.destination, raw.airline || '');
+                }
+                */
+
                 // ---- 기본 정보 ----
                 if (raw.title) setProductName(raw.title);
                 if (raw.destination) setDestination(raw.destination);
@@ -266,10 +282,10 @@ export default function ConfirmationPage() {
                 // 시간 정보는 raw.departureTime 등이 문자열일 수도 있고 객체일 수도 있으므로 유연하게 처리
                 if (raw.departureTime) setDepartureTime(raw.departureTime);
                 if (raw.arrivalTime) setArrivalTime(raw.arrivalTime);
-                if (raw.flightDuration) setFlightDuration(raw.flightDuration);
+                if (raw.departureDuration) setDepartureDuration(raw.departureDuration);
                 if (raw.returnDepartureTime) setReturnDepartureTime(raw.returnDepartureTime);
                 if (raw.returnArrivalTime) setReturnArrivalTime(raw.returnArrivalTime);
-                if (raw.returnFlightDuration) setReturnFlightDuration(raw.returnFlightDuration);
+                if (raw.returnDuration) setReturnDuration(raw.returnDuration);
                 
                 // 편명/코드 (필요시 추가 매핑)
                 // if (raw.flightCode) ... (현재 state에 flightCode가 없으면 생략 가능)
@@ -342,6 +358,13 @@ export default function ConfirmationPage() {
                 if (noticesParts.length > 0) {
                     setNotices(noticesParts.join('\n\n'));
                 }
+
+                /* [사용자 요청] 2차 조사(날씨/세관 등) 자동 실행 비활성화 - 수동 실행만 허용
+                if (raw.destination) {
+                    console.log("[Auto-Research] Analysis complete. Triggering secondary research...");
+                    setTimeout(() => runSecondaryResearchDirectly(raw.destination, raw.airline || ''), 500);
+                }
+                */
             } else {
                 setAnalysisError(json.error || '분석에 실패했습니다.');
             }
@@ -350,6 +373,37 @@ export default function ConfirmationPage() {
         } finally {
             setAnalyzing(false);
             setAnalysisStep('');
+        }
+    };
+
+    // 2차 조사를 비동기적으로 바로 호출하기 위한 헬퍼 (기존 runSecondaryResearch의 로직 재활용)
+    const runSecondaryResearchDirectly = async (targetDest: string, targetAirline: string) => {
+        if (!targetDest) return;
+        setResearchLoading(true);
+        setResearchError('');
+        try {
+            const monthMatch = departureDate.match(/-(\d{2})-/);
+            const travelMonth = monthMatch ? `${parseInt(monthMatch[1])}월` : '';
+
+            const res = await fetch('/api/confirmation/secondary-research', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    destination: targetDest,
+                    airline: targetAirline,
+                    customGuides: customGuideInputs.filter(g => g.trim()),
+                    travelMonth,
+                    itinerary, // 일정 정보 추가
+                }),
+            });
+            const json = await res.json();
+            if (json.success) {
+                setSecondaryResearch(json.data);
+            }
+        } catch (err: any) {
+            console.error('[Auto-Research] Failed:', err.message);
+        } finally {
+            setResearchLoading(false);
         }
     };
 
@@ -443,13 +497,13 @@ export default function ConfirmationPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    title: (analysisResult as any)?.title || '',
                     destination,
                     airline,
                     airport: departureAirport,
                     customGuides: customGuideInputs.filter(g => g.trim()),
                     travelMonth,
                     baggageNote: (analysisResult as any)?.baggageNote || '',
+                    itinerary, // 일정 정보 추가
                 }),
             });
             const json = await res.json();
@@ -474,16 +528,14 @@ export default function ConfirmationPage() {
     const updateSRField = (section: string, field: string, value: string) => {
         setSecondaryResearch((prev: any) => {
             if (!prev) return prev;
-            const sectionData = prev[section] || {};
-            return { ...prev, [section]: { ...sectionData, [field]: value } };
+            return { ...prev, [section]: { ...prev[section], [field]: value } };
         });
     };
     const updateSRLandmark = (index: number, field: string, value: string) => {
         setSecondaryResearch((prev: any) => {
             if (!prev || !prev.landmarks) return prev;
             const newLandmarks = [...prev.landmarks];
-            const item = newLandmarks[index] || {};
-            newLandmarks[index] = { ...item, [field]: value };
+            newLandmarks[index] = { ...newLandmarks[index], [field]: value };
             return { ...prev, landmarks: newLandmarks };
         });
     };
@@ -491,8 +543,7 @@ export default function ConfirmationPage() {
         setSecondaryResearch((prev: any) => {
             if (!prev || !prev.weather || !prev.weather.forecast) return prev;
             const newForecast = [...prev.weather.forecast];
-            const item = newForecast[index] || {};
-            newForecast[index] = { ...item, [field]: value };
+            newForecast[index] = { ...newForecast[index], [field]: value };
             return { ...prev, weather: { ...prev.weather, forecast: newForecast } };
         });
     };
@@ -501,8 +552,7 @@ export default function ConfirmationPage() {
         setSecondaryResearch((prev: any) => {
             if (!prev || !prev.weather || !prev.weather.clothingTips) return prev;
             const newTips = [...prev.weather.clothingTips];
-            const item = newTips[index] || {};
-            newTips[index] = { ...item, [field]: value };
+            newTips[index] = { ...newTips[index], [field]: value };
             return { ...prev, weather: { ...prev.weather, clothingTips: newTips } };
         });
     };
@@ -520,8 +570,7 @@ export default function ConfirmationPage() {
         setSecondaryResearch((prev: any) => {
             if (!prev || !prev.customs || !prev.customs.links) return prev;
             const newLinks = [...prev.customs.links];
-            const item = newLinks[index] || {};
-            newLinks[index] = { ...item, [field]: value };
+            newLinks[index] = { ...newLinks[index], [field]: value };
             return { ...prev, customs: { ...prev.customs, links: newLinks } };
         });
     };
@@ -544,8 +593,8 @@ export default function ConfirmationPage() {
                 },
                 flight: {
                     airline, departureAirport,
-                    departureFlightNumber, departureTime, arrivalTime,
-                    returnFlightNumber, returnDepartureTime, returnArrivalTime,
+                    departureFlightNumber, departureTime, arrivalTime, departureDuration,
+                    returnFlightNumber, returnDepartureTime, returnArrivalTime, returnDuration,
                 },
                 hotels: hotels.map(h => ({
                     ...h,
@@ -762,7 +811,7 @@ export default function ConfirmationPage() {
                     </div>
                     <div className="confirm-field">
                         <label>가는편 편명</label>
-                        <input value={departureFlightNumber} onChange={e => setDepartureFlightNumber(e.target.value)} placeholder="KE123" />
+                        <input value={departureFlightNumber} onChange={e => setDepartureFlightNumber(e.target.value)} placeholder="정보 없음" />
                     </div>
                     <div className="confirm-field">
                         <label>오는편 편명</label>
@@ -774,23 +823,15 @@ export default function ConfirmationPage() {
                     </div>
                     <div className="confirm-field">
                         <label>가는편 도착</label>
-                        <input value={arrivalTime} onChange={e => setArrivalTime(e.target.value)} placeholder="12:30" style={{ color: '#ffffff' }} />
-                    </div>
-                    <div className="confirm-field">
-                        <label>가는편 소요시간</label>
-                        <input value={flightDuration} onChange={e => setFlightDuration(e.target.value)} placeholder="02:05 소요" style={{ color: '#ffffff' }} />
+                        <input value={arrivalTime} onChange={e => setArrivalTime(e.target.value)} placeholder="12:30" />
                     </div>
                     <div className="confirm-field">
                         <label>오는편 출발</label>
-                        <input value={returnDepartureTime} onChange={e => setReturnDepartureTime(e.target.value)} placeholder="14:00" style={{ color: '#ffffff' }} />
+                        <input value={returnDepartureTime} onChange={e => setReturnDepartureTime(e.target.value)} placeholder="14:00" />
                     </div>
                     <div className="confirm-field">
                         <label>오는편 도착</label>
-                        <input value={returnArrivalTime} onChange={e => setReturnArrivalTime(e.target.value)} placeholder="21:00" style={{ color: '#ffffff' }} />
-                    </div>
-                    <div className="confirm-field">
-                        <label>오는편 소요시간</label>
-                        <input value={returnFlightDuration} onChange={e => setReturnFlightDuration(e.target.value)} placeholder="02:30 소요" style={{ color: '#ffffff' }} />
+                        <input value={returnArrivalTime} onChange={e => setReturnArrivalTime(e.target.value)} placeholder="21:00" />
                     </div>
                 </div>
                 {hotels.map((h, i) => (
@@ -801,20 +842,24 @@ export default function ConfirmationPage() {
                         </div>
                         <div className="confirm-grid">
                             <div className="confirm-field">
-                                <label>호텔명</label>
-                                <input value={h.name} onChange={e => updateHotel(i, 'name', e.target.value)} placeholder="호텔명" />
+                                <label>호텔명 (한글)</label>
+                                <input value={h.name || ''} onChange={e => updateHotel(i, 'name', e.target.value)} placeholder="신주쿠 프린스 호텔" />
                             </div>
                             <div className="confirm-field">
-                                <label>호텔 주소</label>
-                                <input value={h.address} onChange={e => updateHotel(i, 'address', e.target.value)} placeholder="주소" />
+                                <label>호텔명 (영문)</label>
+                                <input value={h.englishName || ''} onChange={e => updateHotel(i, 'englishName', e.target.value)} placeholder="Shinjuku Prince Hotel" />
+                            </div>
+                            <div className="confirm-field" style={{ gridColumn: '1 / -1' }}>
+                                <label>주소</label>
+                                <input value={h.address || ''} onChange={e => updateHotel(i, 'address', e.target.value)} placeholder="1-30-1 Kabukicho, Shinjuku, Tokyo" />
                             </div>
                             <div className="confirm-field">
                                 <label>체크인</label>
-                                <input type="date" value={h.checkIn} onChange={e => updateHotel(i, 'checkIn', e.target.value)} />
+                                <input type="date" value={h.checkIn || ''} onChange={e => updateHotel(i, 'checkIn', e.target.value)} />
                             </div>
                             <div className="confirm-field">
                                 <label>체크아웃</label>
-                                <input type="date" value={h.checkOut} onChange={e => updateHotel(i, 'checkOut', e.target.value)} />
+                                <input type="date" value={h.checkOut || ''} onChange={e => updateHotel(i, 'checkOut', e.target.value)} />
                             </div>
                         </div>
                         <div className="confirm-grid" style={{ marginTop: '12px' }}>
@@ -839,7 +884,7 @@ export default function ConfirmationPage() {
                         </div>
                     </div>
                 ))}
-                <button onClick={addHotel} className="btn-add-hotel" style={{ width: '100%', padding: '12px', background: 'var(--bg-secondary)', border: '1px dashed var(--border-color)', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, color: 'var(--text-primary)' }}>+ 호텔 추가</button>
+                <button onClick={addHotel} className="btn-add-hotel" style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px dashed var(--border-color)', borderRadius: '8px', cursor: 'pointer', fontWeight: 500, color: '#fff' }}>+ 호텔 추가</button>
             </div>
 
             {/* 미팅 및 수속 정보 */}
@@ -851,7 +896,7 @@ export default function ConfirmationPage() {
                     <div key={i} className="confirm-grid" style={{ marginBottom: '16px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                         <div className="confirm-field">
                             <label>타입</label>
-                            <select value={m.type} onChange={e => updateMeetingInfo(i, 'type', e.target.value as '미팅장소' | '수속카운터')} className="admin-select" style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem', outline: 'none', background: 'var(--bg-primary)', color: 'inherit' }}>
+                            <select value={m.type || '미팅장소'} onChange={e => updateMeetingInfo(i, 'type', e.target.value as '미팅장소' | '수속카운터')} className="admin-select" style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem', outline: 'none', background: 'var(--bg-primary)', color: 'inherit' }}>
                                 <option value="미팅장소">미팅장소</option>
                                 <option value="수속카운터">수속카운터</option>
                             </select>
@@ -945,7 +990,7 @@ export default function ConfirmationPage() {
                 </div>
                 <div className="itinerary-preview-header">
                     <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                        URL 분석 결과 추출된 {duration || `${itinerary.length}일`}간의 일정입니다.
+                        URL 분석 결과 추출된 {itinerary.length}일간의 일정입니다.
                         {!itinerary.length && " URL 분석을 먼저 진행해 주세요."}
                     </p>
                 </div>
@@ -1134,35 +1179,71 @@ export default function ConfirmationPage() {
                                 <div>
                                     <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500, marginBottom: '8px', display: 'block' }}>📅 일별 기온 및 예보</label>
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px' }}>
-                                        {secondaryResearch.weather?.forecast?.map((day: any, idx: number) => (
-                                            <div key={idx} style={{ background: 'var(--bg-tertiary)', padding: '12px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                                                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '8px' }}>{day.date}</div>
-                                                <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                                                    <div style={{ flex: 1 }}>
-                                                        <label style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>최저</label>
-                                                        <input 
-                                                            value={day.tempMin} 
-                                                            onChange={e => updateSRWeatherForecast(idx, 'tempMin', e.target.value)}
-                                                            style={{ width: '100%', fontSize: '0.8rem', padding: '4px 8px' }}
-                                                        />
+                                        {secondaryResearch.weather?.forecast?.map((day: any, idx: number) => {
+                                            // 날짜 계산 로직
+                                            let displayDate = "";
+                                            try {
+                                                if (departureDate) {
+                                                    const startDate = new Date(departureDate.replace(/\./g, '-'));
+                                                    if (!isNaN(startDate.getTime())) {
+                                                        const targetDate = new Date(startDate);
+                                                        targetDate.setDate(startDate.getDate() + idx);
+                                                        const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+                                                        const dd = String(targetDate.getDate()).padStart(2, '0');
+                                                        const week = ['일', '월', '화', '수', '목', '금', '토'][targetDate.getDay()];
+                                                        displayDate = `${mm}.${dd} (${week})`;
+                                                    }
+                                                }
+                                            } catch(e) {}
+
+                                            // 날씨 아이콘 매칭 로직
+                                            const getWeatherIcon = (desc: string) => {
+                                                if (!desc) return "☀️";
+                                                const d = desc.toLowerCase();
+                                                if (d.includes("비") || d.includes("샤워") || d.includes("rain") || d.includes("shower")) return "🌧️";
+                                                if (d.includes("눈") || d.includes("snow")) return "❄️";
+                                                if (d.includes("흐림") || d.includes("구름") || d.includes("cloud") || d.includes("overcast")) return "☁️";
+                                                if (d.includes("낙뢰") || d.includes("번개") || d.includes("thunder") || d.includes("storm")) return "⚡";
+                                                if (d.includes("안개") || d.includes("mist") || d.includes("fog")) return "🌫️";
+                                                return "☀️";
+                                            };
+
+                                            return (
+                                                <div key={idx} style={{ background: 'var(--bg-tertiary)', padding: '12px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                                                        <div>
+                                                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-primary)' }}>{day.date}</div>
+                                                            {displayDate && <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '2px' }}>{displayDate}</div>}
+                                                        </div>
+                                                        <div style={{ fontSize: '1.2rem' }}>{getWeatherIcon(day.description)}</div>
                                                     </div>
-                                                    <div style={{ flex: 1 }}>
-                                                        <label style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>최고</label>
-                                                        <input 
-                                                            value={day.tempMax} 
-                                                            onChange={e => updateSRWeatherForecast(idx, 'tempMax', e.target.value)}
-                                                            style={{ width: '100%', fontSize: '0.8rem', padding: '4px 8px' }}
-                                                        />
+                                                    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <label style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>최저</label>
+                                                            <input 
+                                                                value={day.tempMin} 
+                                                                onChange={e => updateSRWeatherForecast(idx, 'tempMin', e.target.value)}
+                                                                style={{ width: '100%', fontSize: '0.8rem', padding: '4px 8px' }}
+                                                            />
+                                                        </div>
+                                                        <div style={{ flex: 1 }}>
+                                                            <label style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>최고</label>
+                                                            <input 
+                                                                value={day.tempMax} 
+                                                                onChange={e => updateSRWeatherForecast(idx, 'tempMax', e.target.value)}
+                                                                style={{ width: '100%', fontSize: '0.8rem', padding: '4px 8px' }}
+                                                            />
+                                                        </div>
                                                     </div>
+                                                    <input 
+                                                        value={day.description} 
+                                                        onChange={e => updateSRWeatherForecast(idx, 'description', e.target.value)}
+                                                        placeholder="날씨 상태"
+                                                        style={{ width: '100%', fontSize: '0.8rem', padding: '4px 8px' }}
+                                                    />
                                                 </div>
-                                                <input 
-                                                    value={day.description} 
-                                                    onChange={e => updateSRWeatherForecast(idx, 'description', e.target.value)}
-                                                    placeholder="날씨 상태"
-                                                    style={{ width: '100%', fontSize: '0.8rem', padding: '4px 8px' }}
-                                                />
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
 
@@ -1172,12 +1253,12 @@ export default function ConfirmationPage() {
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                         {secondaryResearch.weather?.clothingTips?.map((tip: any, idx: number) => (
                                             <div key={idx} style={{ background: 'var(--bg-tertiary)', padding: '12px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                                                <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>{tip.title}</label>
+                                                <label style={{ fontSize: '0.7rem', color: '#fff', fontWeight: 600 }}>{tip.title}</label>
                                                 <textarea 
                                                     rows={2} 
                                                     value={tip.content} 
                                                     onChange={e => updateSRWeatherClothing(idx, 'content', e.target.value)}
-                                                    style={{ width: '100%', fontSize: '0.82rem', padding: '8px 10px', marginTop: '4px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '6px', resize: 'none', color: '#ffffff' }}
+                                                    style={{ width: '100%', fontSize: '0.8rem', padding: '6px 8px', marginTop: '4px', background: 'transparent', border: 'none', resize: 'none', color: '#fff' }}
                                                 />
                                             </div>
                                         ))}
@@ -1209,30 +1290,20 @@ export default function ConfirmationPage() {
                                 <div className="confirm-field">
                                     <label style={{ color: 'var(--text-secondary)' }}>핵심 경고 제목 (레퍼런스형)</label>
                                     <input value={secondaryResearch.customs?.majorAlert?.title || ''} onChange={e => {
-                                        setSecondaryResearch((prev: any) => {
-                                            if (!prev) return prev;
-                                            const customs = prev.customs || {};
-                                            const majorAlert = customs.majorAlert || {};
-                                            return {
-                                                ...prev,
-                                                customs: { ...customs, majorAlert: { ...majorAlert, title: e.target.value } }
-                                            };
-                                        });
-                                    }} style={{ color: '#ffffff' }} />
+                                        setSecondaryResearch((prev: any) => ({
+                                            ...prev,
+                                            customs: { ...prev.customs, majorAlert: { ...prev.customs.majorAlert, title: e.target.value } }
+                                        }));
+                                    }} />
                                 </div>
                                 <div className="confirm-field">
                                     <label style={{ color: 'var(--text-secondary)' }}>핵심 경고 벌금/내용</label>
                                     <input value={secondaryResearch.customs?.majorAlert?.penalty || ''} onChange={e => {
-                                        setSecondaryResearch((prev: any) => {
-                                            if (!prev) return prev;
-                                            const customs = prev.customs || {};
-                                            const majorAlert = customs.majorAlert || {};
-                                            return {
-                                                ...prev,
-                                                customs: { ...customs, majorAlert: { ...majorAlert, penalty: e.target.value } }
-                                            };
-                                        });
-                                    }} style={{ color: '#ffffff' }} />
+                                        setSecondaryResearch((prev: any) => ({
+                                            ...prev,
+                                            customs: { ...prev.customs, majorAlert: { ...prev.customs.majorAlert, penalty: e.target.value } }
+                                        }));
+                                    }} />
                                 </div>
                                 <div className="confirm-field">
                                     <label style={{ color: 'var(--text-secondary)' }}>미성년자 안내 (간략)</label>
@@ -1257,16 +1328,11 @@ export default function ConfirmationPage() {
                                     <div className="confirm-field">
                                         <label style={{ color: 'var(--text-secondary)' }}>절차 제목</label>
                                         <input value={secondaryResearch.customs?.arrivalProcedure?.title || ''} onChange={e => {
-                                            setSecondaryResearch((prev: any) => {
-                                                if (!prev) return prev;
-                                                const customs = prev.customs || {};
-                                                const arrivalProcedure = customs.arrivalProcedure || {};
-                                                return {
-                                                    ...prev,
-                                                    customs: { ...customs, arrivalProcedure: { ...arrivalProcedure, title: e.target.value } }
-                                                };
-                                            });
-                                        }} style={{ color: '#ffffff' }} />
+                                            setSecondaryResearch((prev: any) => ({
+                                                ...prev,
+                                                customs: { ...prev.customs, arrivalProcedure: { ...prev.customs.arrivalProcedure, title: e.target.value } }
+                                            }));
+                                        }} />
                                     </div>
                                     {secondaryResearch.customs?.arrivalProcedure?.steps?.map((step: any, idx: number) => (
                                         <div key={idx} style={{ 
@@ -1282,29 +1348,23 @@ export default function ConfirmationPage() {
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                 <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>단계명</label>
                                                 <input value={step.step} placeholder="단계명" style={{ width: '100%', fontSize: '0.8rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '6px 10px', color: '#fff' }} onChange={e => {
-                                                    setSecondaryResearch((prev: any) => {
-                                                        if (!prev || !prev.customs || !prev.customs.arrivalProcedure || !prev.customs.arrivalProcedure.steps) return prev;
-                                                        const newSteps = [...prev.customs.arrivalProcedure.steps];
-                                                        newSteps[idx] = { ...newSteps[idx], step: e.target.value };
-                                                        return {
-                                                            ...prev,
-                                                            customs: { ...prev.customs, arrivalProcedure: { ...prev.customs.arrivalProcedure, steps: newSteps } }
-                                                        };
-                                                    });
+                                                    const newSteps = [...(secondaryResearch.customs?.arrivalProcedure?.steps || [])];
+                                                    newSteps[idx] = { ...newSteps[idx], step: e.target.value };
+                                                    setSecondaryResearch((prev: any) => ({
+                                                        ...prev,
+                                                        customs: { ...prev.customs, arrivalProcedure: { ...(prev.customs?.arrivalProcedure || {}), steps: newSteps } }
+                                                    }));
                                                 }} />
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                 <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>상세 가이드</label>
                                                 <textarea rows={2} value={step.description} placeholder="상세 내용" style={{ width: '100%', fontSize: '0.8rem', padding: '8px 10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff', resize: 'vertical' }} onChange={e => {
-                                                    setSecondaryResearch((prev: any) => {
-                                                        if (!prev || !prev.customs || !prev.customs.arrivalProcedure || !prev.customs.arrivalProcedure.steps) return prev;
-                                                        const newSteps = [...prev.customs.arrivalProcedure.steps];
-                                                        newSteps[idx] = { ...newSteps[idx], description: e.target.value };
-                                                        return {
-                                                            ...prev,
-                                                            customs: { ...prev.customs, arrivalProcedure: { ...prev.customs.arrivalProcedure, steps: newSteps } }
-                                                        };
-                                                    });
+                                                    const newSteps = [...(secondaryResearch.customs?.arrivalProcedure?.steps || [])];
+                                                    newSteps[idx] = { ...newSteps[idx], description: e.target.value };
+                                                    setSecondaryResearch((prev: any) => ({
+                                                        ...prev,
+                                                        customs: { ...prev.customs, arrivalProcedure: { ...(prev.customs?.arrivalProcedure || {}), steps: newSteps } }
+                                                    }));
                                                 }} />
                                             </div>
                                         </div>
@@ -1329,7 +1389,7 @@ export default function ConfirmationPage() {
                     {secondaryResearch && (
                         <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
                             <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>🏛️ 관광지 ({secondaryResearch.landmarks?.length || 0}개)</div>
-                            {Array.isArray(secondaryResearch.landmarks) && secondaryResearch.landmarks.length > 0 ? (
+                            {secondaryResearch.landmarks?.length ? (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                     {secondaryResearch.landmarks.map((lm: any, i: number) => (
                                         <div key={i} style={{ padding: '16px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: '10px' }}>
@@ -1365,24 +1425,32 @@ export default function ConfirmationPage() {
                         <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
                             <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>🧳 수하물 규정</div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 2fr', gap: '8px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '8px' }}>
                                     <div className="confirm-field" style={{ marginBottom: 0 }}>
                                         <label style={{ color: 'var(--text-secondary)' }}>위탁수하물 무게</label>
-                                        <input value={secondaryResearch.baggage?.checkedWeight || ''} onChange={e => updateSRField('baggage', 'checkedWeight', e.target.value)} />
+                                        <input value={(secondaryResearch as any).baggage?.checkedWeight || ''} onChange={e => updateSRField('baggage', 'checkedWeight', e.target.value)} />
+                                    </div>
+                                    <div className="confirm-field" style={{ marginBottom: 0 }}>
+                                        <label style={{ color: 'var(--text-secondary)' }}>위탁 크기/규격</label>
+                                        <input value={(secondaryResearch as any).baggage?.checkedSize || ''} placeholder="가로, 세로, 높이 합 203cm 이내" onChange={e => updateSRField('baggage', 'checkedSize', e.target.value)} />
                                     </div>
                                     <div className="confirm-field" style={{ marginBottom: 0 }}>
                                         <label style={{ color: 'var(--text-secondary)' }}>위탁 추가 노트</label>
-                                        <input value={secondaryResearch.baggage?.checkedNote || ''} onChange={e => updateSRField('baggage', 'checkedNote', e.target.value)} />
+                                        <input value={(secondaryResearch as any).baggage?.checkedNote || ''} onChange={e => updateSRField('baggage', 'checkedNote', e.target.value)} />
                                     </div>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 2fr', gap: '8px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '8px' }}>
                                     <div className="confirm-field" style={{ marginBottom: 0 }}>
                                         <label style={{ color: 'var(--text-secondary)' }}>기내수하물 무게</label>
-                                        <input value={secondaryResearch.baggage?.carryonWeight || ''} onChange={e => updateSRField('baggage', 'carryonWeight', e.target.value)} />
+                                        <input value={(secondaryResearch as any).baggage?.carryonWeight || ''} onChange={e => updateSRField('baggage', 'carryonWeight', e.target.value)} />
+                                    </div>
+                                    <div className="confirm-field" style={{ marginBottom: 0 }}>
+                                        <label style={{ color: 'var(--text-secondary)' }}>기내 크기/규격</label>
+                                        <input value={(secondaryResearch as any).baggage?.carryonSize || ''} placeholder="(각 변 최대 55cm x 40cm x 20cm) 합 115cm 이내" onChange={e => updateSRField('baggage', 'carryonSize', e.target.value)} />
                                     </div>
                                     <div className="confirm-field" style={{ marginBottom: 0 }}>
                                         <label style={{ color: 'var(--text-secondary)' }}>기내 추가 노트</label>
-                                        <input value={secondaryResearch.baggage?.carryonNote || ''} onChange={e => updateSRField('baggage', 'carryonNote', e.target.value)} />
+                                        <input value={(secondaryResearch as any).baggage?.carryonNote || ''} onChange={e => updateSRField('baggage', 'carryonNote', e.target.value)} />
                                     </div>
                                 </div>
                                 {secondaryResearch.baggage?.additionalNotes?.map((n: string, i: number) => (
@@ -1396,12 +1464,12 @@ export default function ConfirmationPage() {
                     )}
 
                     {/* 커스텀 가이드 */}
-                    {Array.isArray(secondaryResearch?.customGuides) && secondaryResearch.customGuides.length > 0 && (
+                    {secondaryResearch?.customGuides && secondaryResearch.customGuides.length > 0 && (
                         <>
                             {secondaryResearch.customGuides.map((guide, i) => (
                                 <div key={i} style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
                                     <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>{safeStr(guide.icon)} {safeStr(guide.topic)} ({guide.sections?.length || 0}개 섹션)</div>
-                                    {Array.isArray(guide.sections) && guide.sections.map((sec, si) => (
+                                    {guide.sections?.map((sec, si) => (
                                         <div key={si} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                                             • <strong>{safeStr(sec.title)}</strong> [{sec.type}]
                                         </div>

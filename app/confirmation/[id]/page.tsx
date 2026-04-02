@@ -33,6 +33,54 @@ function safeStr(val: any): string {
     return String(val);
 }
 
+const WeatherIcon = ({ description }: { description: string }) => {
+    const d = description || '';
+    
+    // Icon mapping logic
+    if (d.includes('맑음') || d.includes('태양') || d.includes('화창')) {
+        return (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+            </svg>
+        );
+    }
+    if (d.includes('비') || d.includes('소나기') || d.includes('강수')) {
+        return (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>
+            </svg>
+        );
+    }
+    if (d.includes('눈') || d.includes('빙판')) {
+        return (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M8 15h.01"/><path d="M8 19h.01"/><path d="M12 17h.01"/><path d="M12 21h.01"/><path d="M16 15h.01"/><path d="M16 19h.01"/>
+            </svg>
+        );
+    }
+    if (d.includes('천둥') || d.includes('번개')) {
+        return (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m13 10-4 6h3v4l4-6h-3v-4Z"/>
+            </svg>
+        );
+    }
+    if (d.includes('흐림') || d.includes('구름') || d.includes('안개')) {
+        return (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17.5 19x"/><path d="M17.5 19c2.31 0 4.19-1.88 4.19-4.19 0-1.89-1.25-3.48-2.96-3.98A5.95 5.95 0 0 0 19 9c0-3.31-2.69-6-6-6-2.5 0-4.66 1.54-5.52 3.73A4.54 4.54 0 0 0 2 11c0 2.49 2.01 4.5 4.5 4.5h11"/>
+            </svg>
+        );
+    }
+    
+    // Default: Cloudy
+    return (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17.5 19x"/><path d="M17.5 19c2.31 0 4.19-1.88 4.19-4.19 0-1.89-1.25-3.48-2.96-3.98A5.95 5.95 0 0 0 19 9c0-3.31-2.69-6-6-6-2.5 0-4.66 1.54-5.52 3.73A4.54 4.54 0 0 0 2 11c0 2.49 2.01 4.5 4.5 4.5h11"/>
+        </svg>
+    );
+};
+
 const OutboundFlightIcon = () => (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '90px', flexShrink: 0, marginTop: '-6px' }}>
         <svg width="90" height="24" viewBox="0 0 100 24" style={{ overflow: 'visible' }}>
@@ -406,13 +454,115 @@ const PinchZoomModal = ({ src, onClose, footer, isPdf }: { src: string, onClose:
 
 import { AIRLINE_MAP, CITY_CODE_MAP } from '@/lib/constants/travel-data';
 
+const TIMEZONE_OFFSETS: Record<string, number> = {
+    'CXR': 2, 'DAD': 2, 'SGN': 2, 'HAN': 2, 'PQC': 2, // 베트남
+    'BKK': 2, 'HKT': 2, 'USM': 2, 'CNX': 2, // 태국
+    'SIN': 1, 'MNL': 1, 'CEB': 1, 'TPE': 1, 'HKG': 1, 'PVG': 1, 'PEK': 1, // 동남아/중화권
+    'GUM': -1, 'SPN': -1, // 괌/사이판
+    'ICN': 0, 'PUS': 0, 'GMP': 0, 'CJU': 0, // 한국
+};
+
+const getKSTOffset = (cityCode?: string) => {
+    if (!cityCode) return 0;
+    const cleanCode = cityCode.replace(/[()]/g, '').trim().toUpperCase();
+    return TIMEZONE_OFFSETS[cleanCode] ?? 0;
+};
+
+const calculateFlightDuration = (dept: string, deptCity: string | undefined, arr: string, arrCity: string | undefined) => {
+    if (!dept || !arr) return null;
+    try {
+        const [dHour, dMin] = dept.split(':').map(Number);
+        const [aHour, aMin] = arr.split(':').map(Number);
+        if (isNaN(dHour) || isNaN(dMin) || isNaN(aHour) || isNaN(aMin)) return null;
+        const dOffset = getKSTOffset(deptCity);
+        const aOffset = getKSTOffset(arrCity);
+        let dMinsKST = (dHour * 60 + dMin) + (dOffset * 60);
+        let aMinsKST = (aHour * 60 + aMin) + (aOffset * 60);
+        let diff = aMinsKST - dMinsKST;
+        if (diff <= 0) diff += 1440;
+        const hours = Math.floor(diff / 60);
+        const mins = diff % 60;
+        return mins > 0 ? `${hours}시간 ${mins}분` : `${hours}시간`;
+    } catch { return null; }
+};
+
+const getKoreaTimeText = (localTime: string, cityCode?: string) => {
+    if (!localTime || !cityCode) return null;
+    const offset = getKSTOffset(cityCode);
+    if (offset === 0) return null;
+    try {
+        const [h, m] = localTime.split(':').map(Number);
+        let kH = h + offset;
+        let dayNote = "";
+        if (kH >= 24) { kH -= 24; dayNote = " +1일"; }
+        else if (kH < 0) { kH += 24; dayNote = " -1일"; }
+        return `(한국 ${String(kH).padStart(2, '0')}:${String(m).padStart(2, '0')}${dayNote})`;
+    } catch { return null; }
+};
+
 const simplifyDestination = (dest: string | undefined) => {
     if (!dest) return '도착';
-    let result = dest.split(',')[0].trim();
-    result = result.split('/')[0].trim();
-    const words = result.split(' ');
+    const firstPart = dest.split(',')[0].trim();
+    const words = firstPart.split(' ');
     // 단어 배열의 마지막 요소를 선택하여 '일본 삿포로' 같은 경우 '삿포로'만 추출
     return words[words.length - 1];
+};
+
+const cleanWeatherDesc = (desc: string | undefined, destination: string | undefined) => {
+    if (!desc) return '정보 없음';
+    let clean = desc;
+    
+    // 1. 여행지 관련 단어(국가, 도시)가 포함된 경우 제거
+    if (destination) {
+        const destParts = destination.split(/[\s,·\(\)]+/).filter(p => p.length > 1);
+        destParts.forEach(part => {
+             const regex = new RegExp(`\\s*${part}\\s*`, 'gi');
+             clean = clean.replace(regex, ' ').trim();
+        });
+    }
+
+    // 2. 영어 날씨 용어 한글 변환
+    // 긴 구문부터 먼저 변환되도록 정렬 (예: 'partly cloudy'가 'cloudy'보다 먼저)
+    const translations: [string, string][] = [
+        ['partly cloudy', '구름 조금'],
+        ['mostly cloudy', '대체로 흐림'],
+        ['thunderstorm', '천둥번개'],
+        ['thunderstorms', '천둥번개'],
+        ['light rain', '약한 비'],
+        ['heavy rain', '폭우'],
+        ['partly', '구름 조금'],
+        ['sunny', '맑음'],
+        ['clear', '맑음'],
+        ['cloudy', '흐림'],
+        ['overcast', '흐림'],
+        ['rainy', '비'],
+        ['rain', '비'],
+        ['showers', '소나기'],
+        ['shower', '소나기'],
+        ['thunder', '천둥'],
+        ['storm', '폭풍'],
+        ['snowy', '눈'],
+        ['snow', '눈'],
+        ['mist', '안개'],
+        ['fog', '안개'],
+        ['haze', '연무'],
+        ['humid', '습함']
+    ];
+
+    translations.forEach(([eng, kor]) => {
+        const regex = new RegExp(`\\b${eng}\\b`, 'gi');
+        clean = clean.replace(regex, kor);
+    });
+
+    // 3. 마지막 정제
+    clean = clean.replace(/[,\s·\-:;]+$/g, '').replace(/^[,\s·\-:;]+/g, '').replace(/\s+/g, ' ').trim();
+    
+    // 특수 케이스: '구름 조금 흐림' -> '구름 조금'
+    if (clean.includes('구름 조금') && clean.includes('흐림')) {
+        clean = '구름 조금';
+    }
+
+    return clean || '정보 없음';
 };
 
 const getExtraTransportation = (day: any) => {
@@ -441,108 +591,156 @@ const getAirlineInfo = (codeOrName: string) => {
     
     return { name: codeOrName, logoUrl: null, color: '#3b82f6' };
 };
-
-const FlightInfoCard = ({ 
-    airline, 
-    flightNo, 
-    departureCity, 
-    departureTime, 
-    arrivalCity, 
-    arrivalTime, 
-    duration, 
-    date,
-    label // '가는 편', '오는 편' 등
-}: { 
-    airline?: string, 
-    flightNo?: string, 
-    departureCity: string, 
-    departureTime: string, 
-    arrivalCity: string, 
-    arrivalTime: string, 
-    duration?: string, 
-    date?: string,
-    label?: string
-}) => {
-    const info = getAirlineInfo(airline || flightNo || '');
-    const deptCityText = departureCity.trim();
-    const arrCityText = arrivalCity.trim();
-    const deptCode = CITY_CODE_MAP[deptCityText] ? ` (${CITY_CODE_MAP[deptCityText]})` : '';
-    const arrCode = CITY_CODE_MAP[arrCityText] ? ` (${CITY_CODE_MAP[arrCityText]})` : '';
-
-    const cleanDuration = (dur: string | undefined): string => {
-        if (!dur) {
-            // duration이 없을 경우 시간 문자열로 자동 계산 (예: 09:30, 11:00)
-            if (departureTime && arrivalTime && departureTime.includes(':') && arrivalTime.includes(':')) {
-                const [dh, dm] = departureTime.split(':').map(Number);
-                const [ah, am] = arrivalTime.split(':').map(Number);
-                if (!isNaN(dh) && !isNaN(dm) && !isNaN(ah) && !isNaN(am)) {
-                    let dMinutes = dh * 60 + dm;
-                    let aMinutes = ah * 60 + am;
-                    if (aMinutes < dMinutes) {
-                        aMinutes += 24 * 60; // 다음날 도착으로 간주
-                    }
-                    const diff = aMinutes - dMinutes;
-                    if (diff > 0 && diff < 24 * 60) {
-                        const hours = Math.floor(diff / 60);
-                        const mins = diff % 60;
-                        let text = '';
-                        if (hours > 0) text += `${String(hours).padStart(2, '0')}시간 `;
-                        if (mins > 0) text += `${String(mins).padStart(2, '0')}분`;
-                        return `${text.trim()} 소요`;
-                    }
-                }
-            }
-            return '';
+const ParsedFlightCard = ({ day, isFirst, isLast }: { day: any, isFirst: boolean, isLast: boolean }) => {
+    let flightInfo: any = null;
+    if (day.transport) {
+        const t = day.transport;
+        flightInfo = {
+            flightNo: t.flightNo,
+            airline: t.airline,
+            departureCity: t.departureCity,
+            departureTime: t.departureTime,
+            arrivalCity: t.arrivalCity,
+            arrivalTime: t.arrivalTime,
+            duration: t.duration,
+        };
+    } else if (day.transportation) {
+        const matchOld = day.transportation.match(/비행기\s*([A-Z0-9]*)\s*\((.+?)\s+(\d{2}:\d{2})\s*출발,\s*(.+?)\s+(\d{2}:\d{2})\s*도착,\s*(.+?)\s*소요\)/);
+        const matchNew = day.transportation.match(/([가-힣a-zA-Z]+항공|[가-힣a-zA-Z]+에어)\s*([A-Za-z0-9]+)?,\s*출발\s*(\d{2}:\d{2}),\s*도착\s*(\d{2}:\d{2}),\s*소요(?:시간)?\s*(.+)/);
+        if (matchOld) {
+            flightInfo = { flightNo: matchOld[1], departureCity: matchOld[2], departureTime: matchOld[3], arrivalCity: matchOld[4], arrivalTime: matchOld[5], duration: matchOld[6] };
+        } else if (matchNew) {
+            flightInfo = { airline: matchNew[1], flightNo: matchNew[2] || '', departureTime: matchNew[3], arrivalTime: matchNew[4], duration: matchNew[5] };
         }
-        let d = dur.trim();
-        // '소요'가 중복으로 들어있거나 끝에 이미 붙어있는 경우 처리
-        d = d.replace(/소요/g, '').trim();
-        return d ? `${d} 소요` : '';
-    };
+    }
+    if (!flightInfo) return null;
+    const title = isFirst ? '가는 편' : (isLast ? '오는 편' : undefined);
+    return <UnifiedFlightCard flightInfo={flightInfo} dateStr={day.date} title={title} />;
+};
 
-    const durationText = cleanDuration(duration);
+const parseDurationToMins = (durationStr: string) => {
+    if (!durationStr) return 0;
+    let mins = 0;
+    const hMatch = durationStr.match(/(\d+)\s*(?:시간|h|H)/);
+    const mMatch = durationStr.match(/(\d+)\s*(?:분|m|M)/);
+    if (hMatch) mins += parseInt(hMatch[1], 10) * 60;
+    if (mMatch) mins += parseInt(mMatch[1], 10);
+    return mins;
+};
+
+const getArrivalKST = (deptTimeKST: string, durationStr: string) => {
+    if (!deptTimeKST || !durationStr) return null;
+    const durMins = parseDurationToMins(durationStr);
+    if (durMins === 0) return null;
+    try {
+        const [h, m] = deptTimeKST.split(':').map(Number);
+        if (isNaN(h) || isNaN(m)) return null;
+        const totalMins = h * 60 + m + durMins;
+        const outH = Math.floor(totalMins / 60);
+        const outM = totalMins % 60;
+        const dayOffset = Math.floor(outH / 24);
+        const finalH = outH % 24;
+        const dayStr = dayOffset > 0 ? ` +${dayOffset}일` : '';
+        return `(한국 ${String(finalH).padStart(2, '0')}:${String(outM).padStart(2, '0')}${dayStr})`;
+    } catch { return null; }
+};
+
+const getDepartureKST = (arrTimeKST: string, durationStr: string) => {
+    if (!arrTimeKST || !durationStr) return null;
+    const durMins = parseDurationToMins(durationStr);
+    if (durMins === 0) return null;
+    try {
+        const [h, m] = arrTimeKST.split(':').map(Number);
+        if (isNaN(h) || isNaN(m)) return null;
+        let totalMins = h * 60 + m - durMins;
+        let dayOffset = 0;
+        while (totalMins < 0) {
+            totalMins += 24 * 60;
+            dayOffset -= 1;
+        }
+        const outH = Math.floor(totalMins / 60);
+        const outM = totalMins % 60;
+        const dayStr = dayOffset < 0 ? ` ${dayOffset}일` : '';
+        return `(한국 ${String(outH).padStart(2, '0')}:${String(outM).padStart(2, '0')}${dayStr})`;
+    } catch { return null; }
+};
+
+const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, dateStr?: string, title?: string }) => {
+    const planeSrc = flightInfo.airline || flightInfo.flightNo;
+    const info = getAirlineInfo(planeSrc);
+
+    const deptCity = (flightInfo.departureCity || '출발지').trim();
+    const arrCity = (flightInfo.arrivalCity || '도착지').trim();
+    const deptCode = CITY_CODE_MAP[deptCity] ? ` (${CITY_CODE_MAP[deptCity]})` : '';
+    const arrCode = CITY_CODE_MAP[arrCity] ? ` (${CITY_CODE_MAP[arrCity]})` : '';
+
+    const durationText = flightInfo.duration || calculateFlightDuration(flightInfo.departureTime, deptCode, flightInfo.arrivalTime, arrCode);
+
+    const needDepKST = !!getKoreaTimeText(flightInfo.departureTime, deptCode);
+    const needArrKST = !!getKoreaTimeText(flightInfo.arrivalTime, arrCode);
+
+    const displayDepKST = needDepKST && !needArrKST && flightInfo.duration
+        ? getDepartureKST(flightInfo.arrivalTime, flightInfo.duration) || getKoreaTimeText(flightInfo.departureTime, deptCode)
+        : getKoreaTimeText(flightInfo.departureTime, deptCode);
+
+    const displayArrKST = needArrKST && !needDepKST && flightInfo.duration
+        ? getArrivalKST(flightInfo.departureTime, flightInfo.duration) || getKoreaTimeText(flightInfo.arrivalTime, arrCode)
+        : getKoreaTimeText(flightInfo.arrivalTime, arrCode);
 
     return (
-        <div style={{ marginBottom: '16px', width: '100%' }}>
+        <div style={{ marginBottom: '24px', marginTop: title ? '16px' : '0', position: 'relative' }}>
+            {title && (
+                <div style={{ 
+                    position: 'absolute', 
+                    top: '-12px', 
+                    left: '16px', 
+                    background: title === '가는 편' ? '#e0f2fe' : '#eef2ff',
+                    border: `1px solid ${title === '가는 편' ? '#bae6fd' : '#c7d2fe'}`,
+                    borderRadius: '6px',
+                    padding: '3px 10px',
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    color: title === '가는 편' ? '#0369a1' : '#4338ca',
+                    zIndex: 2,
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
+                    letterSpacing: '-0.02em'
+                }}>
+                    {title}
+                </div>
+            )}
             <div style={{
                 background: '#fff',
                 border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '24px 20px',
+                borderRadius: '16px',
+                padding: '24px 20px 20px', // 여백 최적화
                 position: 'relative',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
             }}>
-                {label && (
-                    <div style={{ 
-                        position: 'absolute', 
-                        top: '-10px', 
-                        left: '20px', 
-                        background: '#0ea5e9', 
-                        color: '#fff', 
-                        fontSize: '0.7rem', 
-                        fontWeight: 800, 
-                        padding: '2px 8px', 
-                        borderRadius: '4px',
-                        boxShadow: '0 2px 4px rgba(14,165,233,0.3)'
-                    }}>
-                        {label}
-                    </div>
-                )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     
                     {/* 왼쪽: 출발 정보 */}
-                    <div style={{ textAlign: 'center', flex: 1 }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{deptCityText}{deptCode} 출발</div>
-                        {date && <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '2px' }}>{date}</div>}
-                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{formatFlightTime(departureTime)}</div>
-                        {flightNo && <div style={{ fontSize: '0.7rem', color: '#0ea5e9', fontWeight: 700, marginTop: '2px' }}>{flightNo}</div>}
+                    <div style={{ textAlign: 'left', width: '30%', minWidth: '90px' }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{deptCity}{deptCode} 출발</div>
+                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{dateStr}</div>}
+                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{flightInfo.departureTime}</div>
+                        
+                        {displayDepKST && (
+                            <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 500, marginTop: '2px' }}>
+                                {displayDepKST}
+                            </div>
+                        )}
                     </div>
 
                     {/* 중앙: 아이콘, 노선, 시간 */}
-                    <div style={{ width: '120px', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px' }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px' }}>
+                        {flightInfo.flightNo && (
+                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#3b82f6', marginBottom: '4px' }}>
+                                {flightInfo.flightNo}
+                            </div>
+                        )}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                             {info.logoUrl ? (
-                                <img src={info.logoUrl} alt={info.name} style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                                <img src={info.logoUrl} alt={info.name} style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
                             ) : (
                                 <div style={{ width: '16px', height: '16px', background: info.color, color: 'white', fontSize: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '3px' }}>
                                     {info.name.slice(0, 1)}
@@ -552,109 +750,33 @@ const FlightInfoCard = ({
                         </div>
 
                         {/* 타임라인 바 */}
-                        <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                        <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
                             <div style={{ flex: 1, height: '1.5px', background: '#cbd5e1' }}></div>
                             <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
                         </div>
 
-                        {durationText && (
-                            <div style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 600, marginTop: '8px' }}>
-                                {durationText}
-                            </div>
-                        )}
+                        <div style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 600, marginTop: '8px' }}>
+                            {durationText} 소요
+                        </div>
                     </div>
 
                     {/* 오른쪽: 도착 정보 */}
-                    <div style={{ textAlign: 'center', flex: 1 }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{arrCityText}{arrCode} 도착</div>
-                        {date && <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '2px' }}>{date}</div>}
-                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{formatFlightTime(arrivalTime)}</div>
+                    <div style={{ textAlign: 'right', width: '30%', minWidth: '90px' }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{arrCity}{arrCode} 도착</div>
+                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{dateStr}</div>}
+                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{flightInfo.arrivalTime}</div>
+                        
+                        {displayArrKST && (
+                            <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 500, marginTop: '2px' }}>
+                                {displayArrKST}
+                            </div>
+                        )}
                     </div>
 
                 </div>
             </div>
         </div>
-    );
-};
-
-const ParsedFlightCard = ({ day }: { day: any }) => {
-    let flightInfo: any = null;
-
-    if (day.transport) {
-        const t = day.transport;
-        const isPlaceholder = 
-            (t.airline === '항공편' || t.airline === '항공사' || t.airline === 'null' || !t.airline) && 
-            (t.flightNo === '비행편명' || t.flightNo === 'null' || t.flightNo === '없음' || !t.flightNo);
-
-        if (!isPlaceholder) {
-            flightInfo = {
-                flightNo: t.flightNo && t.flightNo !== 'null' ? t.flightNo : '',
-                airline: t.airline && t.airline !== 'null' ? t.airline : '',
-                departureCity: t.departureCity && t.departureCity !== 'null' && t.departureCity !== '출발도시명' ? t.departureCity : '출발지',
-                departureTime: t.departureTime && t.departureTime !== 'null' ? t.departureTime : '',
-                arrivalCity: t.arrivalCity && t.arrivalCity !== 'null' && t.arrivalCity !== '도착도시명' ? t.arrivalCity : '도착지',
-                arrivalTime: t.arrivalTime && t.arrivalTime !== 'null' ? t.arrivalTime : '',
-                duration: t.duration && t.duration !== 'null' ? t.duration : '',
-            };
-        }
-    }
-    
-    if (!flightInfo && day.transportation) {
-        // 기존 패턴 (Booking 모드 등에서 넘어온 형식)
-        const matchOld = day.transportation.match(/비행기\s*([A-Z0-9]*)\s*\((.+?)\s+(\d{2}:\d{2})\s*출발,\s*(.+?)\s+(\d{2}:\d{2})\s*도착,\s*(.+?)\s*소요\)(?:,\s*(.+))?/);
-        // 새로운 AI 포맷 (Normal 모드 등)
-        const matchNew = day.transportation.match(/([가-힣a-zA-Z]+항공|[가-힣a-zA-Z]+에어)\s*([A-Za-z0-9]+)?,\s*출발\s*(\d{2}:\d{2}),\s*도착\s*(\d{2}:\d{2}),\s*소요(?:시간)?\s*(.+)/);
-        
-        if (matchOld) {
-            flightInfo = {
-                flightNo: matchOld[1],
-                airline: '',
-                departureCity: matchOld[2],
-                departureTime: matchOld[3],
-                arrivalCity: matchOld[4],
-                arrivalTime: matchOld[5],
-                duration: matchOld[6],
-            };
-        } else if (matchNew) {
-            let dept = '출발지';
-            let arr = '도착지';
-            if (day.title) {
-                const parts = day.title.split(/->|-|→|>|▶/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                const cityParts = parts.filter((p: string) => !p.includes('일차'));
-                if (cityParts.length >= 2) {
-                    dept = simplifyDestination(cityParts[0]);
-                    arr = simplifyDestination(cityParts[cityParts.length - 1]);
-                } else if (cityParts.length === 1) {
-                    dept = simplifyDestination(cityParts[0]);
-                }
-            }
-
-            flightInfo = {
-                airline: matchNew[1],
-                flightNo: matchNew[2] || '',
-                departureCity: dept,
-                departureTime: matchNew[3],
-                arrivalCity: arr,
-                arrivalTime: matchNew[4],
-                duration: matchNew[5],
-            };
-        }
-    }
-    
-    if (!flightInfo) return null;
-
-    return (
-        <FlightInfoCard 
-            airline={flightInfo.airline}
-            flightNo={flightInfo.flightNo}
-            departureCity={flightInfo.departureCity}
-            departureTime={flightInfo.departureTime}
-            arrivalCity={flightInfo.arrivalCity}
-            arrivalTime={flightInfo.arrivalTime}
-            duration={flightInfo.duration}
-            date={day.date}
-        />
     );
 };
 
@@ -955,37 +1077,41 @@ export default function ConfirmationViewerPage() {
                                 <div className="mc-section-title">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 3.6c-.1.4.1.9.5 1.1L9 14.5l-3.5 3.5-2.8-.8c-.4-.1-.8.2-1 .6L1 19.5l4.5 1 1 4.5c.1.4.4.7.9.6l1.8-.7c.4-.2.6-.6.5-1l-.8-2.8 3.5-3.5 2.9 6c.2.4.7.6 1.1.5l3.6-1.2c.5-.2.8-.6.7-1.1z"></path></svg> 항공 정보
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px' }}>
                                     {doc.flight.departureTime && (
-                                        <FlightInfoCard 
-                                            label="가는 편"
-                                            airline={doc.flight.airline}
-                                            flightNo={doc.flight.departureFlightNumber}
-                                            departureCity={simplifyDestination(doc.flight.departureAirport || '출발')}
-                                            departureTime={doc.flight.departureTime}
-                                            arrivalCity={simplifyDestination(doc.trip.destination)}
-                                            arrivalTime={doc.flight.arrivalTime || ''}
-                                            duration={doc.flight.flightDuration}
-                                            date={doc.trip.departureDate}
+                                        <UnifiedFlightCard 
+                                            title="가는 편"
+                                            dateStr={doc.trip.departureDate}
+                                            flightInfo={{
+                                                airline: doc.flight.airline,
+                                                flightNo: doc.flight.departureFlightNumber,
+                                                departureCity: simplifyDestination(doc.flight.departureAirport),
+                                                departureTime: doc.flight.departureTime,
+                                                arrivalCity: simplifyDestination(doc.trip.destination),
+                                                arrivalTime: doc.flight.arrivalTime,
+                                                duration: (doc.flight as any).departureDuration
+                                            }} 
                                         />
                                     )}
-                                    
                                     {doc.flight.returnDepartureTime && (
-                                        <FlightInfoCard 
-                                            label="오는 편"
-                                            airline={doc.flight.airline}
-                                            flightNo={doc.flight.returnFlightNumber}
-                                            departureCity={simplifyDestination(doc.trip.destination)}
-                                            departureTime={doc.flight.returnDepartureTime}
-                                            arrivalCity={simplifyDestination(doc.flight.departureAirport || '도착')}
-                                            arrivalTime={doc.flight.returnArrivalTime || ''}
-                                            duration={doc.flight.returnFlightDuration}
-                                            date={doc.trip.returnDate}
+                                        <UnifiedFlightCard 
+                                            title="오는 편"
+                                            dateStr={doc.trip.returnDate}
+                                            flightInfo={{
+                                                airline: doc.flight.airline,
+                                                flightNo: doc.flight.returnFlightNumber,
+                                                departureCity: simplifyDestination(doc.trip.destination),
+                                                departureTime: doc.flight.returnDepartureTime,
+                                                arrivalCity: simplifyDestination(doc.flight.departureAirport),
+                                                arrivalTime: doc.flight.returnArrivalTime,
+                                                duration: (doc.flight as any).returnDuration
+                                            }} 
                                         />
                                     )}
                                 </div>
                             </div>
                         )}
+
                         {/* 수하물 규정 (개요 탭으로 이동) */}
                         {doc.secondaryResearch?.baggage && (
                             <GuideAccordion
@@ -999,17 +1125,23 @@ export default function ConfirmationViewerPage() {
                                         <div className="bag-icon">
                                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="8" width="16" height="12" rx="2" ry="2"></rect><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                         </div>
-                                        <div className="bag-label">위탁 수하물</div>
-                                        <div className="bag-weight">
+                                        <div className="bag-label" style={{ marginBottom: '4px' }}>위탁 수하물</div>
+                                        <div className="bag-weight" style={{ marginBottom: '16px' }}>
                                             {(() => {
                                                 const weight = safeStr(doc.secondaryResearch.baggage.checkedWeight);
                                                 const match = weight.match(/(\d+(?:\.\d+)?)\s*(?:kg|키로|k|KG|K)/i);
                                                 if (match) return `${match[1]}kg`;
-                                                if (/^\d+(?:\.\d+)?$/.test(weight.trim())) return `${weight.trim()}kg`;
                                                 return (weight || '확인 필요');
                                             })()}
                                         </div>
-                                        <p>{safeStr(doc.secondaryResearch.baggage.checkedNote)}</p>
+                                        <div style={{ marginTop: '0', color: '#64748b', fontSize: '0.82rem', lineHeight: '1.6', wordBreak: 'keep-all', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            {safeStr(doc.secondaryResearch.baggage.checkedNote).split('. ').filter(s => s.trim()).map((sentence, idx) => (
+                                                <div key={idx} style={{ position: 'relative', paddingLeft: '14px' }}>
+                                                    <span style={{ position: 'absolute', left: 0, top: '2px', color: '#cbd5e1' }}>•</span>
+                                                    {sentence.trim()}{!sentence.trim().endsWith('.') && '.'}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                     <div className="baggage-card carryon">
                                         <div className="bag-icon">
@@ -1018,17 +1150,23 @@ export default function ConfirmationViewerPage() {
                                                 <path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                             </svg>
                                         </div>
-                                        <div className="bag-label">기내 수하물</div>
-                                        <div className="bag-weight">
+                                        <div className="bag-label" style={{ marginBottom: '4px' }}>기내 수하물</div>
+                                        <div className="bag-weight" style={{ marginBottom: '16px' }}>
                                             {(() => {
                                                 const weight = safeStr(doc.secondaryResearch.baggage.carryonWeight);
                                                 const match = weight.match(/(\d+(?:\.\d+)?)\s*(?:kg|키로|k|KG|K)/i);
                                                 if (match) return `${match[1]}kg`;
-                                                if (/^\d+(?:\.\d+)?$/.test(weight.trim())) return `${weight.trim()}kg`;
                                                 return (weight || '확인 필요');
                                             })()}
                                         </div>
-                                        <p>{safeStr(doc.secondaryResearch.baggage.carryonNote)}</p>
+                                        <div style={{ marginTop: '0', color: '#64748b', fontSize: '0.82rem', lineHeight: '1.6', wordBreak: 'keep-all', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            {safeStr(doc.secondaryResearch.baggage.carryonNote).split('. ').filter(s => s.trim()).map((sentence, idx) => (
+                                                <div key={idx} style={{ position: 'relative', paddingLeft: '14px' }}>
+                                                    <span style={{ position: 'absolute', left: 0, top: '2px', color: '#cbd5e1' }}>•</span>
+                                                    {sentence.trim()}{!sentence.trim().endsWith('.') && '.'}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                                 {doc.secondaryResearch.baggage.additionalNotes?.length > 0 && (
@@ -1036,7 +1174,7 @@ export default function ConfirmationViewerPage() {
                                         {doc.secondaryResearch.baggage.additionalNotes.map((note, i) => (
                                             <div key={i} className="baggage-note-item">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle' }}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                                                {safeStr(note)}
+                                                {safeStr(note).replace(/📏/g, '')}
                                             </div>
                                         ))}
                                     </div>
@@ -1137,7 +1275,11 @@ export default function ConfirmationViewerPage() {
 
                                                 {isOpen && (
                                                     <div className="day-body">
-                                                        <ParsedFlightCard day={day} />
+                                                        <ParsedFlightCard 
+                                                            day={day} 
+                                                            isFirst={i === 0} 
+                                                            isLast={i === doc.itinerary.length - 1} 
+                                                        />
                                                         <div className="day-content" style={{ marginTop: '16px' }}>
                                                             {day.timeline && Array.isArray(day.timeline) && day.timeline.length > 0 ? (
                                                                 <div className="timeline-list" style={{ paddingLeft: '4px' }}>
@@ -1407,28 +1549,100 @@ export default function ConfirmationViewerPage() {
                                         </p>
                                     </div>
 
-                                    {/* 일별 예보 카드 */}
+                                    {/* 일별 예보 카드 (미니멀 디자인) */}
                                     <div style={{ marginBottom: '24px' }}>
                                         <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                                             일별 기온 및 날씨
                                         </div>
-                                        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '8px', WebkitOverflowScrolling: 'touch' }}>
-                                            {sr.weather?.forecast?.map((day: any, i: number) => (
-                                                <div key={i} style={{ minWidth: '120px', background: '#fff', border: '1px solid #f1f5f9', borderRadius: '12px', padding: '12px', textAlign: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
-                                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '6px' }}>{day.date}</div>
-                                                    <div style={{ fontSize: '1rem', fontWeight: 800, color: '#1e293b', marginBottom: '4px' }}>
-                                                        <span style={{ color: '#ef4444' }}>{day.tempMax}</span>
-                                                        <span style={{ color: '#cbd5e1', margin: '0 4px', fontWeight: 400 }}>/</span>
-                                                        <span style={{ color: '#3b82f6' }}>{day.tempMin}</span>
+                                        <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '12px', WebkitOverflowScrolling: 'touch', paddingLeft: '4px', paddingRight: '4px' }}>
+                                            {sr.weather?.forecast?.map((day: any, i: number) => {
+                                                let displayDate = day.date;
+                                                try {
+                                                    if (doc.trip.departureDate) {
+                                                        const d = new Date(doc.trip.departureDate);
+                                                        d.setDate(d.getDate() + i);
+                                                        const month = d.getMonth() + 1;
+                                                        const date = d.getDate();
+                                                        const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                                                        const dayName = dayNames[d.getDay()];
+                                                        displayDate = `${month}.${date} (${dayName})`;
+                                                    }
+                                                } catch (e) {}
+
+                                                return (
+                                                    <div key={i} style={{ 
+                                                        minWidth: '165px', 
+                                                        background: 'rgba(15, 23, 42, 0.9)', 
+                                                        backdropFilter: 'blur(10px)',
+                                                        borderRadius: '22px', 
+                                                        padding: '24px 16px 20px', 
+                                                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        textAlign: 'center',
+                                                        minHeight: '265px', // 전체 높이 소폭 확보
+                                                        height: '265px' // 고정 높이로 통일감 부여
+                                                    }}>
+                                                        {/* 상단 정보 영역: 높이 고정 */}
+                                                        <div style={{ height: '82px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                                                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', marginBottom: '4px', letterSpacing: '-0.02em' }}>{i + 1}일차</div>
+                                                            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>{displayDate}</div>
+                                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500, opacity: 0.9 }}>
+                                                                {`(${(day.location || simplifyDestination(doc.trip.destination)).replace(/[\(\)]/g, '')})`}
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {/* 아이콘 영역: flex: 1을 사용하여 상하 텍스트 사이의 정중앙에 배치 */}
+                                                        <div style={{ 
+                                                            flex: 1, 
+                                                            display: 'flex', 
+                                                            alignItems: 'center', 
+                                                            justifyContent: 'center', 
+                                                            width: '100%',
+                                                            margin: '10px 0'
+                                                        }}>
+                                                            <div style={{ transform: 'scale(1.65)' }}>
+                                                                <WeatherIcon description={cleanWeatherDesc(day.description, doc.trip.destination)} />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* 날씨 설명 영역: 하단 기온과의 균형을 위해 높이 고정 */}
+                                                        <div style={{ 
+                                                            height: '42px', // 2줄 내외 텍스트를 위한 최적 높이
+                                                            fontSize: '0.82rem', 
+                                                            color: '#e2e8f0', 
+                                                            fontWeight: 500, 
+                                                            lineHeight: 1.4,
+                                                            wordBreak: 'keep-all',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            width: '100%',
+                                                            padding: '0 4px',
+                                                            marginBottom: '10px'
+                                                        }}>
+                                                            {cleanWeatherDesc(day.description, doc.trip.destination)}
+                                                        </div>
+                                                        
+                                                        {/* 온도 정보: 최하단 고정 */}
+                                                        <div style={{ 
+                                                            display: 'flex', 
+                                                            alignItems: 'baseline', 
+                                                            gap: '8px',
+                                                            paddingBottom: '4px'
+                                                        }}>
+                                                            <span style={{ fontSize: '1.35rem', fontWeight: 900, color: '#fff' }}>{day.tempMax?.replace(/[^0-9.-]/g, '')}°</span>
+                                                            <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'rgba(148, 163, 184, 0.7)' }}>/ {day.tempMin?.replace(/[^0-9.-]/g, '')}°</span>
+                                                        </div>
                                                     </div>
-                                                    <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>{day.description}</div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     </div>
 
-                                    {/* 추천 복장 리스트 */}
+                                    {/* 의류 및 준비물 가이드 */}
                                     <div style={{ marginBottom: '24px' }}>
                                         <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.62 1.96v.18A2 2 0 0 0 3 7.5V19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7.5a2 2 0 0 0 1-1.9v-.18a2 2 0 0 0-1.62-1.96Z"></path><path d="M12 21V7"></path><path d="M16 21V11"></path><path d="M8 21V11"></path></svg>
@@ -1462,7 +1676,7 @@ export default function ConfirmationViewerPage() {
                                 onToggle={toggleSection}
                             >
                                 {/* 첫 번째 랜드마크: 히어로 카드 */}
-                                {sr.landmarks && sr.landmarks.length > 0 && (
+                                {sr.landmarks?.[0] && (
                                     <div className="landmark-hero">
                                         {sr.landmarks[0].imageUrl && (
                                             // eslint-disable-next-line @next/next/no-img-element
@@ -1477,7 +1691,7 @@ export default function ConfirmationViewerPage() {
                                 )}
                                 {/* 나머지 랜드마크: 그리드 카드 */}
                                 <div className="landmark-grid">
-                                    {(sr.landmarks || []).slice(1).map((lm: any, i: number) => (
+                                    {sr.landmarks?.slice(1).map((lm, i) => (
                                         <div key={i} className="landmark-card">
                                             {lm.imageUrl && (
                                                 // eslint-disable-next-line @next/next/no-img-element
@@ -1500,36 +1714,39 @@ export default function ConfirmationViewerPage() {
                                 isOpen={expandedSections['customs'] || false}
                                 onToggle={toggleSection}
                             >
-                                 {/* (1) 국가별 핵심 경보 (식품류 등) - 이미지 최상단 스타일 */}
+                                 {/* (1) 국가별 핵심 경보 (식품류 등) - 프리미엄 경고 스타일 */}
                                  {sr.customs?.majorAlert && sr.customs.majorAlert.title && (
-                                     <div style={{ marginBottom: '20px', border: '1.5px solid #fecaca', background: '#fff', padding: '20px', borderRadius: '16px' }}>
-                                         <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#dc2626', marginBottom: '12px', textAlign: 'center' }}>
+                                     <div style={{ marginBottom: '24px', border: '1px solid #fee2e2', background: 'linear-gradient(135deg, #fff5f5 0%, #fff 100%)', padding: '24px 20px', borderRadius: '20px', boxShadow: '0 4px 15px rgba(220, 38, 38, 0.05)' }}>
+                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '1.05rem', fontWeight: 900, color: '#dc2626', marginBottom: '14px' }}>
+                                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                                              {safeStr(sr.customs.majorAlert.title)}
                                          </div>
-                                         <div style={{ fontSize: '0.88rem', color: '#7f1d1d', lineHeight: 1.6, marginBottom: '14px', textAlign: 'center', wordBreak: 'keep-all' }}>
+                                         <div style={{ fontSize: '0.88rem', color: '#7f1d1d', lineHeight: 1.7, marginBottom: '16px', textAlign: 'center', wordBreak: 'keep-all', fontWeight: 500 }}>
                                              {safeStr(sr.customs.majorAlert.content)}
                                          </div>
-                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#dc2626', fontSize: '0.82rem', fontWeight: 700, background: '#fef2f2', padding: '8px 12px', borderRadius: '8px', border: '1px solid #fee2e2' }}>
-                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                                             {safeStr(sr.customs.majorAlert.penalty || '위반 시 벌금 부과 또는 압수 조치')}
+                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#fff', fontSize: '0.8rem', fontWeight: 800, background: '#dc2626', padding: '10px 16px', borderRadius: '12px', boxShadow: '0 4px 10px rgba(220, 38, 38, 0.2)' }}>
+                                             {safeStr(sr.customs.majorAlert.penalty || '위반 시 항공기 탑승 거절 또는 압수')}
                                          </div>
                                      </div>
                                  )}
 
-                                 {/* (2) 반입 금지/제한 품목 - 이미지 스타일 매칭 (Red Theme) */}
+                                 {/* (2) 반입 금지/제한 품목 - 세련된 레드 테마 디자인 */}
                                  {sr.customs?.prohibitedItems && sr.customs.prohibitedItems.length > 0 && (
-                                     <div style={{ marginBottom: '24px', border: '1.5px solid #fee2e2', background: '#fff5f5', borderRadius: '16px', overflow: 'hidden' }}>
-                                         <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
-                                             <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#dc2626' }}>반입 금지 • 제한 품목</span>
+                                     <div style={{ marginBottom: '24px', border: '1px solid #fee2e2', background: '#fff', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 2px 10px rgba(220, 38, 38, 0.03)' }}>
+                                         <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(220, 38, 38, 0.03)', borderBottom: '1px solid #fee2e2' }}>
+                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                                             <span style={{ fontSize: '1rem', fontWeight: 900, color: '#dc2626', letterSpacing: '-0.02em' }}>반입 금지 · 제한 품목</span>
                                          </div>
-                                         <div style={{ padding: '0 18px 18px 18px' }}>
+                                         <div style={{ padding: '20px' }}>
                                              {sr.customs?.prohibitedItems?.map((pi, pii) => (
-                                                 <div key={pii} style={{ marginBottom: '16px' }}>
-                                                     <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#991b1b', marginBottom: '8px' }}>{safeStr(pi.category)}</div>
-                                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                                 <div key={pii} style={{ marginBottom: pii === sr.customs.prohibitedItems.length - 1 ? 0 : '18px' }}>
+                                                     <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#991b1b', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                         <div style={{ width: '4px', height: '14px', background: '#dc2626', borderRadius: '2px' }}></div>
+                                                         {safeStr(pi.category)}
+                                                     </div>
+                                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                                          {pi.items.map((it, iti) => (
-                                                             <span key={iti} style={{ fontSize: '0.78rem', background: '#fff', color: '#dc2626', border: '1px solid #fee2e2', padding: '4px 12px', borderRadius: '20px', fontWeight: 700 }}>
+                                                             <span key={iti} style={{ fontSize: '0.78rem', background: '#fff', color: '#dc2626', border: '1px solid #fee2e2', padding: '6px 14px', borderRadius: '12px', fontWeight: 700, boxShadow: '0 2px 4px rgba(220,38,38,0.05)' }}>
                                                                  {safeStr(it)}
                                                              </span>
                                                          ))}
@@ -1540,21 +1757,27 @@ export default function ConfirmationViewerPage() {
                                      </div>
                                  )}
 
-                                 {/* (3) 면세 한도 & 여권 유의사항 - 이미지 2컬럼 카드 스타일 */}
-                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '24px' }}>
-                                     <div style={{ background: '#f0f9ff', border: '1.5px solid #bae6fd', borderRadius: '16px', padding: '16px' }}>
-                                         <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0369a1', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> 면세 한도
+                                 {/* (3) 면세 한도 & 여권 유의사항 - 세로 정렬 카드 스타일 */}
+                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+                                     <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(12, 148, 217, 0.05)' }}>
+                                         <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#0369a1', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                             <div style={{ width: '32px', height: '32px', background: '#fff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" strokeWidth="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                                             </div>
+                                             면세 한도
                                          </div>
-                                         <div style={{ fontSize: '0.78rem', color: '#075985', lineHeight: 1.5, wordBreak: 'keep-all' }}>
+                                         <div style={{ fontSize: '0.85rem', color: '#075985', lineHeight: 1.6, wordBreak: 'keep-all', paddingLeft: '2px', fontWeight: 500 }}>
                                              {safeStr(sr.customs?.dutyFree || '담배 1보루, 주류 1리터 등')}
                                          </div>
                                      </div>
-                                     <div style={{ background: '#f5f3ff', border: '1.5px solid #ddd6fe', borderRadius: '16px', padding: '16px' }}>
-                                         <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#6d28d9', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg> 여권 유의사항
+                                     <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(124, 58, 237, 0.05)' }}>
+                                         <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#6d28d9', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                             <div style={{ width: '32px', height: '32px', background: '#fff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                             </div>
+                                             여권 유의사항
                                          </div>
-                                         <div style={{ fontSize: '0.78rem', color: '#5b21b6', lineHeight: 1.5, wordBreak: 'keep-all' }}>
+                                         <div style={{ fontSize: '0.85rem', color: '#5b21b6', lineHeight: 1.6, wordBreak: 'keep-all', paddingLeft: '2px', fontWeight: 500 }}>
                                              {safeStr(sr.customs?.passportNote || '만료일 6개월 이상 권장')}
                                          </div>
                                      </div>
