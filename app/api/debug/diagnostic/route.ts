@@ -18,35 +18,77 @@ export async function GET(request: NextRequest) {
 
         const data = JSON.parse(fs.readFileSync(debugPath, 'utf8'));
         
-        // HTML 출력을 위해 정리된 JSON 반환
         return new NextResponse(
             `<html>
                 <head>
-                    <title>Crawler Diagnostic Log</title>
+                    <title>Crawler Diagnostic Log (Detailed)</title>
                     <style>
-                        body { background: #0f172a; color: #e2e8f0; font-family: monospace; padding: 20px; line-height: 1.5; }
-                        pre { background: #1e293b; padding: 15px; border-radius: 8px; overflow-x: auto; border: 1px solid #334155; }
-                        .status-success { color: #10b981; font-weight: bold; }
-                        .status-fail { color: #ef4444; font-weight: bold; }
-                        h2 { border-bottom: 2px solid #334155; padding-bottom: 10px; color: #38bdf8; }
+                        body { background: #010409; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; padding: 20px; line-height: 1.6; }
+                        pre { background: #0d1117; padding: 16px; border-radius: 8px; overflow-x: auto; border: 1px solid #30363d; color: #8b949e; font-size: 13px; }
+                        .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+                        .status-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+                        .bg-success { background: #238636; color: #fff; }
+                        .bg-fail { background: #da3633; color: #fff; }
+                        .bg-warn { background: #9e6a03; color: #fff; }
+                        h2, h3 { color: #58a6ff; margin-top: 0; }
+                        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 20px; }
+                        .item-label { color: #8b949e; font-size: 12px; display: block; }
+                        .item-value { font-size: 16px; font-weight: 600; }
                     </style>
                 </head>
                 <body>
-                    <h2>🔍 Crawler 실시간 진단 로그</h2>
-                    <p>마지막 분석 시간: ${data.timestamp || 'N/A'}</p>
-                    <p>분석 URL: <a href="${data.url}" target="_blank" style="color: #fbbf24;">${data.url}</a></p>
-                    <p>텍스트 길이: ${data.textLength || 0} 자</p>
-                    <p>Native 데이터 여부: <span class="${data.hasNativeData ? 'status-success' : 'status-fail'}">${data.hasNativeData ? 'YES' : 'NO'}</span></p>
-                    <p>Gemini 분석 결과: <span class="${data.geminiResult === 'SUCCESS' ? 'status-success' : 'status-fail'}">${data.geminiResult}</span></p>
+                    <h2>🛰️ 실서버 크롤러 정밀 진단</h2>
                     
-                    <h3>1. Gemini 수집 현황 (Sample)</h3>
-                    <pre>${JSON.stringify(data.geminiSample || {}, null, 2)}</pre>
-                    
-                    <h3>2. 최종 조립 결과 (Final Result)</h3>
-                    <pre>${JSON.stringify(data.finalResult || {}, null, 2)}</pre>
-                    
-                    <h3>3. 수집된 원본 텍스트 샘플 (Top 2000)</h3>
-                    <pre>${(data.textSample || '').substring(0, 2000)}</pre>
+                    <div class="grid">
+                        <div class="card">
+                            <span class="item-label">분석 URL</span>
+                            <div class="item-value" style="word-break: break-all;">${data.url}</div>
+                        </div>
+                        <div class="card">
+                            <span class="item-label">마지막 시도 시간</span>
+                            <div class="item-value">${data.timestamp}</div>
+                        </div>
+                    </div>
+
+                    <div class="grid">
+                        <div class="card">
+                            <span class="item-label">Native API 상태 (Status Codes)</span>
+                            <div class="item-value">
+                                ${data.nativeStatuses ? data.nativeStatuses.map((s: number) => 
+                                    `<span class="status-badge ${s === 200 ? 'bg-success' : 'bg-fail'}">${s}</span>`
+                                ).join(' ') : '<span class="status-badge bg-warn">기록 없음</span>'}
+                            </div>
+                        </div>
+                        <div class="card">
+                            <span class="item-label">Native 데이터 수집</span>
+                            <div class="item-value">
+                                <span class="status-badge ${data.hasNativeData ? 'bg-success' : 'bg-fail'}">${data.hasNativeData ? 'SUCCESS' : 'FAILED'}</span>
+                                ${data.nativeDataSummary ? `<span style="font-size: 12px; color: #8b949e; margin-left: 10px;">(${data.nativeDataSummary.itineraryDays}일치 일정 확보)</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="card">
+                            <span class="item-label">Gemini AI 분석</span>
+                            <div class="item-value">
+                                <span class="status-badge ${data.geminiResult === 'SUCCESS' ? 'bg-success' : 'bg-fail'}">${data.geminiResult || 'NO_ATTEMPT'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>1. AI 추출 샘플 (Gemini Sample)</h3>
+                        <pre>${JSON.stringify(data.geminiSample || {}, null, 2)}</pre>
+                    </div>
+
+                    <div class="card">
+                        <h3>2. AI가 읽은 원문 샘플 (Scraped Text)</h3>
+                        <p style="font-size: 12px; color: #8b949e;">총 길이: ${data.textLength} 자</p>
+                        <pre>${(data.textSample || '').substring(0, 3000)}...</pre>
+                    </div>
+
+                    <div class="card">
+                        <h3>3. 최종 병합 결과 (Final Result)</h3>
+                        <pre>${JSON.stringify(data.finalResult || {}, null, 2)}</pre>
+                    </div>
                 </body>
             </html>`,
             { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
