@@ -135,18 +135,29 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
         const scheduleRaw = dataSchedule?.result || dataSchedule?.list || dataSchedule?.scheduleList || (Array.isArray(dataSchedule) ? dataSchedule : []);
         const scheduleArray = Array.isArray(scheduleRaw) ? scheduleRaw : [];
 
-        const itinerary = scheduleArray.map((day: any) => {
+        const itinerary = scheduleArray.map((day: any, idx: number) => {
+            const hasFlight = idx === 0 || idx === scheduleArray.length - 1;
+            const transport = hasFlight ? {
+                airline: d.transportName || d.carrier_nm || '',
+                flightNo: idx === 0 ? (d.departureFlightNo || d.dep_flight_no || '') : (d.arrivalFlightNo || d.arr_flight_no || ''),
+                departureTime: idx === 0 ? (d.departureTime || d.dep_time || '') : (d.returnDepartureTime || d.ret_dep_time || ''),
+                arrivalTime: idx === 0 ? (d.arrivalTime || d.arr_time || '') : (d.returnArrivalTime || d.ret_arr_time || '')
+            } : null;
+
             if (isSummaryOnly) {
                 return {
-                    day: day.day || day.dayNo || '',
+                    day: day.day || day.dayNo || (idx + 1),
                     title: day.title || day.scheduleTitle || '',
                     date: day.date || '',
                     route: day.route || '',
+                    transport: transport,
                     timeline: []
                 };
             }
             return {
                 ...day,
+                day: day.day || day.dayNo || (idx + 1),
+                transport: transport,
                 timeline: day.timeline || []
             };
         });
