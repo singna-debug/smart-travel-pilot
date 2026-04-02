@@ -265,98 +265,88 @@ export default function ConfirmationPage() {
                 }
                 */
 
-                // ---- 기본 정보 ----
+                // ---- 데이터 셋팅 로그 (디버깅) ----
+                console.log("[DEBUG] Confirmation API Raw Data:", raw);
+
+                // ---- 기본 정보 (보수적 파싱) ----
                 if (raw.title) setProductName(raw.title);
                 if (raw.destination) setDestination(raw.destination);
-                if (raw.departureDate) setDepartureDate(formatToHtmlDate(raw.departureDate));
-                if (raw.returnDate) setReturnDate(formatToHtmlDate(raw.returnDate));
                 if (raw.duration) setDuration(raw.duration);
-
-                // ---- 항공 상세 ----
-                if (raw.airline) setAirline(raw.airline);
-                if (raw.departureAirport) setDepartureAirport(raw.departureAirport);
-                if (raw.departureFlightNumber) setDepartureFlightNumber(raw.departureFlightNumber);
-                if (raw.returnFlightNumber) setReturnFlightNumber(raw.returnFlightNumber);
-                if (raw.flightCode && !raw.departureFlightNumber) setDepartureFlightNumber(raw.flightCode);
                 
-                // 시간 정보는 raw.departureTime 등이 문자열일 수도 있고 객체일 수도 있으므로 유연하게 처리
-                if (raw.departureTime) setDepartureTime(raw.departureTime);
-                if (raw.arrivalTime) setArrivalTime(raw.arrivalTime);
-                if (raw.departureDuration) setDepartureDuration(raw.departureDuration);
-                if (raw.returnDepartureTime) setReturnDepartureTime(raw.returnDepartureTime);
-                if (raw.returnArrivalTime) setReturnArrivalTime(raw.returnArrivalTime);
-                if (raw.returnDuration) setReturnDuration(raw.returnDuration);
-                
-                // 편명/코드 (필요시 추가 매핑)
-                // if (raw.flightCode) ... (현재 state에 flightCode가 없으면 생략 가능)
-
-                // ---- 호텔 상세 (다중 지원) ----
-                let extractedHotels: any[] = [];
-                if (raw.hotels && Array.isArray(raw.hotels) && raw.hotels.length > 0) {
-                    extractedHotels = raw.hotels.map((h: any) => ({
-                        ...h,
-                        checkIn: h.checkIn || formatToHtmlDate(raw.departureDate || ''),
-                        checkOut: h.checkOut || formatToHtmlDate(raw.returnDate || '')
-                    }));
-                } else if (raw.hotel) {
-                    // 단일 호텔 백업
-                    const h = typeof raw.hotel === 'object' ? raw.hotel : { name: raw.hotel };
-                    extractedHotels = [{
-                        name: h.name || '',
-                        address: h.address || raw.hotelAddress || '',
-                        checkIn: h.checkIn || formatToHtmlDate(raw.departureDate || ''),
-                        checkOut: h.checkOut || formatToHtmlDate(raw.returnDate || ''),
-                        images: Array.isArray(h.images) ? h.images : [],
-                        amenities: Array.isArray(h.amenities) ? h.amenities : []
-                    }];
+                // 날짜 로직 (에러 발생 시 중단 방지)
+                try {
+                    if (raw.departureDate) setDepartureDate(formatToHtmlDate(raw.departureDate));
+                    if (raw.returnDate) setReturnDate(formatToHtmlDate(raw.returnDate));
+                } catch (e) {
+                    console.error("Date formatting error:", e);
+                    if (raw.departureDate) setDepartureDate(raw.departureDate); // 원본이라도 셋팅
                 }
 
-                if (extractedHotels.length > 0) {
-                    setHotels(extractedHotels);
+                // ---- 항공 상세 (강제 매핑) ----
+                setAirline(raw.airline || '');
+                setDepartureAirport(raw.departureAirport || '');
+                setDepartureFlightNumber(raw.departureFlightNumber || raw.flightCode || '');
+                setReturnFlightNumber(raw.returnFlightNumber || '');
+                
+                setDepartureTime(raw.departureTime || '');
+                setArrivalTime(raw.arrivalTime || '');
+                setReturnDepartureTime(raw.returnDepartureTime || '');
+                setReturnArrivalTime(raw.returnArrivalTime || '');
+                
+                // ---- 호텔 상세 (유연한 객체 처리) ----
+                const finalHotels: any[] = [];
+                const sourceHotels = Array.isArray(raw.hotels) ? raw.hotels : (raw.hotel ? [raw.hotel] : []);
+                
+                sourceHotels.forEach((h: any) => {
+                    const hotelObj = typeof h === 'string' ? { name: h } : h;
+                    if (hotelObj && (hotelObj.name || hotelObj.hotelName)) {
+                        finalHotels.push({
+                            name: hotelObj.name || hotelObj.hotelName || '',
+                            englishName: hotelObj.englishName || '',
+                            address: hotelObj.address || '',
+                            checkIn: hotelObj.checkIn || formatToHtmlDate(raw.departureDate || ''),
+                            checkOut: hotelObj.checkOut || formatToHtmlDate(raw.returnDate || ''),
+                            images: Array.isArray(hotelObj.images) ? hotelObj.images : [],
+                            amenities: Array.isArray(hotelObj.amenities) ? hotelObj.amenities : []
+                        });
+                    }
+                });
+
+                if (finalHotels.length > 0) {
+                    setHotels(finalHotels);
                 }
 
-                // ---- 일정 및 미팅 ----
-                if (raw.itinerary && Array.isArray(raw.itinerary) && raw.itinerary.length > 0) {
+                // ---- 일정 및 미팅 (누락 차단) ----
+                if (raw.itinerary && Array.isArray(raw.itinerary)) {
+                    console.log(`[DEBUG] Setting itinerary: ${raw.itinerary.length} days`);
                     setItinerary(raw.itinerary);
                 }
                 
                 if (raw.meetingInfo && Array.isArray(raw.meetingInfo)) {
                     setMeetingInfo(raw.meetingInfo);
                 } else if (raw.notices && Array.isArray(raw.notices)) {
-                    // notices에 미팅 관련 내용이 있을 수 있음 (legacy 대응)
-                    const mInfo = raw.notices
-                        .filter((n: string) => n.includes('미팅') || n.includes('집합'))
-                        .map((n: string) => ({ title: '미팅 안내', content: n }));
+                    const mInfo = (Array.isArray(raw.notices) ? raw.notices : [raw.notices])
+                        .filter((n: any) => typeof n === 'string' && (n.includes('미팅') || n.includes('집합')))
+                        .map((n: string) => ({ type: '미팅장소' as const, title: '미팅 안내', location: n, description: n }));
                     if (mInfo.length > 0) setMeetingInfo(mInfo);
-                    setNotices(raw.notices.join('\n'));
-                } else if (typeof raw.notices === 'string') {
-                    setNotices(raw.notices);
                 }
-                if (raw.inclusions?.length) setInclusions(Array.isArray(raw.inclusions) ? raw.inclusions.join('\n') : raw.inclusions);
-                if (raw.exclusions?.length) setExclusions(Array.isArray(raw.exclusions) ? raw.exclusions.join('\n') : raw.exclusions);
-                if (raw.cancellationPolicy) setCancellationPolicy(raw.cancellationPolicy);
-                if (raw.checklist?.length) setChecklist(Array.isArray(raw.checklist) ? raw.checklist.join('\n') : raw.checklist);
 
-                // ---- 유의사항 (Notices) 통합 ----
+                // ---- 기타 사항 (문자열 강제 전환) ----
+                if (raw.inclusions) setInclusions(Array.isArray(raw.inclusions) ? raw.inclusions.join('\n') : String(raw.inclusions));
+                if (raw.exclusions) setExclusions(Array.isArray(raw.exclusions) ? raw.exclusions.join('\n') : String(raw.exclusions));
+                if (raw.cancellationPolicy) setCancellationPolicy(String(raw.cancellationPolicy));
+                if (raw.checklist) setChecklist(Array.isArray(raw.checklist) ? raw.checklist.join('\n') : String(raw.checklist));
+
+                // ---- 유의사항 통합 ----
                 const noticesParts: string[] = [];
-                if (raw.keyPoints?.length) {
-                    noticesParts.push('핵심 포인트:\n' + raw.keyPoints.map((k: string) => `• ${k}`).join('\n'));
-                }
-                if (raw.specialOffers?.length) {
-                    noticesParts.push('특전/혜택:\n' + raw.specialOffers.map((s: string) => `• ${s}`).join('\n'));
-                }
-                if (raw.features?.length) {
-                    noticesParts.push('상품 특징:\n' + raw.features.map((f: string) => `• ${f}`).join('\n'));
-                }
-                if (raw.notices?.length) {
-                    if (Array.isArray(raw.notices)) {
-                        noticesParts.push('⚠️ 유의사항:\n' + raw.notices.map((n: string) => `• ${n}`).join('\n'));
-                    } else {
-                        noticesParts.push('⚠️ 유의사항:\n' + raw.notices);
-                    }
-                }
+                if (raw.keyPoints?.length) noticesParts.push('핵심 포인트:\n' + raw.keyPoints.map((k: string) => `• ${k}`).join('\n'));
+                if (raw.specialOffers?.length) noticesParts.push('특전/혜택:\n' + raw.specialOffers.map((s: string) => `• ${s}`).join('\n'));
+                if (raw.features?.length) noticesParts.push('상품 특징:\n' + raw.features.map((f: string) => `• ${f}`).join('\n'));
+                
                 if (noticesParts.length > 0) {
                     setNotices(noticesParts.join('\n\n'));
+                } else if (raw.notices) {
+                    setNotices(Array.isArray(raw.notices) ? raw.notices.join('\n') : String(raw.notices));
                 }
 
                 /* [사용자 요청] 2차 조사(날씨/세관 등) 자동 실행 비활성화 - 수동 실행만 허용
