@@ -52,18 +52,22 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
         const fs = require('fs');
         const path = require('path');
         const debugPath = path.join(process.cwd(), 'tmp', 'last_confirmation_debug.json');
-        fs.writeFileSync(debugPath, JSON.stringify({ 
+        
+        const debugInfo = { 
             timestamp: new Date().toISOString(),
             url, 
             textLength: text.length, 
             hasNativeData: !!nativeData,
+            nativeStatuses: (nativeData as any)?._statuses || [], // statuses 기록
             nativeDataSummary: nativeData ? { 
                 title: nativeData.title, 
-                itineraryDays: nativeData.itinerary?.length || 0 
+                itineraryDays: (nativeData.itinerary?.length || 0)
             } : null,
-            textSample: text.substring(0, 2000)
-        }, null, 2));
-        console.log(`[Confirmation/Index] Debug info saved to: ${debugPath}`);
+            textSample: text.substring(0, 5000)
+        };
+        
+        fs.writeFileSync(debugPath, JSON.stringify(debugInfo, null, 2));
+        console.log(`[Confirmation/Index] Debug info saved with statuses.`);
     } catch (e: any) {
         console.warn('[Confirmation/Index] Failed to save debug log:', e.message);
     }
