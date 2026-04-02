@@ -45,33 +45,38 @@ export async function scrapeForConfirmation(url: string): Promise<string | null>
 
         // --- 1 & 2. [핵심] 빠른 딥 스크롤 + 버튼 클릭 병행 (최적화 버전) ---
         await page.evaluate(async () => {
-            const distance = 3000; // 더 공격적인 스크롤
-            const delay = 200;    // 대기 시간 단축
+            const distance = 2500; 
+            const delay = 400;    
+            const totalSteps = 8;
             let currentScroll = 0;
             let simpleBtnClicked = false;
 
-            for (let i = 0; i < 8; i++) { // 최대 24,000px까지만 스캔 (보통 충분히 끝남)
+            for (let i = 0; i < totalSteps; i++) {
                 window.scrollBy(0, distance);
                 currentScroll += distance;
                 await new Promise(r => setTimeout(r, delay));
 
-                // 버튼 수시 체크
-                const btns = Array.from(document.querySelectorAll('button, a, span')) as HTMLElement[];
-                const simpleBtn = btns.find(b => b.innerText?.includes('간략일정') && b.offsetParent !== null);
-                
-                if (simpleBtn && !simpleBtnClicked) {
-                    simpleBtn.click();
-                    simpleBtnClicked = true;
-                    // 버튼 클릭 후 내용이 펼쳐질 시간을 아주 짧게만 기다림
-                    await new Promise(r => setTimeout(r, 800)); 
-                    break; // [핵심] 찾았으면 즉시 루프 탈출!
+                // 버튼 체크 및 클릭
+                if (!simpleBtnClicked) {
+                    const btns = Array.from(document.querySelectorAll('button, a, span')) as HTMLElement[];
+                    const simpleBtn = btns.find(b => 
+                        (b.innerText?.includes('간략일정') || b.innerText?.includes('상세일정 펼치기')) && 
+                        b.offsetParent !== null
+                    );
+                    
+                    if (simpleBtn) {
+                        simpleBtn.click();
+                        simpleBtnClicked = true;
+                        // 클릭 후 펼쳐지는 시간을 위해 추가 대기
+                        await new Promise(r => setTimeout(r, 1200)); 
+                    }
                 }
             }
             window.scrollTo(0, 0); 
         });
         
-        // 추가 대기 시간도 절반으로 단축 (800ms)
-        await new Promise(r => setTimeout(r, 800)); 
+        // 최종 렌더링 완료를 위한 안전 대기
+        await new Promise(r => setTimeout(r, 2000)); 
 
         // --- 3. 특정 섹션 대기 ---
         if (url.includes('modetour.com')) {
