@@ -29,12 +29,16 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
     const headers = {
         'modewebapireqheader': '{"WebSiteNo":2,"CompanyNo":81202,"DeviceType":"DVTPC","ApiKey":"jm9i5RUzKPMPdklHzDKqNzwZYy0IGV5hTyKkCcpxO0IGIgVS+8Z7NnbzbARv5w7Bn90KT13Gq79XZMow6TYvwQ=="}',
         'referer': 'https://www.modetour.com/',
-        'accept': 'application/json'
+        'accept': 'application/json, text/plain, */*',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'origin': 'https://www.modetour.com',
+        'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7'
     };
 
     let dataDetail: any = null;
     let dataPoints: any = null;
     let dataSchedule: any = null;
+    let statuses: number[] = [];
 
     try {
         console.log(`[Native] Fetching for Product No: ${productNo}`);
@@ -45,10 +49,13 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
         ];
 
         const responses = await Promise.all(fetchTasks);
-        console.log(`[Native] Response statuses: ${responses.map(r => r.status).join(', ')}`);
+        statuses = responses.map(r => r.status);
+        console.log(`[Native] Response statuses: ${statuses.join(', ')}`);
         
         if (responses[0].ok) {
             dataDetail = await responses[0].json();
+        } else {
+            console.error(`[Native] Detail Fetch Failed: ${responses[0].status}`);
         }
         
         if (responses[1].ok) dataPoints = await responses[1].json();
@@ -141,6 +148,25 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                     description: m.content || m.remark || ''
                 });
             } );
+        }
+
+        // [중요] 요약 모드(Booking)일 때는 무거운 데이터를 모두 비워주고 즉시 반환합니다.
+        if (isSummaryOnly) {
+            return {
+                isProduct: true,
+                title: cleanTitle,
+                destination: destination,
+                price: rawPrice.replace(/[^0-9]/g, ''),
+                departureDate: d.departureDate || d.startDay || d.p_startday || d.P_StartDay || d.SDay || d.start_dt || d.dep_dt || (url.match(/depDate=(\d{4}-\d{2}-\d{2})/) || [])[1] || '',
+                returnDate: d.arrivalDate || d.endDay || d.p_endday || d.P_EndDay || d.EDay || d.end_dt || d.arr_dt || (url.match(/arrDate=(\d{4}-\d{2}-\d{2})/) || [])[1] || '',
+                url: url,
+                itinerary: [],
+                hotels: [],
+                inclusions: [],
+                exclusions: [],
+                meetingInfo: [],
+                keyPoints: []
+            } as any;
         }
 
         // 일정표 데이터 (초정밀 매핑)
