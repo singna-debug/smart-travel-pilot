@@ -109,56 +109,74 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
         const exclusions: string[] = [];
         const meetingInfo: any[] = [];
 
-        // 1. 호텔 정보 (d.HotelList 또는 d.SummaryHotelList)
-        const rawHotels = d.HotelList || d.SummaryHotelList || [];
-        rawHotels.slice(0, 5).forEach((h: any) => {
-            if (h.hotelName) hotels.push({ name: h.hotelName, address: h.hotelAddress || '' });
+        // 1. 호텔 정보 (상세 매핑)
+        const rawHotels = d.HotelList || d.SummaryHotelList || d.hotelList || [];
+        rawHotels.forEach((h: any) => {
+            if (h.hotelName || h.hotelNm) {
+                hotels.push({
+                    name: h.hotelName || h.hotelNm || '',
+                    englishName: h.hotelEngName || h.hotelEnNm || '',
+                    address: h.hotelAddress || h.addr || '',
+                    images: h.hotelImageList?.map((img: any) => img.imageUrl || img.url).filter(Boolean) || [],
+                    amenities: h.hotelFacilityList?.map((fac: any) => fac.facilityName || fac.name).filter(Boolean) || []
+                });
+            }
         });
 
-        // 2. 포함/불포함 (d.InclusionList/ExclusionList)
-        if (d.InclusionList) d.InclusionList.forEach((i: any) => inclusions.push(i.content || i.title || i));
-        if (d.ExclusionList) d.ExclusionList.forEach((e: any) => exclusions.push(e.content || e.title || e));
+        // 2. 포함/불포함 (필드명 총결합)
+        const rawInclusions = d.InclusionList || d.inclusion_list || d.SummaryInclusionList || [];
+        const rawExclusions = d.ExclusionList || d.exclusion_list || d.SummaryExclusionList || [];
         
-        // 3. 미팅 정보 (d.SummaryMeetingList)
-        if (d.SummaryMeetingList) {
-            d.SummaryMeetingList.forEach((m: any) => {
+        if (Array.isArray(rawInclusions)) rawInclusions.forEach((i: any) => inclusions.push(i.content || i.title || i.item_nm || i));
+        if (Array.isArray(rawExclusions)) rawExclusions.forEach((e: any) => exclusions.push(e.content || e.title || e.item_nm || e));
+        
+        // 3. 미팅 정보 상세화
+        const rawMeeting = d.SummaryMeetingList || d.meeting_info || d.MeetingList || [];
+        if (Array.isArray(rawMeeting)) {
+            rawMeeting.forEach((m: any) => {
                 meetingInfo.push({
-                    type: m.title || '미팅안내',
-                    location: m.place || '',
-                    time: m.time || '',
-                    description: m.content || ''
+                    type: m.title || m.meeting_nm || '미팅포인트',
+                    location: m.place || m.place_nm || '',
+                    time: m.time || m.meeting_time || '',
+                    description: m.content || m.remark || ''
                 });
-            });
+            } );
         }
 
-        // 일정표 데이터 안전하게 처리 (배열인지 확인)
+        // 일정표 데이터 (초정밀 매핑)
         const scheduleRaw = dataSchedule?.result || dataSchedule?.list || dataSchedule?.scheduleList || (Array.isArray(dataSchedule) ? dataSchedule : []);
         const scheduleArray = Array.isArray(scheduleRaw) ? scheduleRaw : [];
 
         const itinerary = scheduleArray.map((day: any, idx: number) => {
-            const hasFlight = idx === 0 || idx === scheduleArray.length - 1;
-            const transport = hasFlight ? {
-                airline: d.transportName || d.carrier_nm || '',
-                flightNo: idx === 0 ? (d.departureFlightNo || d.dep_flight_no || '') : (d.arrivalFlightNo || d.arr_flight_no || ''),
-                departureTime: idx === 0 ? (d.departureTime || d.dep_time || '') : (d.returnDepartureTime || d.ret_dep_time || ''),
-                arrivalTime: idx === 0 ? (d.arrivalTime || d.arr_time || '') : (d.returnArrivalTime || d.ret_arr_time || '')
-            } : null;
+            // 시간 및 편명 보강
+            const transport = {
+                airline: day.transportName || day.carrier_nm || d.transportName || '',
+                flightNo: idx === 0 ? (d.departureFlightNo || d.dep_flight_no || d.P_AirSch_Start_VNum || '') : 
+                          (idx === scheduleArray.length - 1 ? (d.arrivalFlightNo || d.arr_flight_no || d.P_AirSch_End_VNum || '') : ''),
+                departureTime: idx === 0 ? (d.departureTime || d.dep_time || '') : '',
+                arrivalTime: idx === 0 ? (d.arrivalTime || d.arr_time || '') : '',
+                returnDepartureTime: idx === scheduleArray.length - 1 ? (d.returnDepartureTime || d.ret_dep_time || '') : '',
+                returnArrivalTime: idx === scheduleArray.length - 1 ? (d.returnArrivalTime || d.ret_arr_time || '') : ''
+            };
 
-            if (isSummaryOnly) {
-                return {
-                    day: day.day || day.dayNo || (idx + 1),
-                    title: day.title || day.scheduleTitle || '',
-                    date: day.date || '',
-                    route: day.route || '',
-                    transport: transport,
-                    timeline: []
-                };
-            }
             return {
-                ...day,
                 day: day.day || day.dayNo || (idx + 1),
+                title: day.title || day.scheduleTitle || day.title_nm || '',
+                date: day.date || day.sch_dt || '',
+                route: day.route || day.route_nm || '',
                 transport: transport,
-                timeline: day.timeline || []
+                timeline: (day.timeline || day.scheduleDetailList || []).map((t: any) => ({
+                    type: t.type || (t.location_nm ? 'location' : 'default'),
+                    title: t.title || t.location_nm || t.activity_nm || '',
+                    subtitle: t.subtitle || '',
+                    description: t.description || t.content || t.remark || ''
+                })),
+                hotel: day.hotel || day.hotelName || day.hotel_nm || '',
+                meals: {
+                    breakfast: day.meals?.breakfast || day.breakfast_nm || day.m1_nm || '호텔식',
+                    lunch: day.meals?.lunch || day.lunch_nm || day.m2_nm || '현지식',
+                    dinner: day.meals?.dinner || day.dinner_nm || day.m3_nm || '자유식'
+                }
             };
         });
 
@@ -173,7 +191,7 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             airline: d.transportName || d.carrier_nm || d.CarrierName || '',
             duration: d.travelPeriod || d.prd_day_cnt || d.period || d.P_Period || '',
             departureFlightNumber: d.departureFlightNo || d.dep_flight_no || d.P_AirSch_Start_VNum || '',
-            returnFlightNumber: d.arrivalFlightNo || d.arrivalFlightNo || d.arr_flight_no || d.P_AirSch_End_VNum || '',
+            returnFlightNumber: d.arrivalFlightNo || d.arr_flight_no || d.P_AirSch_End_VNum || '',
             departureTime: d.departureTime || d.dep_time || '',
             arrivalTime: d.arrivalTime || d.arr_time || '',
             returnDepartureTime: d.returnDepartureTime || d.ret_dep_time || '',
