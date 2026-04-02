@@ -21,17 +21,26 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
     let nativeData: any = null;
 
     if (!text) {
-        console.log('[Confirmation/Index] No text provided. Attempting Specialized Browser Scraper and Native API...');
-        const [browserText, fetchedNative] = await Promise.all([
-            scrapeForConfirmation(url),
-            fetchModeTourNative(url, false).catch(() => null)
-        ]);
+        console.log('[Confirmation/Index] No text provided. Deciding extraction strategy...');
+        const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
         
-        text = browserText || '';
-        nativeData = fetchedNative;
+        if (isVercel) {
+            console.log('[Confirmation/Index] Production(Vercel) detected. Skipping browser scraper to avoid timeout. Using Native API...');
+            nativeData = await fetchModeTourNative(url, false).catch(() => null);
+            // Native 데이터가 있다면 텍스트로 변환하여 AI에게 제공
+            text = nativeData ? JSON.stringify(nativeData) : '';
+        } else {
+            console.log('[Confirmation/Index] Local environment detected. Attempting full browser scrape...');
+            const [browserText, fetchedNative] = await Promise.all([
+                scrapeForConfirmation(url),
+                fetchModeTourNative(url, false).catch(() => null)
+            ]);
+            text = browserText || '';
+            nativeData = fetchedNative;
+        }
         
-        if (!text) {
-            console.log('[Confirmation/Index] Falling back to fetchContent (Regular Fetch)...');
+        if (!text && !isVercel) {
+            console.log('[Confirmation/Index] Falling back to regular fetchContent...');
             const { text: fallbackText, nativeData: fallbackNative } = await fetchContent(url, { isSummaryOnly: false });
             text = fallbackText;
             if (!nativeData) nativeData = fallbackNative;

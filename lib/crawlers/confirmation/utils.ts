@@ -43,13 +43,27 @@ export function mergeNativeData(result: any, nativeData: any): DetailedProductIn
         }
     }
     
+    // 3. 호텔 정보 정밀 보강
     if (!result.hotels || result.hotels.length === 0) {
         result.hotels = nativeData.hotels || [];
+    } else {
+        // 기존 hotels가 있다면 주소나 영문명이 비어있는지 확인하여 Native로 보강
+        result.hotels = result.hotels.map((h: any, idx: number) => {
+            const nativeH = nativeData.hotels?.[idx] || nativeData.hotels?.[0];
+            return {
+                ...h,
+                englishName: h.englishName || nativeH?.englishName || '',
+                address: h.address || nativeH?.address || '',
+                images: (h.images?.length ? h.images : nativeH?.images) || [],
+                amenities: (h.amenities?.length ? h.amenities : nativeH?.amenities) || []
+            };
+        });
     }
     
-    // 4. 일정표 및 항공 정보 상호 보강
+    // 4. 일정표 및 항공 정보 (공격적 주입)
+    // AI가 일정을 아예 못 뽑았거나 너무 짧게 뽑은 경우, Native 일정을 1순위로 사용
     if ((!result.itinerary || result.itinerary.length < 2) && nativeData.itinerary && nativeData.itinerary.length > 0) {
-        console.log('[Confirmation/Utils] Using Native Itinerary as Fallback.');
+        console.log('[Confirmation/Utils] AI Itinerary is missing or too short. Using Native Itinerary as Force-Fallback.');
         result.itinerary = nativeData.itinerary;
     }
 
@@ -57,16 +71,16 @@ export function mergeNativeData(result: any, nativeData: any): DetailedProductIn
         const firstDay = result.itinerary[0];
         const lastDay = result.itinerary[result.itinerary.length - 1];
 
-        // 일정표 -> 최상위 필드 보강
-        if (!result.departureFlightNumber) result.departureFlightNumber = firstDay.transport?.flightNo;
-        if (!result.departureTime) result.departureTime = firstDay.transport?.departureTime;
-        if (!result.arrivalTime) result.arrivalTime = firstDay.transport?.arrivalTime;
+        // 일정표 -> 최상위 필드 보강 (더 꼼꼼하게)
+        if (!result.departureFlightNumber || result.departureFlightNumber === '정보 없음') result.departureFlightNumber = firstDay.transport?.flightNo || nativeData.departureFlightNumber;
+        if (!result.departureTime) result.departureTime = firstDay.transport?.departureTime || nativeData.departureTime;
+        if (!result.arrivalTime) result.arrivalTime = firstDay.transport?.arrivalTime || nativeData.arrivalTime;
         
-        if (!result.returnFlightNumber) result.returnFlightNumber = lastDay.transport?.flightNo;
-        if (!result.returnDepartureTime) result.returnDepartureTime = lastDay.transport?.returnDepartureTime || lastDay.transport?.departureTime;
-        if (!result.returnArrivalTime) result.returnArrivalTime = lastDay.transport?.returnArrivalTime || lastDay.transport?.arrivalTime;
+        if (!result.returnFlightNumber || result.returnFlightNumber === '정보 없음') result.returnFlightNumber = lastDay.transport?.flightNo || nativeData.returnFlightNumber;
+        if (!result.returnDepartureTime) result.returnDepartureTime = lastDay.transport?.returnDepartureTime || lastDay.transport?.departureTime || nativeData.returnDepartureTime;
+        if (!result.returnArrivalTime) result.returnArrivalTime = lastDay.transport?.returnArrivalTime || lastDay.transport?.arrivalTime || nativeData.returnArrivalTime;
 
-        // 최상위 필드 -> 일정표 보강 (상호 작용)
+        // 최상위 필드 -> 일정표 보강 (상호 작용 - 일관성 유지)
         if (result.departureFlightNumber && firstDay.transport) firstDay.transport.flightNo = result.departureFlightNumber;
         if (result.returnFlightNumber && lastDay.transport) lastDay.transport.flightNo = result.returnFlightNumber;
     }
@@ -77,6 +91,7 @@ export function mergeNativeData(result: any, nativeData: any): DetailedProductIn
     if (!result.exclusions || result.exclusions.length === 0) result.exclusions = nativeData.exclusions || [];
     if (!result.keyPoints || result.keyPoints.length === 0) result.keyPoints = nativeData.keyPoints || [];
     if (!result.specialOffers || result.specialOffers.length === 0) result.specialOffers = nativeData.specialOffers || [];
+    if (!result.cancellationPolicy) result.cancellationPolicy = nativeData.cancellationPolicy || '';
 
     return result as DetailedProductInfo;
 }
