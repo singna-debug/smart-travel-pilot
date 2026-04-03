@@ -124,38 +124,53 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
         const exclusions: string[] = [];
         const meetingInfo: any[] = [];
 
-        // 1. 호텔 정보 (상세 매핑)
-        const rawHotels = d.HotelList || d.SummaryHotelList || d.hotelList || [];
-        rawHotels.forEach((h: any) => {
-            if (h.hotelName || h.hotelNm) {
-                hotels.push({
-                    name: h.hotelName || h.hotelNm || '',
-                    englishName: h.hotelEngName || h.hotelEnNm || '',
-                    address: h.hotelAddress || h.addr || '',
-                    images: h.hotelImageList?.map((img: any) => img.imageUrl || img.url).filter(Boolean) || [],
-                    amenities: h.hotelFacilityList?.map((fac: any) => fac.facilityName || fac.name).filter(Boolean) || []
+        // 1. 호텔 정보: 일정표의 listHotelPlace에서 추출 (실제 API 구조)
+        const scheduleItems = dataSchedule?.result?.scheduleItemList || [];
+        const hotelNameSet = new Set<string>();
+        if (Array.isArray(scheduleItems)) {
+            scheduleItems.forEach((day: any) => {
+                const hotelPlaces = day.listHotelPlace || [];
+                hotelPlaces.forEach((h: any) => {
+                    const name = h.itiPlaceName || h.placeNameK || '';
+                    const groupName = h.itiPlaceGroupName || '';
+                    const key = name || groupName;
+                    if (key && !hotelNameSet.has(key)) {
+                        hotelNameSet.add(key);
+                        hotels.push({
+                            name: name,
+                            englishName: h.placeNameE || '',
+                            address: h.address || '',
+                            groupName: groupName, // 호텔 그룹 (예: "[호남] 푸꾸옥 4성급 호텔")
+                            images: [],
+                            amenities: []
+                        });
+                    }
                 });
-            }
-        });
+            });
+        }
 
-        // 2. 포함/불포함 (필드명 총결합)
-        const rawInclusions = d.InclusionList || d.inclusion_list || d.SummaryInclusionList || [];
-        const rawExclusions = d.ExclusionList || d.exclusion_list || d.SummaryExclusionList || [];
+        // 2. 포함/불포함: includedNote/unincludedNote HTML에서 추출
+        const parseHtmlList = (html: string): string[] => {
+            if (!html) return [];
+            return html
+                .replace(/<[^>]+>/g, '\n')  // HTML 태그를 줄바꿈으로
+                .split('\n')
+                .map(s => s.replace(/^[-·•\s]+/, '').trim())
+                .filter(s => s.length > 2);
+        };
         
-        if (Array.isArray(rawInclusions)) rawInclusions.forEach((i: any) => inclusions.push(i.content || i.title || i.item_nm || i));
-        if (Array.isArray(rawExclusions)) rawExclusions.forEach((e: any) => exclusions.push(e.content || e.title || e.item_nm || e));
+        inclusions.push(...parseHtmlList(d.includedNote || ''));
+        exclusions.push(...parseHtmlList(d.unincludedNote || ''));
         
-        // 3. 미팅 정보 상세화
-        const rawMeeting = d.SummaryMeetingList || d.meeting_info || d.MeetingList || [];
-        if (Array.isArray(rawMeeting)) {
-            rawMeeting.forEach((m: any) => {
-                meetingInfo.push({
-                    type: m.title || m.meeting_nm || '미팅포인트',
-                    location: m.place || m.place_nm || '',
-                    time: m.time || m.meeting_time || '',
-                    description: m.content || m.remark || ''
-                });
-            } );
+        // 3. 미팅 정보: meetingPlace2, meetingTime에서 추출
+        const meetingText = (d.meetingPlace2 || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        if (meetingText || d.meetingTime) {
+            meetingInfo.push({
+                type: '미팅포인트',
+                location: meetingText,
+                time: d.meetingTime || '',
+                description: d.meetingInfo || ''
+            });
         }
 
         // [중요] 요약 모드(Booking)일 때는 무거운 데이터를 모두 비워주고 즉시 반환합니다.
