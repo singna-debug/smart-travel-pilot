@@ -1,0 +1,76 @@
+﻿node.exe : Error [ERR_MODUL
+E_NOT_FOUND]: Cannot find m
+odule 'C:\Users\vbxn6\.gemi
+ni\antigravity\scratch\smar
+t-travel-pilot\tmp\lib\craw
+lers\modetour-utils.ts' imp
+orted from C:\Users\vbxn6\.
+gemini\antigravity\scratch\
+smart-travel-pilot\tmp\test
+-native-api.mjs
+위치 줄:1 문자:1
++ & "C:\Program Files\nodej
+s/node.exe" "C:\Program Fil
+es\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (Err  
+  or [ERR_MODU...-native   
+ -api.mjs:String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+Did you mean to import "../
+lib/crawlers/modetour-utils
+.ts"?
+    at finalizeResolution (
+node:internal/modules/esm/r
+esolve:274:11)
+    at moduleResolve (node:
+internal/modules/esm/resolv
+e:864:10)
+    at defaultResolve (node
+:internal/modules/esm/resol
+ve:990:11)
+    at nextResolve (node:in
+ternal/modules/esm/hooks:78
+5:28)
+    at resolveBase (file://
+/C:/Users/vbxn6/AppData/Loc
+al/npm-cache/_npx/fd45a72a5
+45557e9/node_modules/tsx/di
+st/esm/index.mjs?1775175639
+172:2:3744)
+    at async resolveDirecto
+ry (file:///C:/Users/vbxn6/
+AppData/Local/npm-cache/_np
+x/fd45a72a545557e9/node_mod
+ules/tsx/dist/esm/index.mjs
+?1775175639172:2:4237)
+    at async resolve (file:
+///C:/Users/vbxn6/AppData/L
+ocal/npm-cache/_npx/fd45a72
+a545557e9/node_modules/tsx/
+dist/esm/index.mjs?17751756
+39172:2:5355)
+    at async nextResolve (n
+ode:internal/modules/esm/ho
+oks:785:22)
+    at async AsyncLoaderHoo
+ksOnLoaderHookWorker.resolv
+e (node:internal/modules/es
+m/hooks:269:24)
+    at async handleMessage 
+(node:internal/modules/esm/
+worker:251:18) {
+  code: 'ERR_MODULE_NOT_FOU
+ND',
+  url: 'file:///C:/Users/vb
+xn6/.gemini/antigravity/scr
+atch/smart-travel-pilot/tmp
+/lib/crawlers/modetour-util
+s.ts'
+}
