@@ -36,15 +36,22 @@ export async function updateSession(request: NextRequest) {
   // The matcher in middleware.ts should handle this, but being extra safe here
   const isAuthPage = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/auth')
   const isStaticAsset = request.nextUrl.pathname.includes('.') || request.nextUrl.pathname.startsWith('/_next')
+  // 고객이 보는 확정서 페이지(/confirmation/ID)는 로그인이 필요 없어야 함
+  const isPublicConfirmationViewer = request.nextUrl.pathname.startsWith('/confirmation/') && request.nextUrl.pathname !== '/confirmation'
 
   if (isStaticAsset) return supabaseResponse
+
+  // 공개 페이지는 로그인 체크 없이 통과
+  if (isAuthPage || isPublicConfirmationViewer) {
+      return supabaseResponse
+  }
 
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
   // 로그인하지 않은 사용자가 보호된 페이지에 접근할 때
-  if (!user && !isAuthPage) {
+  if (!user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
