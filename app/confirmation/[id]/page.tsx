@@ -1745,7 +1745,7 @@ export default function ConfirmationViewerPage() {
                                                          {safeStr(pi.category)}
                                                      </div>
                                                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                                         {pi.items.map((it, iti) => (
+                                                         {(pi.items || []).map((it: any, iti: number) => (
                                                              <span key={iti} style={{ fontSize: '0.78rem', background: '#fff', color: '#dc2626', border: '1px solid #fee2e2', padding: '6px 14px', borderRadius: '12px', fontWeight: 700, boxShadow: '0 2px 4px rgba(220,38,38,0.05)' }}>
                                                                  {safeStr(it)}
                                                              </span>
@@ -1880,14 +1880,14 @@ export default function ConfirmationViewerPage() {
 
                                  <div className="customs-warning-card" style={{ marginTop: '10px', opacity: 0.6 }}>
                                      <h3>기타 기본 유의사항</h3>
-                                     <p>{safeStr(sr.customs.warningContent)}</p>
+                                     <p>{safeStr(sr.customs?.warningContent)}</p>
                                  </div>
                             </GuideAccordion>
 
                             {/* ── 환전 & 계산기 ── */}
                             <GuideAccordion
                                 id="currency"
-                                title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> 환전 가이드 ({safeStr(sr.currency.localCurrency)})</>}
+                                title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> 환전 가이드 ({safeStr(sr.currency?.localCurrency)})</>}
                                 isOpen={expandedSections['currency'] || false}
                                 onToggle={toggleSection}
                             >
