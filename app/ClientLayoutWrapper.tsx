@@ -12,11 +12,13 @@ export default function ClientLayoutWrapper({
     const pathname = usePathname();
 
     // If the path is exactly /confirmation (admin page), we show the sidebar.
-    // If the path is /confirmation/[id] (client viewer), we hide the sidebar.
-    const isClientViewer = pathname?.startsWith("/confirmation/") && pathname !== "/confirmation";
+    // If the path is /confirmation/[id] (client viewer), or if it is the /login page, we hide the sidebar.
+    const isFullScreenPage = 
+        (pathname?.startsWith("/confirmation/") && pathname !== "/confirmation") || 
+        pathname === "/login";
 
-    if (isClientViewer) {
-        return <main className="viewer-content">{children}</main>;
+    if (isFullScreenPage) {
+        return <main className="full-screen-content">{children}</main>;
     }
 
     return (
