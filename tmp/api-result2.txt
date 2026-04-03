@@ -1,0 +1,138 @@
+﻿=== GetScheduleList RAW KEYS ===
+Top-level keys: [ 'result', 'errorMessages', 'isOK' ]
+result type: object false
+result keys: [
+  'transportationMethod',
+  'transportationMethodCode',
+  'scheduleItemList'
+]
+  result.scheduleItemList: Array[5]
+    first item keys: [
+  'scheduleHotel',
+  'date',
+  'first',
+  'allPlaceTravelToday',
+  'placeHeader',
+  'ortherActions',
+  'listLocalPlace',
+  'listGuidePlace',
+  'listHotelPlace',
+  'listTransportPlace',
+  'listMealPlace',
+  'listAirRouteInfo'
+]
+
+=== FULL JSON (first 3000 chars) ===
+{
+  "result": {
+    "transportationMethod": "援?젣??,
+    "transportationMethodCode": "MU7001",
+    "scheduleItemList": [
+      {
+        "scheduleHotel": "珥?6媛쒖쓽 ?덉젙 ?명뀛???덉뒿?덈떎. ?뺤젙 ?섎뒗?濡?異쒕컻 1?쇱쟾源뚯?) ?덊럹?댁?, ?대찓???먮뒗 ?뚮┝???깆쓣 ?듯빐 ?덈궡 ?쒕━寃좎뒿?덈떎.",
+        "date": "2026-06-15T00:00:00",
+        "first": 1,
+        "allPlaceTravelToday": [],
+        "placeHeader": [
+          "遺??
+        ],
+        "ortherActions": [
+          {
+            "itiDetailNo": 4747640895,
+            "itiDate": "2026-06-15T00:00:00",
+            "itiDays": 1,
+            "itiSeq": 5,
+            "itiServiceCode": "SSCIDS",
+            "itiPlaceName": "源?닿뎅?쒓났??,
+            "itiPlaceGroupNo": 0,
+            "itiPlaceGroupName": null,
+            "itiServiceName": "?대룞?섎떒(援먰넻)",
+            "itiSummaryDes": "源?닿뎅?쒓났??異쒕컻",
+            "itiDetailDes": null,
+            "itiPointPlace": 0,
+            "itiPointPlaceSeq": 0,
+            "itiBenefit": 0,
+            "itiHighlight": 0,
+            "placeNo": 66589,
+            "outLinkFlag": 0,
+            "placeSeq": 5,
+            "parentPlaceNo": 0,
+            "placeCategory": "0PL008",
+            "exposeName": null,
+            "placeNameK": "源?닿뎅?쒓났??,
+            "placeNameE": "源?닿뎅?쒓났??,
+            "placeNameL": null,
+            "continentCode": null,
+            "countryCode": "180",
+            "countryNo": 0,
+            "areaCode": null,
+            "cityCode": "109",
+            "airPortCode": null,
+            "gridY": 35.17322,
+            "gridX": 128.94646,
+            "regCount": 0,
+            "placePath": "|3|207|32855|2079|66589|",
+            "used": 1,
+            "copyright": null,
+            "summaryDes": null,
+            "rating": "",
+            "address": "??쒕?援?遺?곌킅??떆 媛뺤꽌援?怨듯빆吏꾩엯濡?108",
+            "contactTel": "+82 1661-2626",
+            "homePage": "http://www.airport.co.kr/mbs/gimhae/",
+            "contactWay": null,
+            "salesTime": null,
+            "charge": null,
+            "takeTime": null,
+            "alterPlace": null,
+            "placeSize": null,
+            "additionalPlace": null,
+            "detailDes": null,
+            "highlightDes": null,
+            "summerTime": null,
+            "placeType": null,
+            "weatherE": null,
+            "contentsCount": 0,
+            "contentsCountWithChild": 0,
+            "regUser": 0,
+            "regTime": "2020-03-09T10:20:32.04",
+            "remarks": null,
+            "googleKey": "ChIJDfcSIsGSaDUR7DKMmkKpoxU",
+            "itemNo": 0,
+            "approve": 0,
+            "updateUser": 0,
+            "updateTime": "2023-05-09T15:08:48.7366667",
+            "salesTime_GG": null,
+            "modeImgPriority": null,
+            "alterPlaceNameK": null,
+            "arrKeyword": [],
+            "arrPlaceImge": [],
+            "externalLink": {
+              "header": null,
+              "response": null,
+              "validity": 0
+            },
+            "externalLinkReview": {
+              "header": null,
+              "response": null
+         
+
+=== Flight-related fields ===
+departureFlight: LJ119
+arrivalFlight: LJ120
+departureTime: 19:55
+arrivalTime: 07:45
+localArrivalTime: 23:25
+localDepartureTime: 00:25
+transportName: 吏꾩뿉??transportCode: LJ
+travelPeriod: 3諛?5??departureCityName: 遺??arrivalCityName: ?멸씀??nightNumber: 3
+daysNumber: 5
+
+=== Inclusion/Exclusion ===
+includedNote length: 119
+unincludedNote length: 577
+includedNote (first 200): <font size="2">- ?뺣났??났沅? ???쇱젙 ?숇컯鍮? 愿愿묒? ?낆옣猷? ?쇱젙 ?곸쓽 ?꾩슜李⑤웾 諛??앹궗<br>- 源?닿났??꽭/?꾩?怨듯빆?? ?꾩웳蹂댄뿕猷? 愿愿묒쭊?κ린湲? ?좊쪟?좎쬆猷?br>- ?ы뻾?먮낫??/font><br>
+
+=== Meeting Info ===
+meetingPlace2: <b>怨듯빆 ?꾩갑 ??蹂꾨룄 誘명똿 ?놁씠 諛붾줈 異쒓뎅 ?섏냽??吏꾪뻾?????덉뒿?덈떎.</b><br><br><b>源?닿뎅?쒓났??媛쒕퀎?섏냽 (異쒕컻 理쒖냼 3?쒓컙?꾧퉴吏)</b>
+meetingInfo: null
+meetingTime: 16:55

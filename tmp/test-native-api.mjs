@@ -1,47 +1,62 @@
-
-import fetch from 'node-fetch';
-
-const productNo = '106173541';
-const browserHeaders = {
-    'modewebapireqheader': '{"WebSiteNo":2,"CompanyNo":81202,"DeviceType":"DVTPC","ApiKey":"jm9i5RUzKPMPdklHzDKqNzwZYy0IGV5hTyKkCcpxO0IGIgVS+8Z7NnbzbARv5w7Bn90KT13Gq79XZMow6TYvwQ=="}',
-    'referer': 'https://www.modetour.com/',
-    'accept': 'application/json, text/plain, */*',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-};
-
-async function testNative() {
-    console.log(`\n[NATIVE TEST] Fetching Schedule for: ${productNo}\n`);
+// 수정된 fetchModeTourNative를 직접 테스트
+async function test() {
+    // 동적으로 import
+    const { fetchModeTourNative } = await import('./lib/crawlers/modetour-utils.ts');
     
-    // Test Schedule List
-    const scheduleUrl = `https://b2c-api.modetour.com/Package/GetScheduleList?productNo=${productNo}`;
-    try {
-        const res = await fetch(scheduleUrl, { headers: browserHeaders });
-        const json = await res.json();
-        console.log(`      > Schedule Status: ${res.status}`);
-        console.log(`      > Schedule Result: ${json.isOK ? 'SUCCESS' : 'FAILED'}`);
-        if (json.result) {
-            console.log(`      > Days Found: ${json.result.length}`);
-            if (json.result.length > 0) {
-                console.log(`      > First Day Title: ${json.result[0].title}`);
-            }
-        } else {
-            console.log(`      > Raw JSON: ${JSON.stringify(json).substring(0, 200)}`);
-        }
-    } catch (e) {
-        console.error(`      > Error: ${e.message}`);
+    const url = 'https://www.modetour.com/package/106173541';
+    console.log('Testing fetchModeTourNative...');
+    const result = await fetchModeTourNative(url, false);
+    
+    if (!result) {
+        console.log('RESULT: null (failed)');
+        return;
     }
-
-    // Test Product Detail
-    const detailUrl = `https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`;
-    try {
-        const res = await fetch(detailUrl, { headers: browserHeaders });
-        const json = await res.json();
-        console.log(`\n      > Detail Result: ${json.isOK ? 'SUCCESS' : 'FAILED'}`);
-        if (json.result) {
-            console.log(`      > Product Name: ${json.result.productName}`);
-            console.log(`      > Price: ${json.result.sellingPriceAdultTotalAmount}`);
+    
+    console.log('\n=== Result Summary ===');
+    console.log('title:', result.title?.substring(0, 50));
+    console.log('departureDate:', result.departureDate);
+    console.log('returnDate:', result.returnDate);
+    console.log('airline:', result.airline);
+    console.log('departureFlightNumber:', result.departureFlightNumber);
+    console.log('returnFlightNumber:', result.returnFlightNumber);
+    console.log('departureTime:', result.departureTime);
+    console.log('arrivalTime:', result.arrivalTime);
+    console.log('returnDepartureTime:', result.returnDepartureTime);
+    console.log('returnArrivalTime:', result.returnArrivalTime);
+    console.log('duration:', result.duration);
+    console.log('departureCityName:', result.departureAirport);
+    console.log('itinerary count:', result.itinerary?.length);
+    console.log('hotels count:', result.hotels?.length);
+    console.log('inclusions count:', result.inclusions?.length);
+    console.log('exclusions count:', result.exclusions?.length);
+    console.log('keyPoints count:', result.keyPoints?.length);
+    
+    if (result.itinerary?.length > 0) {
+        console.log('\n=== Itinerary Day 1 ===');
+        const d1 = result.itinerary[0];
+        console.log('day:', d1.day);
+        console.log('title:', d1.title);
+        console.log('date:', d1.date);
+        console.log('hotel:', d1.hotel?.substring(0, 80));
+        console.log('timeline items:', d1.timeline?.length);
+        if (d1.timeline?.length > 0) {
+            d1.timeline.slice(0, 3).forEach((t, i) => {
+                console.log(`  [${i}] type=${t.type}, title="${t.title}", desc="${t.description?.substring(0, 60)}"`);
+            });
         }
-    } catch (e) {}
+        console.log('transport:', JSON.stringify(d1.transport));
+        
+        console.log('\n=== Itinerary Day 2 ===');
+        const d2 = result.itinerary[1];
+        console.log('day:', d2.day);
+        console.log('title:', d2.title);
+        console.log('timeline items:', d2.timeline?.length);
+        if (d2.timeline?.length > 0) {
+            d2.timeline.slice(0, 5).forEach((t, i) => {
+                console.log(`  [${i}] type=${t.type}, title="${t.title}", desc="${t.description?.substring(0, 60)}"`);
+            });
+        }
+    }
 }
 
-testNative();
+test().catch(console.error);
