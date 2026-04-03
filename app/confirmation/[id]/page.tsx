@@ -1788,7 +1788,7 @@ export default function ConfirmationViewerPage() {
                                      <div style={{ marginBottom: '24px', border: '1.5px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden', background: '#fff' }}>
                                          <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                             <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1e293b' }}>{safeStr(sr.customs.arrivalProcedure.title || '괌 입국 절차')}</span>
+                                             <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1e293b' }}>{safeStr(sr?.customs?.arrivalProcedure?.title || '여행지 입국 절차')}</span>
                                          </div>
                                          <div style={{ padding: '0 18px 18px 18px' }}>
                                              <div style={{ background: '#e0f2fe', color: '#0369a1', padding: '8px 12px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
@@ -1819,13 +1819,13 @@ export default function ConfirmationViewerPage() {
                                          </div>
                                          <div style={{ padding: '0 18px 18px 18px' }}>
                                              <div style={{ fontSize: '0.85rem', color: '#713f12', lineHeight: 1.6, marginBottom: '14px', wordBreak: 'keep-all' }}>
-                                                 {safeStr(sr.customs.minorEntry)}
+                                                 {safeStr(sr?.customs?.minorEntry)}
                                              </div>
                                              {sr.customs.minorDetail && (
                                                  <div style={{ background: '#fff', border: '1px solid #fdf4ff', borderRadius: '12px', padding: '16px', borderLeft: '4px solid #facc15' }}>
                                                      <div style={{ color: '#854d0e', fontSize: '0.82rem', lineHeight: 1.6, display: 'flex', gap: '10px' }}>
                                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0, marginTop: '2px' }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                                                         <span style={{ wordBreak: 'keep-all' }}>{safeStr(sr.customs.minorDetail)}</span>
+                                                         <span style={{ wordBreak: 'keep-all' }}>{safeStr(sr?.customs?.minorDetail)}</span>
                                                      </div>
                                                  </div>
                                              )}
@@ -1896,18 +1896,18 @@ export default function ConfirmationViewerPage() {
                                         <div className="ct-title">
                                             간편 환산법
                                         </div>
-                                        <p>{safeStr(sr.currency.calculationTip)}</p>
+                                        <p>{safeStr(sr?.currency?.calculationTip)}</p>
                                         <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '6px', lineHeight: 1.4 }}>
                                             *정확한 현재 환율이 아닌, 현지에서 체감 물가를 빠르게 계산하기 위한 대략적인 암산법입니다.
                                         </div>
                                     </div>
                                     <div className="currency-tip-card">
                                         <div className="ct-title">환전 팁</div>
-                                        <p>{safeStr(sr.currency.exchangeTip)}</p>
+                                        <p>{safeStr(sr?.currency?.exchangeTip)}</p>
                                     </div>
                                     <div className="currency-tip-card">
                                         <div className="ct-title">팁 문화</div>
-                                        <p>{safeStr(sr.currency.tipCulture)}</p>
+                                        <p>{safeStr(sr?.currency?.tipCulture)}</p>
                                     </div>
                                 </div>
 
@@ -2129,11 +2129,11 @@ export default function ConfirmationViewerPage() {
 
             {/* 하단 액션 바 */}
             <div className="mc-bottom-bar">
-                <a href="https://pf.kakao.com/_xjxkxbxj/chat" target="_blank" rel="noopener noreferrer" className="mc-action-btn kakao" style={{ flex: 2 }}>
-                    💬 상담원 연결
+                <a href="tel:01093079004" className="mc-action-btn kakao" style={{ flex: 2 }}>
+                    상담원 연결
                 </a>
                 <button className="mc-action-btn share" onClick={handleShare}>
-                    🔗 공유
+                    공유
                 </button>
             </div>
 

@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart2, MessageSquareText, FileText, GraduationCap, PenLine, Wrench, Mail, MessageCircle, TableProperties, Plane } from 'lucide-react';
+import { BarChart2, MessageSquareText, FileText, GraduationCap, PenLine, Wrench, Mail, MessageCircle, TableProperties, Plane, PieChart, LogOut } from 'lucide-react';
+import { logout } from '@/app/login/actions';
 
 interface NavItem {
     href: string;
@@ -12,6 +13,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
     { href: '/', label: '대시보드', icon: <BarChart2 size={20} /> },
+    { href: '/analytics', label: '데이터 분석', icon: <PieChart size={20} /> },
     { href: '/chats', label: '상담 목록', icon: <MessageSquareText size={20} /> },
     { href: '/confirmation', label: '확정서 제작', icon: <FileText size={20} /> },
     { href: '/products', label: '상품 교육', icon: <GraduationCap size={20} /> },
@@ -77,6 +79,21 @@ export default function Sidebar() {
                     <span className="nav-label">Google Sheets</span>
                     <span className="external-icon">↗</span>
                 </a>
+
+                {/* Logout Button */}
+                <button 
+                    onClick={async () => {
+                        if (confirm('로그아웃 하시겠습니까?')) {
+                            await logout();
+                        }
+                    }} 
+                    className="nav-item-logout"
+                >
+                    <span className="nav-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <LogOut size={18} />
+                    </span>
+                    <span className="nav-label">로그아웃</span>
+                </button>
             </div>
         </aside>
     );

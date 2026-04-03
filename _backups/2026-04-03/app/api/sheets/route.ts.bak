@@ -1,0 +1,156 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { appendConsultationToSheet } from '@/lib/google-sheets';
+import { messageStore } from '@/lib/message-store';
+import { ConsultationData } from '@/types';
+import { calculateAutomationDates } from '@/lib/date-calculator';
+
+// Google Sheets 초기화 및 상태 확인
+export async function GET() {
+    const hasCredentials = !!(
+        process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL &&
+        process.env.GOOGLE_PRIVATE_KEY &&
+        process.env.GOOGLE_SHEET_ID
+    );
+
+    if (!hasCredentials) {
+        return NextResponse.json({
+            status: 'not_configured',
+            message: 'Google Sheets API 자격증명이 설정되지 않았습니다.',
+        });
+    }
+
+    return NextResponse.json({
+        status: 'configured',
+        message: 'Google Sheets API가 설정되어 있습니다.',
+        sheetId: process.env.GOOGLE_SHEET_ID?.substring(0, 10) + '...',
+    });
+}
+
+// 수동 상담 등록 (전화 상담 등)
+export async function POST(request: NextRequest) {
+    try {
+        const body = await request.json();
+        const { action, data } = body;
+
+        if (action === 'init') {
+            // 시트 헤더 초기화
+            const { initializeSheetHeaders } = await import('@/lib/google-sheets');
+            await initializeSheetHeaders();
+            return NextResponse.json({
+                success: true,
+                message: 'Google Sheets 헤더가 초기화되었습니다.',
+            });
+        }
+
+        if (action === 'add-consultation') {
+            // 수동 상담 등록
+            const { customerName, customerPhone, destination, productName, productUrl, departureDate, notes, source } = data;
+
+            if (!customerName || !customerPhone) {
+                return NextResponse.json(
+                    { success: false, error: '고객명과 연락처는 필수입니다.' },
+                    { status: 400 }
+                );
+            }
+
+            // 자동화 날짜 계산
+            let balanceDueDate = '';
+            let noticeDate = '';
+            let nextFollowup = '';
+
+            if (departureDate) {
+                const automationDates = calculateAutomationDates(departureDate);
+                balanceDueDate = automationDates.balance_due_date;
+                noticeDate = automationDates.notice_date;
+                nextFollowup = automationDates.next_followup;
+            } else {
+                const automationDates = calculateAutomationDates(new Date().toISOString().split('T')[0]);
+                nextFollowup = automationDates.next_followup;
+            }
+
+            // 상담 데이터 구성
+            const consultationData: ConsultationData = {
+                customer: {
+                    name: customerName,
+                    phone: customerPhone,
+                },
+                trip: {
+                    destination: destination || '',
+                    departure_date: departureDate || '',
+                    return_date: '',
+                    travelers: '',
+                    product_name: productName || '',
+                    url: productUrl || '',
+                },
+                automation: {
+                    status: '상담중',
+                    balance_due_date: balanceDueDate,
+                    notice_date: noticeDate,
+                    next_followup: nextFollowup,
+                },
+            };
+
+            // Google Sheets에 기록
+            try {
+                await appendConsultationToSheet(consultationData);
+            } catch (error) {
+                console.error('Sheets 기록 실패:', error);
+            }
+
+            // 메시지 스토어에 세션 생성
+            const visitorId = `phone-${Date.now()}-${customerPhone.replace(/\D/g, '')}`;
+            const session = messageStore.upsertSession(visitorId, {
+                visitorName: customerName,
+                visitorPhone: customerPhone,
+                destination: destination || '',
+                productName: productName || '',
+                productUrl: productUrl || '',
+                departureDate: departureDate || '',
+                status: '상담중',
+                automationDates: {
+                    balanceDueDate,
+                    noticeDate,
+                    nextFollowup,
+                },
+            });
+
+            // 메모가 있으면 메시지로 추가
+            if (notes) {
+                messageStore.addMessage(visitorId, 'user', `[전화 상담 메모]\n${notes}`);
+                messageStore.addMessage(visitorId, 'assistant', `[${source || '전화'} 상담] ${customerName}님 상담 등록 완료`);
+            }
+
+            // 활동 로그
+            messageStore.addActivityLog({
+                type: 'chat_start',
+                message: `${customerName}님 ${source || '전화'} 상담 등록`,
+                visitorName: customerName,
+                destination: destination,
+            });
+
+            return NextResponse.json({
+                success: true,
+                message: '상담이 등록되었습니다.',
+                data: {
+                    sessionId: visitorId,
+                    automationDates: {
+                        balanceDueDate,
+                        noticeDate,
+                        nextFollowup,
+                    },
+                },
+            });
+        }
+
+        return NextResponse.json(
+            { success: false, error: '알 수 없는 action입니다.' },
+            { status: 400 }
+        );
+    } catch (error) {
+        console.error('Sheets API 오류:', error);
+        return NextResponse.json(
+            { success: false, error: '처리 중 오류가 발생했습니다.' },
+            { status: 500 }
+        );
+    }
+}

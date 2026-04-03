@@ -1,0 +1,467 @@
+/* ═══════════════════════════════════════════════════════
+   Analytics Dashboard — Premium Dark Theme v2
+   2-column layout, larger charts, insight cards
+   ═══════════════════════════════════════════════════════ */
+
+.analytics-container {
+    padding: 8px 0;
+}
+
+/* ── Header ── */
+.analytics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.analytics-header-left {
+    flex: 1;
+    min-width: 200px;
+}
+
+.analytics-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.analytics-subtitle {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 6px 0 0 0;
+}
+
+.analytics-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ── Period Buttons ── */
+.period-filter-group {
+    display: flex;
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    padding: 3px;
+    gap: 2px;
+}
+
+.period-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+}
+
+.period-btn:hover {
+    color: #e2e8f0;
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.period-btn.active {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+}
+
+.period-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.analytics-refresh-btn {
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 10px;
+    background: rgba(30, 41, 59, 0.7);
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.analytics-refresh-btn:hover {
+    color: #6366f1;
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.analytics-refresh-btn .spin {
+    animation: analyticsSpin 1s linear infinite;
+}
+
+@keyframes analyticsSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ── Summary Badge ── */
+.analytics-summary-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin-bottom: 24px;
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.analytics-summary-badge strong {
+    color: #f1f5f9;
+    font-weight: 700;
+}
+
+.badge-divider {
+    color: rgba(99, 102, 241, 0.3);
+}
+
+/* ══════════════════════════════
+   2-Column Layout (larger charts)
+   ══════════════════════════════ */
+.analytics-row-2col {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+    margin-bottom: 22px;
+}
+
+@media (max-width: 900px) {
+    .analytics-row-2col {
+        grid-template-columns: 1fr;
+    }
+    .analytics-header {
+        flex-direction: column;
+    }
+}
+
+/* ── Card (Large) ── */
+.analytics-card-large {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95));
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    border-radius: 18px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.analytics-card-large::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, #22d3ee, #6366f1);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.analytics-card-large:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(99, 102, 241, 0.15);
+}
+
+.analytics-card-large:hover::before {
+    opacity: 1;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 22px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* ── Toggle Group (문의순/확정순) ── */
+.toggle-group {
+    display: flex;
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 3px;
+    border-radius: 10px;
+    gap: 2px;
+    margin-left: auto;
+}
+
+.toggle-btn {
+    padding: 5px 12px;
+    border-radius: 7px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    color: #64748b;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.toggle-btn.active {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8fafc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-btn:hover:not(.active) {
+    color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* ── KPI 전환율 뱃지 ── */
+.kpi-cvr-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(34, 211, 238, 0.12));
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    padding: 6px 14px;
+    border-radius: 12px;
+    margin-left: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.kpi-label {
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 1px;
+}
+
+.kpi-value {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #22d3ee;
+    line-height: 1;
+    text-shadow: 0 0 12px rgba(34, 211, 238, 0.4);
+}
+
+.card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.card-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.card-header p {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 3px 0 0 0;
+    line-height: 1.4;
+}
+
+/* ── Chart Area (Large) ── */
+.chart-area-large {
+    padding: 8px 16px 4px;
+    min-height: 290px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+
+/* ── 툴팁 이동 애니메이션 제거 (정신없는 움직임 방지) ── */
+.recharts-tooltip-wrapper {
+    transition: transform 0s !important;
+}
+
+/* ── 도넛 그래프 섹션 호버 효과 ── */
+.recharts-pie-sector {
+    transition: filter 0.3s ease, transform 0.3s ease;
+    outline: none;
+}
+
+.recharts-pie-sector:hover {
+    filter: brightness(1.1) drop-shadow(0 0 10px rgba(99, 102, 241, 0.3));
+    cursor: pointer;
+}
+
+/* ── Source Select Dropdown ── */
+.source-select {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: auto;
+}
+
+.source-select:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.source-select option {
+    background: #1e293b;
+    color: #f1f5f9;
+}
+
+.chart-empty {
+    color: #475569;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 60px 0;
+}
+
+/* ══════════════════════════════
+   Insight Boxes (분석 요약 + 전략 제안)
+   ══════════════════════════════ */
+.card-insight {
+    padding: 0 22px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.insight-box {
+    border-radius: 12px;
+    padding: 14px 16px;
+    border: 1px solid;
+}
+
+.insight-box-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.insight-box p {
+    font-size: 0.82rem;
+    line-height: 1.6;
+    margin: 0;
+    word-break: keep-all;
+}
+
+/* 분석 요약 박스 */
+.analysis-box {
+    background: rgba(99, 102, 241, 0.06);
+    border-color: rgba(99, 102, 241, 0.2);
+}
+
+.analysis-box .insight-box-header {
+    color: #818cf8;
+}
+
+.analysis-box p {
+    color: #cbd5e1;
+}
+
+/* 전략 제안 박스 */
+.strategy-box {
+    background: rgba(34, 211, 238, 0.05);
+    border-color: rgba(34, 211, 238, 0.2);
+}
+
+.strategy-box .insight-box-header {
+    color: #22d3ee;
+}
+
+.strategy-box p {
+    color: #67e8f9;
+    font-weight: 500;
+}
+
+/* ── Tooltip Fade-in Animation ── */
+@keyframes tooltipFadeIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* ── 막대 그래프 호버 애니메이션 (살짝 커지는 효과) ── */
+.recharts-bar-rectangle {
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+    transform-origin: left;
+    cursor: pointer;
+}
+
+.recharts-bar-rectangle:hover {
+    filter: brightness(1.25) drop-shadow(0 0 12px rgba(255, 255, 255, 0.15));
+    transform: scaleX(1.025);
+}
+
+.recharts-bar-rectangle:active {
+    transform: scaleX(0.98);
+}
+
+/* ── Loading ── */
+.analytics-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    gap: 16px;
+    color: #94a3b8;
+    font-size: 0.95rem;
+}
+
+.analytics-loading-spinner {
+    width: 44px;
+    height: 44px;
+    border: 3px solid rgba(99, 102, 241, 0.15);
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: analyticsSpin 0.8s linear infinite;
+}
+
+/* ── Recharts Override ── */
+.recharts-default-legend { margin-top: 8px !important; }
+.recharts-legend-item-text { color: #94a3b8 !important; font-size: 0.8rem !important; }
+.recharts-sector:focus, .recharts-sector:active,
+.recharts-wrapper:focus, .recharts-wrapper:active,
+.recharts-surface:focus, .recharts-surface:active { 
+    outline: none !important; 
+    border: none !important;
+}
+
+/* ── Recharts Pie hover effect ── */
+.recharts-sector {
+    transition: opacity 0.2s, filter 0.2s;
+    cursor: pointer;
+}
+.recharts-sector:hover {
+    filter: brightness(1.15) drop-shadow(0 0 8px rgba(99, 102, 241, 0.4));
+}

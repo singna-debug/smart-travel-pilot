@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import GoogleContactsPicker from './GoogleContactsPicker';
+import CustomerSearchBox from './CustomerSearchBox';
+import { ConsultationData } from '@/types';
 
 function formatToHtmlDate(dateStr: string): string {
     if (!dateStr) return '';
@@ -260,6 +262,23 @@ export default function ManualConsultationForm() {
         setForm(prev => ({ ...prev, customerName: name, customerPhone: phone }));
     };
 
+    const handleCustomerSelect = (c: ConsultationData) => {
+        setForm(prev => ({
+            ...prev,
+            customerName: c.customer.name,
+            customerPhone: c.customer.phone,
+            destination: c.trip.destination || prev.destination,
+            productName: c.trip.product_name || prev.productName,
+            productUrl: c.trip.url || prev.productUrl,
+            departureDate: c.trip.departure_date ? formatToHtmlDate(c.trip.departure_date) : prev.departureDate,
+            duration: c.trip.duration || prev.duration,
+            returnDate: c.trip.return_date ? formatToHtmlDate(c.trip.return_date) : prev.returnDate,
+            travelersCount: c.trip.travelers_count ? String(c.trip.travelers_count) : prev.travelersCount,
+            recurringCustomer: '재방문',
+            inquirySource: c.automation.inquirySource || prev.inquirySource,
+        }));
+    };
+
     return (
         <div className="manual-consultation-form" style={{
             background: 'var(--bg-card)',
@@ -313,6 +332,8 @@ export default function ManualConsultationForm() {
                     </button>
                 </div>
             </div>
+
+            <CustomerSearchBox onSelect={handleCustomerSelect} />
 
             <form onSubmit={handleSubmit}>
 

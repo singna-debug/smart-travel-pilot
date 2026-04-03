@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import type { AnalysisResult, SingleResult } from '@/types';
+import type { AnalysisResult, SingleResult, ConsultationData } from '@/types';
+import CustomerSearchBox from './CustomerSearchBox';
 
 // Declare google on window for TypeScript
 declare global {
@@ -311,6 +312,21 @@ export default function UrlAnalyzer() {
         }
     };
 
+    const handleCustomerSelect = (c: ConsultationData) => {
+        setCustomerName(c.customer.name);
+        setCustomerPhone(c.customer.phone);
+        if (c.trip.destination) setDestination(c.trip.destination);
+        if (c.trip.departure_date) setDepartureDate(formatToHtmlDate(c.trip.departure_date));
+        if (c.trip.duration) setDuration(c.trip.duration);
+        if (c.trip.return_date) setReturnDate(formatToHtmlDate(c.trip.return_date));
+        if (c.trip.product_name) setInterestedProduct(c.trip.product_name);
+        if (c.trip.url) setSingleUrl(c.trip.url);
+        if (c.trip.travelers_count) setTravelersCount(String(c.trip.travelers_count));
+        setRecurringCustomer('재방문');
+        if (c.automation.inquirySource) setInquirySource(c.automation.inquirySource);
+        if (c.summary) setMemo(c.summary);
+    };
+
 
 
     const analyzeSingle = async () => {
@@ -590,6 +606,8 @@ export default function UrlAnalyzer() {
                     </button>
                 </div>
             </div>
+
+            <CustomerSearchBox onSelect={handleCustomerSelect} />
 
             {/* Row 1: 고객명, 연락처, 여행지 */}
             <div className="analyzer-form-grid-3">

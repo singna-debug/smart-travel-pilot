@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import CustomerSearchBox from '@/components/CustomerSearchBox';
 import type { ConsultationData, DetailedProductInfo, TravelerInfo, DocumentFile, SecondaryResearch, MeetingInfo } from '@/types';
 
 // AI 응답에서 객체/배열이 올 수 있으므로 안전하게 문자열로 변환
@@ -168,36 +169,7 @@ export default function ConfirmationPage() {
         setInfantCount(infants);
     }, [travelers]);
 
-    // 고객 검색 외부 클릭 감지
-    useEffect(() => {
-        const handler = (e: MouseEvent) => {
-            if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-                setShowCustomerDropdown(false);
-            }
-        };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, []);
-
-    // 고객 검색
-    const searchCustomers = async (query: string) => {
-        setCustomerQuery(query);
-        if (query.length < 1) {
-            setCustomerResults([]);
-            setShowCustomerDropdown(false);
-            return;
-        }
-        try {
-            const res = await fetch(`/api/confirmation?action=search-customers&q=${encodeURIComponent(query)}`);
-            const json = await res.json();
-            if (json.success) {
-                setCustomerResults(json.data);
-                setShowCustomerDropdown(json.data.length > 0);
-            }
-        } catch (err) {
-            console.error('Customer search error:', err);
-        }
-    };
+    // 고객 검색 외부 클릭 감지 (이제 필요 없음 - CustomerSearchBox 내부에서 처리)
 
     // 고객 선택
     const selectCustomer = (c: ConsultationData) => {
@@ -205,12 +177,11 @@ export default function ConfirmationPage() {
         setCustomerPhone(c.customer.phone);
         if (c.trip.destination) setDestination(c.trip.destination);
         if (c.trip.product_name) setProductName(c.trip.product_name);
-        if (c.trip.departure_date) setDepartureDate(c.trip.departure_date);
-        if (c.trip.return_date) setReturnDate(c.trip.return_date);
+        if (c.trip.departure_date) setDepartureDate(formatToHtmlDate(c.trip.departure_date));
+        if (c.trip.return_date) setReturnDate(formatToHtmlDate(c.trip.return_date));
         if (c.trip.duration) setDuration(c.trip.duration);
         if (c.trip.url) setProductUrl(c.trip.url);
-        setShowCustomerDropdown(false);
-        setCustomerQuery('');
+        if (c.trip.travelers_count) setAdultCount(Number(c.trip.travelers_count));
     };
 
     // URL 분석 — 수집+분석을 한 번에 처리하는 통합 Edge API 사용
@@ -642,29 +613,8 @@ export default function ConfirmationPage() {
                     <span className="section-icon">👤</span> 고객 정보
                 </div>
                 <div className="confirm-grid">
-                    <div className="confirm-field full-width" ref={searchRef}>
-                        <label>고객 검색 (구글 시트에서 찾기)</label>
-                        <div className="customer-search-wrapper">
-                            <input
-                                type="text"
-                                placeholder="이름 또는 연락처로 검색..."
-                                value={customerQuery}
-                                onChange={e => searchCustomers(e.target.value)}
-                            />
-                            {showCustomerDropdown && (
-                                <div className="customer-search-results">
-                                    {customerResults.map((c, i) => (
-                                        <div key={i} className="customer-search-item" onClick={() => selectCustomer(c)}>
-                                            <div>
-                                                <div className="csi-name">{c.customer.name}</div>
-                                                <div className="csi-dest">{c.trip.destination} · {c.trip.departure_date}</div>
-                                            </div>
-                                            <div className="csi-phone">{c.customer.phone}</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                    <div className="confirm-field full-width">
+                        <CustomerSearchBox onSelect={selectCustomer} />
                     </div>
                     <div className="confirm-field">
                         <label>고객 성함</label>
