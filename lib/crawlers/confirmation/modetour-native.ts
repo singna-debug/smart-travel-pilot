@@ -214,24 +214,60 @@ export async function fetchConfirmationNative(url: string): Promise<DetailedProd
             keyPoints: keyPoints,
             itinerary: (function() {
                 if (isHistorical) return []; 
-                const scheduleList = Array.isArray(dataSchedule?.result) ? dataSchedule.result : (Array.isArray(dataSchedule) ? dataSchedule : []);
-                if (!Array.isArray(scheduleList)) return [];
-                return scheduleList.map((day: any) => {
-                    const dayNo = day?.day || day?.dayNo;
+                
+                // 실제 API 데이터 구조: result.scheduleItemList 또는 result
+                const scheduleRaw = dataSchedule?.result?.scheduleItemList || dataSchedule?.result || dataSchedule?.list || (Array.isArray(dataSchedule) ? dataSchedule : []);
+                const scheduleArray = Array.isArray(scheduleRaw) ? scheduleRaw : [];
+                
+                if (scheduleArray.length === 0) return [];
+                
+                return scheduleArray.map((day: any, idx: number) => {
+                    const dayNo = day?.day || day?.dayNo || (idx + 1);
                     const dateStr = day?.date || '';
-                    const title = day?.title || day?.scheduleTitle || '';
-                    const details = Array.isArray(day?.ScheduleDetailList) ? day.ScheduleDetailList : [];
-                    const timeline = Array.isArray(details) ? details.map((dt: any) => ({
-                        type: (dt.title?.includes('미팅') || dt.title?.includes('집합')) ? 'default' : 'location',
-                        title: dt.title || '',
-                        description: (dt.content && dt.content.length > 200) ? dt.content.substring(0, 200) + '...' : (dt.content || '')
-                    })) : [];
+                    
+                    // 도시/경로 정보
+                    const cities = Array.isArray(day.placeHeader) ? day.placeHeader.join(' → ') : (day.title || day.scheduleTitle || '');
+                    
+                    // 상세 일정 (핀 + 동그라미 아이템 모두 포함)
+                    // ortherActions( typo 의심되나 실제 API 필드), allPlaceTravelToday, ScheduleDetailList 병합 시도
+                    const rawTimeline = day.ortherActions || day.allPlaceTravelToday || day.ScheduleDetailList || day.timeline || [];
+                    const timeline = (Array.isArray(rawTimeline) ? rawTimeline : []).map((t: any) => {
+                        const placeName = t.itiPlaceName || t.placeNameK || t.title || t.location_nm || '';
+                        const summary = t.itiSummaryDes || t.itiDetailDes || t.summaryDes || t.description || t.content || '';
+                        const serviceType = t.itiServiceCode || '';
+                        
+                        // 관광지(SS), 장소(PL) 등은 핀(location), 나머지는 동그라미(default)
+                        const isLocation = serviceType.includes('SS') || serviceType.includes('PL') || !!t.placeNo;
+                        
+                        return {
+                            type: isLocation ? 'location' : 'default',
+                            title: placeName,
+                            subtitle: t.itiServiceName || t.subtitle || '',
+                            description: (summary && summary.length > 300) ? summary.substring(0, 300) + '...' : summary
+                        };
+                    }).filter((item: any) => item.title || item.description);
+
+                    // 식사 정보 (조식/중식/석식)
+                    const meals: any = { breakfast: '', lunch: '', dinner: '' };
+                    const mealList = day.listMealPlace || [];
+                    if (Array.isArray(mealList)) {
+                        mealList.forEach((m: any) => {
+                            const name = m.itiPlaceName || m.placeNameK || '';
+                            if (m.itiServiceCode === 'SSCBKF' || name.includes('조식')) meals.breakfast = name || '호텔식';
+                            else if (m.itiServiceCode === 'SSCLCH' || name.includes('중식')) meals.lunch = name || '현지식';
+                            else if (m.itiServiceCode === 'SSCDNR' || name.includes('석식')) meals.dinner = name || '현지식';
+                        });
+                    }
+
                     return {
                         day: dayNo,
                         date: dateStr,
-                        title: title,
+                        title: cities,
+                        route: cities,
                         transport: day?.transport || null,
-                        timeline: timeline.length > 0 ? timeline : (day?.timeline || [])
+                        timeline: timeline,
+                        hotel: day.scheduleHotel || day.hotel || '',
+                        meals: meals
                     };
                 });
             })(),
