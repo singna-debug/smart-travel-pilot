@@ -38,11 +38,13 @@ export async function updateSession(request: NextRequest) {
   const isStaticAsset = request.nextUrl.pathname.includes('.') || request.nextUrl.pathname.startsWith('/_next')
   // 고객이 보는 확정서 페이지(/confirmation/ID)는 로그인이 필요 없어야 함
   const isPublicConfirmationViewer = request.nextUrl.pathname.startsWith('/confirmation/') && request.nextUrl.pathname !== '/confirmation'
+  // 확정서 데이터 API도 공개 (뷰어에서 데이터를 가져와야 하므로)
+  const isPublicConfirmationApi = request.nextUrl.pathname.startsWith('/api/confirmation/') && request.nextUrl.pathname !== '/api/confirmation'
 
   if (isStaticAsset) return supabaseResponse
 
   // 공개 페이지는 로그인 체크 없이 통과
-  if (isAuthPage || isPublicConfirmationViewer) {
+  if (isAuthPage || isPublicConfirmationViewer || isPublicConfirmationApi) {
       return supabaseResponse
   }
 
