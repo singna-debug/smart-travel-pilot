@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ConsultationData } from '@/types';
 import { EditableField, InfoCell, TimelineCell } from './EditableComponents';
-import { Pencil, MapPin, Calendar, Users } from 'lucide-react';
+import { Pencil, MapPin, Calendar, Users, Bell, X } from 'lucide-react';
 
 interface ConsultationListProps {
     title: string;
@@ -78,6 +78,7 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
             departureNotice: ['automation', 'departure_notice'],
             phoneNotice: ['automation', 'phone_notice'],
             happyCall: ['automation', 'happy_call'],
+            specific_reminder_date: ['specific_reminder_date'],
         };
 
         if (updateMapping[field]) {
@@ -98,6 +99,7 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                     copy.automation.departure_notice = '';
                     copy.automation.phone_notice = '';
                     copy.automation.happy_call = '';
+                    copy.specific_reminder_date = '';
                 }
             }
 
@@ -255,6 +257,11 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                                                 안내(4주): {item.automation.notice_date}
                                                             </div>
                                                         )}
+                                                        {item.specific_reminder_date && (
+                                                            <div style={{ color: '#ec4899', fontWeight: 'bold', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                특정일: {item.specific_reminder_date}
+                                                            </div>
+                                                        )}
                                                     </>
                                                 )}
                                             </div>
@@ -309,6 +316,15 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                                                     forceEditMode={editingCustomerChatId === strIndex} 
                                                                 />
                                                                 <InfoCell label="등록방식" value={item.source || '-'} highlight={item.source === '카카오톡' ? '#fbbf24' : '#a78bfa'} />
+                                                                <EditableField 
+                                                                    label="특정날 리마인드" 
+                                                                    value={item.specific_reminder_date || ''} 
+                                                                    field="specific_reminder_date" 
+                                                                    chatId={strIndex} 
+                                                                    onSave={handleFieldUpdate} 
+                                                                    forceEditMode={editingCustomerChatId === strIndex}
+                                                                    displayValue={item.specific_reminder_date ? <span style={{ color: '#ec4899', fontWeight: 700 }}>{item.specific_reminder_date}</span> : undefined}
+                                                                />
                                                             </div>
 
                                                         </div>
@@ -544,6 +560,15 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                                             <TimelineCell label="출발안내" date={item.automation.departure_notice || ''} today={today} field="departureNotice" chatId={strIndex} onCheck={handleFieldUpdate} />
                                                             <TimelineCell label="전화안내" date={item.automation.phone_notice || ''} today={today} field="phoneNotice" chatId={strIndex} onCheck={handleFieldUpdate} />
                                                             <TimelineCell label="해피콜" date={item.automation.happy_call || ''} today={today} field="happyCall" chatId={strIndex} onCheck={handleFieldUpdate} />
+                                                            <TimelineCell 
+                                                                label="특정날 리마인드" 
+                                                                date={item.specific_reminder_date || ''} 
+                                                                today={today} 
+                                                                field="specific_reminder_date" 
+                                                                chatId={strIndex} 
+                                                                onCheck={handleFieldUpdate} 
+                                                                highlightColor="#ec4899"
+                                                            />
                                                             {item.automation.confirmed_product && (
                                                                 <div style={{ gridColumn: 'span 1', padding: '8px', background: '#111827', borderRadius: '6px', fontSize: '11px' }}>
                                                                     <div style={{ color: '#6b7280', marginBottom: '4px' }}>확정상품</div>

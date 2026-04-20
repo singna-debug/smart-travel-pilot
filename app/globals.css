@@ -832,3 +832,80 @@ body {
         font-size: 22px;
     }
 }
+/* 확정서 뷰어 전용 반응형 패치 (이미지/표 잘림 방지) */
+.mc-section img, 
+.custom-sub-section img,
+.ga-content img,
+.mc-policy-text img {
+    max-width: 100% !important;
+    height: auto !important;
+    border-radius: 12px;
+    margin: 8px 0 !important;
+    display: block !important;
+}
+
+.mc-section table,
+.css-table {
+    width: 100% !important;
+ table-layout: auto !important;
+    word-break: keep-all;
+}
+
+.css-table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    margin: 8px 0;
+    border-radius: 8px;
+}
+
+.mc-section, 
+.custom-sub-section,
+.ga-content,
+.mc-policy-text {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* ?정? ?이? ?용 (Mobile Image Cutoff Fix) */
+.itinerary-img-fix img {
+    max-width: 100% !important;
+    height: auto !important;
+    border-radius: 8px;
+    display: block;
+    margin: 8px 0;
+}
+
+/* 확정서 일정표 이미지/텍스트 overflow 완벽 차단 */
+.day-activity-item,
+.timeline-item-wrapper {
+    max-width: 100% !important;
+    overflow: hidden;
+}
+.activity-text,
+.activity-header {
+    max-width: 100% !important;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+.itinerary-img-fix img,
+.day-activity-item img,
+.activity-header img,
+.day-content img,
+.timeline-item-wrapper img {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+    border-radius: 8px;
+    display: block;
+    margin: 8px 0;
+    object-fit: contain;
+}
+.mc-itinerary {
+    overflow: hidden;
+    max-width: 100%;
+}
+.mc-day-card {
+    overflow: hidden;
+    max-width: 100%;
+}

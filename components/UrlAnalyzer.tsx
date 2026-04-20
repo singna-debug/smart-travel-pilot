@@ -461,12 +461,14 @@ export default function UrlAnalyzer() {
         // 중복 인사말 방지: content에 이미 "안녕하세요"가 포함되어 있는지 확인
         const hasGreeting = content.includes('안녕하세요') || content.includes('님!');
         const greeting = hasGreeting ? '' : `안녕하세요. 모두투어 김호기 팀장입니다.\n${customerName || '고객'}님 문의주신 ${destination || '요청하신'} 일정표입니다.\n\n`;
-        const footer = `\n\n추가로 궁금하신 점이나, 더 비교하고 싶으신 상품이 있으시면 편하게 말씀해주세요.\n감사합니다. 김호기 드림\n\n📞 상담 및 문의\n* 담당자: (주)클럽모두투어 김호기\n* 직통전화: 02-951-9004\n* 휴대폰: 010-9307-9004`;
+        const footer = `\n\n※ 추가로 궁금하신 점이나, 더 비교하고 싶으신 상품이 있으시면 편하게 말씀해주세요.\n감사합니다. 김호기 드림\n\n📞 상담 및 문의\n* 담당자: (주)클럽모두투어 김호기\n* 직통전화: 02-951-9004\n* 휴대폰: 010-9307-9004`;
 
-        // 만약 content 내부에 이미 "예약 전 확인사항" 문구가 있다면 중복 방지를 위해 제거
+        // 만약 content 내부에 이미 "예약 전 확인사항" 또는 "※" 문구가 있다면 중복 방지를 위해 제거
         let cleanedContent = content;
         if (content.includes("예약 전 확인사항")) {
-            cleanedContent = content.split("예약 전 확인사항")[0].trim();
+            cleanedContent = content.split("※")[0].trim();
+        } else if (content.includes("※")) {
+            cleanedContent = content.split("※")[0].trim();
         }
 
         // 링크 포맷 수정: 서버에서 이미 [원문 일정표 열기]\n(URL) 형식을 제공하므로 그대로 사용

@@ -3,19 +3,50 @@ import { supabase } from './supabase';
 
 /**
  * 확정서 데이터 저장소
- * 기존 인메모리 방식에서 Supabase 영구 저장 방식으로 전환되었습니다.
+ * Supabase 영구 저장 방식
  */
 
 export const confirmationStore = {
     get: async (id: string): Promise<ConfirmationDocument | null> => {
-        if (!supabase) return null;
-        const { data, error } = await supabase
+        if (!supabase || !id) return null;
+        
+        console.log(`[ConfirmationStore] GET: ${id}`);
+        
+        // 1. 기본 ID로 조회
+        let { data, error } = await supabase
             .from('mobile_confirmations')
             .select('data')
             .eq('id', id)
-            .single();
+            .maybeSingle();
 
-        if (error || !data) return null;
+        // 2. 못 찾으면 data 내부의 reservationNumber로 재조회
+        if (!data) {
+            const { data: fallbackData } = await supabase
+                .from('mobile_confirmations')
+                .select('data')
+                .eq('data->>reservationNumber', id)
+                .maybeSingle();
+            
+            if (fallbackData) data = fallbackData;
+        }
+
+        // 3. 못 찾으면 data 내부의 id로도 재조회
+        if (!data) {
+            const { data: fallbackData2 } = await supabase
+                .from('mobile_confirmations')
+                .select('data')
+                .eq('data->>id', id)
+                .maybeSingle();
+            
+            if (fallbackData2) data = fallbackData2;
+        }
+
+        if (!data) {
+            console.log(`[ConfirmationStore] NOT FOUND: ${id}`);
+            return null;
+        }
+
+        console.log(`[ConfirmationStore] FOUND: ${id}`);
         return data.data as ConfirmationDocument;
     },
 
@@ -24,6 +55,9 @@ export const confirmationStore = {
             console.error('Supabase client not initialized');
             return false;
         }
+
+        console.log(`[ConfirmationStore] SET: ${id}`);
+
         const { error } = await supabase
             .from('mobile_confirmations')
             .upsert({
@@ -33,9 +67,11 @@ export const confirmationStore = {
             });
 
         if (error) {
-            console.error('Supabase Error:', error.message);
+            console.error('[ConfirmationStore] Supabase Error:', error.message);
             return false;
         }
+        
+        console.log(`[ConfirmationStore] SAVED: ${id}`);
         return true;
     },
 

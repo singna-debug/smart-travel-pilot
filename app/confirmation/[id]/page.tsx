@@ -721,7 +721,7 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
                     {/* 왼쪽: 출발 정보 */}
                     <div style={{ textAlign: 'left', width: '30%', minWidth: '90px' }}>
                         <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{deptCity}{deptCode} 출발</div>
-                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{dateStr}</div>}
+                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{String(dateStr).replace(/T\d{2}:\d{2}:\d{2}(\.\d+)?$/, '')}</div>}
                         <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{flightInfo.departureTime}</div>
                         
                         {displayDepKST && (
@@ -764,7 +764,7 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
                     {/* 오른쪽: 도착 정보 */}
                     <div style={{ textAlign: 'right', width: '30%', minWidth: '90px' }}>
                         <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{arrCity}{arrCode} 도착</div>
-                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{dateStr}</div>}
+                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{String(dateStr).replace(/T\d{2}:\d{2}:\d{2}(\.\d+)?$/, '')}</div>}
                         <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{flightInfo.arrivalTime}</div>
                         
                         {displayArrKST && (
@@ -1267,7 +1267,7 @@ export default function ConfirmationViewerPage() {
                                                 <div className="day-header" onClick={() => toggleDay(i)}>
                                                     <div className="day-number">
                                                         {typeof day === 'string' ? `Day ${i + 1}` : (day.day || `Day ${i + 1}`)}
-                                                        {day.date && <span className="day-date">{day.date}</span>}
+                                                        {day.date && <span className="day-date">{String(day.date).replace(/T\d{2}:\d{2}:\d{2}(\.\d+)?$/, '').replace(/T00:00:00/g, '')}</span>}
                                                     </div>
                                                     {day.title && <div className="day-title">{day.title}</div>}
                                                     <div className={`day-chevron ${isOpen ? 'open' : ''}`}>›</div>
@@ -1290,19 +1290,29 @@ export default function ConfirmationViewerPage() {
                                                             ) : day.activities && Array.isArray(day.activities) ? (
                                                                 <div className="activity-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                                                     {day.activities.flatMap((act: string) => act.split('\n')).map((line: string, ai: number) => {
-                                                                        let cleanText = line.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+                                                                        let cleanText = line.trim();
                                                                         if (!cleanText) return null;
                                                                         
-                                                                        // 개조식 명사형 종결 변환 (하위 호환용)
-                                                                        cleanText = cleanText.replace(/(이동|구경|감상|산책|관람|방문|체크인|진행|제공|이용|탑승|출발|도착|해산|귀환|관광|쇼핑|체험|시식|식사|숙박|휴식)합니다\.?$/, '$1');
-                                                                        cleanText = cleanText.replace(/(을|를)\s*가집니다\.?$/, ' 진행');
+                                                                        const hasImage = cleanText.toLowerCase().includes('<img');
+                                                                        
+                                                                        // 개조식 명사형 종결 변환 (하위 호환용, 단 이미지가 없을 때만 적용)
+                                                                        if (!hasImage) {
+                                                                            cleanText = cleanText.replace(/(이동|구경|감상|산책|관람|방문|체크인|진행|제공|이용|탑승|출발|도착|해산|귀환|관광|쇼핑|체험|시식|식사|숙박|휴식)합니다\.?$/, '$1');
+                                                                            cleanText = cleanText.replace(/(을|를)\s*가집니다\.?$/, ' 진행');
+                                                                        }
                                                                         cleanText = cleanText.trim();
                                                                         
                                                                         return (
-                                                                            <div key={ai} className="day-activity-item">
-                                                                                <div className="timeline-dot"></div>
-                                                                                <div className="activity-text">
-                                                                                    <div className="activity-header">{cleanText}</div>
+                                                                            <div key={ai} className="day-activity-item" style={{ display: 'flex', gap: '10px', alignItems: hasImage ? 'flex-start' : 'center' }}>
+                                                                                <div className="activity-icon-wrap" style={{ fontSize: '0.85rem', flexShrink: 0, marginTop: '2px', width: '20px', textAlign: 'center' }}>
+                                                                                    {hasImage ? '🖼️' : '•'}
+                                                                                </div>
+                                                                                <div className="activity-text" style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                                                                                    <div 
+                                                                                        className="activity-header itinerary-img-fix" 
+                                                                                        style={{ fontSize: '0.88rem', color: '#1e293b', lineHeight: 1.6, overflowWrap: 'break-word', wordBreak: 'break-word' }}
+                                                                                        dangerouslySetInnerHTML={{ __html: cleanText }} 
+                                                                                    />
                                                                                 </div>
                                                                             </div>
                                                                         );

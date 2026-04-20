@@ -2,20 +2,20 @@ import type { Metadata, ResolvingMetadata } from 'next';
 import { confirmationStore } from '@/lib/confirmation-store';
 
 type Props = {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 };
 
 export async function generateMetadata(
     { params }: Props,
     parent: ResolvingMetadata
 ): Promise<Metadata> {
-    const id = params.id;
+    const { id } = await params;
     const doc = await confirmationStore.get(id);
 
     if (!doc) {
         return {
-            title: "Confirm - CLUBMODE TRAVEL",
-            description: "Travel Confirmation Viewer",
+            title: "여행 확정서 - CLUBMODE TRAVEL",
+            description: "여기를 눌러 링크를 확인하세요.",
         };
     }
 
@@ -30,7 +30,7 @@ export async function generateMetadata(
     }
     titleStr += `_${destination}`;
 
-    const description = `${customerName} 님의 ${destination} 여행 확정서입니다. 일정을 확인해 보세요.`;
+    const description = `${customerName} 님의 ${destination} 여행 확정서입니다. 여기를 눌러 링크를 확인하세요.`;
 
     return {
         title: titleStr,

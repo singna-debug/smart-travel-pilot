@@ -152,6 +152,7 @@ export async function GET(request: NextRequest) {
             sheetRowIndex: c.sheetRowIndex,
             sheetName: c.sheetName,
             sheetGid: c.sheetGid,
+            specific_reminder_date: c.specific_reminder_date || '',
             previousInquiries: c.previousInquiries || [],
         }));
 

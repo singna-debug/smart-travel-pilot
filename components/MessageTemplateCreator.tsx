@@ -14,6 +14,8 @@ interface Customer {
     status: string;
     balanceDueDate: string;
     travelersCount: string;
+    visitorId: string;
+    reservationNumber?: string;
     timestamp: string;
 }
 
@@ -37,7 +39,7 @@ interface ProductInfo {
     specialTerms?: string;
 }
 
-type TemplateType = 'remind' | 'booking' | 'dotcom' | 'pre_4w' | 'balance' | 'ticket' | 'confirmation' | 'departure' | 'happy_call';
+type TemplateType = 'remind' | 'booking' | 'dotcom' | 'pre_4w' | 'balance' | 'ticket' | 'confirmation' | 'departure' | 'happy_call' | 'china_barcode';
 
 const TEMPLATE_LABELS: Record<TemplateType, { label: string; icon: string }> = {
     remind: { label: '리마인드', icon: '⏰' },
@@ -49,6 +51,7 @@ const TEMPLATE_LABELS: Record<TemplateType, { label: string; icon: string }> = {
     confirmation: { label: '확정서 안내', icon: '📖' },
     departure: { label: '출발 안내', icon: '✈️' },
     happy_call: { label: '해피콜', icon: '📞' },
+    china_barcode: { label: '중국 바코드', icon: '📱' },
 };
 
 const AGENT_NAME = '김호기';
@@ -120,6 +123,10 @@ export default function MessageTemplateCreator() {
             if (selectedCustomer.url) setUrl(selectedCustomer.url);
             if (selectedCustomer.travelersCount) setTravelers(selectedCustomer.travelersCount);
             if (selectedCustomer.departureDate) setDepartureDate(selectedCustomer.departureDate);
+            if (selectedCustomer.visitorId) {
+                const baseUrl = window.location.origin;
+                setConfirmationLink(`${baseUrl}/confirmation/${selectedCustomer.visitorId}`);
+            }
         }
     }, [selectedCustomer]);
 
@@ -145,7 +152,7 @@ export default function MessageTemplateCreator() {
         selectedCustomer, product, templateType, url, 
         bookingNumber, travelers, deposit, depositDeadline, 
         bankAccount, bankHolder, excludedCosts, depositPerPerson, 
-        confirmationLink, reviewLink, specialTerms, airline, departureDate
+        confirmationLink, reviewLink, specialTerms, airline, departureDate, bookingNumber
     ]);
 
     async function fetchCustomers() {
@@ -493,41 +500,41 @@ ${bankAccount}
             }
 
             case 'ticket':
-                text = `✈️ [모두투어] 항공권 발권 및 좌석 지정 안내 (담당: ${AGENT_NAME})
+                text = `✈️ [모두투어] 항공권 발권 및 좌석 지정 안내
 
-안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
-${name}님의 소중한 여행을 위한 항공권 발권이 완료되었습니다.
-미리 좌석을 지정하여 더욱 편안한 여행을 준비해 보세요.
-
-──────────────────
-
-✅ 좌석 배정
-고객님의 항공권이 발권되었습니다. 예약번호를 통해 항공사 홈페이지 또는 전화로 좌석 지정을 하실 수 있습니다.
-좌석 위치에 따라 추가 요금이 발생할 수 있으며, 이는 항공사 규정에 따릅니다.
-
-출발 1일 전 지정의 경우 무료로 진행 가능하나 일행과 떨어질 수 있습니다.
+안녕하세요, ${name}님! 
+항공권 발권이 완료되었습니다.
+편안한 여행을 위해 좌석을 미리 지정하세요.
 
 ──────────────────
 
-🔄 좌석 변경 방법
-1) 사전 변경 (항공사 홈페이지)
-- 예약번호 또는 항공권 번호로 직접 변경 가능
+🪑 좌석 지정 방법
 
-2) 온라인 체크인 시 변경
-- 출발 1일 전부터 온라인 체크인 시 변경 가능
+1. 온라인 사전 신청 (항공사 홈페이지)
+- 예약번호로 접속하여 좌석 선택
+- 좌석 위치에 따라 추가 요금 발생
+- 출발 1~2일 전 무료 지정 가능
 
-3) 출발 당일 공항에서 변경
-- 공항 항공사 카운터에서 좌석 조정 요청
+
+2. 온라인 체크인 (출발 24시간 전)
+- 항공사 홈페이지/앱에서 체크인 후 변경 가능
+- 무료 좌석 지정 최종 기회
+
+3. 공항 카운터 (당일)
+- 잔여 좌석 범위 내에서 조정 요청
 
 ──────────────────
 
-📌 참고사항
-- 좌석 현황에 따라 변경이 불가할 수 있습니다.
+📞 문의처
+• 각 항공사 고객센터: ${airlineDisplay || '[항공사명]'}
 
-📞 상담 및 문의
-• 담당자: (주)클럽모두투어 ${AGENT_NAME}
-• 직통전화: 02-951-9004
-• 휴대폰: 010-9307-9004`;
+──────────────────
+
+⚠️ 주의사항
+- 항공사마다 좌석 지정 요건디 다릅니다.
+- 기종 변경 시 좌석이 재배정될 수 있습니다
+
+즐거운 여행 되세요! ✈️`;
                 break;
 
             case 'confirmation':
@@ -598,6 +605,39 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
 • 담당자: (주)클럽모두투어 ${AGENT_NAME}
 • 직통전화: 02-951-9004
 • 휴대폰: 010-9307-9004`;
+                break;
+            case 'china_barcode':
+                text = `📱 중국 입국 온라인 출입국 바코드 안내
+
+안녕하세요!
+중국 입국 시 필요한 온라인 출입국 바코드를 준비했습니다.
+
+──────────────────
+
+✅ 준비 방법
+
+1️⃣ 바코드 다운로드
+   스마트폰에 바코드 이미지를 저장하세요
+
+2️⃣ 중국 도착 후
+   공항 입국심사 시 직원이 보여달라고 요청할 수 있습니다
+
+3️⃣ 제시 방법
+   스마트폰 사진으로 보여주면 됩니다
+   (인쇄 불필요)
+
+──────────────────
+
+📌 참고사항
+
+• 기본적으로 전산에 기록되어 있어 확인하지 않을 수도 있습니다
+• 요청 시에만 제시하면 되므로 항상 준비해두세요
+
+
+──────────────────
+
+궁금한 점은 언제든 연락주세요
+☎️ 062-269-9362 / 010-9307-9004`;
                 break;
         }
 
@@ -722,7 +762,15 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                     className="msg-field-input"
                                     placeholder="51202764"
                                     value={bookingNumber}
-                                    onChange={(e) => setBookingNumber(e.target.value)}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setBookingNumber(val);
+                                        // 예약번호가 입력되면 확정서 링크도 업데이트 시도
+                                        if (val && val.trim() !== '') {
+                                            const baseUrl = window.location.origin;
+                                            setConfirmationLink(`${baseUrl}/confirmation/${val.trim()}`);
+                                        }
+                                    }}
                                 />
                             </div>
                             <div className="msg-field">

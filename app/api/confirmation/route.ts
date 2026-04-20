@@ -52,8 +52,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-
-        const id = `CF-${Date.now().toString(36).toUpperCase()}`;
+        const visitorId = body.customer?.visitorId || body.visitorId;
+        const reservationNumber = body.reservationNumber;
+        
+        // 예약번호가 있으면 우선 사용, 없으면 visitorId 사용
+        const id = (reservationNumber && reservationNumber !== '미정' && reservationNumber.trim() !== '') 
+            ? reservationNumber.trim() 
+            : (visitorId ? visitorId : `CF-${Date.now().toString(36).toUpperCase()}`);
         const now = new Date().toISOString();
 
         const doc: ConfirmationDocument = {
@@ -86,9 +91,17 @@ export async function POST(request: NextRequest) {
             secondaryResearch: body.secondaryResearch,
         };
 
-        await confirmationStore.set(id, doc);
+        const saved = await confirmationStore.set(id, doc);
 
-        console.log(`[Confirmation] Created: ${id}`);
+        if (!saved) {
+            console.error(`[Confirmation] Save FAILED for id: ${id}`);
+            return NextResponse.json(
+                { success: false, error: '확정서 저장에 실패했습니다. Supabase 연결을 확인하세요.' },
+                { status: 500 }
+            );
+        }
+
+        console.log(`[Confirmation] Created: ${id} (visitorId: ${visitorId}, reservationNumber: ${reservationNumber})`);
         return NextResponse.json({ success: true, data: doc });
     } catch (error: any) {
         console.error('[Confirmation API] POST Error:', error.message);

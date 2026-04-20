@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MapPin, Calendar, Users, ChevronDown, Pencil } from 'lucide-react';
+import { MapPin, Calendar, Users, ChevronDown, Pencil, Bell } from 'lucide-react';
 import { EditableField, InfoCell, TimelineCell } from '../../components/EditableComponents';
 
 interface ChatItem {
@@ -37,6 +37,7 @@ interface ChatItem {
     sheetRowIndex?: number;
     sheetName?: string;
     sheetGid?: number;
+    specific_reminder_date: string;
 }
 
 const STATUS_OPTIONS = ['상담중', '예약확정', '선금완료', '잔금완료', '여행완료', '취소/보류', '상담완료'];
@@ -68,6 +69,8 @@ export default function ChatsPage() {
     const [confirmModal, setConfirmModal] = useState<{ chat: ChatItem; } | null>(null);
     const [confirmUrl, setConfirmUrl] = useState('');
     const [confirming, setConfirming] = useState(false);
+    const [reminderModal, setReminderModal] = useState<ChatItem | null>(null);
+    const [reminderDateInput, setReminderDateInput] = useState('');
     const [customerHistoryByPhone, setCustomerHistoryByPhone] = useState<Record<string, any[]>>({});
     const [historyLoading, setHistoryLoading] = useState<string | null>(null);
 
@@ -102,7 +105,7 @@ export default function ChatsPage() {
         }
 
         // 날짜 자동 포맷팅 (예: 20260412 -> 2026-04-12)
-        const dateFields = ['departureDate', 'returnDate', 'confirmedDate', 'prepaidDate', 'noticeDate', 'balanceDate', 'confirmationSent', 'departureNotice', 'phoneNotice', 'happyCall', 'nextFollowup'];
+        const dateFields = ['departureDate', 'returnDate', 'confirmedDate', 'prepaidDate', 'noticeDate', 'balanceDate', 'confirmationSent', 'departureNotice', 'phoneNotice', 'happyCall', 'nextFollowup', 'specific_reminder_date'];
         let formattedValue = value;
         if (dateFields.includes(field) && formattedValue) {
             const cleanStr = formattedValue.trim();
@@ -145,11 +148,17 @@ export default function ChatsPage() {
                             updated.departureNotice = '';
                             updated.phoneNotice = '';
                             updated.happyCall = '';
+                            updated.specific_reminder_date = ''; // 특정일 리마인드도 함께 초기화
                         }
                         return updated;
                     }
                     return c;
                 }));
+
+                // 특정일 삭제나 상태 변경 시 강제 새로고침으로 싱크 맞춤
+                if ((field === 'specific_reminder_date' && formattedValue === '') || field === 'status') {
+                    setTimeout(() => fetchChats(true), 1500); // 시트 반영 시간을 고려한 약간의 지연 후 갱신
+                }
             } else {
                 alert(`수정 실패: ${data.error}`);
             }
@@ -655,7 +664,7 @@ export default function ChatsPage() {
                                 {/* 헤더 */}
                                 <div style={{
                                     display: 'grid',
-                                    gridTemplateColumns: '40px 100px 1fr 90px 130px 90px 50px',
+                                    gridTemplateColumns: '40px 100px 1fr 90px 130px 90px 90px 50px',
                                     padding: '12px 16px',
                                     backgroundColor: '#1f2937',
                                     fontWeight: 600,
@@ -676,7 +685,8 @@ export default function ChatsPage() {
                                     <div>상태</div>
                                     <div>상태 변경</div>
                                     <div>최근 활동</div>
-                                    <div>시트</div>
+                                    <div style={{ textAlign: 'center' }}>특정일</div>
+                                    <div style={{ textAlign: 'center' }}>시트</div>
                                 </div>
 
                                 {/* 목록 */}
@@ -699,7 +709,7 @@ export default function ChatsPage() {
                                                 }}
                                                 style={{
                                                     display: 'grid',
-                                                    gridTemplateColumns: '40px 100px 1fr 90px 130px 90px 50px',
+                                                    gridTemplateColumns: '40px 100px 1fr 90px 130px 90px 90px 50px',
                                                     padding: '16px',
                                                     borderBottom: isExpanded ? 'none' : '1px solid #374151',
                                                     alignItems: 'center',
@@ -733,9 +743,6 @@ export default function ChatsPage() {
                                                             {(chat.source === '카카오톡' || !chat.source) && chat.id.startsWith('sheet-') === false && (
                                                                 <span style={{ backgroundColor: '#FEE500', color: '#000', fontSize: '10px', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>K</span>
                                                             )}
-                                                            {chat.recurringCustomer === '재방문' && (
-                                                                <span style={{ backgroundColor: '#3b82f620', color: '#60a5fa', fontSize: '10px', padding: '1px 5px', borderRadius: '3px', fontWeight: 600 }}>재방문</span>
-                                                            )}
                                                         </div>
                                                         <div style={{ fontSize: '12px', color: '#9ca3af', display: 'flex', gap: '10px' }}>
                                                             {chat.destination && (
@@ -746,6 +753,11 @@ export default function ChatsPage() {
                                                             )}
                                                             {chat.departureDate && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#34d399', fontWeight: 500 }}><Calendar size={12} /> {chat.departureDate}</span>}
                                                             {chat.travelersCount && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#f59e0b', fontWeight: 500 }}><Users size={12} /> {chat.travelersCount}명</span>}
+                                                            {chat.specific_reminder_date && (
+                                                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ec4899', fontWeight: 700, background: '#ec489915', padding: '0 6px', borderRadius: '4px' }}>
+                                                                    특정일: {chat.specific_reminder_date}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -783,6 +795,34 @@ export default function ChatsPage() {
                                                 {/* 최근 활동 */}
                                                 <div style={{ fontSize: '12px', color: '#6b7280' }}>
                                                     {formatTime(chat.lastMessageAt)}
+                                                </div>
+                                                
+                                                {/* 특정일 설정 버튼 전용 컬럼 (가운데 정렬) */}
+                                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setReminderModal(chat);
+                                                            setReminderDateInput(chat.specific_reminder_date || '');
+                                                        }}
+                                                        title={chat.specific_reminder_date ? `리마인드 알림: ${chat.specific_reminder_date}` : "특정일 리마인드 알림 설정"}
+                                                        style={{
+                                                            background: chat.specific_reminder_date ? '#ec4899' : 'transparent',
+                                                            border: chat.specific_reminder_date ? 'none' : '1px solid #374151',
+                                                            color: chat.specific_reminder_date ? '#fff' : '#9ca3af',
+                                                            cursor: 'pointer',
+                                                            width: '32px',
+                                                            height: '32px',
+                                                            borderRadius: '50%',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            transition: 'all 0.2s',
+                                                            boxShadow: chat.specific_reminder_date ? '0 0 10px rgba(236, 72, 153, 0.4)' : 'none'
+                                                        }}
+                                                    >
+                                                        {chat.specific_reminder_date ? <Calendar size={16} /> : <Bell size={16} />}
+                                                    </button>
                                                 </div>
 
                                                 {/* 시트 링크 */}
@@ -843,6 +883,15 @@ export default function ChatsPage() {
                                                                 <EditableField label="재방문여부" value={chat.recurringCustomer} field="recurringCustomer" chatId={chat.id} onSave={handleFieldUpdate} options={['신규고객', '재방문', '장기미방문', '정보없음']} forceEditMode={editingCustomerChatId === chat.id} />
                                                                 <EditableField label="유입경로" value={chat.inquirySource} field="inquirySource" chatId={chat.id} onSave={handleFieldUpdate} options={['네이버 블로그', '카카오톡 채널', '인스타그램 및 페이스북', '당근마켓', '닷컴', '지인소개', '기존고객', '전화문의', '매장방문', '기타']} forceEditMode={editingCustomerChatId === chat.id} />
                                                                 <InfoCell label="등록방식" value={chat.source || '-'} highlight={chat.source === '카카오톡' ? '#fbbf24' : '#a78bfa'} />
+                                                                <EditableField 
+                                                                    label="특정날 리마인드" 
+                                                                    value={chat.specific_reminder_date || ''} 
+                                                                    field="specific_reminder_date" 
+                                                                    chatId={chat.id} 
+                                                                    onSave={handleFieldUpdate} 
+                                                                    forceEditMode={editingCustomerChatId === chat.id}
+                                                                    displayValue={chat.specific_reminder_date ? <span style={{ color: '#ec4899', fontWeight: 700 }}>{chat.specific_reminder_date}</span> : undefined}
+                                                                />
                                                             </div>
 
                                                         </div>
@@ -1087,6 +1136,15 @@ export default function ChatsPage() {
                                                                     <TimelineCell label="출발안내" date={chat.departureNotice} today={today} field="departureNotice" chatId={chat.id} onCheck={handleFieldUpdate} />
                                                                     <TimelineCell label="전화안내" date={chat.phoneNotice} today={today} field="phoneNotice" chatId={chat.id} onCheck={handleFieldUpdate} />
                                                                     <TimelineCell label="해피콜" date={chat.happyCall} today={today} field="happyCall" chatId={chat.id} onCheck={handleFieldUpdate} />
+                                                                    <TimelineCell 
+                                                                        label="특정날 리마인드" 
+                                                                        date={chat.specific_reminder_date || ''} 
+                                                                        today={today} 
+                                                                        field="specific_reminder_date" 
+                                                                        chatId={chat.id} 
+                                                                        onCheck={handleFieldUpdate} 
+                                                                        highlightColor="#ec4899"
+                                                                    />
                                                                 </>
                                                             )}
                                                             {chat.confirmedProduct && (
@@ -1290,6 +1348,123 @@ export default function ChatsPage() {
                                 }}
                             >
                                 {confirming ? '처리 중...' : '예약확정 진행'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 특정일 리마인드 설정 모달 */}
+            {reminderModal && (
+                <div
+                    style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 1100,
+                        backdropFilter: 'blur(4px)'
+                    }}
+                    onClick={() => !updating && setReminderModal(null)}
+                >
+                    <div
+                        style={{
+                            backgroundColor: '#1f2937', borderRadius: '20px',
+                            padding: '32px', maxWidth: '450px', width: '90%',
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                            color: '#fff', border: '1px solid #ec489940',
+                            animation: 'modalSlideUp 0.3s ease-out'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '24px' }}>
+                            <div style={{ 
+                                backgroundColor: '#ec489920', padding: '12px', 
+                                borderRadius: '12px', color: '#ec4899' 
+                            }}>
+                                <Bell size={24} />
+                            </div>
+                            <div>
+                                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 700 }}>특정일 리마인드 설정</h3>
+                                <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#9ca3af' }}>
+                                    {reminderModal.visitorName} 고객을 위한 알림 날짜
+                                </p>
+                            </div>
+                        </div>
+
+                        <div style={{ marginBottom: '24px' }}>
+                            <label style={{ fontSize: '13px', color: '#9ca3af', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                                알림 날짜 (YYYY-MM-DD)
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="예: 2026-05-30"
+                                value={reminderDateInput}
+                                onChange={(e) => {
+                                    let val = e.target.value.replace(/[^0-9]/g, '');
+                                    if (val.length >= 8) {
+                                        val = `${val.substring(0, 4)}-${val.substring(4, 6)}-${val.substring(6, 8)}`;
+                                    }
+                                    setReminderDateInput(val);
+                                }}
+                                disabled={updating === reminderModal.id}
+                                autoFocus
+                                style={{
+                                    width: '100%', padding: '14px 18px',
+                                    backgroundColor: '#111827', border: '2px solid #374151',
+                                    borderRadius: '12px', color: '#fff', fontSize: '16px',
+                                    outline: 'none', transition: 'all 0.2s',
+                                    textAlign: 'center', letterSpacing: '2px', fontWeight: 700
+                                }}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                                onClick={() => setReminderModal(null)}
+                                style={{
+                                    flex: 1, padding: '14px', borderRadius: '12px',
+                                    backgroundColor: '#374151', color: '#fff',
+                                    border: 'none', cursor: 'pointer', fontWeight: 600,
+                                    fontSize: '14px'
+                                }}
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    if (reminderModal && confirm('이 특정일 알림을 삭제하시겠습니까?')) {
+                                        await handleFieldUpdate(reminderModal.id, 'specific_reminder_date', '');
+                                        setReminderModal(null);
+                                    }
+                                }}
+                                disabled={updating === reminderModal.id}
+                                style={{
+                                    flex: 1, padding: '14px', borderRadius: '12px',
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)', cursor: 'pointer', 
+                                    fontWeight: 600, fontSize: '14px',
+                                    opacity: updating === reminderModal.id ? 0.5 : 1
+                                }}
+                            >
+                                삭제
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    if (reminderModal) {
+                                        await handleFieldUpdate(reminderModal.id, 'specific_reminder_date', reminderDateInput);
+                                        setReminderModal(null);
+                                    }
+                                }}
+                                disabled={updating === reminderModal.id}
+                                style={{
+                                    flex: 2, padding: '14px', borderRadius: '12px',
+                                    backgroundColor: '#ec4899', color: '#fff',
+                                    border: 'none', cursor: 'pointer', fontWeight: 700,
+                                    fontSize: '14px', boxShadow: '0 4px 12px rgba(236, 72, 153, 0.3)',
+                                    opacity: updating === reminderModal.id ? 0.7 : 1
+                                }}
+                            >
+                                {updating === reminderModal.id ? '저장 중...' : '저장하기'}
                             </button>
                         </div>
                     </div>

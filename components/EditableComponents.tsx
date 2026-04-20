@@ -127,7 +127,7 @@ export function InfoCell({ label, value, highlight, wide }: { label: string; val
     );
 }
 
-export function TimelineCell({ label, date, today, field, chatId, onCheck }: { label: string; date: string; today: string, field?: string, chatId?: string, onCheck?: (chatId: string, field: string, newValue: string) => Promise<void> }) {
+export function TimelineCell({ label, date, today, field, chatId, onCheck, highlightColor }: { label: string; date: string; today: string, field?: string, chatId?: string, onCheck?: (chatId: string, field: string, newValue: string) => Promise<void>, highlightColor?: string }) {
     if (!date) return null;
     
     const isChecked = date.includes('(완료)');
@@ -143,10 +143,13 @@ export function TimelineCell({ label, date, today, field, chatId, onCheck }: { l
         onCheck(chatId, field, newValue);
     };
 
+    const bgColor = highlightColor ? `${highlightColor}1A` : (isToday ? 'rgba(245, 158, 11, 0.1)' : '#111827');
+    const borderColor = highlightColor ? `${highlightColor}4D` : (isToday ? 'rgba(245, 158, 11, 0.3)' : '1px solid transparent');
+
     return (
         <div style={{
-            padding: '8px', background: isToday ? 'rgba(245, 158, 11, 0.1)' : '#111827',
-            border: isToday ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid transparent',
+            padding: '8px', background: bgColor,
+            border: `1px solid ${borderColor}`,
             borderRadius: '6px', fontSize: '11px', opacity: isPast && !isChecked ? 0.6 : 1,
         }}>
             <div style={{ color: '#6b7280', marginBottom: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

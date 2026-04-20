@@ -104,6 +104,8 @@ export default function ConfirmationPage() {
     const [childCount, setChildCount] = useState(0);
     const [infantCount, setInfantCount] = useState(0);
     const [travelers, setTravelers] = useState<TravelerInfo[]>([{ name: '', type: 'adult' }]);
+    const [visitorId, setVisitorId] = useState('');
+    const [reservationNumber, setReservationNumber] = useState('');
 
     // 항공
     const [airline, setAirline] = useState('');
@@ -126,7 +128,7 @@ export default function ConfirmationPage() {
     const [inclusions, setInclusions] = useState('');
     const [exclusions, setExclusions] = useState('');
     const [notices, setNotices] = useState('');
-    const [checklist, setChecklist] = useState('여권 (유효기간 6개월 이상)\n환전 (현지 화폐)\n여행자 보험');
+    const [checklist, setChecklist] = useState('여권 (유효기간 6개월 이상)\n항공권\n\n바람막이 또는 가디건\n수영복, 아쿠아슈즈\n\n220V 사용가능\n보조배터리(반드시 기내 휴대)\n멀티 어댑터\n\n상비약(감기약, 소화제, 지사제, 밴드)\n자외선 차단제\n개인 세면도구\n중요한 약은 반드시 기내로\n(혈압, 당뇨약 등)');
     const [cancellationPolicy, setCancellationPolicy] = useState('');
     const [itinerary, setItinerary] = useState<any[]>([]); // 일정표 상태 추가
     const [meetingInfo, setMeetingInfo] = useState<MeetingInfo[]>([]); // 미팅 및 수속 정보
@@ -175,6 +177,8 @@ export default function ConfirmationPage() {
     const selectCustomer = (c: ConsultationData) => {
         setCustomerName(c.customer.name);
         setCustomerPhone(c.customer.phone);
+        const vId = c.visitorId || c.visitor_id || '';
+        setVisitorId(vId);
         if (c.trip.destination) setDestination(c.trip.destination);
         if (c.trip.product_name) setProductName(c.trip.product_name);
         if (c.trip.departure_date) setDepartureDate(formatToHtmlDate(c.trip.departure_date));
@@ -182,6 +186,10 @@ export default function ConfirmationPage() {
         if (c.trip.duration) setDuration(c.trip.duration);
         if (c.trip.url) setProductUrl(c.trip.url);
         if (c.trip.travelers_count) setAdultCount(Number(c.trip.travelers_count));
+        // 예약번호 자동 로드 (있는 경우)
+        if ((c as any).reservation_number) setReservationNumber((c as any).reservation_number);
+        else if ((c as any).reservationNumber) setReservationNumber((c as any).reservationNumber);
+        else setReservationNumber(''); // 초기화
     };
 
     // URL 분석 — 수집+분석을 한 번에 처리하는 통합 Edge API 사용
@@ -306,7 +314,13 @@ export default function ConfirmationPage() {
                 if (raw.inclusions) setInclusions(Array.isArray(raw.inclusions) ? raw.inclusions.join('\n') : String(raw.inclusions));
                 if (raw.exclusions) setExclusions(Array.isArray(raw.exclusions) ? raw.exclusions.join('\n') : String(raw.exclusions));
                 if (raw.cancellationPolicy) setCancellationPolicy(String(raw.cancellationPolicy));
-                if (raw.checklist) setChecklist(Array.isArray(raw.checklist) ? raw.checklist.join('\n') : String(raw.checklist));
+                if (raw.checklist) {
+                    const newChecklist = Array.isArray(raw.checklist) ? raw.checklist.join('\n') : String(raw.checklist);
+                    // 기존 체크리스트가 더 길면 유지하고, AI가 준 내용이 5줄 이상으로 풍부할 때만 교체 시도
+                    if (newChecklist.split('\n').filter(Boolean).length > 5) {
+                        setChecklist(newChecklist);
+                    }
+                }
 
                 // ---- 유의사항 통합 ----
                 const noticesParts: string[] = [];
@@ -546,7 +560,9 @@ export default function ConfirmationPage() {
         try {
             const body = {
                 status: '예약확정',
-                customer: { name: customerName, phone: customerPhone },
+                visitorId: visitorId,
+                reservationNumber: reservationNumber.trim(),
+                customer: { name: customerName, phone: customerPhone, visitorId: visitorId },
                 trip: {
                     productName, productUrl, destination,
                     departureDate, returnDate, duration,
@@ -581,7 +597,7 @@ export default function ConfirmationPage() {
             });
             const json = await res.json();
             if (json.success) {
-                setGeneratedId(json.data.id);
+                setGeneratedId(json.data.id || (reservationNumber.trim() || visitorId));
                 setShowShareModal(true);
             } else {
                 alert('생성 실패: ' + json.error);
@@ -593,8 +609,10 @@ export default function ConfirmationPage() {
         }
     };
 
+    // 생성 전에도 예약번호가 있으면 미리 링크 예측 표시
+    const currentId = generatedId || (reservationNumber.trim() && reservationNumber !== '미정' && reservationNumber.trim() !== '' ? reservationNumber.trim() : visitorId);
     const shareUrl = typeof window !== 'undefined'
-        ? `${window.location.origin}/confirmation/${generatedId}`
+        ? `${window.location.origin}/confirmation/${currentId}`
         : '';
 
     const copyShareLink = () => {
@@ -670,6 +688,15 @@ export default function ConfirmationPage() {
                     <span className="section-icon">✈️</span> 예약 정보
                 </div>
                 <div className="confirm-grid">
+                    <div className="confirm-field full-width">
+                        <label style={{ color: 'var(--accent-primary)', fontWeight: 700 }}>🔍 예약번호 (공유 링크 ID로 사용됨)</label>
+                        <input 
+                            value={reservationNumber} 
+                            onChange={e => setReservationNumber(e.target.value)} 
+                            placeholder="예: A1234567 (이 번호가 주소가 됩니다)" 
+                            style={{ border: '1px solid var(--accent-primary)', background: 'rgba(0, 212, 170, 0.05)' }} 
+                        />
+                    </div>
                     <div className="confirm-field full-width">
                         <label>여행 상품명</label>
                         <input value={productName} onChange={e => setProductName(e.target.value)} placeholder="상품명 입력" />

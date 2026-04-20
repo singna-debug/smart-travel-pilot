@@ -31,6 +31,7 @@ export async function GET() {
                     status: c.automation.status,
                     balanceDueDate: c.automation.balance_due_date || '',
                     travelersCount: c.trip.travelers_count || '',
+                    visitorId: c.visitor_id || '',
                     timestamp: c.timestamp,
                 });
             }

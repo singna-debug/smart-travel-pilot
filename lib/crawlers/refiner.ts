@@ -138,10 +138,10 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
         }
     }
 
-    // 핵심포인트(keyPoints) 보강: Gemini 결과가 부족(3개 미만)할 때 실행하거나 제목 정보를 추가
+    // 핵심포인트(keyPoints) 보강: Gemini 결과가 부족(10개 미만)할 때 실행하거나 제목 정보를 추가
     const currentPoints = Array.isArray(refined.keyPoints) ? [...refined.keyPoints] : [];
     
-    if (currentPoints.length < 3) {
+    if (currentPoints.length < 10) {
         const points: string[] = [...currentPoints];
         
         // 제목의 대괄호([]) 내용이나 특징적인 키워드 추출

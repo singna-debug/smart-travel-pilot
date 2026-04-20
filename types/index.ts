@@ -38,6 +38,8 @@ export interface ConsultationData {
   source?: '카카오톡' | '웹' | '대시보드' | '직접입력' | string;
   timestamp?: string;
   visitor_id?: string;
+  specific_reminder_date?: string;
+  reservation_number?: string; // 예약번호 (AC열)
 }
 
 // 채팅 메시지 타입

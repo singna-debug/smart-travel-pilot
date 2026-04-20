@@ -40,6 +40,19 @@ export function autoFormatDateString(val: string | undefined): string {
     return cleanStr;
 }
 
+/**
+ * 여행 기간(숫자)을 N박 M일 형식으로 자동 변환합니다.
+ */
+export function autoFormatDuration(value: any): string {
+    const str = (value || '').toString().trim();
+    if (/^\d+$/.test(str)) {
+        const days = parseInt(str);
+        if (days > 1) return `${days - 1}박 ${days}일`;
+        if (days === 1) return '당일';
+    }
+    return str;
+}
+
 export function getGoogleSheetsClient() {
     try {
         let auth;
@@ -249,7 +262,7 @@ async function getOrCreateMonthlySheet(sheets: any, spreadsheetId: string, month
         // 헤더 초기화
         const consultationHeaders = [
             '상담일시', '고객성함', '연락처', '총인원', '재방문여부', '유입경로', '목적지', '출발일', '귀국일', '기간', '상품명', '상품URL', '상담요약', '상담단계', '등록방식', '팔로업일',
-            '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup'
+            '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호'
         ];
 
         await sheets.spreadsheets.values.update({
@@ -436,11 +449,13 @@ export async function appendConsultationToSheet(data: ConsultationData): Promise
             data.automation.happy_call || '',        // Y: 해피콜 (24)
             data.visitor_id || '',                  // Z: visitor_id (25)
             data.automation.inquiry_info_backup || '', // AA: inquiry_info_backup (26)
+            data.specific_reminder_date || '',      // AB: 특정날 리마인드 (27)
+            data.reservation_number || '',          // AC: 예약번호 (28)
         ];
 
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
-            range: `${targetSheet}!A:AA`,
+            range: `${targetSheet}!A:AC`,
             valueInputOption: 'USER_ENTERED',
             requestBody: {
                 values: [row],
@@ -494,7 +509,7 @@ export async function upsertConsultationToSheet(data: ConsultationData): Promise
         for (const sheetTitle of sheetsToSearch) {
             const resp = await sheets.spreadsheets.values.get({
                 spreadsheetId: sheetId,
-                range: `${sheetTitle}!A:Z`,
+                range: `${sheetTitle}!A:AB`,
             });
             const rows = resp.data.values || [];
 
@@ -569,6 +584,8 @@ export async function upsertConsultationToSheet(data: ConsultationData): Promise
             data.automation.happy_call || '',        // Y: 해피콜 (24)
             data.visitor_id || '',                  // Z: visitor_id (25)
             data.automation.inquiry_info_backup || '', // AA: inquiry_info_backup (26)
+            data.specific_reminder_date || '',      // AB: 특정날 리마인드 (27)
+            data.reservation_number || '',          // AC: 예약번호 (28)
         ];
 
         // 2. 행 삭제
@@ -597,7 +614,7 @@ export async function upsertConsultationToSheet(data: ConsultationData): Promise
 
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
-            range: `${targetSheet}!A:AA`,
+            range: `${targetSheet}!A:AC`,
             valueInputOption: 'USER_ENTERED',
             requestBody: { values: [newRow] },
         });
@@ -632,7 +649,7 @@ export async function initializeSheetHeaders(): Promise<boolean> {
         // 1. 상담 요약 시트
         const consultationHeaders = [
             '상담일시', '고객성함', '연락처', '총인원', '재방문여부', '유입경로', '목적지', '출발일', '귀국일', '기간', '상품명', '상품URL', '상담요약', '상담단계', '등록방식', '팔로업일',
-            '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id'
+            '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호'
         ];
 
         // 2. 메시지 로그 시트
@@ -842,7 +859,7 @@ export async function getConsultationHistory(customerPhone: string): Promise<Con
                     destination: row[6] || '',        // G: 목적지 (index 6)
                     departure_date: autoFormatDateString(row[7]),     // H: 출발일 (index 7)
                     return_date: autoFormatDateString(row[8]),        // I: 귀국일 (index 8)
-                    duration: row[9] || '',           // J: 기간 (index 9)
+                    duration: autoFormatDuration(row[9]),             // J: 기간 (index 9)
                     product_name: row[10] || '',      // K: 상품명 (index 10)
                     url: row[11] || '',               // L: 상품URL (index 11)
                 },
@@ -863,6 +880,8 @@ export async function getConsultationHistory(customerPhone: string): Promise<Con
                     happy_call: autoFormatDateString(row[24]),        // Y: 해피콜 (index 24)
                     inquiry_info_backup: row[26] || '',               // AA: 백업 (index 26)
                 },
+                specific_reminder_date: row[27] || '', // AB: 리마인드 (index 27)
+                reservation_number: row[28] || '',     // AC: 예약번호 (index 28)
                 source: row[14] || '',                // O: 등록방식 (index 14)
                 timestamp: row[0],
                 visitor_id: row[25] || '',            // Z: visitor_id (index 25)
@@ -904,7 +923,7 @@ async function fetchAllSheetData(forceRefresh = false): Promise<any[]> {
     const sheetsToRead = monthlySheets.length > 0 ? [...monthlySheets].sort().reverse() : [fallbackSheet];
 
     // BatchGet을 사용하여 모든 시트 데이터를 한 번의 API 호출로 가져옴
-    const ranges = sheetsToRead.map(s => `${s}!A:Z`);
+    const ranges = sheetsToRead.map(s => `${s}!A:AC`);
     const resp = await sheets.spreadsheets.values.batchGet({
         spreadsheetId: sheetId,
         ranges: ranges,
@@ -962,7 +981,7 @@ export async function getAllConsultations(forceRefresh = false): Promise<Consult
                     destination: row[6] || '',        // G: 목적지 (index 6)
                     departure_date: autoFormatDateString(row[7]),     // H: 출발일 (index 7)
                     return_date: autoFormatDateString(row[8]),        // I: 귀국일 (index 8)
-                    duration: row[9] || '',           // J: 기간 (index 9)
+                    duration: autoFormatDuration(row[9]),             // J: 기간 (index 9)
                     product_name: row[10] || '',      // K: 상품명 (index 10)
                     url: row[11] || '',               // L: 상품URL (index 11)
                 },
@@ -982,7 +1001,10 @@ export async function getAllConsultations(forceRefresh = false): Promise<Consult
                     phone_notice: autoFormatDateString(row[23]),      // X: 전화 안내 (index 23)
                     happy_call: autoFormatDateString(row[24]),        // Y: 해피콜 (index 24)
                     inquiry_info_backup: row[26] || '',               // AA: 백업 (index 26)
+                    reservation_number: row[28] || '',                // AC: 예약번호 (index 28)
                 },
+                specific_reminder_date: row[27] || '', // AB: 리마인드 (index 27)
+                reservation_number: row[28] || '',     // AC: 예약번호 (index 28)
                 source: row[14] || '수동등록',        // O: 등록방식 (index 14)
                 visitor_id: row[25] || '',            // Z: visitor_id (index 25)
                 sheetName: row._sheetName,
@@ -1210,10 +1232,16 @@ export async function updateConsultationStatus(rowIndex: number, status: string,
                 }
             }
 
+            // 예약 정보 초기화 및 특정일 리마인드 초기화
             data.push({
                 range: `${targetSheetName}!Q${rowIndex}:Y${rowIndex}`,
                 values: [['', '', '', '', '', '', '', '', '']]
                 // Q=확정상품, R=예약확정일, S=선금일, T=출발전안내(4주), U=잔금일, V=확정서, W=출발안내, X=전화안내, Y=해피콜
+            });
+            
+            data.push({
+                range: `${targetSheetName}!AB${rowIndex}`,
+                values: [['']] // AB: 특정날 리마인드 초기화
             });
         }
 
@@ -1251,7 +1279,8 @@ const FIELD_TO_COLUMN: Record<string, string> = {
     confirmedProduct: 'Q', confirmedDate: 'R',
     prepaidDate: 'S', noticeDate: 'T', balanceDate: 'U',
     confirmationSent: 'V', departureNotice: 'W', phoneNotice: 'X', happyCall: 'Y',
-    inquiryInfoBackup: 'AA',
+    inquiryInfoBackup: 'AA', specific_reminder_date: 'AB',
+    reservationNumber: 'AC',
 };
 
 export async function updateConsultationField(
@@ -1272,7 +1301,7 @@ export async function updateConsultationField(
         }
 
         // 날짜 필드인 경우 자동 포맷 적용 (시트에 저장될 때)
-        const dateFields = ['departureDate', 'returnDate', 'confirmedDate', 'prepaidDate', 'noticeDate', 'balanceDate', 'confirmationSent', 'departureNotice', 'phoneNotice', 'happyCall', 'nextFollowup'];
+        const dateFields = ['departureDate', 'returnDate', 'confirmedDate', 'prepaidDate', 'noticeDate', 'balanceDate', 'confirmationSent', 'departureNotice', 'phoneNotice', 'happyCall', 'nextFollowup', 'specific_reminder_date'];
         let finalValue = value;
         if (dateFields.includes(field)) {
             finalValue = autoFormatDateString(value);
