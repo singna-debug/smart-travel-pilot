@@ -597,7 +597,7 @@ export default function ConfirmationPage() {
             });
             const json = await res.json();
             if (json.success) {
-                setGeneratedId(json.data.id || (reservationNumber.trim() || visitorId));
+                setGeneratedId(json.data.id);
                 setShowShareModal(true);
             } else {
                 alert('생성 실패: ' + json.error);
@@ -610,10 +610,10 @@ export default function ConfirmationPage() {
     };
 
     // 생성 전에도 예약번호가 있으면 미리 링크 예측 표시
-    const currentId = generatedId || (reservationNumber.trim() && reservationNumber !== '미정' && reservationNumber.trim() !== '' ? reservationNumber.trim() : visitorId);
-    const shareUrl = typeof window !== 'undefined'
+    const currentId = generatedId || (reservationNumber.trim() && reservationNumber !== '미정' && reservationNumber.trim() !== '' ? reservationNumber.trim() : 'AUTO_GENERATE');
+    const shareUrl = (typeof window !== 'undefined' && currentId !== 'AUTO_GENERATE')
         ? `${window.location.origin}/confirmation/${currentId}`
-        : '';
+        : (typeof window !== 'undefined' ? `${window.location.origin}/confirmation/(저장 시 자동생성)` : '');
 
     const copyShareLink = () => {
         navigator.clipboard.writeText(shareUrl);

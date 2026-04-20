@@ -55,17 +55,32 @@ export async function POST(request: NextRequest) {
         const visitorId = body.customer?.visitorId || body.visitorId;
         const reservationNumber = body.reservationNumber;
         
-        // 예약번호가 있으면 우선 사용, 없으면 visitorId 사용
+        // 예약번호가 없거나 '미정'인 경우 랜덤 알파벳/숫자 조합 생성
+        const generateRandomId = (length: number) => {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 헷갈리는 O, 0, I, 1 제외
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        };
+
+        const randomId = generateRandomId(8);
+        
+        // ID는 예약번호가 있으면 사용, 없으면 랜덤 생성 (visitorId는 더 이상 ID로 쓰지 않음)
         const id = (reservationNumber && reservationNumber !== '미정' && reservationNumber.trim() !== '') 
             ? reservationNumber.trim() 
-            : (visitorId ? visitorId : `CF-${Date.now().toString(36).toUpperCase()}`);
+            : randomId;
+            
         const now = new Date().toISOString();
 
         const doc: ConfirmationDocument = {
             id,
             createdAt: now,
             updatedAt: now,
-            reservationNumber: body.reservationNumber || id,
+            reservationNumber: (reservationNumber && reservationNumber !== '미정' && reservationNumber.trim() !== '') 
+                ? reservationNumber.trim() 
+                : id, // 명시적 예약번호 없으면 생성된 ID를 예약번호로 사용
             status: body.status || '예약확정',
             customer: body.customer || { name: '', phone: '' },
             trip: body.trip || {
