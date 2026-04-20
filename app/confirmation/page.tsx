@@ -499,6 +499,75 @@ export default function ConfirmationPage() {
     const removeCustomGuide = (i: number) => setCustomGuideInputs(prev => prev.filter((_, idx) => idx !== i));
     const updateCustomGuide = (i: number, val: string) => setCustomGuideInputs(prev => prev.map((g, idx) => idx === i ? val : g));
 
+    // 일정 관리 핸들러
+    const updateDayInfo = (dayIdx: number, field: string, value: string) => {
+        setItinerary(prev => prev.map((day, idx) => idx === dayIdx ? { ...day, [field]: value } : day));
+    };
+
+    const updateTimelineItem = (dayIdx: number, itemIdx: number, field: string, value: string) => {
+        setItinerary(prev => prev.map((day, idx) => {
+            if (idx !== dayIdx) return day;
+            const newTimeline = [...(day.timeline || [])];
+            newTimeline[itemIdx] = { ...newTimeline[itemIdx], [field]: value };
+            return { ...day, timeline: newTimeline };
+        }));
+    };
+
+    const addTimelineItem = (dayIdx: number) => {
+        setItinerary(prev => prev.map((day, idx) => {
+            if (idx !== dayIdx) return day;
+            const newTimeline = [...(day.timeline || []), { type: 'activity', title: '', subtitle: '', description: '' }];
+            return { ...day, timeline: newTimeline };
+        }));
+    };
+
+    const removeTimelineItem = (dayIdx: number, itemIdx: number) => {
+        setItinerary(prev => prev.map((day, idx) => {
+            if (idx !== dayIdx) return day;
+            const newTimeline = (day.timeline || []).filter((_: any, tIdx: number) => tIdx !== itemIdx);
+            return { ...day, timeline: newTimeline };
+        }));
+    };
+
+    const updateActivity = (dayIdx: number, actIdx: number, value: string) => {
+        setItinerary(prev => prev.map((day, idx) => {
+            if (idx !== dayIdx) return day;
+            const newActivities = [...(day.activities || [])];
+            newActivities[actIdx] = value;
+            return { ...day, activities: newActivities };
+        }));
+    };
+
+    const addActivity = (dayIdx: number) => {
+        setItinerary(prev => prev.map((day, idx) => {
+            if (idx !== dayIdx) return day;
+            const newActivities = [...(day.activities || []), ''];
+            return { ...day, activities: newActivities };
+        }));
+    };
+
+    const removeActivity = (dayIdx: number, actIdx: number) => {
+        setItinerary(prev => prev.map((day, idx) => {
+            if (idx !== dayIdx) return day;
+            const newActivities = (day.activities || []).filter((_: any, aIdx: number) => aIdx !== actIdx);
+            return { ...day, activities: newActivities };
+        }));
+    };
+
+    const updateDayTransport = (dayIdx: number, field: string, value: string) => {
+        setItinerary(prev => prev.map((day, idx) => {
+            if (idx !== dayIdx) return day;
+            return { ...day, transport: { ...(day.transport || {}), [field]: value } };
+        }));
+    };
+
+    const updateDayMeals = (dayIdx: number, field: string, value: string) => {
+        setItinerary(prev => prev.map((day, idx) => {
+            if (idx !== dayIdx) return day;
+            return { ...day, meals: { ...(day.meals || {}), [field]: value } };
+        }));
+    };
+
     // 2차 조사(AI) 데이터 수정 핸들러
     const updateSRField = (section: string, field: string, value: string) => {
         setSecondaryResearch((prev: any) => {
@@ -955,48 +1024,117 @@ export default function ConfirmationPage() {
 
                 <div className="itinerary-preview-list" style={{ marginTop: '12px' }}>
                     {itinerary.map((day: any, i: number) => (
-                        <div key={i} style={{ padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', marginBottom: '8px', background: '#fff' }}>
-                            <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1e293b', marginBottom: '8px', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
-                                {day.day || `Day ${i + 1}`} - {day.title}
+                        <div key={i} style={{ padding: '16px', border: '1px solid #e2e8f0', borderRadius: '12px', marginBottom: '16px', background: '#fff' }}>
+                            <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', borderBottom: '2px solid #f1f5f9', paddingBottom: '8px' }}>
+                                <input 
+                                    value={day.day || `Day ${i + 1}`} 
+                                    onChange={e => updateDayInfo(i, 'day', e.target.value)}
+                                    style={{ width: '80px', fontWeight: 800, fontSize: '1rem', border: 'none', background: '#f8fafc', padding: '4px 8px', borderRadius: '4px' }}
+                                />
+                                <input 
+                                    value={day.title || ''} 
+                                    onChange={e => updateDayInfo(i, 'title', e.target.value)}
+                                    placeholder="날짜 제목 (예: 다낭 도착 및 휴식)"
+                                    style={{ flex: 1, fontWeight: 700, fontSize: '1rem', border: 'none', borderBottom: '1px solid #e2e8f0', padding: '4px' }}
+                                />
+                                <input 
+                                    type="date"
+                                    value={day.date ? day.date.split('T')[0] : ''} 
+                                    onChange={e => updateDayInfo(i, 'date', e.target.value)}
+                                    style={{ fontSize: '0.8rem', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '2px 6px' }}
+                                />
                             </div>
                             
-                            {/* 활동 내용 (신규 Timeline 구조) */}
-                            {day.timeline && Array.isArray(day.timeline) && day.timeline.length > 0 ? (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', margin: '12px 0' }}>
-                                    {day.timeline.map((item: any, idx: number) => (
-                                        <div key={idx} style={{ display: 'flex', gap: '8px' }}>
-                                            <div style={{ marginTop: '2px', color: item.type === 'location' ? '#10b981' : '#94a3b8' }}>
-                                                {item.type === 'location' ? '📍' : '•'}
-                                            </div>
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>
-                                                    {item.title} {item.type === 'location' && '›'}
-                                                </div>
-                                                {item.subtitle && <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>{item.subtitle}</div>}
-                                                {item.description && <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px', lineHeight: 1.4 }}>{item.description}</div>}
-                                            </div>
+                            {/* 활동 내용 (Timeline 구조) */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', margin: '15px 0' }}>
+                                {day.timeline && Array.isArray(day.timeline) && day.timeline.map((item: any, idx: number) => (
+                                    <div key={idx} style={{ display: 'flex', gap: '10px', padding: '10px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '60px', flexShrink: 0 }}>
+                                            <select 
+                                                value={item.type || 'activity'} 
+                                                onChange={e => updateTimelineItem(i, idx, 'type', e.target.value)}
+                                                style={{ fontSize: '0.7rem', padding: '2px' }}
+                                            >
+                                                <option value="location">📍 장소</option>
+                                                <option value="activity">• 활동</option>
+                                                <option value="flight">✈️ 항공</option>
+                                                <option value="hotel">🏨 호텔</option>
+                                                <option value="meal">🍽️ 식사</option>
+                                            </select>
+                                            <button onClick={() => removeTimelineItem(i, idx)} style={{ fontSize: '0.7rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>삭제</button>
+                                        </div>
+                                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            <input 
+                                                value={item.title || ''} 
+                                                onChange={e => updateTimelineItem(i, idx, 'title', e.target.value)}
+                                                placeholder="항목 제목"
+                                                style={{ fontWeight: 700, fontSize: '0.85rem', width: '100%', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '4px 8px' }}
+                                            />
+                                            <input 
+                                                value={item.subtitle || ''} 
+                                                onChange={e => updateTimelineItem(i, idx, 'subtitle', e.target.value)}
+                                                placeholder="부제목 (선택)"
+                                                style={{ fontSize: '0.78rem', color: '#64748b', width: '100%', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '3px 8px' }}
+                                            />
+                                            <textarea 
+                                                value={item.description || ''} 
+                                                onChange={e => updateTimelineItem(i, idx, 'description', e.target.value)}
+                                                placeholder="상세 설명"
+                                                rows={2}
+                                                style={{ fontSize: '0.78rem', color: '#475569', width: '100%', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '6px 8px', resize: 'vertical' }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                                <button 
+                                    onClick={() => addTimelineItem(i)}
+                                    style={{ padding: '8px', background: '#fff', border: '1px dashed #cbd5e1', borderRadius: '6px', fontSize: '0.8rem', color: '#64748b', cursor: 'pointer' }}
+                                >
+                                    + 타임라인 항목 추가
+                                </button>
+                            </div>
+
+                            {/* 레거시 활동 (단순 목록 구조) */}
+                            {day.activities && Array.isArray(day.activities) && day.activities.length > 0 && (
+                                <div style={{ marginTop: '10px', padding: '12px', background: '#fffbeb', borderRadius: '8px', border: '1px solid #fef3c7' }}>
+                                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#92400e', marginBottom: '8px' }}>📝 일반 활동 리스트</div>
+                                    {day.activities.map((act: string, idx: number) => (
+                                        <div key={idx} style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
+                                            <input 
+                                                value={act} 
+                                                onChange={e => updateActivity(i, idx, e.target.value)}
+                                                style={{ flex: 1, fontSize: '0.82rem', padding: '4px 8px', border: '1px solid #fde68a', borderRadius: '4px' }}
+                                            />
+                                            <button onClick={() => removeActivity(i, idx)} style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer' }}>✕</button>
                                         </div>
                                     ))}
+                                    <button onClick={() => addActivity(i)} style={{ fontSize: '0.75rem', background: 'none', border: 'none', color: '#b45309', cursor: 'pointer', fontWeight: 600 }}>+ 활동 추가</button>
                                 </div>
-                            ) : day.activities && Array.isArray(day.activities) && (
-                                <ul style={{ paddingLeft: '20px', margin: '8px 0', fontSize: '0.85rem', color: '#475569', lineHeight: '1.5' }}>
-                                    {day.activities.map((act: string, idx: number) => (
-                                        <li key={idx} dangerouslySetInnerHTML={{ __html: act }} />
-                                    ))}
-                                </ul>
                             )}
 
                             {/* 부가 정보 (교통, 호텔, 식사) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '10px', fontSize: '0.8rem', color: '#64748b', background: '#f8fafc', padding: '8px', borderRadius: '6px' }}>
-                                {day.transport && 
-                                 (!['항공사', '항공편', 'null', ''].includes(day.transport.airline || '') || !['비행편명', 'null', '', '없음'].includes(day.transport.flightNo || '')) && (
-                                    <div>🛫 <strong>비행편:</strong> {day.transport.airline !== 'null' ? day.transport.airline : ''} {day.transport.flightNo !== 'null' ? day.transport.flightNo : ''} ({day.transport.departureCity !== 'null' ? day.transport.departureCity : ''} {day.transport.departureTime !== 'null' ? day.transport.departureTime : ''} 출발 ➔ {day.transport.arrivalCity !== 'null' ? day.transport.arrivalCity : ''} {day.transport.arrivalTime !== 'null' ? day.transport.arrivalTime : ''} 도착)</div>
-                                )}
-                                {day.transportation && typeof day.transportation === 'string' && <div>🚡 <strong>교통:</strong> {day.transportation}</div>}
-                                {day.hotel && <div>🏨 <strong>예정호텔:</strong> {day.hotel}</div>}
-                                {day.meals && (
-                                    <div>🍽️ <strong>식사:</strong> 조식({day.meals.breakfast || '-'}) / 중식({day.meals.lunch || '-'}) / 석식({day.meals.dinner || '-'})</div>
-                                )}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '15px', background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                                <div className="confirm-field" style={{ marginBottom: 0 }}>
+                                    <label style={{ fontSize: '0.7rem' }}>🏨 예정 호텔</label>
+                                    <input value={day.hotel || ''} onChange={e => updateDayInfo(i, 'hotel', e.target.value)} style={{ fontSize: '0.8rem' }} />
+                                </div>
+                                <div className="confirm-field" style={{ marginBottom: 0 }}>
+                                    <label style={{ fontSize: '0.7rem' }}>🍽️ 식사 (조/중/석)</label>
+                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                        <input value={day.meals?.breakfast || ''} onChange={e => updateDayMeals(i, 'breakfast', e.target.value)} placeholder="조" style={{ flex: 1, fontSize: '0.75rem', textAlign: 'center' }} />
+                                        <input value={day.meals?.lunch || ''} onChange={e => updateDayMeals(i, 'lunch', e.target.value)} placeholder="중" style={{ flex: 1, fontSize: '0.75rem', textAlign: 'center' }} />
+                                        <input value={day.meals?.dinner || ''} onChange={e => updateDayMeals(i, 'dinner', e.target.value)} placeholder="석" style={{ flex: 1, fontSize: '0.75rem', textAlign: 'center' }} />
+                                    </div>
+                                </div>
+                                <div className="confirm-field" style={{ marginBottom: 0, gridColumn: '1 / -1' }}>
+                                    <label style={{ fontSize: '0.7rem' }}>🛫 비행 정보 (항공사 / 편명 / 도시 / 시간)</label>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '6px' }}>
+                                        <input value={day.transport?.airline || ''} onChange={e => updateDayTransport(i, 'airline', e.target.value)} placeholder="항공사" style={{ fontSize: '0.75rem' }} />
+                                        <input value={day.transport?.flightNo || ''} onChange={e => updateDayTransport(i, 'flightNo', e.target.value)} placeholder="편명" style={{ fontSize: '0.75rem' }} />
+                                        <input value={day.transport?.departureCity || ''} onChange={e => updateDayTransport(i, 'departureCity', e.target.value)} placeholder="출발도시" style={{ fontSize: '0.75rem' }} />
+                                        <input value={day.transport?.departureTime || ''} onChange={e => updateDayTransport(i, 'departureTime', e.target.value)} placeholder="출발시간" style={{ fontSize: '0.75rem' }} />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     ))}
