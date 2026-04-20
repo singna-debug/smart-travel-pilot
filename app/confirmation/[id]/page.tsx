@@ -149,6 +149,14 @@ const GuideAccordion = ({
     );
 };
 
+// 날짜 문자열에서 T00:00:00 등 시간 부분 제거
+const formatDateStr = (dateStr: string | undefined): string => {
+    if (!dateStr) return '';
+    return String(dateStr)
+        .replace(/T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:?\d{2})?/g, '')
+        .trim();
+};
+
 const TimelineItem = ({ item }: { item: any }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
@@ -190,7 +198,7 @@ const TimelineItem = ({ item }: { item: any }) => {
             </div>
 
             {/* 우측 콘텐츠 영역 */}
-            <div style={{ flex: 1, paddingTop: isLocation ? '2px' : '0' }}>
+            <div style={{ flex: 1, paddingTop: isLocation ? '2px' : '0', minWidth: 0, overflow: 'hidden' }}>
                 <div 
                     style={{ 
                         fontSize: '0.95rem', 
@@ -721,7 +729,7 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
                     {/* 왼쪽: 출발 정보 */}
                     <div style={{ textAlign: 'left', width: '30%', minWidth: '90px' }}>
                         <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{deptCity}{deptCode} 출발</div>
-                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{String(dateStr).replace(/T\d{2}:\d{2}:\d{2}(\.\d+)?$/, '')}</div>}
+                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{formatDateStr(dateStr)}</div>}
                         <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{flightInfo.departureTime}</div>
                         
                         {displayDepKST && (
@@ -764,7 +772,7 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
                     {/* 오른쪽: 도착 정보 */}
                     <div style={{ textAlign: 'right', width: '30%', minWidth: '90px' }}>
                         <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{arrCity}{arrCode} 도착</div>
-                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{String(dateStr).replace(/T\d{2}:\d{2}:\d{2}(\.\d+)?$/, '')}</div>}
+                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{formatDateStr(dateStr)}</div>}
                         <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{flightInfo.arrivalTime}</div>
                         
                         {displayArrKST && (
@@ -1039,13 +1047,13 @@ export default function ConfirmationViewerPage() {
                                 <div className="mc-info-item">
                                     <span className="info-label">출발일</span>
                                     <span className="info-value">
-                                        {doc.trip.departureDate}
+                                        {formatDateStr(doc.trip.departureDate)}
                                         {dDay && <span className="dday-badge">{dDay}</span>}
                                     </span>
                                 </div>
                                 <div className="mc-info-item">
                                     <span className="info-label">귀국일</span>
-                                    <span className="info-value">{doc.trip.returnDate}</span>
+                                    <span className="info-value">{formatDateStr(doc.trip.returnDate)}</span>
                                 </div>
                                 {doc.trip.duration && (
                                     <div className="mc-info-item full">
@@ -1267,7 +1275,7 @@ export default function ConfirmationViewerPage() {
                                                 <div className="day-header" onClick={() => toggleDay(i)}>
                                                     <div className="day-number">
                                                         {typeof day === 'string' ? `Day ${i + 1}` : (day.day || `Day ${i + 1}`)}
-                                                        {day.date && <span className="day-date">{String(day.date).replace(/T\d{2}:\d{2}:\d{2}(\.\d+)?$/, '').replace(/T00:00:00/g, '')}</span>}
+                                                        {day.date && <span className="day-date">{formatDateStr(day.date)}</span>}
                                                     </div>
                                                     {day.title && <div className="day-title">{day.title}</div>}
                                                     <div className={`day-chevron ${isOpen ? 'open' : ''}`}>›</div>
