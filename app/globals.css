@@ -832,7 +832,7 @@ body {
         font-size: 22px;
     }
 }
-/* 확정서 뷰어 전용 반응형 패치 (이미지/표 잘림 방지) */
+/* Confirmation Patch */
 .mc-section img, 
 .custom-sub-section img,
 .ga-content img,
@@ -867,7 +867,7 @@ body {
     overflow-wrap: break-word;
 }
 
-/* ?정? ?이? ?용 (Mobile Image Cutoff Fix) */
+/* Mobile Image Fix */
 .itinerary-img-fix img {
     max-width: 100% !important;
     height: auto !important;
@@ -876,7 +876,7 @@ body {
     margin: 8px 0;
 }
 
-/* 확정서 일정표 이미지/텍스트 overflow 완벽 차단 */
+/* Confirmation Patch */
 .day-activity-item,
 .timeline-item-wrapper {
     max-width: 100% !important;
