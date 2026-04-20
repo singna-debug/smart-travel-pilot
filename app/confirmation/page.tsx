@@ -1003,23 +1003,47 @@ export default function ConfirmationPage() {
                 <div className="confirm-grid">
                     <div className="confirm-field">
                         <label>포함사항 (줄바꿈으로 구분)</label>
-                        <textarea value={inclusions} onChange={e => setInclusions(e.target.value)} placeholder="왕복 항공권&#10;호텔 숙박&#10;전 일정 식사" />
+                        <textarea 
+                            value={inclusions} 
+                            onChange={e => setInclusions(e.target.value)} 
+                            placeholder="왕복 항공권&#10;호텔 숙박&#10;전 일정 식사" 
+                            style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+                        />
                     </div>
                     <div className="confirm-field">
                         <label>불포함사항 (줄바꿈으로 구분)</label>
-                        <textarea value={exclusions} onChange={e => setExclusions(e.target.value)} placeholder="여행자 보험&#10;현지 팁&#10;개인 경비" />
+                        <textarea 
+                            value={exclusions} 
+                            onChange={e => setExclusions(e.target.value)} 
+                            placeholder="여행자 보험&#10;현지 팁&#10;개인 경비" 
+                            style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+                        />
                     </div>
                     <div className="confirm-field">
                         <label>준비물 체크리스트 (줄바꿈으로 구분)</label>
-                        <textarea value={checklist} onChange={e => setChecklist(e.target.value)} />
+                        <textarea 
+                            value={checklist} 
+                            onChange={e => setChecklist(e.target.value)} 
+                            style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+                        />
                     </div>
                     <div className="confirm-field">
                         <label>취소/환불 규정</label>
-                        <textarea value={cancellationPolicy} onChange={e => setCancellationPolicy(e.target.value)} placeholder="출발 30일 전: 전액 환불&#10;출발 7일 전: 50% 환불" />
+                        <textarea 
+                            value={cancellationPolicy} 
+                            onChange={e => setCancellationPolicy(e.target.value)} 
+                            placeholder="출발 30일 전: 전액 환불&#10;출발 7일 전: 50% 환불" 
+                            style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+                        />
                     </div>
                     <div className="confirm-field full-width">
                         <label>추가 안내사항</label>
-                        <textarea value={notices} onChange={e => setNotices(e.target.value)} placeholder="기타 참고사항을 입력하세요..." />
+                        <textarea 
+                            value={notices} 
+                            onChange={e => setNotices(e.target.value)} 
+                            placeholder="기타 참고사항을 입력하세요..." 
+                            style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+                        />
                     </div>
                 </div>
             </div>
@@ -1030,7 +1054,7 @@ export default function ConfirmationPage() {
                     <span className="section-icon">🗓️</span> 상세 일정 미리보기
                 </div>
                 <div className="itinerary-preview-header">
-                    <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                         URL 분석 결과 추출된 {itinerary.length}일간의 일정입니다.
                         {!itinerary.length && " URL 분석을 먼저 진행해 주세요."}
                     </p>
@@ -1038,42 +1062,42 @@ export default function ConfirmationPage() {
 
                 <div className="itinerary-preview-list" style={{ marginTop: '12px' }}>
                     {itinerary.map((day: any, i: number) => (
-                        <div key={i} style={{ padding: '16px', border: '1px solid #e2e8f0', borderRadius: '12px', marginBottom: '16px', background: '#fff', position: 'relative' }}>
+                        <div key={i} style={{ padding: '16px', border: '1px solid var(--border-color)', borderRadius: '12px', marginBottom: '16px', background: 'var(--bg-secondary)', position: 'relative' }}>
                             <button 
                                 onClick={() => removeDay(i)} 
-                                style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem' }}
+                                style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}
                                 title="일자 전체 삭제"
                             >
                                 ✕
                             </button>
                             
-                            <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', borderBottom: '2px solid #f1f5f9', paddingBottom: '8px', paddingRight: '30px' }}>
+                            <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', borderBottom: '2px solid var(--border-color)', paddingBottom: '8px', paddingRight: '30px' }}>
                                 <input 
                                     value={day.day || `Day ${i + 1}`} 
                                     onChange={e => updateDayInfo(i, 'day', e.target.value)}
-                                    style={{ width: '80px', fontWeight: 800, fontSize: '1rem', border: 'none', background: '#f8fafc', padding: '4px 8px', borderRadius: '4px' }}
+                                    style={{ width: '80px', fontWeight: 800, fontSize: '1rem', border: 'none', background: 'var(--bg-tertiary)', padding: '4px 8px', borderRadius: '4px', color: 'var(--text-primary)' }}
                                 />
                                 <input 
                                     value={day.title || ''} 
                                     onChange={e => updateDayInfo(i, 'title', e.target.value)}
                                     placeholder="날짜 제목 (예: 다낭 도착 및 휴식)"
-                                    style={{ flex: 1, fontWeight: 700, fontSize: '1rem', border: 'none', borderBottom: '1px solid #e2e8f0', padding: '4px' }}
+                                    style={{ flex: 1, fontWeight: 700, fontSize: '1rem', border: 'none', borderBottom: '1px solid var(--border-color)', padding: '4px', background: 'transparent', color: 'var(--text-primary)' }}
                                 />
                                 <input 
                                     type="date"
                                     value={day.date ? day.date.split('T')[0] : ''} 
                                     onChange={e => updateDayInfo(i, 'date', e.target.value)}
-                                    style={{ fontSize: '0.8rem', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '2px 6px' }}
+                                    style={{ fontSize: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '2px 6px', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
                                 />
                             </div>
                             
                             {/* 활동 내용 (Timeline 구조) */}
                             <div style={{ marginBottom: '20px' }}>
-                                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <span>📍 타임라인 상세 항목</span>
                                     <button 
                                         onClick={() => addTimelineItem(i)}
-                                        style={{ padding: '4px 10px', background: 'var(--accent-primary)', border: 'none', borderRadius: '4px', fontSize: '0.75rem', color: '#fff', cursor: 'pointer', fontWeight: 700 }}
+                                        style={{ padding: '4px 10px', background: 'var(--accent-primary)', border: 'none', borderRadius: '4px', fontSize: '0.75rem', color: 'var(--bg-primary)', cursor: 'pointer', fontWeight: 700 }}
                                     >
                                         + 항목 추가
                                     </button>
@@ -1081,12 +1105,12 @@ export default function ConfirmationPage() {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                     {day.timeline && Array.isArray(day.timeline) && day.timeline.length > 0 ? (
                                         day.timeline.map((item: any, idx: number) => (
-                                            <div key={idx} style={{ display: 'flex', gap: '10px', padding: '10px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                                            <div key={idx} style={{ display: 'flex', gap: '10px', padding: '10px', background: 'var(--bg-tertiary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '60px', flexShrink: 0 }}>
                                                     <select 
                                                         value={item.type || 'activity'} 
                                                         onChange={e => updateTimelineItem(i, idx, 'type', e.target.value)}
-                                                        style={{ fontSize: '0.7rem', padding: '2px' }}
+                                                        style={{ fontSize: '0.7rem', padding: '2px', background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '4px' }}
                                                     >
                                                         <option value="location">📍 장소</option>
                                                         <option value="activity">• 활동</option>
@@ -1101,35 +1125,35 @@ export default function ConfirmationPage() {
                                                         value={item.title || ''} 
                                                         onChange={e => updateTimelineItem(i, idx, 'title', e.target.value)}
                                                         placeholder="항목 제목"
-                                                        style={{ fontWeight: 700, fontSize: '0.85rem', width: '100%', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '4px 8px' }}
+                                                        style={{ fontWeight: 700, fontSize: '0.85rem', width: '100%', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '4px 8px', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
                                                     />
                                                     <input 
                                                         value={item.subtitle || ''} 
                                                         onChange={e => updateTimelineItem(i, idx, 'subtitle', e.target.value)}
                                                         placeholder="부제목 (선택)"
-                                                        style={{ fontSize: '0.78rem', color: '#64748b', width: '100%', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '3px 8px' }}
+                                                        style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', width: '100%', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '3px 8px', background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}
                                                     />
                                                     <textarea 
                                                         value={item.description || ''} 
                                                         onChange={e => updateTimelineItem(i, idx, 'description', e.target.value)}
                                                         placeholder="상세 설명"
                                                         rows={2}
-                                                        style={{ fontSize: '0.78rem', color: '#475569', width: '100%', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '6px 8px', resize: 'vertical' }}
+                                                        style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', width: '100%', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '6px 8px', resize: 'vertical', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
                                                     />
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div style={{ fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center', padding: '10px', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #e2e8f0' }}>타임라인 항목이 없습니다.</div>
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '10px', background: 'var(--bg-tertiary)', borderRadius: '8px', border: '1px dashed var(--border-color)' }}>타임라인 항목이 없습니다.</div>
                                     )}
                                 </div>
                             </div>
-
+ 
                             {/* 레거시 활동 (단순 목록 구조) */}
-                            <div style={{ marginTop: '10px', padding: '12px', background: '#fffbeb', borderRadius: '12px', border: '1px solid #fef3c7' }}>
+                            <div style={{ marginTop: '10px', padding: '12px', background: 'rgba(251, 191, 36, 0.03)', borderRadius: '12px', border: '1px solid rgba(251, 191, 36, 0.15)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#92400e' }}>📝 일반 활동 리스트 (텍스트 편집형)</div>
-                                    <button onClick={() => addActivity(i)} style={{ fontSize: '0.75rem', background: '#b45309', border: 'none', color: '#fff', borderRadius: '4px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600 }}>+ 활동 추가</button>
+                                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(251, 191, 36, 0.8)' }}>📝 일반 활동 리스트 (텍스트 편집형)</div>
+                                    <button onClick={() => addActivity(i)} style={{ fontSize: '0.75rem', background: 'rgba(251, 191, 36, 0.8)', border: 'none', color: 'var(--bg-primary)', borderRadius: '4px', padding: '2px 8px', cursor: 'pointer', fontWeight: 600 }}>+ 활동 추가</button>
                                 </div>
                                 {day.activities && Array.isArray(day.activities) && day.activities.length > 0 ? (
                                     day.activities.map((act: string, idx: number) => (
@@ -1137,37 +1161,37 @@ export default function ConfirmationPage() {
                                             <input 
                                                 value={act} 
                                                 onChange={e => updateActivity(i, idx, e.target.value)}
-                                                style={{ flex: 1, fontSize: '0.82rem', padding: '4px 8px', border: '1px solid #fde68a', borderRadius: '4px' }}
+                                                style={{ flex: 1, fontSize: '0.82rem', padding: '4px 8px', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
                                             />
                                             <button onClick={() => removeActivity(i, idx)} style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer' }}>✕</button>
                                         </div>
                                     ))
                                 ) : (
-                                    <div style={{ fontSize: '0.75rem', color: '#d97706', textAlign: 'center' }}>간편 텍스트 일정이 없습니다. 항목을 추가하거나 위 타임라인을 사용하세요.</div>
+                                    <div style={{ fontSize: '0.75rem', color: 'rgba(251, 191, 36, 0.5)', textAlign: 'center' }}>간편 텍스트 일정이 없습니다. 항목을 추가하거나 위 타임라인을 사용하세요.</div>
                                 )}
                             </div>
-
+ 
                             {/* 부가 정보 (교통, 호텔, 식사) */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '15px', background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '15px', background: 'var(--bg-tertiary)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                                 <div className="confirm-field" style={{ marginBottom: 0 }}>
-                                    <label style={{ fontSize: '0.7rem' }}>🏨 예정 호텔</label>
-                                    <input value={day.hotel || ''} onChange={e => updateDayInfo(i, 'hotel', e.target.value)} style={{ fontSize: '0.8rem' }} />
+                                    <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>🏨 예정 호텔</label>
+                                    <input value={day.hotel || ''} onChange={e => updateDayInfo(i, 'hotel', e.target.value)} style={{ fontSize: '0.8rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }} />
                                 </div>
                                 <div className="confirm-field" style={{ marginBottom: 0 }}>
-                                    <label style={{ fontSize: '0.7rem' }}>🍽️ 식사 (조/중/석)</label>
+                                    <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>🍽️ 식사 (조/중/석)</label>
                                     <div style={{ display: 'flex', gap: '4px' }}>
-                                        <input value={day.meals?.breakfast || ''} onChange={e => updateDayMeals(i, 'breakfast', e.target.value)} placeholder="조" style={{ flex: 1, fontSize: '0.75rem', textAlign: 'center', background: '#fff' }} />
-                                        <input value={day.meals?.lunch || ''} onChange={e => updateDayMeals(i, 'lunch', e.target.value)} placeholder="중" style={{ flex: 1, fontSize: '0.75rem', textAlign: 'center', background: '#fff' }} />
-                                        <input value={day.meals?.dinner || ''} onChange={e => updateDayMeals(i, 'dinner', e.target.value)} placeholder="석" style={{ flex: 1, fontSize: '0.75rem', textAlign: 'center', background: '#fff' }} />
+                                        <input value={day.meals?.breakfast || ''} onChange={e => updateDayMeals(i, 'breakfast', e.target.value)} placeholder="조" style={{ flex: 1, fontSize: '0.75rem', textAlign: 'center', background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }} />
+                                        <input value={day.meals?.lunch || ''} onChange={e => updateDayMeals(i, 'lunch', e.target.value)} placeholder="중" style={{ flex: 1, fontSize: '0.75rem', textAlign: 'center', background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }} />
+                                        <input value={day.meals?.dinner || ''} onChange={e => updateDayMeals(i, 'dinner', e.target.value)} placeholder="석" style={{ flex: 1, fontSize: '0.75rem', textAlign: 'center', background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }} />
                                     </div>
                                 </div>
                                 <div className="confirm-field" style={{ marginBottom: 0, gridColumn: '1 / -1' }}>
-                                    <label style={{ fontSize: '0.7rem' }}>🛫 비행 정보 (항공사 / 편명 / 도시 / 시간)</label>
+                                    <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>🛫 비행 정보 (항공사 / 편명 / 도시 / 시간)</label>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '6px' }}>
-                                        <input value={day.transport?.airline || ''} onChange={e => updateDayTransport(i, 'airline', e.target.value)} placeholder="항공사" style={{ fontSize: '0.75rem', background: '#fff' }} />
-                                        <input value={day.transport?.flightNo || ''} onChange={e => updateDayTransport(i, 'flightNo', e.target.value)} placeholder="편명" style={{ fontSize: '0.75rem', background: '#fff' }} />
-                                        <input value={day.transport?.departureCity || ''} onChange={e => updateDayTransport(i, 'departureCity', e.target.value)} placeholder="출발도시" style={{ fontSize: '0.75rem', background: '#fff' }} />
-                                        <input value={day.transport?.departureTime || ''} onChange={e => updateDayTransport(i, 'departureTime', e.target.value)} placeholder="출발시간" style={{ fontSize: '0.75rem', background: '#fff' }} />
+                                        <input value={day.transport?.airline || ''} onChange={e => updateDayTransport(i, 'airline', e.target.value)} placeholder="항공사" style={{ fontSize: '0.75rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }} />
+                                        <input value={day.transport?.flightNo || ''} onChange={e => updateDayTransport(i, 'flightNo', e.target.value)} placeholder="편명" style={{ fontSize: '0.75rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }} />
+                                        <input value={day.transport?.departureCity || ''} onChange={e => updateDayTransport(i, 'departureCity', e.target.value)} placeholder="출발도시" style={{ fontSize: '0.75rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }} />
+                                        <input value={day.transport?.departureTime || ''} onChange={e => updateDayTransport(i, 'departureTime', e.target.value)} placeholder="출발시간" style={{ fontSize: '0.75rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }} />
                                     </div>
                                 </div>
                             </div>
@@ -1177,27 +1201,40 @@ export default function ConfirmationPage() {
                     <div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
                         <button 
                             onClick={addDay}
-                            style={{ flex: 1, padding: '14px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 700, fontSize: '1rem' }}
+                            style={{ flex: 1, padding: '14px', background: 'var(--accent-primary)', color: 'var(--bg-primary)', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 700, fontSize: '1rem' }}
                         >
                             + 다음 일차(Day) 추가
                         </button>
                     </div>
+
                     {itinerary.length > 0 && (
-                        <button
-                            className="btn-secondary"
-                            style={{ padding: '8px', fontSize: '0.8rem', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer' }}
-                            onClick={() => {
-                                const ok = confirm('현재 일정을 직접 편집(JSON)하시겠습니까?');
-                                if (ok) {
-                                    const raw = prompt('일정 데이터를 JSON 형식으로 수정하세요:', JSON.stringify(itinerary));
-                                    if (raw) {
-                                        try { setItinerary(JSON.parse(raw)); } catch (e) { alert('잘못된 JSON 형식입니다.'); }
+                        <div style={{ marginTop: '12px' }}>
+                            <button
+                                className="btn-secondary"
+                                style={{ 
+                                    width: '100%',
+                                    padding: '12px', 
+                                    fontSize: '0.85rem', 
+                                    background: 'var(--bg-tertiary)', 
+                                    border: '1px solid var(--border-color)', 
+                                    borderRadius: '10px', 
+                                    cursor: 'pointer',
+                                    color: 'var(--text-secondary)',
+                                    fontWeight: 600
+                                }}
+                                onClick={() => {
+                                    const ok = confirm('현재 일정을 직접 편집(JSON)하시겠습니까?');
+                                    if (ok) {
+                                        const raw = prompt('일정 데이터를 JSON 형식으로 수정하세요:', JSON.stringify(itinerary));
+                                        if (raw) {
+                                            try { setItinerary(JSON.parse(raw)); } catch (e) { alert('잘못된 JSON 형식입니다.'); }
+                                        }
                                     }
-                                }
-                            }}
-                        >
-                            ✏️ 일정 데이터 직접 수정(JSON)
-                        </button>
+                                }}
+                            >
+                                ✏️ 일정 데이터 직접 수정(JSON)
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
