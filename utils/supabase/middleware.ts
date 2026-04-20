@@ -40,11 +40,13 @@ export async function updateSession(request: NextRequest) {
   const isPublicConfirmationViewer = request.nextUrl.pathname.startsWith('/confirmation/') && request.nextUrl.pathname !== '/confirmation'
   // 확정서 데이터 API도 공개 (뷰어에서 데이터를 가져와야 하므로)
   const isPublicConfirmationApi = request.nextUrl.pathname.startsWith('/api/confirmation/') && request.nextUrl.pathname !== '/api/confirmation'
+  // 환율 API도 확정서 뷰어에서 사용
+  const isPublicUtilApi = request.nextUrl.pathname.startsWith('/api/exchange-rate')
 
   if (isStaticAsset) return supabaseResponse
 
   // 공개 페이지는 로그인 체크 없이 통과
-  if (isAuthPage || isPublicConfirmationViewer || isPublicConfirmationApi) {
+  if (isAuthPage || isPublicConfirmationViewer || isPublicConfirmationApi || isPublicUtilApi) {
       return supabaseResponse
   }
 
