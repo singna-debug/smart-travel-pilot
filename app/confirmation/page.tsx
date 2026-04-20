@@ -138,6 +138,7 @@ export default function ConfirmationPage() {
     // 2차 조사
     const [secondaryResearch, setSecondaryResearch] = useState<SecondaryResearch | null>(null);
     const [researchLoading, setResearchLoading] = useState(false);
+    const [partialLoading, setPartialLoading] = useState<Record<string, boolean>>({}); // 4월 9일 개별 로딩 상태 추가
     const [researchError, setResearchError] = useState('');
     const [customGuideInputs, setCustomGuideInputs] = useState<string[]>([]);
 
@@ -442,7 +443,44 @@ export default function ConfirmationPage() {
 
     const getFileByType = (type: DocumentFile['type']) => files.find(f => f.type === type);
 
-    // 2차 조사 실행
+    // 4월 9일 버전: 개별 항목(Weather, Customs, Landmarks 등)만 선택적으로 다시 조사하는 로직
+    const runPartialResearch = async (target: string) => {
+        if (!destination) return;
+        
+        // 특정 타겟 로딩 시작
+        setPartialLoading(prev => ({ ...prev, [target]: true }));
+        try {
+            const monthMatch = departureDate.match(/-(\d{2})-/);
+            const travelMonth = monthMatch ? `${parseInt(monthMatch[1])}월` : '';
+
+            const res = await fetch('/api/confirmation/secondary-research', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    destination,
+                    airline,
+                    targets: [target], // 특정 타겟만 요청
+                    travelMonth,
+                    itinerary,
+                }),
+            });
+            const json = await res.json();
+            if (json.success) {
+                // 기존 데이터와 병합 (수정된 섹션만 덮어쓰기)
+                setSecondaryResearch((prev: any) => {
+                    if (!prev) return json.data;
+                    return { ...prev, ...json.data };
+                });
+            }
+        } catch (err: any) {
+            console.error(`[Partial Research] ${target} failed:`, err.message);
+        } finally {
+            // 로딩 종료
+            setPartialLoading(prev => ({ ...prev, [target]: false }));
+        }
+    };
+
+    // 2차 조사 실행 (전체)
     const runSecondaryResearch = async () => {
         if (!destination) {
             alert('목적지를 먼저 입력해 주세요.');
@@ -1057,7 +1095,16 @@ export default function ConfirmationPage() {
                     {/* 환전 */}
                     {secondaryResearch && (
                         <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
-                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>💱 환전 및 결제 {secondaryResearch.currency?.localCurrency ? `(${safeStr(secondaryResearch.currency.localCurrency)})` : ''}</div>
+                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>💱 환전 및 결제 {secondaryResearch.currency?.localCurrency ? `(${safeStr(secondaryResearch.currency.localCurrency)})` : ''}</span>
+                                <button 
+                                    onClick={() => runPartialResearch('essentials')} 
+                                    disabled={partialLoading['essentials']}
+                                    style={{ fontSize: '0.75rem', padding: '4px 10px', background: '#334155', border: '1px solid #475569', borderRadius: '6px', cursor: 'pointer', color: '#cbd5e1', fontWeight: 600 }}
+                                >
+                                    {partialLoading['essentials'] ? '⏳ 조사 중' : '🔄 다시 조사'}
+                                </button>
+                            </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 <div className="confirm-field">
                                     <label style={{ color: 'var(--text-secondary)' }}>간편 계산법</label>
@@ -1078,7 +1125,16 @@ export default function ConfirmationPage() {
                     {/* 로밍 */}
                     {secondaryResearch && (
                         <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
-                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>📱 로밍·통신</div>
+                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>📱 로밍·통신</span>
+                                <button 
+                                    onClick={() => runPartialResearch('essentials')} 
+                                    disabled={partialLoading['essentials']}
+                                    style={{ fontSize: '0.75rem', padding: '4px 10px', background: '#334155', border: '1px solid #475569', borderRadius: '6px', cursor: 'pointer', color: '#cbd5e1', fontWeight: 600 }}
+                                >
+                                    {partialLoading['essentials'] ? '⏳ 조사 중' : '🔄 다시 조사'}
+                                </button>
+                            </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 <div className="confirm-field">
                                     <label style={{ color: 'var(--text-secondary)' }}>통신사 안내문</label>
@@ -1099,8 +1155,15 @@ export default function ConfirmationPage() {
                     {/* 날씨 및 복장 */}
                     {secondaryResearch && (
                         <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
-                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                🌡️ 날씨 및 복장 가이드
+                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>🌡️ 날씨 및 복장 가이드</span>
+                                <button 
+                                    onClick={() => runPartialResearch('basics')} 
+                                    disabled={partialLoading['basics']}
+                                    style={{ fontSize: '0.75rem', padding: '4px 10px', background: '#334155', border: '1px solid #475569', borderRadius: '6px', cursor: 'pointer', color: '#cbd5e1', fontWeight: 600 }}
+                                >
+                                    {partialLoading['basics'] ? '⏳ 조사 중' : '🔄 다시 조사'}
+                                </button>
                             </div>
                             
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -1221,7 +1284,16 @@ export default function ConfirmationPage() {
                     {/* 세관 및 입국 */}
                     {secondaryResearch && (
                         <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
-                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>🛃 입국·세관 · 공식 링크</div>
+                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>🛃 입국·세관 · 공식 링크</span>
+                                <button 
+                                    onClick={() => runPartialResearch('rules')} 
+                                    disabled={partialLoading['rules']}
+                                    style={{ fontSize: '0.75rem', padding: '4px 10px', background: '#334155', border: '1px solid #475569', borderRadius: '6px', cursor: 'pointer', color: '#cbd5e1', fontWeight: 600 }}
+                                >
+                                    {partialLoading['rules'] ? '⏳ 조사 중' : '🔄 다시 조사'}
+                                </button>
+                            </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 <div className="confirm-field">
                                     <label style={{ color: 'var(--text-secondary)' }}>주요 경고 제목</label>
@@ -1328,7 +1400,16 @@ export default function ConfirmationPage() {
                     {/* 관광지 */}
                     {secondaryResearch && (
                         <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
-                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>🏛️ 관광지 ({secondaryResearch.landmarks?.length || 0}개)</div>
+                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>🏛️ 관광지 ({secondaryResearch.landmarks?.length || 0}개)</span>
+                                <button 
+                                    onClick={() => runPartialResearch('creative')} 
+                                    disabled={partialLoading['creative']}
+                                    style={{ fontSize: '0.75rem', padding: '4px 10px', background: '#334155', border: '1px solid #475569', borderRadius: '6px', cursor: 'pointer', color: '#cbd5e1', fontWeight: 600 }}
+                                >
+                                    {partialLoading['creative'] ? '⏳ 조사 중' : '🔄 다시 조사'}
+                                </button>
+                            </div>
                             {secondaryResearch.landmarks?.length ? (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                     {secondaryResearch.landmarks.map((lm: any, i: number) => (
@@ -1363,7 +1444,16 @@ export default function ConfirmationPage() {
                     {/* 수하물 */}
                     {secondaryResearch && (
                         <div style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
-                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>🧳 수하물 규정</div>
+                            <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>🧳 수하물 규정</span>
+                                <button 
+                                    onClick={() => runPartialResearch('rules')} 
+                                    disabled={partialLoading['rules']}
+                                    style={{ fontSize: '0.75rem', padding: '4px 10px', background: '#334155', border: '1px solid #475569', borderRadius: '6px', cursor: 'pointer', color: '#cbd5e1', fontWeight: 600 }}
+                                >
+                                    {partialLoading['rules'] ? '⏳ 조사 중' : '🔄 다시 조사'}
+                                </button>
+                            </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '8px' }}>
                                     <div className="confirm-field" style={{ marginBottom: 0 }}>

@@ -1901,13 +1901,23 @@ export default function ConfirmationViewerPage() {
                                             *정확한 현재 환율이 아닌, 현지에서 체감 물가를 빠르게 계산하기 위한 대략적인 암산법입니다.
                                         </div>
                                     </div>
+                                    
                                     <div className="currency-tip-card">
                                         <div className="ct-title">환전 팁</div>
-                                        <p>{safeStr(sr?.currency?.exchangeTip)}</p>
+                                        <ul className="guide-list-wrap">
+                                            {safeStr(sr?.currency?.exchangeTip).split(/[\n·\-\*]/).filter(t => t.trim().length > 1).map((text, i) => (
+                                                <li key={i} className="guide-list-item">{text.trim()}</li>
+                                            ))}
+                                        </ul>
                                     </div>
+
                                     <div className="currency-tip-card">
                                         <div className="ct-title">팁 문화</div>
-                                        <p>{safeStr(sr?.currency?.tipCulture)}</p>
+                                        <ul className="guide-list-wrap">
+                                            {safeStr(sr?.currency?.tipCulture).split(/[\n·\-\*]/).filter(t => t.trim().length > 1).map((text, i) => (
+                                                <li key={i} className="guide-list-item">{text.trim()}</li>
+                                            ))}
+                                        </ul>
                                     </div>
                                 </div>
 
