@@ -157,6 +157,16 @@ const formatDateStr = (dateStr: string | undefined): string => {
         .trim();
 };
 
+// HTML 이스케이프 해제 (예: &lt;IMG -> <IMG)
+const cleanupHtml = (html: string | undefined): string => {
+    if (!html) return '';
+    return String(html)
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&amp;/g, '&');
+};
+
 const TimelineItem = ({ item }: { item: any }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
@@ -212,13 +222,13 @@ const TimelineItem = ({ item }: { item: any }) => {
                     }} 
                     onClick={() => needsCollapse && setIsExpanded(!isExpanded)}
                 >
-                    <span dangerouslySetInnerHTML={{ __html: item.title }} />
+                    <span dangerouslySetInnerHTML={{ __html: cleanupHtml(item.title) }} />
                     {isLocation && <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 400, marginLeft: '2px' }}>›</span>}
                 </div>
                 
                 {item.subtitle && (
                     <div style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600, marginTop: '4px', lineHeight: 1.4 }}>
-                        <span dangerouslySetInnerHTML={{ __html: item.subtitle }} />
+                        <span dangerouslySetInnerHTML={{ __html: cleanupHtml(item.subtitle) }} />
                     </div>
                 )}
 
@@ -236,7 +246,7 @@ const TimelineItem = ({ item }: { item: any }) => {
                                 WebkitBoxOrient: 'vertical',
                                 transition: 'max-height 0.3s ease-in-out'
                             }}
-                            dangerouslySetInnerHTML={{ __html: item.description }}
+                            dangerouslySetInnerHTML={{ __html: cleanupHtml(item.description) }}
                         />
                         {needsCollapse && (
                             <div 
@@ -1319,7 +1329,7 @@ export default function ConfirmationViewerPage() {
                                                                                     <div 
                                                                                         className="activity-header itinerary-img-fix" 
                                                                                         style={{ fontSize: '0.88rem', color: '#1e293b', lineHeight: 1.6, overflowWrap: 'break-word', wordBreak: 'break-word' }}
-                                                                                        dangerouslySetInnerHTML={{ __html: cleanText }} 
+                                                                                        dangerouslySetInnerHTML={{ __html: cleanupHtml(cleanText) }} 
                                                                                     />
                                                                                 </div>
                                                                             </div>
@@ -1327,7 +1337,7 @@ export default function ConfirmationViewerPage() {
                                                                     })}
                                                                 </div>
                                                             ) : (
-                                                                <div className="day-activity" dangerouslySetInnerHTML={{ __html: day.description || day.content || '' }} />
+                                                                <div className="day-activity" dangerouslySetInnerHTML={{ __html: cleanupHtml(day.description || day.content || '') }} />
                                                             )}
                                                         </div>
 

@@ -689,15 +689,6 @@ export default function ConfirmationPage() {
                 </div>
                 <div className="confirm-grid">
                     <div className="confirm-field full-width">
-                        <label style={{ color: 'var(--accent-primary)', fontWeight: 700 }}>🔍 예약번호 (공유 링크 ID로 사용됨)</label>
-                        <input 
-                            value={reservationNumber} 
-                            onChange={e => setReservationNumber(e.target.value)} 
-                            placeholder="예: A1234567 (이 번호가 주소가 됩니다)" 
-                            style={{ border: '1px solid var(--accent-primary)', background: 'rgba(0, 212, 170, 0.05)' }} 
-                        />
-                    </div>
-                    <div className="confirm-field full-width">
                         <label>여행 상품명</label>
                         <input value={productName} onChange={e => setProductName(e.target.value)} placeholder="상품명 입력" />
                     </div>
