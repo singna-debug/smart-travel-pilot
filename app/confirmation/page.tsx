@@ -421,30 +421,6 @@ export default function ConfirmationPage() {
         setItinerary(prev => prev.map((d, i) => i === idx ? { ...d, title, route: title } : d));
     };
 
-    const addTimelineItem = (dayIdx: number) => {
-        setItinerary(prev => prev.map((d, i) => i === dayIdx ? {
-            ...d,
-            timeline: [...(d.timeline || []), { type: 'default', title: '', description: '' }]
-        } : d));
-    };
-
-    const removeTimelineItem = (dayIdx: number, itemIdx: number) => {
-        setItinerary(prev => prev.map((d, i) => i === dayIdx ? {
-            ...d,
-            timeline: (d.timeline || []).filter((_: any, idx: number) => idx !== itemIdx)
-        } : d));
-    };
-
-    const updateTimelineItem = (dayIdx: number, itemIdx: number, field: string, value: string) => {
-        setItinerary(prev => prev.map((d, i) => {
-            if (i !== dayIdx) return d;
-            const newTimeline = (d.timeline || []).map((item: any, idx: number) =>
-                idx === itemIdx ? { ...item, [field]: value } : item
-            );
-            return { ...d, timeline: newTimeline };
-        }));
-    };
-
     const updateDayMeal = (idx: number, mealType: 'breakfast' | 'lunch' | 'dinner', value: string) => {
         setItinerary(prev => prev.map((d, i) => i === idx ? {
             ...d,
