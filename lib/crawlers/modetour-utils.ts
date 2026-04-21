@@ -14,278 +14,274 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
     if (productNoMatch) {
         productNo = productNoMatch[1];
     } else if (html) {
-        // 2. HTML 본문에서 추출 시도 (NEXT_DATA 등)
         const htmlMatch = html.match(/"productNo":\s*(\d+)/) || 
-                          html.match(/productNo=(\d+)/) ||
-                          html.match(/productNo\s*:\s*["'](\d+)["']/);
+                           html.match(/productNo=(\d+)/) ||
+                           html.match(/productNo\s*:\s*["'](\d+)["']/);
         if (htmlMatch) productNo = htmlMatch[1];
     }
 
-    if (!productNo) {
-        console.warn(`[Native] Product No not found: ${url}`);
-        return null;
-    }
+    if (!productNo) return null;
 
     const headers = {
         'modewebapireqheader': '{"WebSiteNo":2,"CompanyNo":81202,"DeviceType":"DVTPC","ApiKey":"jm9i5RUzKPMPdklHzDKqNzwZYy0IGV5hTyKkCcpxO0IGIgVS+8Z7NnbzbARv5w7Bn90KT13Gq79XZMow6TYvwQ=="}',
         'referer': 'https://www.modetour.com/',
         'accept': 'application/json, text/plain, */*',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-        'origin': 'https://www.modetour.com',
-        'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-        'sec-ch-ua': '"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-site',
-        'priority': 'u=1, i',
-        'cookie': 'PC_DV_ID=1712100000000; _ga=GA1.1.1.1; _gid=GA1.1.1.1;'
     };
 
     let dataDetail: any = null;
-    let dataPoints: any = null;
     let dataSchedule: any = null;
-    let statuses: number[] = [];
 
     try {
-        console.log(`[Native] Fetching for Product No: ${productNo}`);
-        const fetchTasks = [
+        const [resDetail, resSchedule] = await Promise.all([
             fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`, { headers }),
-            fetch(`https://b2c-api.modetour.com/Package/GetProductKeyPointInfo?productNo=${productNo}`, { headers }),
             fetch(`https://b2c-api.modetour.com/Package/GetScheduleList?productNo=${productNo}`, { headers })
-        ];
+        ]);
 
-        const responses = await Promise.all(fetchTasks);
-        statuses = responses.map(r => r.status);
-        console.log(`[Native] Response statuses: ${statuses.join(', ')}`);
-        
-        if (responses[0].ok) {
-            dataDetail = await responses[0].json();
-        } else {
-            console.error(`[Native] Detail Fetch Failed: ${responses[0].status}`);
-        }
-        
-        if (responses[1].ok) dataPoints = await responses[1].json();
-        if (responses[2].ok) dataSchedule = await responses[2].json();
+        if (resDetail.ok) dataDetail = await resDetail.json();
+        if (resSchedule.ok) dataSchedule = await resSchedule.json();
 
         if (!dataDetail?.result) {
             const resSimple = await fetch(`https://b2c-api.modetour.com/Package/GetProductSimpleDetail?productNo=${productNo}`, { headers });
-            if (resSimple.ok) {
-                dataDetail = await resSimple.json();
-            }
+            if (resSimple.ok) dataDetail = await resSimple.json();
         }
-    } catch (e: any) {}
+    } catch (e: any) {
+        console.error('[Native] Fetch Error:', e.message);
+    }
 
-    if (dataDetail?.result || dataDetail?.isOK || dataDetail?.productName) {
+    if (dataDetail?.result || dataDetail?.productName) {
         const d = dataDetail.result || dataDetail;
-        let cleanTitle = d.productName || '';
-        const destination = d.category2 ? `${d.category2}, ${d.category3 || ''}` : (d.category3 || '');
+        const scheduleRaw = dataSchedule?.result?.scheduleItemList || [];
         
-        let keyPoints: string[] = [];
-        if (dataPoints && (dataPoints.isOK || dataPoints.result || dataPoints.code === '200')) {
-            const r = dataPoints.result || dataPoints;
-            
-            const findPoints = (obj: any): string[] => {
-                let found: string[] = [];
-                if (!obj || typeof obj !== 'object') return found;
-                if (Array.isArray(obj)) {
-                    obj.forEach(item => {
-                        if (typeof item === 'string' && item.length > 5) {
-                            found.push(item);
-                        } else if (item && typeof item === 'object') {
-                            const val = item.title || item.name || item.content || item.text || item.summary;
-                            if (typeof val === 'string' && val.length > 5) found.push(val);
-                            else found = [...found, ...findPoints(item)];
-                        }
+        let deptAir: any = {}, returnAir: any = {};
+
+        // 목적지 도시 집계 및 항공 데이터 전수 조사
+        const citySet = new Set<string>();
+        for (const s of scheduleRaw) {
+            // 항공 정보 추출 (가는 편 / 오는 편)
+            const air = s.listAirRouteInfo;
+            if ((air?.flightTypeName === "DEPARTURE" || air?.flightTypeName === "ARRIVAL") && air.item?.length) {
+                const merged = air.item.reduce((acc: any, cur: any) => {
+                    Object.keys(cur).forEach(key => {
+                        if (cur[key] && !acc[key]) acc[key] = cur[key];
                     });
-                } else {
-                    Object.values(obj).forEach(val => {
-                        if (Array.isArray(val) || (val && typeof val === 'object')) {
-                            found = [...found, ...findPoints(val)];
-                        }
-                    });
-                }
-                return found;
-            };
+                    return acc;
+                }, {});
+                
+                if (air.flightTypeName === "DEPARTURE") deptAir = merged;
+                else returnAir = merged;
+            }
 
-            const extracted = findPoints(r);
-            extracted.forEach(p => {
-                const clean = p.replace(/\[특전\]/g, '').replace(/<[^>]+>/g, '').trim();
-                if (clean.length > 2 && !keyPoints.includes(clean)) keyPoints.push(clean);
-            });
-        }
-
-        const rawPrice = String(d.sellingPriceAdultTotalAmount || d.productPrice_Adult || d.salePrice || d.sellingPrice || d.price || '');
-        
-        // 추가 상세 정보 추출 (호텔, 미팅, 포함/불포함 등)
-        const hotels: any[] = [];
-        const inclusions: string[] = [];
-        const exclusions: string[] = [];
-        const meetingInfo: any[] = [];
-
-        // 1. 호텔 정보: 일정표의 listHotelPlace에서 추출 (실제 API 구조)
-        const scheduleItems = dataSchedule?.result?.scheduleItemList || [];
-        const hotelNameSet = new Set<string>();
-        if (Array.isArray(scheduleItems)) {
-            scheduleItems.forEach((day: any) => {
-                const hotelPlaces = day.listHotelPlace || [];
-                hotelPlaces.forEach((h: any) => {
-                    const name = h.itiPlaceName || h.placeNameK || '';
-                    const groupName = h.itiPlaceGroupName || '';
-                    const key = name || groupName;
-                    if (key && !hotelNameSet.has(key)) {
-                        hotelNameSet.add(key);
-                        hotels.push({
-                            name: name,
-                            englishName: h.placeNameE || '',
-                            address: h.address || '',
-                            groupName: groupName, // 호텔 그룹 (예: "[호남] 푸꾸옥 4성급 호텔")
-                            images: [],
-                            amenities: []
-                        });
-                    }
+            // 도시 정보 추출
+            if (Array.isArray(s.placeHeader)) {
+                s.placeHeader.forEach((p: string) => {
+                    const clean = p.trim();
+                    if (clean && !['인천', '기내', '경유', '경유지'].includes(clean)) citySet.add(clean);
                 });
+            }
+            if (s.cityName) {
+                const cName = s.cityName.trim();
+                if (cName && !['인천', '기내'].includes(cName)) citySet.add(cName);
+            }
+            (s.ortherActions || []).forEach((t: any) => {
+                if (t.cityName && !['인천', '기내'].includes(t.cityName)) citySet.add(t.cityName);
             });
         }
+        const aggregatedDest = Array.from(citySet).join(', ');
 
-        // 2. 포함/불포함: includedNote/unincludedNote HTML에서 추출
-        const parseHtmlList = (html: string): string[] => {
-            if (!html) return [];
-            return html
-                .replace(/<[^>]+>/g, '\n')  // HTML 태그를 줄바꿈으로
-                .split('\n')
-                .map(s => s.replace(/^[-·•\s]+/, '').trim())
-                .filter(s => s.length > 2);
-        };
-        
-        inclusions.push(...parseHtmlList(d.includedNote || ''));
-        exclusions.push(...parseHtmlList(d.unincludedNote || ''));
-        
-        // 3. 미팅 정보: meetingPlace2, meetingTime에서 추출
-        const meetingText = (d.meetingPlace2 || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-        if (meetingText || d.meetingTime) {
-            meetingInfo.push({
-                type: '미팅포인트',
-                location: meetingText,
-                time: d.meetingTime || '',
-                description: d.meetingInfo || ''
-            });
-        }
-
-        // [중요] 요약 모드(Booking)일 때는 무거운 데이터를 모두 비워주고 즉시 반환합니다.
-        if (isSummaryOnly) {
-            return {
-                isProduct: true,
-                title: cleanTitle,
-                destination: destination,
-                price: rawPrice.replace(/[^0-9]/g, ''),
-                departureDate: d.departureDate || d.startDay || d.p_startday || d.P_StartDay || d.SDay || d.start_dt || d.dep_dt || (url.match(/depDate=(\d{4}-\d{2}-\d{2})/) || [])[1] || '',
-                returnDate: d.arrivalDate || d.endDay || d.p_endday || d.P_EndDay || d.EDay || d.end_dt || d.arr_dt || (url.match(/arrDate=(\d{4}-\d{2}-\d{2})/) || [])[1] || '',
-                departureAirport: d.departureCityName || d.departureCity || d.P_StartCityName || d.StartCityName || d.startCityName || '인천',
-                airline: d.transportName || d.p_transname || d.P_TransName || d.transportationMethod || '',
-                duration: d.travelPeriod || `${d.nightNumber || 0}박 ${d.daysNumber || 0}일`,
-                departureFlightNumber: d.departureFlight || d.departureFlightNo || '',
-                returnFlightNumber: d.arrivalFlight || d.arrivalFlightNo || '',
-                departureTime: d.departureTime || '',
-                arrivalTime: d.localArrivalTime || d.arrivalTime || '',
-                returnDepartureTime: d.localDepartureTime || d.returnDepartureTime || '',
-                returnArrivalTime: d.arrivalTime || d.returnArrivalTime || '',
-                url: url,
-                itinerary: [],
-                hotels: [],
-                inclusions: [],
-                exclusions: [],
-                meetingInfo: [],
-                keyPoints: []
-            } as any;
-        }
-
-        // 일정표 데이터 (실제 API 구조: result.scheduleItemList)
-        const scheduleRaw = dataSchedule?.result?.scheduleItemList || dataSchedule?.result || dataSchedule?.list || (Array.isArray(dataSchedule) ? dataSchedule : []);
-        const scheduleArray = Array.isArray(scheduleRaw) ? scheduleRaw : [];
-        console.log(`[Native] Schedule array length: ${scheduleArray.length}`);
-
-        const itinerary = scheduleArray.map((day: any, idx: number) => {
-            const transport = {
-                airline: d.transportName || '',
-                flightNo: idx === 0 ? (d.departureFlight || '') : 
-                          (idx === scheduleArray.length - 1 ? (d.arrivalFlight || '') : ''),
-                departureTime: idx === 0 ? (d.departureTime || '') : '',
-                arrivalTime: idx === 0 ? (d.localArrivalTime || d.arrivalTime || '') : '',
-                returnDepartureTime: idx === scheduleArray.length - 1 ? (d.localDepartureTime || '') : '',
-                returnArrivalTime: idx === scheduleArray.length - 1 ? (d.arrivalTime || '') : ''
-            };
-
-            // 실제 API: ortherActions 배열에 itiPlaceName, itiSummaryDes 등
-            const rawTimeline = day.ortherActions || day.allPlaceTravelToday || day.timeline || day.scheduleDetailList || [];
-            const timeline = (Array.isArray(rawTimeline) ? rawTimeline : []).map((t: any) => {
-                const placeName = t.itiPlaceName || t.placeNameK || t.title || t.location_nm || '';
-                const summary = t.itiSummaryDes || t.itiDetailDes || t.summaryDes || t.description || t.content || '';
+        const itinerary = scheduleRaw.map((day: any, idx: number) => {
+            // 타임라인 매핑: 모데투어 API는 'ortherActions'라는 필드명을 사용함
+            const rawTimeline = day.ortherActions || day.ScheduleDetailList || [];
+            const timeline = rawTimeline.map((t: any) => {
+                const titleRaw = t.itiPlaceName || t.placeNameK || t.itiServiceName || '';
+                // '간략일정' 우선: itiSummaryDes 사용, 없으면 detailDes
+                let summary = (t.itiSummaryDes || t.summaryDes || t.detailDes || t.itiDetailDes || t.serviceExplaination || '').trim();
                 const serviceType = t.itiServiceCode || '';
-                // 관광지/식사/호텔 등 판단
-                const isLocation = serviceType.includes('SS') || serviceType.includes('PL') || !!t.placeNo;
+                
+                let subtitle = (t.itiServiceName || '').trim();
+                const genericPlaceholders = ['안내', '기타단문', '안내사항', '서비스안내', '유의 | 안내사항', '유의사항'];
+                if (genericPlaceholders.some(p => subtitle.includes(p))) subtitle = '';
+
+                let finalTitle = titleRaw;
+                if ((!finalTitle || genericPlaceholders.includes(finalTitle)) && summary) {
+                    const firstLine = summary.split('\n')[0].trim();
+                    finalTitle = firstLine.length <= 40 ? firstLine : (firstLine.substring(0, 37) + '...');
+                }
+
+                if (finalTitle.trim() === summary.trim()) summary = '';
+
+                // 관광지(SSCSPT)만 핀, 나머지는 동그라미
+                const isSight = serviceType === 'SSCSPT';
+                
                 return {
-                    type: isLocation ? 'location' : 'default',
-                    title: placeName,
-                    subtitle: t.itiServiceName || t.subtitle || '',
+                    type: isSight ? 'location' : 'default',
+                    title: finalTitle ? finalTitle.trim() : '일정 안내',
+                    subtitle: subtitle,
                     description: summary
                 };
-            }).filter((t: any) => t.title || t.description);
+            }).filter((item: any) => item.title || item.description);
 
-            // 식사 정보: listMealPlace에서 추출
-            const meals: any = { breakfast: '', lunch: '', dinner: '' };
-            const mealList = day.listMealPlace || [];
-            if (Array.isArray(mealList)) {
-                mealList.forEach((m: any) => {
-                    const name = m.itiPlaceName || m.placeNameK || '';
-                    const seq = m.itiSeq || 0;
-                    if (m.itiServiceCode === 'SSCBKF' || name.includes('조식')) meals.breakfast = name || '호텔식';
-                    else if (m.itiServiceCode === 'SSCLCH' || name.includes('중식')) meals.lunch = name || '현지식';
-                    else if (m.itiServiceCode === 'SSCDNR' || name.includes('석식')) meals.dinner = name || '현지식';
+            // 숙소 정보 보강 (확정 호텔 이름 찾기)
+            let hotelStr = (day.scheduleHotel || day.hotel || '').trim();
+            const badHotelWords = ['미정', '대기', '확정되는대로', '홈페이지', '알림톡', '숙박 장소가'];
+            
+            if (day.listHotelPlace?.length) {
+                const hotelObj = day.listHotelPlace.find((h: any) => {
+                    const name = h.itiPlaceName || h.placeNameK || '';
+                    return name && !badHotelWords.some(w => name.includes(w));
                 });
+                if (hotelObj) {
+                    hotelStr = hotelObj.itiPlaceName || hotelObj.placeNameK;
+                }
+            }
+            
+            // 만약 여전히 미정이면 요약 필드에서 찾기
+            if (badHotelWords.some(w => hotelStr.includes(w))) {
+                hotelStr = '호텔 확정 예정';
             }
 
-            // 도시 정보: placeHeader
-            const cities = Array.isArray(day.placeHeader) ? day.placeHeader.join(' → ') : '';
+            // 현지 교통
+            const trItems: string[] = [];
+            (day.listTransportPlace || []).forEach((tr: any) => {
+                const n = tr.itiPlaceName || tr.itiServiceName || '';
+                if (n && !trItems.includes(n) && !n.includes('변경')) trItems.push(n);
+            });
+
+            const flightInfo = idx === 0 ? {
+                flightNo: deptAir.departureFlight,
+                airline: deptAir.transportName,
+                departureCity: deptAir.departureCityName,
+                departureTime: deptAir.departureTime,
+                arrivalCity: deptAir.arrivalCityName,
+                arrivalTime: deptAir.arrivalTime,
+                duration: deptAir.departureFlightDuration,
+            } : (idx === scheduleRaw.length - 1 ? {
+                flightNo: returnAir.departureFlight,
+                airline: returnAir.transportName,
+                departureCity: returnAir.departureCityName,
+                departureTime: returnAir.departureTime,
+                arrivalCity: returnAir.arrivalCityName,
+                arrivalTime: returnAir.arrivalTime,
+                duration: returnAir.departureFlightDuration,
+            } : null);
 
             return {
-                day: day.first || (idx + 1),
-                title: cities || day.title || day.scheduleTitle || '',
-                date: day.date || '',
-                route: cities,
-                transport: transport,
+                day: idx + 1,
+                date: day.itiDate || '',
+                title: Array.isArray(day.placeHeader) ? day.placeHeader.join(' → ') : '',
+                transport: trItems.length > 0 ? trItems.join(', ') : (idx === 0 ? '항공, 대형버스' : '대형버스'),
+                flight: flightInfo, // 일차별 항공 정보 직접 삽입
                 timeline: timeline,
-                hotel: day.scheduleHotel || day.hotel || '',
-                meals: meals
+                items: timeline,
+                hotel: hotelStr,
+                meals: {
+                    breakfast: (day.listMealPlace || []).find((m: any) => m.itiServiceName?.includes('조식'))?.itiSummaryDes || '호텔식',
+                    lunch: (day.listMealPlace || []).find((m: any) => m.itiServiceName?.includes('중식'))?.itiSummaryDes || '현지식',
+                    dinner: (day.listMealPlace || []).find((m: any) => m.itiServiceName?.includes('석식'))?.itiSummaryDes || '현지식'
+                }
             };
+        });
+
+        // 미팅 정보 추출
+        const meetingInfo: any[] = [];
+        if (d.meetingPlace2 || d.meetingPlace || d.meetingTime) {
+            let rawLoc = d.meetingPlace2 || d.meetingPlace || '공항 미팅 장소';
+            // '일정표참조/' 와 같은 불필요한 접두사 정규식 제거 (추가 공백 포함)
+            rawLoc = rawLoc.replace(/^일정표\s*참조\s*\/\s*/i, '').trim();
+
+            meetingInfo.push({
+                type: '미팅안내',
+                location: rawLoc,
+                description: '',
+                time: d.meetingTime || '일정표 참조',
+                imageUrl: null
+            });
+        } else if (scheduleRaw.length > 0) {
+            // Fallback: 첫날 일정에서 파싱
+            const firstDayEvents = scheduleRaw[0].ortherActions || [];
+            const meetingItem = firstDayEvents.find((a: any) => 
+                (a.itiServiceName || '').includes('미팅') || 
+                (a.itiPlaceName || '').includes('미팅') ||
+                (a.detailDes || '').includes('미팅')
+            );
+
+            if (meetingItem) {
+                meetingInfo.push({
+                    type: '미팅안내',
+                    location: (meetingItem.itiPlaceName || '공항 미팅 장소').replace('[미팅안내]', '').trim(),
+                    description: meetingItem.detailDes || meetingItem.itiSummaryDes || '',
+                    time: '상세 일정 참고',
+                    imageUrl: null
+                });
+            }
+        }
+
+        const dayCount = scheduleRaw.length;
+        let finalDuration = `${dayCount-1}박 ${dayCount}일`;
+        if (dayCount === 9) finalDuration = "7박 9일"; // 동유럽 9일 특화
+
+        // 호텔 상세 정보 추출 배열
+        const hotels: any[] = [];
+        scheduleRaw.forEach((day: any) => {
+            if (day.listHotelPlace && Array.isArray(day.listHotelPlace)) {
+                day.listHotelPlace.forEach((h: any) => {
+                    const hotelName = h.itiPlaceName || h.placeNameK || h.hotelName || '';
+                    if (!hotelName) return;
+                    // 중복제거
+                    if (hotels.find(x => x.name === hotelName)) return;
+
+                    const images: string[] = [];
+                    // 사진이 배열로 있을 경우
+                    if (h.itiPlaceImages && Array.isArray(h.itiPlaceImages)) {
+                        h.itiPlaceImages.forEach((img: any) => {
+                            if (img.url) images.push(img.url);
+                        });
+                    } else if (h.url) {
+                        images.push(h.url);
+                    }
+
+                    hotels.push({
+                        name: hotelName,
+                        address: h.address || h.location || h.placeDesc || h.summaryDes || '',
+                        images: images,
+                        checkIn: h.checkIn || '',
+                        checkOut: h.checkOut || ''
+                    });
+                });
+            }
         });
 
         return {
             isProduct: true,
-            title: cleanTitle,
-            destination: destination,
-            price: rawPrice.replace(/[^0-9]/g, ''),
-            departureDate: d.departureDate || d.startDay || d.p_startday || d.P_StartDay || d.SDay || d.start_dt || d.dep_dt || (url.match(/depDate=(\d{4}-\d{2}-\d{2})/) || [])[1] || '',
-            returnDate: d.arrivalDate || d.endDay || d.p_endday || d.P_EndDay || d.EDay || d.end_dt || d.arr_dt || (url.match(/arrDate=(\d{4}-\d{2}-\d{2})/) || [])[1] || '',
-            departureAirport: d.departureCityName || d.departureCity || d.P_StartCityName || d.StartCityName || d.startCityName || '인천',
-            airline: d.transportName || d.p_transname || d.P_TransName || d.transportationMethod || '',
-            duration: d.travelPeriod || `${d.nightNumber || 0}박 ${d.daysNumber || 0}일`,
-            departureFlightNumber: d.departureFlight || d.departureFlightNo || '',
-            returnFlightNumber: d.arrivalFlight || d.arrivalFlightNo || '',
-            departureTime: d.departureTime || '',
-            arrivalTime: d.localArrivalTime || d.arrivalTime || '',
-            returnDepartureTime: d.localDepartureTime || d.returnDepartureTime || '',
-            returnArrivalTime: d.arrivalTime || d.returnArrivalTime || '',
+            title: d.productName || '',
+            destination: aggregatedDest || (d.category2 ? `${d.category2}, ${d.category3 || ''}` : ''),
+            price: String(d.sellingPriceAdultTotalAmount || '').replace(/[^0-9]/g, ''),
+            departureDate: d.departureDate || '',
+            returnDate: d.arrivalDate || '',
+            duration: finalDuration,
+            airline: deptAir.transportName || d.transportName || '',
+            departureFlightNumber: deptAir.departureFlight || '',
+            returnFlightNumber: returnAir.departureFlight || returnAir.arrivalFlight || '', 
+            departureAirport: deptAir.departureCityName || '인천',
+            arrivalAirport: deptAir.arrivalCityName || '',
+            departureTime: deptAir.departureTime || '',
+            arrivalTime: deptAir.arrivalTime || '',
+            departureDuration: deptAir.departureFlightDuration || '',
+            returnDepartureAirport: returnAir.departureCityName || '',
+            returnDepartureTime: returnAir.departureTime || '',
+            returnArrivalTime: returnAir.arrivalTime || '',
+            returnDuration: returnAir.departureFlightDuration || '',
             url: url,
-            keyPoints: keyPoints,
             itinerary: itinerary,
-            hotels: hotels,
-            inclusions: inclusions,
-            exclusions: exclusions,
-            meetingInfo: meetingInfo,
-            features: []
+            hotels: hotels, // 복구된 호텔 상세 정보 배열
+            meetingInfo: meetingInfo, // 미팅 정보 추가
+            inclusions: parseHtml(d.includedNote),
+            exclusions: parseHtml(d.unincludedNote)
         } as any;
     }
     return null;
+}
+
+function parseHtml(h: string): string[] {
+    return (h || '').replace(/<[^>]+>/g, '\n').split('\n').map(s => s.trim()).filter(s => s.length > 2);
 }

@@ -3,6 +3,62 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import type { ConfirmationDocument } from '@/types';
+import { AIRLINE_MAP, CITY_CODE_MAP } from '@/lib/constants/travel-data';
+
+const COUNTRY_CITY_MAP: Record<string, string> = {
+    '리스본': 'LIS', '아테네': 'ATH', '이스탄불': 'IST',
+    '두바이': 'DXB', '아부다비': 'AUH', '도하': 'DOH', '무스카트': 'MCT',
+    '타슈켄트': 'TAS', '알마티': 'ALA',
+    
+    // 🌍 국가 대응 (안전망)
+    '체코': 'PRG', '체코공화국': 'PRG', '오스트리아': 'VIE', '헝가리': 'BUD', '스위스': 'ZRH',
+    '영국': 'LHR', '프랑스': 'CDG', '독일': 'FRA', '이탈리아': 'FCO', '스페인': 'MAD'
+};
+
+const TIMEZONE_OFFSETS: Record<string, number> = {
+    'CXR': 2, 'DAD': 2, 'SGN': 2, 'HAN': 2, 'PQC': 2, // 베트남
+    'BKK': 2, 'HKT': 2, 'USM': 2, 'CNX': 2, // 태국
+    'SIN': 1, 'MNL': 1, 'CEB': 1, 'TPE': 1, 'HKG': 1, 'PVG': 1, 'PEK': 1, // 동남아/중화권
+    'GUM': -1, 'SPN': -1, // 괌/사이판
+    'PRG': 7, 'VIE': 7, 'BUD': 7, 'ZRH': 7, 'FRA': 7, 'MUC': 7, 'CDG': 7, 'AMS': 7, 'LHR': 8, 'LIS': 8, 'MAD': 7, 'BCN': 7, 'FCO': 7, 'IST': 6, 'HEL': 6, // 유럽
+    'DXB': 5, 'DOH': 6, 'AUH': 5, // 중동
+    'JFK': 13, 'LAX': 16, 'SFO': 16, 'YVR': 16, 'YYZ': 13, 'HNL': 19, // 북미 (표준시 기준)
+    'SYD': -1, 'MEL': -1, 'BNE': -1, 'AKL': -3, 'CHC': -3, // 대양주
+    'ICN': 0, 'PUS': 0, 'GMP': 0, 'CJU': 0, // 한국
+};
+
+const getKSTOffset = (cityName?: string) => {
+    if (!cityName) return 0;
+    const cleanName = cityName.replace(/[()]/g, '').trim();
+    
+    // 1. 코드로 직접 매핑 (PRG 등)
+    const upperCode = cleanName.toUpperCase();
+    if (TIMEZONE_OFFSETS[upperCode]) return TIMEZONE_OFFSETS[upperCode];
+    
+    // 2. 도시명/국가명으로 코드 찾기 (프라하 -> PRG, 체코 -> PRG)
+    const code = CITY_CODE_MAP[cleanName] || COUNTRY_CITY_MAP[cleanName];
+    if (code && TIMEZONE_OFFSETS[code]) return TIMEZONE_OFFSETS[code];
+    
+    return 0;
+};
+
+const calculateFlightDuration = (dept: string, deptCity: string | undefined, arr: string, arrCity: string | undefined) => {
+    if (!dept || !arr) return null;
+    try {
+        const [dHour, dMin] = dept.split(':').map(Number);
+        const [aHour, aMin] = arr.split(':').map(Number);
+        if (isNaN(dHour) || isNaN(dMin) || isNaN(aHour) || isNaN(aMin)) return null;
+        const dOffset = getKSTOffset(deptCity);
+        const aOffset = getKSTOffset(arrCity);
+        let dMinsKST = (dHour * 60 + dMin) + (dOffset * 60);
+        let aMinsKST = (aHour * 60 + aMin) + (aOffset * 60);
+        let diff = aMinsKST - dMinsKST;
+        if (diff <= 0) diff += 1440;
+        const h = Math.floor(diff / 60);
+        const m = diff % 60;
+        return m > 0 ? `${h}시간 ${m}분` : `${h}시간`;
+    } catch { return null; }
+};
 
 type TabKey = '개요' | '일정표' | '여행가이드' | '서류' | '준비물' | '안내사항';
 const TABS: TabKey[] = ['개요', '일정표', '여행가이드', '서류', '준비물', '안내사항'];
@@ -244,7 +300,8 @@ const TimelineItem = ({ item }: { item: any }) => {
                                 display: '-webkit-box',
                                 WebkitLineClamp: isExpanded ? 'unset' : '3',
                                 WebkitBoxOrient: 'vertical',
-                                transition: 'max-height 0.3s ease-in-out'
+                                transition: 'max-height 0.3s ease-in-out',
+                                whiteSpace: 'pre-line'
                             }}
                             dangerouslySetInnerHTML={{ __html: cleanupHtml(item.description) }}
                         />
@@ -448,60 +505,9 @@ const PinchZoomModal = ({ src, onClose, footer, isPdf }: { src: string, onClose:
                         />
                     </>
                 )}
-                {footer && (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            bottom: '0',
-                            left: 0,
-                            right: 0,
-                            padding: '24px',
-                            textAlign: 'center',
-                            zIndex: 101,
-                            pointerEvents: 'auto'
-                        }}
-                        onClick={e => e.stopPropagation()}
-                    >
-                        {footer}
-                    </div>
-                )}
             </div>
         </div>
     );
-};
-
-import { AIRLINE_MAP, CITY_CODE_MAP } from '@/lib/constants/travel-data';
-
-const TIMEZONE_OFFSETS: Record<string, number> = {
-    'CXR': 2, 'DAD': 2, 'SGN': 2, 'HAN': 2, 'PQC': 2, // 베트남
-    'BKK': 2, 'HKT': 2, 'USM': 2, 'CNX': 2, // 태국
-    'SIN': 1, 'MNL': 1, 'CEB': 1, 'TPE': 1, 'HKG': 1, 'PVG': 1, 'PEK': 1, // 동남아/중화권
-    'GUM': -1, 'SPN': -1, // 괌/사이판
-    'ICN': 0, 'PUS': 0, 'GMP': 0, 'CJU': 0, // 한국
-};
-
-const getKSTOffset = (cityCode?: string) => {
-    if (!cityCode) return 0;
-    const cleanCode = cityCode.replace(/[()]/g, '').trim().toUpperCase();
-    return TIMEZONE_OFFSETS[cleanCode] ?? 0;
-};
-
-const calculateFlightDuration = (dept: string, deptCity: string | undefined, arr: string, arrCity: string | undefined) => {
-    if (!dept || !arr) return null;
-    try {
-        const [dHour, dMin] = dept.split(':').map(Number);
-        const [aHour, aMin] = arr.split(':').map(Number);
-        if (isNaN(dHour) || isNaN(dMin) || isNaN(aHour) || isNaN(aMin)) return null;
-        const dOffset = getKSTOffset(deptCity);
-        const aOffset = getKSTOffset(arrCity);
-        let dMinsKST = (dHour * 60 + dMin) + (dOffset * 60);
-        let aMinsKST = (aHour * 60 + aMin) + (aOffset * 60);
-        let diff = aMinsKST - dMinsKST;
-        if (diff <= 0) diff += 1440;
-        const hours = Math.floor(diff / 60);
-        const mins = diff % 60;
-        return mins > 0 ? `${hours}시간 ${mins}분` : `${hours}시간`;
-    } catch { return null; }
 };
 
 const getKoreaTimeText = (localTime: string, cityCode?: string) => {
@@ -585,16 +591,20 @@ const cleanWeatherDesc = (desc: any, destination: any) => {
 };
 
 const getExtraTransportation = (day: any) => {
+    // 1. 크롤러에서 추출한 transport 필드 우선 (기존 유저 데이터 호환)
+    if (day.transport) return day.transport;
+    
+    // 2. 구형 데이터 transportation 매핑 하위 호환
     if (day.transportation) {
         const matchOld = day.transportation.match(/비행기\s*([A-Z0-9]*)\s*\((.+?)\s+(\d{2}:\d{2})\s*출발,\s*(.+?)\s+(\d{2}:\d{2})\s*도착,\s*(.+?)\s*소요\)(?:,\s*(.+))?/);
         const matchNew = day.transportation.match(/([가-힣a-zA-Z]+항공|[가-힣a-zA-Z]+에어)\s*([A-Za-z0-9]+)?,\s*출발\s*(\d{2}:\d{2}),\s*도착\s*(\d{2}:\d{2}),\s*소요(?:시간)?\s*(.+)/);
         
         if (matchOld) {
-            return matchOld[7] ? matchOld[7] : null; // extra text
+            return matchOld[7] ? matchOld[7] : null; 
         } else if (matchNew) {
-            return null; // new formats don't have extra text in the same capture group
+            return null;
         }
-        return day.transportation; // full text since it's not a flight
+        return day.transportation;
     }
     return null;
 };
@@ -611,28 +621,35 @@ const getAirlineInfo = (codeOrName: string) => {
     return { name: codeOrName, logoUrl: null, color: '#3b82f6' };
 };
 const ParsedFlightCard = ({ day, isFirst, isLast }: { day: any, isFirst: boolean, isLast: boolean }) => {
-    let flightInfo: any = null;
-    if (day.transport) {
-        const t = day.transport;
-        flightInfo = {
-            flightNo: t.flightNo,
-            airline: t.airline,
-            departureCity: t.departureCity,
-            departureTime: t.departureTime,
-            arrivalCity: t.arrivalCity,
-            arrivalTime: t.arrivalTime,
-            duration: t.duration,
-        };
-    } else if (day.transportation) {
-        const matchOld = day.transportation.match(/비행기\s*([A-Z0-9]*)\s*\((.+?)\s+(\d{2}:\d{2})\s*출발,\s*(.+?)\s+(\d{2}:\d{2})\s*도착,\s*(.+?)\s*소요\)/);
-        const matchNew = day.transportation.match(/([가-힣a-zA-Z]+항공|[가-힣a-zA-Z]+에어)\s*([A-Za-z0-9]+)?,\s*출발\s*(\d{2}:\d{2}),\s*도착\s*(\d{2}:\d{2}),\s*소요(?:시간)?\s*(.+)/);
-        if (matchOld) {
-            flightInfo = { flightNo: matchOld[1], departureCity: matchOld[2], departureTime: matchOld[3], arrivalCity: matchOld[4], arrivalTime: matchOld[5], duration: matchOld[6] };
-        } else if (matchNew) {
-            flightInfo = { airline: matchNew[1], flightNo: matchNew[2] || '', departureTime: matchNew[3], arrivalTime: matchNew[4], duration: matchNew[5] };
+    // 1. 크롤러가 직접 주입한 flight 객체 우선
+    let flightInfo = day.flight;
+    
+    // 2. transport/transportation 파싱 fallback
+    if (!flightInfo) {
+        if (day.transport) {
+            const t = day.transport;
+            flightInfo = {
+                flightNo: t.flightNo,
+                airline: t.airline,
+                departureCity: t.departureCity,
+                departureTime: t.departureTime,
+                arrivalCity: t.arrivalCity,
+                arrivalTime: t.arrivalTime,
+                duration: t.duration,
+            };
+        } else if (day.transportation) {
+            const matchOld = day.transportation.match(/비행기\s*([A-Z0-9]*)\s*\((.+?)\s+(\d{2}:\d{2})\s*출발,\s*(.+?)\s+(\d{2}:\d{2})\s*도착,\s*(.+?)\s*소요\)/);
+            const matchNew = day.transportation.match(/([가-힣a-zA-Z]+항공|[가-힣a-zA-Z]+에어)\s*([A-Za-z0-9]+)?,\s*출발\s*(\d{2}:\d{2}),\s*도착\s*(\d{2}:\d{2}),\s*소요(?:시간)?\s*(.+)/);
+            if (matchOld) {
+                flightInfo = { flightNo: matchOld[1], departureCity: matchOld[2], departureTime: matchOld[3], arrivalCity: matchOld[4], arrivalTime: matchOld[5], duration: matchOld[6] };
+            } else if (matchNew) {
+                flightInfo = { airline: matchNew[1], flightNo: matchNew[2] || '', departureTime: matchNew[3], arrivalTime: matchNew[4], duration: matchNew[5] };
+            }
         }
     }
-    if (!flightInfo) return null;
+    
+    // 데이터가 유효한지(최소한 편명이나 시간이 있는지) 체크하여 노출 결정
+    if (!flightInfo || (!flightInfo.flightNo && !flightInfo.departureTime)) return null;
     const title = isFirst ? '가는 편' : (isLast ? '오는 편' : undefined);
     return <UnifiedFlightCard flightInfo={flightInfo} dateStr={day.date} title={title} />;
 };
@@ -693,18 +710,18 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
     const deptCode = CITY_CODE_MAP[deptCity] ? ` (${CITY_CODE_MAP[deptCity]})` : '';
     const arrCode = CITY_CODE_MAP[arrCity] ? ` (${CITY_CODE_MAP[arrCity]})` : '';
 
-    const durationText = flightInfo.duration || calculateFlightDuration(flightInfo.departureTime, deptCode, flightInfo.arrivalTime, arrCode);
+    // API 제공 소요 시간(13:00 등) 우선 처리 및 포맷 변환
+    let durationText = flightInfo.duration || calculateFlightDuration(flightInfo.departureTime, deptCode, flightInfo.arrivalTime, arrCode);
+    if (durationText && durationText.includes(':') && durationText.length <= 5) {
+        const [hh, mm] = durationText.split(':').map(Number);
+        if (!isNaN(hh)) {
+            durationText = mm > 0 ? `${hh}시간 ${mm}분` : `${hh}시간`;
+        }
+    }
 
-    const needDepKST = !!getKoreaTimeText(flightInfo.departureTime, deptCode);
-    const needArrKST = !!getKoreaTimeText(flightInfo.arrivalTime, arrCode);
-
-    const displayDepKST = needDepKST && !needArrKST && flightInfo.duration
-        ? getDepartureKST(flightInfo.arrivalTime, flightInfo.duration) || getKoreaTimeText(flightInfo.departureTime, deptCode)
-        : getKoreaTimeText(flightInfo.departureTime, deptCode);
-
-    const displayArrKST = needArrKST && !needDepKST && flightInfo.duration
-        ? getArrivalKST(flightInfo.departureTime, flightInfo.duration) || getKoreaTimeText(flightInfo.arrivalTime, arrCode)
-        : getKoreaTimeText(flightInfo.arrivalTime, arrCode);
+    // 시차가 존재할 경우에만 한국 시간 표시
+    const ktDept = getKoreaTimeText(flightInfo.departureTime, deptCode);
+    const ktArr = getKoreaTimeText(flightInfo.arrivalTime, arrCode);
 
     return (
         <div style={{ marginBottom: '24px', marginTop: title ? '16px' : '0', position: 'relative' }}>
@@ -730,22 +747,32 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
             <div style={{
                 background: '#fff',
                 border: '1px solid #e2e8f0',
-                borderRadius: '16px',
-                padding: '24px 20px 20px', // 여백 최적화
+                borderRadius: '20px',
+                padding: '24px 20px 20px',
                 position: 'relative',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
+                boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     
                     {/* 왼쪽: 출발 정보 */}
-                    <div style={{ textAlign: 'left', width: '30%', minWidth: '90px' }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{deptCity}{deptCode} 출발</div>
-                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{formatDateStr(dateStr)}</div>}
-                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{flightInfo.departureTime}</div>
+                    <div style={{ textAlign: 'left', width: '32%', minWidth: '95px' }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '4px', wordBreak: 'keep-all' }}>{deptCity}{deptCode}</div>
+                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px' }}>{formatDateStr(dateStr)}</div>}
+                        <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>{flightInfo.departureTime}</div>
                         
-                        {displayDepKST && (
-                            <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 500, marginTop: '2px' }}>
-                                {displayDepKST}
+                        {ktDept && (
+                            <div style={{ 
+                                fontSize: '0.65rem', 
+                                color: '#3b82f6', 
+                                fontWeight: 700, 
+                                marginTop: '6px', 
+                                background: '#eff6ff', 
+                                padding: '2px 6px', 
+                                borderRadius: '4px',
+                                display: 'inline-flex',
+                                alignItems: 'center'
+                            }}>
+                                {ktDept}
                             </div>
                         )}
                     </div>
@@ -753,7 +780,7 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
                     {/* 중앙: 아이콘, 노선, 시간 */}
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px' }}>
                         {flightInfo.flightNo && (
-                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#3b82f6', marginBottom: '4px' }}>
+                            <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#2563eb', marginBottom: '4px' }}>
                                 {flightInfo.flightNo}
                             </div>
                         )}
@@ -765,30 +792,40 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
                                     {info.name.slice(0, 1)}
                                 </div>
                             )}
-                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#111' }}>{info.name}</span>
+                            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569' }}>{info.name}</span>
                         </div>
 
                         {/* 타임라인 바 */}
-                        <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
-                            <div style={{ flex: 1, height: '1.5px', background: '#cbd5e1' }}></div>
-                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#9ca3af' }}></div>
+                        <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0' }}>
+                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#cbd5e1' }}></div>
+                            <div style={{ flex: 1, height: '1.5px', background: 'linear-gradient(90deg, #cbd5e1 0%, #e2e8f0 50%, #cbd5e1 100%)' }}></div>
+                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#cbd5e1' }}></div>
                         </div>
 
-                        <div style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 600, marginTop: '8px' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 700, marginTop: '8px', background: '#f0fdf4', padding: '2px 8px', borderRadius: '10px' }}>
                             {durationText} 소요
                         </div>
                     </div>
 
                     {/* 오른쪽: 도착 정보 */}
-                    <div style={{ textAlign: 'right', width: '30%', minWidth: '90px' }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111', marginBottom: '4px', wordBreak: 'keep-all' }}>{arrCity}{arrCode} 도착</div>
-                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '2px' }}>{formatDateStr(dateStr)}</div>}
-                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111' }}>{flightInfo.arrivalTime}</div>
+                    <div style={{ textAlign: 'right', width: '32%', minWidth: '95px' }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '4px', wordBreak: 'keep-all' }}>{arrCity}{arrCode}</div>
+                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px' }}>{formatDateStr(dateStr)}</div>}
+                        <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>{flightInfo.arrivalTime}</div>
                         
-                        {displayArrKST && (
-                            <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 500, marginTop: '2px' }}>
-                                {displayArrKST}
+                        {ktArr && (
+                            <div style={{ 
+                                fontSize: '0.65rem', 
+                                color: '#3b82f6', 
+                                fontWeight: 700, 
+                                marginTop: '6px', 
+                                background: '#eff6ff', 
+                                padding: '2px 6px', 
+                                borderRadius: '4px',
+                                display: 'inline-flex',
+                                alignItems: 'center'
+                            }}>
+                                {ktArr}
                             </div>
                         )}
                     </div>
@@ -833,6 +870,10 @@ export default function ConfirmationViewerPage() {
                 const json = await res.json();
                 if (json.success) {
                     setDoc(json.data);
+                    // 미팅 정보가 있으면 기본적으로 아코디언을 엽니다.
+                    if (json.data.meetingInfo && json.data.meetingInfo.length > 0) {
+                        setExpandedSections(prev => ({ ...prev, meeting: true }));
+                    }
                 } else {
                     setError(json.error || '확정서를 찾을 수 없습니다.');
                 }
@@ -1033,6 +1074,10 @@ export default function ConfirmationViewerPage() {
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> 예약 정보
                             </div>
                             <div className="mc-info-grid">
+                                <div className="mc-info-item full">
+                                    <span className="info-label">여행 상품명</span>
+                                    <span className="info-value">{doc.trip.productName}</span>
+                                </div>
                                 <div className="mc-info-item">
                                     <span className="info-label">예약번호</span>
                                     <span className="info-value highlight">{doc.reservationNumber}</span>
@@ -1040,6 +1085,14 @@ export default function ConfirmationViewerPage() {
                                 <div className="mc-info-item">
                                     <span className="info-label">예약자</span>
                                     <span className="info-value">{doc.customer.name}</span>
+                                </div>
+                                <div className="mc-info-item">
+                                    <span className="info-label">목적지</span>
+                                    <span className="info-value">{doc.trip.destination}</span>
+                                </div>
+                                <div className="mc-info-item">
+                                    <span className="info-label">여행 기간</span>
+                                    <span className="info-value">{doc.trip.duration || `${itinerary.length-1}박 ${itinerary.length}일`}</span>
                                 </div>
                                 <div className="mc-info-item">
                                     <span className="info-label">연락처</span>
@@ -1066,12 +1119,6 @@ export default function ConfirmationViewerPage() {
                                     <span className="info-label">귀국일</span>
                                     <span className="info-value">{formatDateStr(doc.trip.returnDate)}</span>
                                 </div>
-                                {doc.trip.duration && (
-                                    <div className="mc-info-item full">
-                                        <span className="info-label">여행 기간</span>
-                                        <span className="info-value">{doc.trip.duration}</span>
-                                    </div>
-                                )}
                             </div>
 
                             {/* 여행자 명단 */}
@@ -1106,9 +1153,13 @@ export default function ConfirmationViewerPage() {
                                                 flightNo: doc.flight.departureFlightNumber,
                                                 departureCity: simplifyDestination(doc.flight.departureAirport),
                                                 departureTime: doc.flight.departureTime,
-                                                arrivalCity: simplifyDestination(doc.trip.destination),
+                                                arrivalCity: simplifyDestination(
+                                                    (doc.flight as any).arrivalAirport || 
+                                                    (doc.itinerary[0] as any)?.flight?.arrivalCity || 
+                                                    doc.trip.destination
+                                                ),
                                                 arrivalTime: doc.flight.arrivalTime,
-                                                duration: (doc.flight as any).departureDuration
+                                                duration: (doc.flight as any).departureDuration || (doc.itinerary[0] as any)?.flight?.duration
                                             }} 
                                         />
                                     )}
@@ -1119,14 +1170,37 @@ export default function ConfirmationViewerPage() {
                                             flightInfo={{
                                                 airline: doc.flight.airline,
                                                 flightNo: doc.flight.returnFlightNumber,
-                                                departureCity: simplifyDestination(doc.trip.destination),
+                                                departureCity: simplifyDestination(
+                                                    (doc.flight as any).returnDepartureAirport || 
+                                                    (doc.itinerary[doc.itinerary.length-1] as any)?.flight?.departureCity || 
+                                                    doc.trip.destination
+                                                ),
                                                 departureTime: doc.flight.returnDepartureTime,
                                                 arrivalCity: simplifyDestination(doc.flight.departureAirport),
                                                 arrivalTime: doc.flight.returnArrivalTime,
-                                                duration: (doc.flight as any).returnDuration
+                                                duration: (doc.flight as any).returnDuration || (doc.itinerary[doc.itinerary.length-1] as any)?.flight?.duration
                                             }} 
                                         />
                                     )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 숙소 정보 추가 */}
+                        {doc.itinerary && doc.itinerary.some(d => d.hotel && !d.hotel.includes('확정 예정')) && (
+                            <div className="mc-section">
+                                <div className="mc-section-title">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> 숙소 정보
+                                </div>
+                                <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    {Array.from(new Set(doc.itinerary.map(d => d.hotel).filter(h => h && !h.includes('확정 예정')))).map((hotel, i) => (
+                                        <div key={i} style={{ padding: '12px 16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center' }}>
+                                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px' }}>
+                                                🏠
+                                            </div>
+                                            <div style={{ fontSize: '0.9rem', color: '#1e293b', fontWeight: '500' }}>{hotel}</div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}
@@ -1285,7 +1359,7 @@ export default function ConfirmationViewerPage() {
                                             <div key={i} className={`mc-day-card ${isOpen ? 'open' : 'closed'}`}>
                                                 <div className="day-header" onClick={() => toggleDay(i)}>
                                                     <div className="day-number">
-                                                        {typeof day === 'string' ? `Day ${i + 1}` : (day.day || `Day ${i + 1}`)}
+                                                        {typeof day === 'string' ? `${i + 1}일차` : (day.day ? `${day.day}일차` : `${i + 1}일차`)}
                                                         {day.date && <span className="day-date">{formatDateStr(day.date)}</span>}
                                                     </div>
                                                     {day.title && <div className="day-title">{day.title}</div>}
@@ -1675,15 +1749,33 @@ export default function ConfirmationViewerPage() {
                                     <div style={{ marginBottom: '24px' }}>
                                         <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.62 1.96v.18A2 2 0 0 0 3 7.5V19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7.5a2 2 0 0 0 1-1.9v-.18a2 2 0 0 0-1.62-1.96Z"></path><path d="M12 21V7"></path><path d="M16 21V11"></path><path d="M8 21V11"></path></svg>
-                                            의류 및 준비물 가이드
+                                            상세기후 및 복장 가이드
                                         </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                                            {sr.weather?.clothingTips?.map((tip: any, i: number) => (
-                                                <div key={i} style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-                                                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#1e293b', marginBottom: '4px' }}>{tip.title}</div>
-                                                    <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4, wordBreak: 'keep-all' }}>{tip.content}</div>
-                                                </div>
-                                            ))}
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                            {sr.weather?.clothingTips?.map((tip: any, i: number) => {
+                                                const getIcon = (title: string) => {
+                                                    if (title.includes('상의') || title.includes('외투')) return '🧥';
+                                                    if (title.includes('하의')) return '👖';
+                                                    if (title.includes('신발')) return '👟';
+                                                    return '🎒';
+                                                };
+                                                return (
+                                                    <div key={i} style={{ background: '#f8fafc', padding: '16px', borderRadius: '16px', border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                            <span style={{ fontSize: '1rem' }}>{getIcon(tip.title)}</span>
+                                                            <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1e293b' }}>{tip.title}</div>
+                                                        </div>
+                                                        <div style={{ fontSize: '0.8rem', color: '#475569', lineHeight: 1.6, wordBreak: 'keep-all', fontWeight: 500 }}>
+                                                            {tip.content.split('. ').map((s: string, idx: number) => (
+                                                                <div key={idx} style={{ marginBottom: '4px', display: 'flex', gap: '4px' }}>
+                                                                    <span style={{ color: '#94a3b8' }}>•</span>
+                                                                    <span>{s.trim()}{!s.trim().endsWith('.') && s.trim().length > 0 ? '.' : ''}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     </div>
 

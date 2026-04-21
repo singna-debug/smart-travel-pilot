@@ -286,7 +286,7 @@ ${customGuides && customGuides.length > 0 ? `요청 가이드 주제: ${customGu
 (마크다운 없이 순수 JSON만 반환)
 {
   "landmarks": [
-    { "name": "명소 한글 이름", "nameLocal": "영문 또는 현지어 이름", "description": "1-2줄 핵심 소개", "imageUrl": "unsplash 등 이미지 URL" }
+    { "name": "명소 한글 이름", "nameLocal": "영문 또는 현지어 이름", "description": "1-2줄 핵심 소개", "imageUrl": "" }
   ],
   "customGuides": [
     ${customGuides && customGuides.length > 0 ? customGuides.map((g: string) => `{ "topic": "${g}", "icon": "📝", "sections": [{ "title": "정보 요약", "type": "text", "content": "상세 내용" }] }`).join(',') : ''}

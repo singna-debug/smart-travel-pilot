@@ -937,3 +937,107 @@ body {
     max-width: 100% !important;
     box-sizing: border-box !important;
 }
+
+/* 미팅 및 수속 카드 스타일 */
+.meeting-cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 4px;
+}
+
+.meeting-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.meeting-card-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.meeting-card-body {
+    padding: 16px;
+}
+
+.meeting-type-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.meeting-type-badge.counter {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.meeting-type-badge.meeting {
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.meeting-time-loc {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.meeting-time {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.meeting-loc {
+    font-size: 0.85rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.meeting-desc {
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.6;
+    white-space: pre-line;
+    word-break: keep-all;
+}
+
+/* 가이드 아코디언 보강 */
+.mc-guide-container {
+    background: #fff;
+    border-radius: 20px;
+    padding: 0;
+}
+
+.guide-header-banner {
+    padding: 40px 24px;
+    border-radius: 0 0 24px 24px;
+    color: #fff;
+    text-align: center;
+}
+
+.guide-header-label {
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    color: #38bdf8;
+    margin-bottom: 12px;
+}
+
+.guide-header-banner h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+}

@@ -452,6 +452,10 @@ export default function ConfirmationPage() {
         setItinerary(prev => prev.map((d, i) => i === idx ? { ...d, hotel } : d));
     };
 
+    const updateDayTransport = (idx: number, transport: string) => {
+        setItinerary(prev => prev.map((d, i) => i === idx ? { ...d, transport } : d));
+    };
+
     // 미팅/수속 정보 관리
     const addMeetingInfo = () => setMeetingInfo(prev => [...prev, { type: '미팅장소', location: '', time: '', description: '', imageUrl: '' }]);
     const removeMeetingInfo = (i: number) => setMeetingInfo(prev => prev.filter((_, idx) => idx !== i));
@@ -700,12 +704,6 @@ export default function ConfirmationPage() {
         }));
     };
 
-    const updateDayTransport = (dayIdx: number, field: string, value: string) => {
-        setItinerary(prev => prev.map((day, idx) => {
-            if (idx !== dayIdx) return day;
-            return { ...day, transport: { ...(day.transport || {}), [field]: value } };
-        }));
-    };
 
     const updateDayMeals = (dayIdx: number, field: string, value: string) => {
         setItinerary(prev => prev.map((day, idx) => idx === dayIdx ? { ...day, [field]: value } : day));
@@ -1256,7 +1254,7 @@ export default function ConfirmationPage() {
                                         borderRadius: '8px',
                                         fontSize: '0.8rem',
                                         fontWeight: 700,
-                                    }}>Day {i + 1}</span>
+                                    }}>{i + 1}일차</span>
                                     <input
                                         value={day.title || ''}
                                         onChange={e => updateDayTitle(i, e.target.value)}
@@ -1340,8 +1338,8 @@ export default function ConfirmationPage() {
                                 </button>
                             </div>
 
-                            {/* Meals & Hotel */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px', padding: '16px', borderRadius: '10px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)' }}>
+                            {/* Meals, Hotel & Transport */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', padding: '16px', borderRadius: '10px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)' }}>
                                 <div className="confirm-field">
                                     <label>🍳 조식</label>
                                     <input
@@ -1369,6 +1367,15 @@ export default function ConfirmationPage() {
                                         value={day.hotel || ''}
                                         onChange={e => updateDayHotel(i, e.target.value)}
                                         style={{ color: '#fbbf24', fontWeight: 600 }}
+                                    />
+                                </div>
+                                <div className="confirm-field">
+                                    <label>🚌 현지 교통</label>
+                                    <input
+                                        value={day.transport || ''}
+                                        onChange={e => updateDayTransport(i, e.target.value)}
+                                        placeholder="예: 대형버스"
+                                        style={{ color: '#60a5fa' }}
                                     />
                                 </div>
                             </div>
