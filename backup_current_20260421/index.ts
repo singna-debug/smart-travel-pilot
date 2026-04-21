@@ -56,11 +56,6 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
                 inclusionsCount: nativeData.inclusions?.length || 0,
             } : null,
         }, null, 2));
-
-        // [추가] 원본 데이터 무조건 저장 (필드 추적용)
-        if (nativeData) {
-            fs.writeFileSync(path.join(tmpDir, 'full_native_data.json'), JSON.stringify(nativeData, null, 2));
-        }
     } catch (e) {}
 
     // ===== 3단계: 충분하면 Gemini 없이 직접 반환 =====

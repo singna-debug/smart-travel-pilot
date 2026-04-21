@@ -500,21 +500,22 @@ const getKoreaTimeText = (localTime: string, cityCode?: string) => {
     } catch { return null; }
 };
 
-const simplifyDestination = (dest: string | undefined) => {
+const simplifyDestination = (dest: any) => {
     if (!dest) return '도착';
-    const firstPart = dest.split(',')[0].trim();
+    const firstPart = String(dest).split(',')[0].trim();
     const words = firstPart.split(' ');
     // 단어 배열의 마지막 요소를 선택하여 '일본 삿포로' 같은 경우 '삿포로'만 추출
     return words[words.length - 1];
 };
 
-const cleanWeatherDesc = (desc: string | undefined, destination: string | undefined) => {
+const cleanWeatherDesc = (desc: any, destination: any) => {
     if (!desc) return '정보 없음';
-    let clean = desc;
+    let clean = String(desc);
     
     // 1. 여행지 관련 단어(국가, 도시)가 포함된 경우 제거
     if (destination) {
-        const destParts = destination.split(/[\s,·\(\)]+/).filter(p => p.length > 1);
+        const destStr = String(destination);
+        const destParts = destStr.split(/[\s,·\(\)]+/).filter(p => p.length > 1);
         destParts.forEach(part => {
              const regex = new RegExp(`\\s*${part}\\s*`, 'gi');
              clean = clean.replace(regex, ' ').trim();
@@ -1590,7 +1591,7 @@ export default function ConfirmationViewerPage() {
                                                             <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', marginBottom: '4px', letterSpacing: '-0.02em' }}>{i + 1}일차</div>
                                                             <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>{displayDate}</div>
                                                             <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500, opacity: 0.9 }}>
-                                                                {`(${(day.location || simplifyDestination(doc.trip.destination)).replace(/[\(\)]/g, '')})`}
+                                                                {`(${String(day.location || simplifyDestination(doc.trip.destination)).replace(/[\(\)]/g, '')})`}
                                                             </div>
                                                         </div>
                                                         
@@ -1633,8 +1634,8 @@ export default function ConfirmationViewerPage() {
                                                             gap: '8px',
                                                             paddingBottom: '4px'
                                                         }}>
-                                                            <span style={{ fontSize: '1.35rem', fontWeight: 900, color: '#fff' }}>{day.tempMax?.replace(/[^0-9.-]/g, '')}°</span>
-                                                            <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'rgba(148, 163, 184, 0.7)' }}>/ {day.tempMin?.replace(/[^0-9.-]/g, '')}°</span>
+                                                            <span style={{ fontSize: '1.35rem', fontWeight: 900, color: '#fff' }}>{String(day.tempMax ?? '').replace(/[^0-9.-]/g, '')}°</span>
+                                                            <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'rgba(148, 163, 184, 0.7)' }}>/ {String(day.tempMin ?? '').replace(/[^0-9.-]/g, '')}°</span>
                                                         </div>
                                                     </div>
                                                 );
