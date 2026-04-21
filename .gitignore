@@ -45,3 +45,8 @@ google-credentials.json
 *.log
 .vercel
 .env*.local
+*.zip
+api-dump.json
+tmp/
+scratch/
+backup_current_*/
