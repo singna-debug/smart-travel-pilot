@@ -1,0 +1,384 @@
+{
+  "isProduct": true,
+  "title": "[럭셔리 장가계][노쇼핑/노옵션/노팁] 장가계/원가계 직항 4박5일 [칠성산/유리다리+대협곡/황룡동굴]",
+  "destination": "중국, 장가계",
+  "price": "1799000",
+  "departureDate": "2026-10-13",
+  "returnDate": "2026-10-17",
+  "departureAirport": "인천",
+  "airline": "사천항공",
+  "duration": "4박 5일",
+  "departureFlightNumber": "3U3708",
+  "returnFlightNumber": "3U3707",
+  "departureTime": "21:50",
+  "arrivalTime": "23:55",
+  "returnDepartureTime": "16:20",
+  "returnArrivalTime": "20:30",
+  "url": "https://www.modetour.com/package/103293258?MLoc=99&Pnum=103293258&ANO=81440&sno=C117876&thru=crs",
+  "keyPoints": [
+    "노쇼핑 노옵션 팁포함으로 부담없이 즐기는 장가계",
+    "리무진버스탑승으로 더욱 더 편안한 일정",
+    "5성급 호텔 숙박으로 편안한 숙박",
+    "장가계도 식후경, 맛집으로 가득 찬 일정",
+    "모두투어의 자랑, 시그니쳐 블랙",
+    "장가계 직항 (DYG) 공항 모두투어 VIP 라운지 이용 혜택",
+    "천문산  장가계의 상징, 7,455M의 천문산 케이블카 탑승",
+    "72기루",
+    "백룡엘리베이터",
+    "십리화랑",
+    "유리다리  2016년 신규오픈하여 세계 최장길이의 다리로 기네스북에 등재를 앞두고 있는 유리다리는 현재 장가계의 가",
+    "황룡동굴  군지평 동쪽으로 8km 떨어진 곳에 위치해 있다. 지각운동으로 인해 생성된 석회암 용암동굴로 상하 4층으로",
+    "장가계 공항 VIP라운지  장가계 공항 VIP라운지"
+  ],
+  "itinerary": [
+    {
+      "day": 1,
+      "title": "인천",
+      "date": "2026-10-13T00:00:00",
+      "route": "인천",
+      "transport": {
+        "airline": "사천항공",
+        "flightNo": "3U3708",
+        "departureTime": "21:50",
+        "arrivalTime": "23:55",
+        "returnDepartureTime": "",
+        "returnArrivalTime": ""
+      },
+      "timeline": [
+        {
+          "type": "location",
+          "title": "중국 입국 유의사항/ 온라인 입국신고서 작성 안내사항",
+          "subtitle": "유의 ㅣ 안내사항",
+          "description": "중국 무비자 입국/온라인 입국 신고서 안내사항"
+        },
+        {
+          "type": "location",
+          "title": "입국 도시(호남성-장가계)",
+          "subtitle": "유의 ㅣ 안내사항",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "",
+          "subtitle": "기타단문",
+          "description": "\r본 상품은 모두투어의 동일 항공 또는 타 항공의 다른 상품과 현지에서 조인(합류)되어 진행되며 이용 항공과 이용 호텔 등에 따라 상품가격과 일정 등의 차이가 있을 수 있습니다.\r\n가이드 및 최종 행사 안내는 출발 2~3일 전에 안내해 드립니다."
+        },
+        {
+          "type": "location",
+          "title": "",
+          "subtitle": "기타단문",
+          "description": "\r억만년의 침수와 자연붕괴 등의 자연적 영향으로 오늘의 깊은 협곡과 기이한 봉우리, 물 맑은 계곡의 자연절경이 이루어졌다. 장가계의 웅대하면서도 아름답고 기이한 산세에 정신을 잃으며 이 때문에 수많은 학자, 전문가들은 무릉원을 \"대자연의 미궁\"과 \"지구 기념물\" 이라 부른다."
+        },
+        {
+          "type": "location",
+          "title": "",
+          "subtitle": "기타단문",
+          "description": "일부 관광지에서는 정확한 여권정보가 필요합니다. 정보가 잘못 기입될 경우 입장이 제한될 수 있습니다."
+        }
+      ],
+      "hotel": "총 4개의 예정 호텔이 있습니다. 확정 되는대로(출발 1일전까지) 홈페이지, 이메일 또는 알림톡 등을 통해 안내 드리겠습니다.",
+      "meals": {
+        "breakfast": "",
+        "lunch": "",
+        "dinner": ""
+      }
+    },
+    {
+      "day": 2,
+      "title": "장가계",
+      "date": "2026-10-14T00:00:00",
+      "route": "장가계",
+      "transport": {
+        "airline": "사천항공",
+        "flightNo": "",
+        "departureTime": "",
+        "arrivalTime": "",
+        "returnDepartureTime": "",
+        "returnArrivalTime": ""
+      },
+      "timeline": [
+        {
+          "type": "location",
+          "title": "천문산",
+          "subtitle": "관광(콘텐츠)",
+          "description": "장가계의 상징, 7,455M의 천문산 케이블카 탑승+천문동"
+        },
+        {
+          "type": "location",
+          "title": "천문산사+귀곡잔도",
+          "subtitle": "관광(콘텐츠)",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "천문산 유리잔도",
+          "subtitle": "관광(콘텐츠)",
+          "description": "절벽 위에 70M가 되는 유리로 만들어 놓은 길"
+        },
+        {
+          "type": "location",
+          "title": "",
+          "subtitle": "관광(콘텐츠)",
+          "description": "유리전망대+유리잔도"
+        },
+        {
+          "type": "location",
+          "title": "칠성산",
+          "subtitle": "관광(콘텐츠)",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "칠성산 유리잔도",
+          "subtitle": "관광(콘텐츠)",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "천문호선쇼",
+          "subtitle": "관광(콘텐츠)",
+          "description": "장가계 소수민족, 토가족의 전설 연출한 중국 최고의 쇼\n\r※동계시즌에는 다른 쇼(매력상서쇼, 천고정쇼 등)로 대체될 수 있습니다. "
+        },
+        {
+          "type": "location",
+          "title": "72기루",
+          "subtitle": "관광(콘텐츠)",
+          "description": "내부관광"
+        }
+      ],
+      "hotel": "총 4개의 예정 호텔이 있습니다. 확정 되는대로(출발 1일전까지) 홈페이지, 이메일 또는 알림톡 등을 통해 안내 드리겠습니다.",
+      "meals": {
+        "breakfast": "",
+        "lunch": "",
+        "dinner": ""
+      }
+    },
+    {
+      "day": 3,
+      "title": "장가계",
+      "date": "2026-10-15T00:00:00",
+      "route": "장가계",
+      "transport": {
+        "airline": "사천항공",
+        "flightNo": "",
+        "departureTime": "",
+        "arrivalTime": "",
+        "returnDepartureTime": "",
+        "returnArrivalTime": ""
+      },
+      "timeline": [
+        {
+          "type": "location",
+          "title": "보봉호",
+          "subtitle": "관광(콘텐츠)",
+          "description": "VIP코스 (셔틀버스+유람선)"
+        },
+        {
+          "type": "location",
+          "title": "천자산",
+          "subtitle": "관광(콘텐츠)",
+          "description": "무릉원의 서북쪽에 위치해 있는 천자산은 넓은 시야와 웅장한 기세의 풍경을 자랑한다.  특히 운도, 월휘, "
+        },
+        {
+          "type": "location",
+          "title": "하룡공원",
+          "subtitle": "관광(콘텐츠)",
+          "description": "중국의 10대 원수 중의 한 명인 하룡장군을 기리는 공원이 마련되어 있다. 공원 한켠에는 하룡장군의 동상"
+        },
+        {
+          "type": "location",
+          "title": "어필봉",
+          "subtitle": "관광(콘텐츠)",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "원가계",
+          "subtitle": "관광(콘텐츠)",
+          "description": "장가계 국가삼림공원 내에 위치해 있는 장가계의 절경 중의 하나로 천하제일교(天下第一僑)와 미혼대 등의 "
+        },
+        {
+          "type": "location",
+          "title": "천하제일교",
+          "subtitle": "관광(콘텐츠)",
+          "description": "기적중의 기적으로 불리우는 천하제일교는 높이 300m의 커다란 바위 두개가 자연적으로 연결되서 형성된 것"
+        },
+        {
+          "type": "location",
+          "title": "미혼대",
+          "subtitle": "관광(콘텐츠)",
+          "description": "기암절벽이 절경을 이루어, 보는 이의 혼을 빼놓는다는 관광 전망대"
+        },
+        {
+          "type": "location",
+          "title": "백룡엘리베이터",
+          "subtitle": "관광(콘텐츠)",
+          "description": "높이 335M의 수직절벽 엘리베이터"
+        },
+        {
+          "type": "location",
+          "title": "금편계곡",
+          "subtitle": "관광(콘텐츠)",
+          "description": "신선계곡이라 불리며 원시림에서 뿜어져 나오는 맑은 공기로 힐링의 계곡이라 불리는 금편계곡"
+        },
+        {
+          "type": "location",
+          "title": "십리화랑",
+          "subtitle": "관광(콘텐츠)",
+          "description": ""
+        }
+      ],
+      "hotel": "총 4개의 예정 호텔이 있습니다. 확정 되는대로(출발 1일전까지) 홈페이지, 이메일 또는 알림톡 등을 통해 안내 드리겠습니다.",
+      "meals": {
+        "breakfast": "",
+        "lunch": "",
+        "dinner": ""
+      }
+    },
+    {
+      "day": 4,
+      "title": "장가계",
+      "date": "2026-10-16T00:00:00",
+      "route": "장가계",
+      "transport": {
+        "airline": "사천항공",
+        "flightNo": "",
+        "departureTime": "",
+        "arrivalTime": "",
+        "returnDepartureTime": "",
+        "returnArrivalTime": ""
+      },
+      "timeline": [
+        {
+          "type": "location",
+          "title": "백장협(차창관광)",
+          "subtitle": "관광(차창)",
+          "description": "백장협"
+        },
+        {
+          "type": "location",
+          "title": "유리다리",
+          "subtitle": "관광(콘텐츠)",
+          "description": "2016년 신규오픈하여 세계 최장길이의 다리로 기네스북에 등재를 앞두고 있는 유리다리는 현재 장가계의 가"
+        },
+        {
+          "type": "location",
+          "title": "대협곡",
+          "subtitle": "관광(콘텐츠)",
+          "description": "유람선"
+        }
+      ],
+      "hotel": "총 4개의 예정 호텔이 있습니다. 확정 되는대로(출발 1일전까지) 홈페이지, 이메일 또는 알림톡 등을 통해 안내 드리겠습니다.",
+      "meals": {
+        "breakfast": "",
+        "lunch": "",
+        "dinner": ""
+      }
+    },
+    {
+      "day": 5,
+      "title": "장가계 → 인천",
+      "date": "2026-10-17T00:00:00",
+      "route": "장가계 → 인천",
+      "transport": {
+        "airline": "사천항공",
+        "flightNo": "3U3707",
+        "departureTime": "",
+        "arrivalTime": "",
+        "returnDepartureTime": "16:20",
+        "returnArrivalTime": "20:30"
+      },
+      "timeline": [
+        {
+          "type": "location",
+          "title": "황룡동굴",
+          "subtitle": "관광(콘텐츠)",
+          "description": "VIP"
+        },
+        {
+          "type": "location",
+          "title": "군성사석화",
+          "subtitle": "관광(콘텐츠)",
+          "description": " 중국의 유명한 화가인 이군성 화가의 작품을 전시해 놓은 미술관으로, 이름에서도 알 수 있듯이 일반 전시"
+        },
+        {
+          "type": "location",
+          "title": "장가계 공항 VIP라운지",
+          "subtitle": "관광(콘텐츠)",
+          "description": "[시그니처 특전] 장가계공항(DYG) VIP 라운지 이용"
+        },
+        {
+          "type": "location",
+          "title": "",
+          "subtitle": "기타단문",
+          "description": "\r모두투어와 함께 즐거운 여행이 되셨기를 바랍니다."
+        }
+      ],
+      "hotel": "",
+      "meals": {
+        "breakfast": "",
+        "lunch": "",
+        "dinner": ""
+      }
+    }
+  ],
+  "hotels": [
+    {
+      "name": "장가계 피닉스 호텔",
+      "englishName": "Country Garden Phoenix Hotel ZhangJiaJie",
+      "address": "주소: Banping Village, Shadi Township, Zhangjiajie, Hunan, 중국\n전화:+(86-744)860-8888\n",
+      "groupName": "",
+      "images": [],
+      "amenities": []
+    },
+    {
+      "name": "장가계 썬샤인 호텔 (=양광호텔)",
+      "englishName": "Zhangjiajie Sunshine Hotel",
+      "address": "주소: 중국 Hunan Sheng, Zhangjiajie Shi, Yongding Qu, 永定大道?2? ?政??: 427000\n전화:+(86-744)855-8888\n",
+      "groupName": "",
+      "images": [],
+      "amenities": []
+    },
+    {
+      "name": "장가계 청화금강 호텔",
+      "englishName": "Qinghe Jinjiang  Internationl Hotel",
+      "address": "",
+      "groupName": "",
+      "images": [],
+      "amenities": []
+    },
+    {
+      "name": "장가계 화천성 호텔",
+      "englishName": "ZHANGJIAJIE HUATIAN HOTEL",
+      "address": "장가계  영정구 영빈로와 대용루 교휘처 (?家界 永定? 迎?路和大庸路交?)\n",
+      "groupName": "",
+      "images": [],
+      "amenities": []
+    }
+  ],
+  "inclusions": [
+    "왕복항공료 및&nbsp;호텔 숙박비",
+    "인천공항세,관광진흥기금,전쟁보험료,현지공항세, 유류할증료",
+    "가이드/기사 경비",
+    "3억원 여행자 보험"
+  ],
+  "exclusions": [
+    "개인 경비 및 매너팁 (생수 및 음료수 등)",
+    "[중국 무비자 입국안내]",
+    "2026년 12월 31일까지 한국인 대상 중국 무비자 입국 시행",
+    "사업, 관광, 친지 방문 및 국경 통과 목적으로 15일 이내 체류 가능",
+    "※ 일반 여권 이외 개인비자 필요 → 중국 대사관 개별 문의",
+    "[비즈니스석 안내]",
+    "1인 15만원 추가로 비즈니스석 업그레이드 가능합니다. 예약 시 문의 주세요.",
+    "해당 전세기항공편은 국토부의 인,허가 승인 조건이며, 항공스케쥴이 취소 또는 변경 될 수 있습니다."
+  ],
+  "meetingInfo": [
+    {
+      "type": "미팅포인트",
+      "location": "공항 도착 후 별도 미팅 없이 바로 출국 수속을 진행할 수 있습니다. 인천국제공항 1터미널 개별수속 (출발 최소 3시간전까지) -미팅서비스 사전신청고객 : N카운터 14번출구 앞 9~10번 모두투어 테이블 미팅",
+      "time": "18:50",
+      "description": "<b><span style=\"color:red;\">[출국 절차 안내]</span></b><br>최소 3시간전 공항 도착 → 전자항공권(e-티켓) 소지 후 항공사 탑승 수속 및 수화물 위탁 → 출국장 이동 → 보안검색 → 출국심사 → 탑승구 이동 → 항공기 탑승<br>공항 출국 절차 안내가 필요하신 고객님께서는 72시간 전 <span style=\"color:red;\">[미팅 서비스 사전 신청]</span>을 해주시기 바랍니다."
+    }
+  ],
+  "features": []
+}

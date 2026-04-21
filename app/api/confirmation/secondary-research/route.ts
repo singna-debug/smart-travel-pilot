@@ -159,7 +159,7 @@ function getHardcodedLinks(destination: string) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { destination, travelMonth, airline, baggageNote, customGuides, itinerary } = body;
+        const { destination, travelMonth, airline, baggageNote, customGuides, itinerary, targets } = body;
 
         if (!destination) {
             return NextResponse.json({ success: false, error: '여행지 정보가 필요합니다.' }, { status: 400 });
@@ -167,9 +167,10 @@ export async function POST(request: NextRequest) {
 
         const context = `여행지: ${destination}, 시기: ${travelMonth || '현재'}, 항공사: ${airline || '비명시'}, 수하물규정: ${baggageNote || '비명시'}`;
 
-        // --- 🌊 [핵심] 일자별 멀티 시티 날씨 로직 시작 ---
+        // --- 🌊 [핵심] 일자별 멀티 시티 날씨 로직 (basics가 포함된 경우에만 실행) ---
         let dailyWeatherData: any[] = [];
-        try {
+        if (!targets || targets.length === 0 || targets.includes('basics')) {
+            try {
             // 1. 일정(Itinerary)에서 일자별 주요 도시 추출
             const itineraryArr = Array.isArray(itinerary) ? itinerary : [];
             const dailyCities = itineraryArr.map((day: any) => {
@@ -204,14 +205,17 @@ export async function POST(request: NextRequest) {
                     desc: forecast?.desc || cityWeather.current?.weatherDesc?.[0]?.value
                 };
             });
-        } catch (e) {
-            console.error('[MultiWeather] Error:', e);
+            } catch (e) {
+                console.error('[MultiWeather] Error:', e);
+            }
         }
         // --- 🌊 멀티 시티 날씨 로직 끝 ---
 
-        const tasks = [
-            // ✨ Task 1: UI용 고급 날씨 구조 복구 + [멀티 시티 데이터 주입]
-            {
+        const isPartial = Array.isArray(targets) && targets.length > 0;
+        const tasks: any[] = [];
+
+        if (!isPartial || targets.includes('basics') || targets.includes('essentials')) {
+            tasks.push({
                 name: 'basics',
                 prompt: `
 컨텍스트: ${context}
@@ -228,8 +232,7 @@ export async function POST(request: NextRequest) {
   "weather": {
     "summary": "방문 도시별 날씨를 종합한 요약",
     "forecast": [
-      // 여기에 dailyWeatherData의 모든 일차(1일차 ~ ${dailyWeatherData.length}일차)를 빠짐없이 포함하세요.
-      { "date": "1일차", "tempMin": "숫자", "tempMax": "숫자", "description": "반드시 한국어로 날씨 상태만 짧게 작성 (예: '맑음', '흐림', '비', '소나기' 등. '베트남 푸꾸옥' 같은 도시명은 절대 포함하지 마세요)" }
+      { "date": "1일차", "tempMin": "숫자", "tempMax": "숫자", "description": "반드시 한국어로 날씨 상태만 짧게 작성 (예: '맑음', '흐림', '비', '소나기' 등)" }
     ],
     "clothingTips": [
       { "title": "상의 & 외투", "content": "옷차림 상세 조언" },
@@ -241,9 +244,11 @@ export async function POST(request: NextRequest) {
   }
 }
 `
-            },
-            // ✨ Task 2: 수하물 및 세관 (오류 방지)
-            {
+            });
+        }
+
+        if (!isPartial || targets.includes('rules')) {
+            tasks.push({
                 name: 'rules',
                 prompt: `
 컨텍스트: ${context}
@@ -268,8 +273,11 @@ export async function POST(request: NextRequest) {
     "additionalNotes": ["수하물 팁 1", "수하물 팁 2"]
   }
 }`
-            },
-            {
+            });
+        }
+
+        if (!isPartial || targets.includes('creative')) {
+            tasks.push({
                 name: 'creative',
                 prompt: `
 컨텍스트: ${context}
@@ -284,8 +292,8 @@ ${customGuides && customGuides.length > 0 ? `요청 가이드 주제: ${customGu
     ${customGuides && customGuides.length > 0 ? customGuides.map((g: string) => `{ "topic": "${g}", "icon": "📝", "sections": [{ "title": "정보 요약", "type": "text", "content": "상세 내용" }] }`).join(',') : ''}
   ]
 }`
-            }
-        ];
+            });
+        }
 
         console.log('[SecondaryResearch] Generating answers using parallel tasks...');
         console.time('[SecondaryResearch] Parallel Calls');

@@ -56,19 +56,24 @@ export async function scrapeForConfirmation(url: string): Promise<string | null>
                 currentScroll += distance;
                 await new Promise(r => setTimeout(r, delay));
 
-                // 버튼 체크 및 클릭
+                // 버튼 체크 및 클릭 (확장 버전)
                 if (!simpleBtnClicked) {
-                    const btns = Array.from(document.querySelectorAll('button, a, span')) as HTMLElement[];
-                    const simpleBtn = btns.find(b => 
-                        (b.innerText?.includes('간략일정') || b.innerText?.includes('상세일정 펼치기')) && 
-                        b.offsetParent !== null
+                    const btns = Array.from(document.querySelectorAll('button, a, span, p')) as HTMLElement[];
+                    const expandKeywords = ['간략일정', '상세일정 펼치기', '펼쳐보기', '상세보기', '더보기', '내용보기'];
+                    
+                    const targetBtns = btns.filter(b => 
+                        expandKeywords.some(kw => b.innerText?.includes(kw)) && 
+                        b.offsetParent !== null &&
+                        (b.tagName === 'BUTTON' || b.getAttribute('role') === 'button' || b.onclick || getComputedStyle(b).cursor === 'pointer')
                     );
                     
-                    if (simpleBtn) {
-                        simpleBtn.click();
+                    if (targetBtns.length > 0) {
+                        targetBtns.forEach(btn => {
+                            try { btn.click(); } catch (e) {}
+                        });
                         simpleBtnClicked = true;
-                        // 클릭 후 펼쳐지는 시간을 위해 추가 대기
-                        await new Promise(r => setTimeout(r, 1200)); 
+                        // 클릭 후 펼쳐지는 시간을 위해 잠시 대기
+                        await new Promise(r => setTimeout(r, 1500)); 
                     }
                 }
             }

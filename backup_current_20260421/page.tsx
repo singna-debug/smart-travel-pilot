@@ -110,8 +110,6 @@ export default function ConfirmationPage() {
     const [childCount, setChildCount] = useState(0);
     const [infantCount, setInfantCount] = useState(0);
     const [travelers, setTravelers] = useState<TravelerInfo[]>([{ name: '', type: 'adult' }]);
-    const [visitorId, setVisitorId] = useState('');
-    const [reservationNumber, setReservationNumber] = useState('');
 
     // 항공
     const [airline, setAirline] = useState('');
@@ -184,8 +182,6 @@ export default function ConfirmationPage() {
     const selectCustomer = (c: ConsultationData) => {
         setCustomerName(c.customer.name);
         setCustomerPhone(c.customer.phone);
-        const vId = c.visitorId || c.visitor_id || '';
-        setVisitorId(vId);
         if (c.trip.destination) setDestination(c.trip.destination);
         if (c.trip.product_name) setProductName(c.trip.product_name);
         if (c.trip.departure_date) setDepartureDate(formatToHtmlDate(c.trip.departure_date));
@@ -193,10 +189,6 @@ export default function ConfirmationPage() {
         if (c.trip.duration) setDuration(c.trip.duration);
         if (c.trip.url) setProductUrl(c.trip.url);
         if (c.trip.travelers_count) setAdultCount(Number(c.trip.travelers_count));
-        // 예약번호 자동 로드 (있는 경우)
-        if ((c as any).reservation_number) setReservationNumber((c as any).reservation_number);
-        else if ((c as any).reservationNumber) setReservationNumber((c as any).reservationNumber);
-        else setReservationNumber(''); // 초기화
     };
 
     // URL 분석 — 수집+분석을 한 번에 처리하는 통합 Edge API 사용
@@ -669,89 +661,6 @@ export default function ConfirmationPage() {
     const removeCustomGuide = (i: number) => setCustomGuideInputs(prev => prev.filter((_, idx) => idx !== i));
     const updateCustomGuide = (i: number, val: string) => setCustomGuideInputs(prev => prev.map((g, idx) => idx === i ? val : g));
 
-    // 일정 관리 핸들러
-    const updateDayInfo = (dayIdx: number, field: string, value: string) => {
-        setItinerary(prev => prev.map((day, idx) => idx === dayIdx ? { ...day, [field]: value } : day));
-    };
-
-    const updateTimelineItem = (dayIdx: number, itemIdx: number, field: string, value: string) => {
-        setItinerary(prev => prev.map((day, idx) => {
-            if (idx !== dayIdx) return day;
-            const newTimeline = [...(day.timeline || [])];
-            newTimeline[itemIdx] = { ...newTimeline[itemIdx], [field]: value };
-            return { ...day, timeline: newTimeline };
-        }));
-    };
-
-    const addTimelineItem = (dayIdx: number) => {
-        setItinerary(prev => prev.map((day, idx) => {
-            if (idx !== dayIdx) return day;
-            const newTimeline = [...(day.timeline || []), { type: 'activity', title: '', subtitle: '', description: '' }];
-            return { ...day, timeline: newTimeline };
-        }));
-    };
-
-    const removeTimelineItem = (dayIdx: number, itemIdx: number) => {
-        setItinerary(prev => prev.map((day, idx) => {
-            if (idx !== dayIdx) return day;
-            const newTimeline = (day.timeline || []).filter((_: any, tIdx: number) => tIdx !== itemIdx);
-            return { ...day, timeline: newTimeline };
-        }));
-    };
-
-    const updateActivity = (dayIdx: number, actIdx: number, value: string) => {
-        setItinerary(prev => prev.map((day, idx) => {
-            if (idx !== dayIdx) return day;
-            const newActivities = [...(day.activities || [])];
-            newActivities[actIdx] = value;
-            return { ...day, activities: newActivities };
-        }));
-    };
-
-    const addActivity = (dayIdx: number) => {
-        setItinerary(prev => prev.map((day, idx) => {
-            if (idx !== dayIdx) return day;
-            const newActivities = [...(day.activities || []), ''];
-            return { ...day, activities: newActivities };
-        }));
-    };
-
-    const removeActivity = (dayIdx: number, actIdx: number) => {
-        setItinerary(prev => prev.map((day, idx) => {
-            if (idx !== dayIdx) return day;
-            const newActivities = (day.activities || []).filter((_: any, aIdx: number) => aIdx !== actIdx);
-            return { ...day, activities: newActivities };
-        }));
-    };
-
-    const updateDayTransport = (dayIdx: number, field: string, value: string) => {
-        setItinerary(prev => prev.map((day, idx) => {
-            if (idx !== dayIdx) return day;
-            return { ...day, transport: { ...(day.transport || {}), [field]: value } };
-        }));
-    };
-
-    const updateDayMeals = (dayIdx: number, field: string, value: string) => {
-        setItinerary(prev => prev.map((day, idx) => idx === dayIdx ? { ...day, [field]: value } : day));
-    };
-
-    const addDay = () => {
-        const nextDayNum = itinerary.length + 1;
-        setItinerary(prev => [...prev, { 
-            day: `Day ${nextDayNum}`, 
-            title: '', 
-            timeline: [], 
-            activities: [], 
-            hotel: '', 
-            meals: { breakfast: '', lunch: '', dinner: '' } 
-        }]);
-    };
-
-    const removeDay = (dayIdx: number) => {
-        if (!confirm('해당 일자를 전체 삭제하시겠습니까?')) return;
-        setItinerary(prev => prev.filter((_, idx) => idx !== dayIdx));
-    };
-
     // 2차 조사(AI) 데이터 수정 핸들러
     const updateSRField = (section: string, field: string, value: string) => {
         setSecondaryResearch((prev: any) => {
@@ -813,9 +722,7 @@ export default function ConfirmationPage() {
         try {
             const body = {
                 status: '예약확정',
-                visitorId: visitorId,
-                reservationNumber: reservationNumber.trim(),
-                customer: { name: customerName, phone: customerPhone, visitorId: visitorId },
+                customer: { name: customerName, phone: customerPhone },
                 trip: {
                     productName, productUrl, destination,
                     departureDate, returnDate, duration,
@@ -862,11 +769,9 @@ export default function ConfirmationPage() {
         }
     };
 
-    // 생성 전에도 예약번호가 있으면 미리 링크 예측 표시
-    const currentId = generatedId || (reservationNumber.trim() && reservationNumber !== '미정' && reservationNumber.trim() !== '' ? reservationNumber.trim() : 'AUTO_GENERATE');
-    const shareUrl = (typeof window !== 'undefined' && currentId !== 'AUTO_GENERATE')
-        ? `${window.location.origin}/confirmation/${currentId}`
-        : (typeof window !== 'undefined' ? `${window.location.origin}/confirmation/(저장 시 자동생성)` : '');
+    const shareUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/confirmation/${generatedId}`
+        : '';
 
     const copyShareLink = () => {
         navigator.clipboard.writeText(shareUrl);
@@ -1207,47 +1112,23 @@ export default function ConfirmationPage() {
                 <div className="confirm-grid">
                     <div className="confirm-field">
                         <label>포함사항 (줄바꿈으로 구분)</label>
-                        <textarea 
-                            value={inclusions} 
-                            onChange={e => setInclusions(e.target.value)} 
-                            placeholder="왕복 항공권&#10;호텔 숙박&#10;전 일정 식사" 
-                            style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
-                        />
+                        <textarea value={inclusions} onChange={e => setInclusions(e.target.value)} placeholder="왕복 항공권&#10;호텔 숙박&#10;전 일정 식사" />
                     </div>
                     <div className="confirm-field">
                         <label>불포함사항 (줄바꿈으로 구분)</label>
-                        <textarea 
-                            value={exclusions} 
-                            onChange={e => setExclusions(e.target.value)} 
-                            placeholder="여행자 보험&#10;현지 팁&#10;개인 경비" 
-                            style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
-                        />
+                        <textarea value={exclusions} onChange={e => setExclusions(e.target.value)} placeholder="여행자 보험&#10;현지 팁&#10;개인 경비" />
                     </div>
                     <div className="confirm-field">
                         <label>준비물 체크리스트 (줄바꿈으로 구분)</label>
-                        <textarea 
-                            value={checklist} 
-                            onChange={e => setChecklist(e.target.value)} 
-                            style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
-                        />
+                        <textarea value={checklist} onChange={e => setChecklist(e.target.value)} />
                     </div>
                     <div className="confirm-field">
                         <label>취소/환불 규정</label>
-                        <textarea 
-                            value={cancellationPolicy} 
-                            onChange={e => setCancellationPolicy(e.target.value)} 
-                            placeholder="출발 30일 전: 전액 환불&#10;출발 7일 전: 50% 환불" 
-                            style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
-                        />
+                        <textarea value={cancellationPolicy} onChange={e => setCancellationPolicy(e.target.value)} placeholder="출발 30일 전: 전액 환불&#10;출발 7일 전: 50% 환불" />
                     </div>
                     <div className="confirm-field full-width">
                         <label>추가 안내사항</label>
-                        <textarea 
-                            value={notices} 
-                            onChange={e => setNotices(e.target.value)} 
-                            placeholder="기타 참고사항을 입력하세요..." 
-                            style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
-                        />
+                        <textarea value={notices} onChange={e => setNotices(e.target.value)} placeholder="기타 참고사항을 입력하세요..." />
                     </div>
                 </div>
             </div>
