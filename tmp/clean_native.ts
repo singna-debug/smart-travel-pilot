@@ -1,9 +1,8 @@
-/**
- * ★ 확정서 모드 전용 Native API 유틸리티 ★
- * 
- * 이 파일은 확정서 모드만을 위한 독립 복사본입니다.
- * 노말 모드의 ../modetour-utils.ts와 완전히 분리되어 있습니다.
- * 확정서 관련 수정은 이 파일만 수정하세요.
+﻿/**
+ * ???뺤젙??紐⑤뱶 ?꾩슜 Native API ?좏떥由ы떚 ?? * 
+ * ???뚯씪? ?뺤젙??紐⑤뱶留뚯쓣 ?꾪븳 ?낅┰ 蹂듭궗蹂몄엯?덈떎.
+ * ?몃쭚 紐⑤뱶??../modetour-utils.ts? ?꾩쟾??遺꾨━?섏뼱 ?덉뒿?덈떎.
+ * ?뺤젙??愿???섏젙? ???뚯씪留??섏젙?섏꽭??
  */
 
 import type { DetailedProductInfo } from '../../../types';
@@ -16,9 +15,9 @@ export async function fetchConfirmationNative(url: string): Promise<DetailedProd
     const pnum = urlObj.searchParams.get('pnum') || urlObj.searchParams.get('Pnum') || '';
     const goodsNo = urlObj.searchParams.get('goodsNo') || '';
     
-    // productNo는 반드시 순수 숫자여야 합니다.
-    // sno는 'C117876' 같은 알파벳+숫자 코드 → productNo로 사용 불가
-    // pnum이 항상 올바른 상품 번호
+    // productNo??諛섎뱶???쒖닔 ?レ옄?ъ빞 ?⑸땲??
+    // sno??'C117876' 媛숈? ?뚰뙆踰??レ옄 肄붾뱶 ??productNo濡??ъ슜 遺덇?
+    // pnum????긽 ?щ컮瑜??곹뭹 踰덊샇
     const numericSno = /^\d+$/.test(sno) ? sno : '';
     const numericAno = /^\d+$/.test(ano) ? ano : '';
     let productNo = goodsNo || pnum || numericSno || numericAno || '';
@@ -105,13 +104,13 @@ export async function fetchConfirmationNative(url: string): Promise<DetailedProd
         let cleanTitle = d.productName || '';
         let destination = d.category2 ? `${d.category2}, ${d.category3 || ''}` : (d.category3 || '');
         
-        // 목적지 오염 필터링 (노팁/노쇼핑 등)
-        const forbiddenWords = ['노팁', '노쇼핑', '노옵션', '출발', '확정', '특가', '단독', '기획', '모객', '특전', '스마일', '명부터', '예약', '마감', '할인', '이벤트', '시그니처', '선착순', '베스트', '홈쇼핑'];
+        // 紐⑹쟻吏 ?ㅼ뿼 ?꾪꽣留?(?명똻/?몄눥????
+        const forbiddenWords = ['?명똻', '?몄눥??, '?몄샃??, '異쒕컻', '?뺤젙', '?밴?', '?⑤룆', '湲고쉷', '紐④컼', '?뱀쟾', '?ㅻ쭏??, '紐낅???, '?덉빟', '留덇컧', '?좎씤', '?대깽??, '?쒓렇?덉쿂', '?좎갑??, '踰좎뒪??, '?덉눥??];
         if (destination && forbiddenWords.some(w => destination.includes(w))) {
             destination = '';
         }
         
-        // Key Points 추출
+        // Key Points 異붿텧
         let keyPoints: string[] = [];
         if (dataPoints && (dataPoints.isOK || dataPoints.result || dataPoints.code === '200')) {
             const r = dataPoints.result || dataPoints;
@@ -136,22 +135,21 @@ export async function fetchConfirmationNative(url: string): Promise<DetailedProd
             };
             const extracted = findPoints(r);
             extracted.forEach(p => {
-                const clean = p.replace(/\[특전\]/g, '').replace(/<[^>]+>/g, '').trim();
+                const clean = p.replace(/\[?뱀쟾\]/g, '').replace(/<[^>]+>/g, '').trim();
                 if (clean.length > 2 && !keyPoints.includes(clean)) keyPoints.push(clean);
             });
         }
 
         const rawPrice = String(d.sellingPriceAdultTotalAmount || d.productPrice_Adult || d.salePrice || d.sellingPrice || d.price || '');
         
-        // 호텔 정보
+        // ?명뀛 ?뺣낫
         const hotels: any[] = [];
         const rawHotels = Array.isArray(d.HotelList) ? d.HotelList : (Array.isArray(d.SummaryHotelList) ? d.SummaryHotelList : []);
         rawHotels.slice(0, 5).forEach((h: any) => {
             if (h && h.hotelName) hotels.push({ name: h.hotelName, address: h.hotelAddress || '' });
         });
         
-        // 포함/불포함
-        const inclusions: string[] = [];
+        // ?ы븿/遺덊룷??        const inclusions: string[] = [];
         const exclusions: string[] = [];
         if (Array.isArray(d.InclusionList)) d.InclusionList.forEach((i: any) => {
             const val = i.content || i.title || (typeof i === 'string' ? i : '');
@@ -162,12 +160,12 @@ export async function fetchConfirmationNative(url: string): Promise<DetailedProd
             if (val) exclusions.push(val);
         });
         
-        // 미팅 정보
+        // 誘명똿 ?뺣낫
         const meetingInfo: any[] = [];
         if (Array.isArray(d.SummaryMeetingList)) {
             d.SummaryMeetingList.forEach((m: any) => {
                 meetingInfo.push({
-                    type: m.title || '미팅안내',
+                    type: m.title || '誘명똿?덈궡',
                     location: m.place || '',
                     time: m.time || '',
                     description: m.content || ''
@@ -175,7 +173,7 @@ export async function fetchConfirmationNative(url: string): Promise<DetailedProd
             });
         }
 
-        // 취소 규정
+        // 痍⑥냼 洹쒖젙
         let cancelPolicy = d.CancelRuleContent || d.CancelRuleInfo || '';
         if (!cancelPolicy && Array.isArray(d.CancelRuleList)) {
             cancelPolicy = d.CancelRuleList
@@ -186,7 +184,7 @@ export async function fetchConfirmationNative(url: string): Promise<DetailedProd
             cancelPolicy = d.CancelRuleList;
         }
         
-        // 항공 상세
+        // ??났 ?곸꽭
         const depFlight = d.DepartureFlightNo || d.CarrierFlightNoDepart || d.FlightNoDepart || '';
         const retFlight = d.ArrivalFlightNo || d.CarrierFlightNoReturn || d.FlightNoReturn || '';
         const depTime = d.DepartureTimeDepart || d.DepartureTime || '';
@@ -201,7 +199,7 @@ export async function fetchConfirmationNative(url: string): Promise<DetailedProd
             price: rawPrice.replace(/[^0-9]/g, ''),
             departureDate: depDateRaw,
             returnDate: d.arrivalDate || d.end_dt || d.arr_dt || '',
-            departureAirport: d.departureCityName || d.departureCity || '인천',
+            departureAirport: d.departureCityName || d.departureCity || '?몄쿇',
             airline: isHistorical ? '' : (d.transportName || d.carrier_nm || ''),
             departureFlightNumber: isHistorical ? '' : depFlight,
             returnFlightNumber: isHistorical ? '' : retFlight,
@@ -215,7 +213,7 @@ export async function fetchConfirmationNative(url: string): Promise<DetailedProd
             itinerary: (function() {
                 if (isHistorical) return []; 
                 
-                // 실제 API 데이터 구조: result.scheduleItemList 또는 result
+                // ?ㅼ젣 API ?곗씠??援ъ“: result.scheduleItemList ?먮뒗 result
                 const scheduleRaw = dataSchedule?.result?.scheduleItemList || dataSchedule?.result || dataSchedule?.list || (Array.isArray(dataSchedule) ? dataSchedule : []);
                 const scheduleArray = Array.isArray(scheduleRaw) ? scheduleRaw : [];
                 
@@ -225,37 +223,37 @@ export async function fetchConfirmationNative(url: string): Promise<DetailedProd
                     const dayNo = day?.day || day?.dayNo || (idx + 1);
                     const dateStr = day?.date || '';
                     
-                    // 도시/경로 정보
-                    const cities = Array.isArray(day.placeHeader) ? day.placeHeader.join(' → ') : (day.title || day.scheduleTitle || '');
+                    // ?꾩떆/寃쎈줈 ?뺣낫
+                    const cities = Array.isArray(day.placeHeader) ? day.placeHeader.join(' ??') : (day.title || day.scheduleTitle || '');
                     
-                    // 상세 일정 (핀 + 동그라미 아이템 모두 포함)
-                    // ortherActions( typo 의심되나 실제 API 필드), allPlaceTravelToday, ScheduleDetailList 병합 시도
+                    // ?곸꽭 ?쇱젙 (? + ?숆렇?쇰? ?꾩씠??紐⑤몢 ?ы븿)
+                    // ortherActions( typo ?섏떖?섎굹 ?ㅼ젣 API ?꾨뱶), allPlaceTravelToday, ScheduleDetailList 蹂묓빀 ?쒕룄
                     const rawTimeline = day.ortherActions || day.allPlaceTravelToday || day.ScheduleDetailList || day.timeline || [];
                     const timeline = (Array.isArray(rawTimeline) ? rawTimeline : []).map((t: any) => {
                         const placeName = t.itiPlaceName || t.placeNameK || t.title || t.location_nm || '';
                         const summary = t.itiSummaryDes || t.itiDetailDes || t.summaryDes || t.description || t.content || '';
                         const serviceType = t.itiServiceCode || '';
                         
-                        // 관광지(SS), 장소(PL) 등은 핀(location), 나머지는 동그라미(default)
+                        // 愿愿묒?(SS), ?μ냼(PL) ?깆? ?(location), ?섎㉧吏???숆렇?쇰?(default)
                         const isLocation = serviceType.includes('SS') || serviceType.includes('PL') || !!t.placeNo;
                         
                         return {
                             type: isLocation ? 'location' : 'default',
                             title: placeName,
                             subtitle: t.itiServiceName || t.subtitle || '',
-                            description: summary
+                            description: (summary && summary.length > 300) ? summary.substring(0, 300) + '...' : summary
                         };
                     }).filter((item: any) => item.title || item.description);
 
-                    // 식사 정보 (조식/중식/석식)
+                    // ?앹궗 ?뺣낫 (議곗떇/以묒떇/?앹떇)
                     const meals: any = { breakfast: '', lunch: '', dinner: '' };
                     const mealList = day.listMealPlace || [];
                     if (Array.isArray(mealList)) {
                         mealList.forEach((m: any) => {
                             const name = m.itiPlaceName || m.placeNameK || '';
-                            if (m.itiServiceCode === 'SSCBKF' || name.includes('조식')) meals.breakfast = name || '호텔식';
-                            else if (m.itiServiceCode === 'SSCLCH' || name.includes('중식')) meals.lunch = name || '현지식';
-                            else if (m.itiServiceCode === 'SSCDNR' || name.includes('석식')) meals.dinner = name || '현지식';
+                            if (m.itiServiceCode === 'SSCBKF' || name.includes('議곗떇')) meals.breakfast = name || '?명뀛??;
+                            else if (m.itiServiceCode === 'SSCLCH' || name.includes('以묒떇')) meals.lunch = name || '?꾩???;
+                            else if (m.itiServiceCode === 'SSCDNR' || name.includes('?앹떇')) meals.dinner = name || '?꾩???;
                         });
                     }
 
