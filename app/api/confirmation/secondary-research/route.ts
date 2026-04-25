@@ -156,6 +156,38 @@ function getHardcodedLinks(destination: string) {
     return null;
 }
 
+/**
+ * 출발지 정보 제거 (예: "청주 출발 장가계" -> "장가계")
+ */
+function getPureDestination(dest: string): string {
+    if (!dest) return "";
+    let pure = dest;
+    
+    // 1. [...] 괄호 및 그 안의 내용 제거 (보통 [청주출발] 등)
+    pure = pure.replace(/\[.*?\]/g, '');
+    
+    // 2. "XX 출발", "XX발" 패턴 제거
+    pure = pure.replace(/[가-힣]{2,4}\s*(출발|발)\b/g, '');
+    
+    // 3. 한국 주요 출발 도시명 제거 (명시적으로 목적지가 아님을 알림)
+    const departureCities = ['인천', '김포', '김해', '부산', '대구', '청주', '광주', '무안', '양양', '제주'];
+    departureCities.forEach(city => {
+        const regex = new RegExp(`\\b${city}\\b`, 'g');
+        pure = pure.replace(regex, '');
+    });
+
+    // 4. 화살표나 대시가 있는 경우 마지막 요소가 목적지일 확률이 높음
+    if (pure.includes('->') || pure.includes('→') || pure.includes('-')) {
+        const parts = pure.split(/[->→-]/);
+        pure = parts[parts.length - 1].trim();
+    }
+
+    // 5. 남은 특수문자 정화 및 정리
+    pure = pure.replace(/[()]/g, '').replace(/[/, ]+/g, ' ').trim();
+    
+    return pure || dest;
+}
+
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
@@ -165,7 +197,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: '여행지 정보가 필요합니다.' }, { status: 400 });
         }
 
-        const context = `여행지: ${destination}, 시기: ${travelMonth || '현재'}, 항공사: ${airline || '비명시'}, 수하물규정: ${baggageNote || '비명시'}`;
+        const pureDestination = getPureDestination(destination);
+        const context = `목적지: ${pureDestination} (전체 명칭: ${destination}), 시기: ${travelMonth || '현재'}, 항공사: ${airline || '비명시'}, 수하물규정: ${baggageNote || '비명시'}`;
 
         // --- 🌊 [핵심] 일자별 멀티 시티 날씨 로직 (basics가 포함된 경우에만 실행) ---
         let dailyWeatherData: any[] = [];
@@ -176,7 +209,7 @@ export async function POST(request: NextRequest) {
             const dailyCities = itineraryArr.map((day: any) => {
                 // '도쿄/오사카/교토' 처럼 여러 도시가 있으면 첫 번째 도시 선택
                 const locations = (day.location || "").split(/[/,]/);
-                return locations[0]?.trim() || destination.split(/[/,]/)[0]?.trim();
+                return locations[0]?.trim() || pureDestination.split(/[/,]/)[0]?.trim();
             });
 
             // 2. 고유 도시 리스트 생성 (API 호출 최소화)
@@ -222,6 +255,7 @@ export async function POST(request: NextRequest) {
 실시간 일자별 도시 날씨 데이터: ${JSON.stringify(dailyWeatherData)}
 
 미션: 위 실시간 날씨 데이터(dailyWeatherData)를 바탕으로 **전체 일정(${dailyWeatherData.length}일)**에 대한 일별 기온을 JSON으로 작성하세요.
+**중요: 입력값에 '인천', '청주', '부산' 등 한국 도시명이 포함되어 있더라도, 이는 출발지일 뿐입니다. 반드시 실제 해외 여행 목적지(${pureDestination})의 날씨와 정보를 생성해야 합니다. 한국 도시의 정보를 생성하면 절대 안 됩니다.**
 공급된 데이터의 최고/최저 기온이 동일하거나(예: 27/27) 비현실적일 경우, 해당 도시의 해당 월 평균 기온을 참고하여 상식적인 범위로 보정하세요.
 각 일차별로 명시된 도시(city)의 날씨를 정확히 반영하여 조언을 작성하세요.
 모든 결과물은 반드시 한국어로 작성하며, 날씨 설명(description)은 '맑음', '흐림', '비'와 같이 핵심 상태만 짧게 표현하세요.
@@ -282,6 +316,7 @@ export async function POST(request: NextRequest) {
                 prompt: `
 컨텍스트: ${context}
 위 여행지의 대표 관광지 5곳을 소개하고, 요청된 가이드 항목에 대한 답변을 작성하세요.
+**중요: '인천', '청주', '부산' 등 한국 도시명이 목적지에 포함되어 있더라도 무시하세요. 반드시 실제 해외 목적지(${pureDestination})의 현지 관광지 정보를 생성해야 합니다. 한국의 관광지를 추천하면 절대 안 됩니다.**
 ${customGuides && customGuides.length > 0 ? `요청 가이드 주제: ${customGuides.join(', ')}` : '요청 가이드 주제 없음'}
 (마크다운 없이 순수 JSON만 반환)
 {

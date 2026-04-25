@@ -7,8 +7,9 @@ export function calculateAutomationDates(params: {
     departureDateStr?: string;
     returnDateStr?: string;
     confirmedDateStr?: string;
+    status?: string;
 }) {
-    const { departureDateStr, returnDateStr, confirmedDateStr } = params;
+    const { departureDateStr, returnDateStr, confirmedDateStr, status } = params || {};
 
     const parseDate = (dStr?: string) => {
         if (!dStr) return null;
@@ -20,13 +21,15 @@ export function calculateAutomationDates(params: {
     const returnDate = parseDate(returnDateStr);
     const confirmedDate = parseDate(confirmedDateStr);
 
-    const prepaid_date = confirmedDate ? format(addDays(confirmedDate, 2), 'yyyy-MM-dd') : '';
-    const notice_date = departureDate ? format(addDays(departureDate, -28), 'yyyy-MM-dd') : '';
-    const balance_date = departureDate ? format(addDays(departureDate, -21), 'yyyy-MM-dd') : '';
-    const confirmation_sent = departureDate ? format(addDays(departureDate, -14), 'yyyy-MM-dd') : '';
-    const departure_notice = departureDate ? format(addDays(departureDate, -3), 'yyyy-MM-dd') : '';
-    const phone_notice = departureDate ? format(addDays(departureDate, -1), 'yyyy-MM-dd') : '';
-    const happy_call = (returnDate && isValid(returnDate)) ? format(addDays(returnDate, 1), 'yyyy-MM-dd') : '';
+    const isConsultingPhase = status === '상담중' || status === '견적제공' || status === '취소/보류';
+
+    const prepaid_date = (!isConsultingPhase && confirmedDate) ? format(addDays(confirmedDate, 2), 'yyyy-MM-dd') : '';
+    const notice_date = (!isConsultingPhase && departureDate) ? format(addDays(departureDate, -28), 'yyyy-MM-dd') : '';
+    const balance_date = (!isConsultingPhase && departureDate) ? format(addDays(departureDate, -21), 'yyyy-MM-dd') : '';
+    const confirmation_sent = (!isConsultingPhase && departureDate) ? format(addDays(departureDate, -14), 'yyyy-MM-dd') : '';
+    const departure_notice = (!isConsultingPhase && departureDate) ? format(addDays(departureDate, -3), 'yyyy-MM-dd') : '';
+    const phone_notice = (!isConsultingPhase && departureDate) ? format(addDays(departureDate, -1), 'yyyy-MM-dd') : '';
+    const happy_call = (!isConsultingPhase && returnDate && isValid(returnDate)) ? format(addDays(returnDate, 1), 'yyyy-MM-dd') : '';
     const next_followup = format(addDays(new Date(), 2), 'yyyy-MM-dd');
 
     return {

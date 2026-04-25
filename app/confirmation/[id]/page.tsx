@@ -1031,8 +1031,9 @@ export default function ConfirmationViewerPage() {
 
     const totalTravelers = doc.trip.adultCount + doc.trip.childCount + doc.trip.infantCount;
     const dDay = calcDDay(doc.trip.departureDate);
-    const checklistItems = doc.checklist ? doc.checklist.split('\n').filter(Boolean) : [];
-    const checkedCount = checklistItems.filter((_, i) => checkedItems[`cl-${i}`]).length;
+    const checklistItems = doc.checklist ? doc.checklist.split('\n') : [];
+    const realChecklistItems = checklistItems.filter(item => item.trim() !== '');
+    const checkedCount = checklistItems.filter((item, i) => item.trim() !== '' && checkedItems[`cl-${i}`]).length;
 
     return (
         <div className="mobile-confirm">
@@ -1056,8 +1057,8 @@ export default function ConfirmationViewerPage() {
                         onClick={() => setActiveTab(tab)}
                     >
                         <span>{tab}</span>
-                        {tab === '준비물' && checklistItems.length > 0 && (
-                            <span className="tab-badge">{checkedCount}/{checklistItems.length}</span>
+                        {tab === '준비물' && realChecklistItems.length > 0 && (
+                            <span className="tab-badge">{checkedCount}/{realChecklistItems.length}</span>
                         )}
                     </div>
                 ))}
@@ -1534,19 +1535,19 @@ export default function ConfirmationViewerPage() {
                         <div className="mc-section">
                             <div className="mc-section-title">
                                 <span className="sec-icon">✅</span> 준비물 체크리스트
-                                {checklistItems.length > 0 && (
+                                {realChecklistItems.length > 0 && (
                                     <span className="checklist-progress">
-                                        {checkedCount}/{checklistItems.length}
+                                        {checkedCount}/{realChecklistItems.length}
                                     </span>
                                 )}
                             </div>
 
                             {/* 진행상태 바 */}
-                            {checklistItems.length > 0 && (
+                            {realChecklistItems.length > 0 && (
                                 <div className="checklist-progress-bar">
                                     <div
                                         className="checklist-progress-fill"
-                                        style={{ width: `${(checkedCount / checklistItems.length) * 100}%` }}
+                                        style={{ width: `${(checkedCount / realChecklistItems.length) * 100}%` }}
                                     />
                                 </div>
                             )}
@@ -1556,6 +1557,9 @@ export default function ConfirmationViewerPage() {
                                     {checklistItems.map((item, i) => {
                                         const key = `cl-${i}`;
                                         const checked = !!checkedItems[key];
+                                        if (!item.trim()) {
+                                            return <li key={i} style={{ listStyle: 'none', height: '14px' }} />;
+                                        }
                                         return (
                                             <li
                                                 key={i}

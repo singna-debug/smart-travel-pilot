@@ -17,22 +17,6 @@ export function formatProductInfo(info: DetailedProductInfo, index?: number): st
     r += `* 기간 : ${info.duration || '-'}\n`;
 
     if (info.keyPoints && info.keyPoints.length > 0) {
-        r += `\n[여행 준비물 및 핵심 포인트]\n`;
-        // 사용자 요청 필수 준비물 상단 배치
-        const essentialItems = [
-            '여권, 항공권',
-            '바람막이 또는 가디건',
-            '수영복, 아쿠아슈즈',
-            '220V 사용가능 여부 확인',
-            '보조배터리(반드시 기내 휴대)',
-            '멀티 어댑터',
-            '상비약(감기약, 소화제, 지사제, 밴드)',
-            '자외선 차단제',
-            '개인 세면도구',
-            '중요한 약(혈압, 당뇨약 등)은 반드시 기내 휴대'
-        ];
-        
-        essentialItems.forEach(item => { r += `- ${item}\n`; });
         r += `\n[상품별 특이사항]\n`;
         info.keyPoints.slice(0, 10).forEach(point => {
             r += `- ${point}\n`;
@@ -66,22 +50,7 @@ export function compareProducts(products: DetailedProductInfo[]): string {
         comparison += `* 기간 : ${p.duration || '-'}\n\n`;
 
         if (p.keyPoints && p.keyPoints.length > 0) {
-            comparison += `[여행 준비물 및 핵심 포인트]\n`;
-            const essentialItems = [
-                '여권, 항공권',
-                '바람막이 또는 가디건',
-                '수영복, 아쿠아슈즈',
-                '220V 사용가능 여부 확인',
-                '보조배터리(반드시 기내 휴대)',
-                '멀티 어댑터',
-                '상비약(감기약, 소화제, 지사제, 밴드)',
-                '자외선 차단제',
-                '개인 세면도구',
-                '중요한 약(혈압, 당뇨약 등)은 반드시 기내 휴대'
-            ];
-            essentialItems.forEach(item => { comparison += `- ${item}\n`; });
-            
-            comparison += `\n[상품별 특이사항]\n`;
+            comparison += `[상품별 특이사항]\n`;
             p.keyPoints.slice(0, 10).forEach(point => {
                 comparison += `- ${point}\n`;
             });

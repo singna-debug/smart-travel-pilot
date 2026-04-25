@@ -177,7 +177,8 @@ export async function POST(request: NextRequest) {
         const automationDates = calculateAutomationDates({
             departureDateStr: departureDate,
             returnDateStr: returnDate,
-            confirmedDateStr: finalConfirmedDate
+            confirmedDateStr: finalConfirmedDate,
+            status: status
         });
 
         const kstNow = new Date(new Date().getTime() + 9 * 60 * 60000 + new Date().getTimezoneOffset() * 60000);

@@ -124,7 +124,7 @@ export default function MessageTemplateCreator() {
             if (selectedCustomer.travelersCount) setTravelers(selectedCustomer.travelersCount);
             if (selectedCustomer.departureDate) setDepartureDate(selectedCustomer.departureDate);
             if (selectedCustomer.visitorId) {
-                const baseUrl = window.location.origin;
+                const baseUrl = 'https://clubmode.vercel.app';
                 setConfirmationLink(`${baseUrl}/confirmation/${selectedCustomer.visitorId}`);
             }
         }
@@ -538,26 +538,24 @@ ${bankAccount}
                 break;
 
             case 'confirmation':
-                text = `✈️ [모두투어] 여행 확정서(가이드북) 안내 (담당: ${AGENT_NAME})
+                text = `안녕하세요! ${name} 고객님
+이번 여행의 모바일 가이드북을 보내드립니다. ✈️
 
-안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
-기다려주신 ${dest} 여행의 모든 준비가 완료되어 '최종 확정서(가이드북)'를 보내드립니다.
+이 가이드북은 모두투어 일정을 바탕으로 고객님의 여행 날짜에 맞게 
+저희 여행사에서 별도로 만들었습니다. 
 
-──────────────────
+📍 날씨 정보
+🧳 준비물 
+💰 환전 정보
+📞 로밍
+🗺️ 여행지 가이드 
+등을 담았습니다.
 
-🔗 확정서 확인하기: ${confirmationLink || '(확정서 링크)'}
+출발 전 아래 링크에서 확인하셔서 
+즐거운 여행을 만드세요! 🌟
 
-위 링크를 클릭하시면 호텔 정보, 미팅 장소, 준비물 등 여행에 꼭 필요한 정보들을 한눈에 확인하실 수 있습니다.
-여행 전 꼭 한 번 정독 부탁드리며, 추가로 궁금하신 사항은 언제든 말씀해 주세요.
-
-──────────────────
-
-행복한 여행의 시작, 끝까지 정성껏 챙기겠습니다. ✈️
-
-📞 상담 및 문의
-• 담당자: (주)클럽모두투어 ${AGENT_NAME}
-• 직통전화: 02-951-9004
-• 휴대폰: 010-9307-9004`;
+🔗 모바일 가이드북 링크
+${confirmationLink}`;
                 break;
 
             case 'departure':
@@ -767,7 +765,7 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                         setBookingNumber(val);
                                         // 예약번호가 입력되면 확정서 링크도 업데이트 시도
                                         if (val && val.trim() !== '') {
-                                            const baseUrl = window.location.origin;
+                                            const baseUrl = 'https://clubmode.vercel.app';
                                             setConfirmationLink(`${baseUrl}/confirmation/${val.trim()}`);
                                         }
                                     }}
@@ -950,7 +948,7 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                 <label className="msg-field-label">확정서(가이드북) 링크</label>
                                 <input
                                     className="msg-field-input"
-                                    placeholder="https://www.modetour.com/..."
+                                    placeholder="https://clubmode.vercel.app/confirmation/..."
                                     value={confirmationLink}
                                     onChange={(e) => setConfirmationLink(e.target.value)}
                                 />

@@ -1,4 +1,4 @@
-
+/** Modetour Utils - Updated with improved itinerary parsing and icon logic */
 import type { DetailedProductInfo } from '../../types';
 
 export async function fetchModeTourNative(url: string, isSummaryOnly = false, html?: string): Promise<DetailedProductInfo | null> {
@@ -99,19 +99,46 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                 const serviceType = t.itiServiceCode || '';
                 
                 let subtitle = (t.itiServiceName || '').trim();
-                const genericPlaceholders = ['안내', '기타단문', '안내사항', '서비스안내', '유의 | 안내사항', '유의사항'];
+                const genericPlaceholders = ['안내', '기타단문', '안내사항', '서비스안내', '유의 | 안내사항', '유의사항', '관광(콘텐츠)', '관광', '기타', '일정', '안내문구'];
+                
+                // 자막(Subtitle) 처리
                 if (genericPlaceholders.some(p => subtitle.includes(p))) subtitle = '';
 
-                let finalTitle = titleRaw;
+                // 제목(Title) 추출: 최대한 많은 필드를 검사
+                const titleCandidates = [
+                    t.itiPlaceName, 
+                    t.placeNameK, 
+                    t.itiServiceName, 
+                    t.itiServiceNm,
+                    t.itiContentTitle,
+                    t.contentTitle,
+                    t.title
+                ]
+                .map(v => (v || '').trim())
+                .filter(v => v && v.length > 0 && !genericPlaceholders.includes(v));
+                
+                let finalTitle = titleCandidates[0] || '';
+
+                // 제목이 예약어이거나 비어있으면 summary의 첫 줄 사용
                 if ((!finalTitle || genericPlaceholders.includes(finalTitle)) && summary) {
                     const firstLine = summary.split('\n')[0].trim();
-                    finalTitle = firstLine.length <= 40 ? firstLine : (firstLine.substring(0, 37) + '...');
+                    // 첫 줄이 너무 길지 않으면 제목으로 승격
+                    if (firstLine.length > 1 && firstLine.length <= 50) {
+                        finalTitle = firstLine;
+                        // 제목으로 썼으면 설명에서는 제거 (중복 방지)
+                        if (summary.trim() === firstLine) summary = '';
+                    }
                 }
 
-                if (finalTitle.trim() === summary.trim()) summary = '';
-
-                // 관광지(SSCSPT)만 핀, 나머지는 동그라미
-                const isSight = serviceType === 'SSCSPT';
+                // 관광지(SSCSPT)여도 이동/체험/설명 성격이 강하면 동그라미(default)로 표시
+                // 사용자 요청: 케이블카 등정, 촬영지 원가계 등은 동그라미여야 함
+                const activityKeywords = ['케이블카', '등정', '이동', '촬영지', '탑승', '안내', '설명', '감상', '조망', '경유', '도착', '출발', '휴식'];
+                let isSight = serviceType === 'SSCSPT';
+                
+                // 핀 아이콘 제외 조건: 키워드 포함 시 또는 제목이 너무 길 때(대체로 설명문)
+                if (isSight && (activityKeywords.some(k => finalTitle.includes(k)) || finalTitle.length > 20)) {
+                    isSight = false;
+                }
                 
                 return {
                     type: isSight ? 'location' : 'default',
@@ -119,7 +146,7 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                     subtitle: subtitle,
                     description: summary
                 };
-            }).filter((item: any) => item.title || item.description);
+            }).filter((item: any) => (item.title && item.title !== '일정 안내') || item.description);
 
             // 숙소 정보 보강 (확정 호텔 이름 찾기)
             let hotelStr = (day.scheduleHotel || day.hotel || '').trim();
@@ -175,9 +202,9 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                 items: timeline,
                 hotel: hotelStr,
                 meals: {
-                    breakfast: (day.listMealPlace || []).find((m: any) => m.itiServiceName?.includes('조식'))?.itiSummaryDes || '호텔식',
-                    lunch: (day.listMealPlace || []).find((m: any) => m.itiServiceName?.includes('중식'))?.itiSummaryDes || '현지식',
-                    dinner: (day.listMealPlace || []).find((m: any) => m.itiServiceName?.includes('석식'))?.itiSummaryDes || '현지식'
+                    breakfast: (day.listMealPlace || []).find((m: any) => m.itiServiceName?.includes('조식'))?.itiSummaryDes || '-',
+                    lunch: (day.listMealPlace || []).find((m: any) => m.itiServiceName?.includes('중식'))?.itiSummaryDes || '-',
+                    dinner: (day.listMealPlace || []).find((m: any) => m.itiServiceName?.includes('석식'))?.itiSummaryDes || '-'
                 }
             };
         });

@@ -81,7 +81,12 @@ function formatToHtmlDate(dateStr: string): string {
 const clean = (s: any) => {
     if (!s) return '';
     const str = Array.isArray(s) ? s.join('\n') : String(s);
-    return str.replaceAll('&nbsp;', ' ').trim();
+    let cleaned = str.replaceAll('&nbsp;', ' ');
+    // <br> 태그는 줄바꿈으로 변환
+    cleaned = cleaned.replace(/<br\s*\/?>/gi, '\n');
+    // 나머지 모든 HTML 태그 제거
+    cleaned = cleaned.replace(/<[^>]*>?/gm, '');
+    return cleaned.trim();
 };
 
 export default function ConfirmationPage() {
@@ -134,7 +139,7 @@ export default function ConfirmationPage() {
     const [inclusions, setInclusions] = useState('');
     const [exclusions, setExclusions] = useState('');
     const [notices, setNotices] = useState('');
-    const [checklist, setChecklist] = useState('여권 (유효기간 6개월 이상)\n환전 (현지 화폐 및 달러)\n여행자 보험 증서 (출력/저장)\n비행기 e-티켓 / 각종 바우처\n멀티 어댑터 및 보조 배터리\n상비약 (감기, 배탈, 밴드 등)\n세면도구 및 개인 화장품\n포켓 와이파이 / 유심칩');
+    const [checklist, setChecklist] = useState('여권\n항공권\n\n바람막이 또는 가디건\n수영복, 아쿠아슈스\n\n220V 사용가능\n보조배터리(반드시 기내 휴대)\n멀티 어댑터\n\n상비약(감기약, 소화제, 지사제, 밴드)\n자외선 차단제\n개인 세면도구\n중요한 약은 반드시 기내로\n(혈압, 당뇨약 등)');
     const [cancellationPolicy, setCancellationPolicy] = useState('');
     const [itinerary, setItinerary] = useState<any[]>([]); // 일정표 상태 추가
     const [meetingInfo, setMeetingInfo] = useState<MeetingInfo[]>([]); // 미팅 및 수속 정보
