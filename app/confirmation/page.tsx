@@ -86,6 +86,19 @@ const clean = (s: any) => {
     cleaned = cleaned.replace(/<br\s*\/?>/gi, '\n');
     // 나머지 모든 HTML 태그 제거
     cleaned = cleaned.replace(/<[^>]*>?/gm, '');
+
+    // 공통 오타 자동 수정
+    const typoMap: Record<string, string> = {
+        '아쿠아슈스': '아쿠아슈즈',
+        '가이드경미': '가이드경비',
+        '불포함사행': '불포함사항',
+        '포함사행': '포함사항',
+        '유의사행': '유의사항'
+    };
+    Object.entries(typoMap).forEach(([typo, correct]) => {
+        cleaned = cleaned.replaceAll(typo, correct);
+    });
+
     return cleaned.trim();
 };
 
@@ -139,7 +152,7 @@ export default function ConfirmationPage() {
     const [inclusions, setInclusions] = useState('');
     const [exclusions, setExclusions] = useState('');
     const [notices, setNotices] = useState('');
-    const [checklist, setChecklist] = useState('여권\n항공권\n\n바람막이 또는 가디건\n수영복, 아쿠아슈스\n\n220V 사용가능\n보조배터리(반드시 기내 휴대)\n멀티 어댑터\n\n상비약(감기약, 소화제, 지사제, 밴드)\n자외선 차단제\n개인 세면도구\n중요한 약은 반드시 기내로\n(혈압, 당뇨약 등)');
+    const [checklist, setChecklist] = useState('여권\n항공권\n\n바람막이 또는 가디건\n수영복, 아쿠아슈즈\n\n220V 사용가능\n보조배터리(반드시 기내 휴대)\n멀티 어댑터\n\n상비약(감기약, 소화제, 지사제, 밴드)\n자외선 차단제\n개인 세면도구\n중요한 약은 반드시 기내로\n(혈압, 당뇨약 등)');
     const [cancellationPolicy, setCancellationPolicy] = useState('');
     const [itinerary, setItinerary] = useState<any[]>([]); // 일정표 상태 추가
     const [meetingInfo, setMeetingInfo] = useState<MeetingInfo[]>([]); // 미팅 및 수속 정보
@@ -347,7 +360,9 @@ export default function ConfirmationPage() {
                 if (raw.cancellationPolicy) setCancellationPolicy(clean(raw.cancellationPolicy));
                 if (raw.checklist) setChecklist(clean(raw.checklist) || checklist); // AI 결과가 없으면 기본값 유지
 
-                // ---- 유의사항 통합 ----
+                // ---- 유의사항 통합 (사용자 요청으로 자동 비활성화: 비워두기) ----
+                setNotices('');
+                /*
                 const noticesParts: string[] = [];
                 if (raw.keyPoints?.length) noticesParts.push('핵심 포인트:\n' + raw.keyPoints.map((k: string) => `• ${clean(k)}`).join('\n'));
                 if (raw.specialOffers?.length) noticesParts.push('특전/혜택:\n' + raw.specialOffers.map((s: string) => `• ${clean(s)}`).join('\n'));
@@ -358,6 +373,7 @@ export default function ConfirmationPage() {
                 } else if (raw.notices) {
                     setNotices(clean(raw.notices));
                 }
+                */
 
                 /* [사용자 요청] 2차 조사(날씨/세관 등) 자동 실행 비활성화 - 수동 실행만 허용
                 if (raw.destination) {
@@ -516,10 +532,7 @@ export default function ConfirmationPage() {
                 uploadedAt: new Date().toISOString(),
             };
 
-            setFiles(prev => {
-                const filtered = prev.filter(f => f.type !== type);
-                return [...filtered, newFile];
-            });
+            setFiles(prev => [...prev, newFile]);
         } catch (err: any) {
             alert(`오류 발생: ${err.message}`);
         } finally {
@@ -572,7 +585,11 @@ export default function ConfirmationPage() {
         }
     };
 
-    const getFileByType = (type: DocumentFile['type']) => files.find(f => f.type === type);
+    const removeFile = (id: string) => {
+        setFiles(prev => prev.filter(f => f.id !== id));
+    };
+
+    const getFilesByType = (type: DocumentFile['type']) => files.filter(f => f.type === type);
 
     // 4월 9일 버전: 개별 항목(Weather, Customs, Landmarks 등)만 선택적으로 다시 조사하는 로직
     const runPartialResearch = async (target: string) => {
@@ -1159,19 +1176,52 @@ export default function ConfirmationPage() {
                         { type: 'insurance' as const, label: '여행자 보험 증서', icon: '🛡️' },
                         { type: 'other' as const, label: '기타 서류', icon: '📄' },
                     ].map(slot => {
-                        const uploaded = getFileByType(slot.type);
+                        const slotFiles = getFilesByType(slot.type);
                         const isUploading = uploading === slot.type;
                         return (
-                            <div key={slot.type} className={`file-upload-slot ${uploaded ? 'uploaded' : ''} ${isUploading ? 'uploading' : ''}`}>
-                                <div className="slot-icon">{isUploading ? '⌛' : slot.icon}</div>
-                                <div className="slot-label">{isUploading ? '업로드 중...' : slot.label}</div>
-                                {uploaded && !isUploading && <div className="slot-filename">{uploaded.name}</div>}
-                                <input
-                                    type="file"
-                                    accept=".pdf,.jpg,.jpeg,.png"
-                                    onChange={e => handleFileUpload(slot.type, slot.label, e)}
-                                    disabled={isUploading}
-                                />
+                            <div key={slot.type} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div className={`file-upload-slot ${slotFiles.length > 0 ? 'uploaded' : ''} ${isUploading ? 'uploading' : ''}`}>
+                                    <div className="slot-icon">{isUploading ? '⌛' : slot.icon}</div>
+                                    <div className="slot-label">{isUploading ? '업로드 중...' : slot.label}</div>
+                                    <input
+                                        type="file"
+                                        accept=".pdf,.jpg,.jpeg,.png"
+                                        onChange={e => handleFileUpload(slot.type, slot.label, e)}
+                                        disabled={isUploading}
+                                    />
+                                </div>
+                                {slotFiles.length > 0 && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                        {slotFiles.map(file => (
+                                            <div key={file.id} style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                padding: '8px 12px',
+                                                background: 'var(--bg-tertiary)',
+                                                border: '1px solid var(--border-color)',
+                                                borderRadius: '8px',
+                                                fontSize: '0.75rem'
+                                            }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                                                    <span>📄</span>
+                                                    <span style={{ color: 'var(--accent-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</span>
+                                                </div>
+                                                <button
+                                                    onClick={() => removeFile(file.id)}
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        color: '#ef4444',
+                                                        cursor: 'pointer',
+                                                        padding: '2px 6px',
+                                                        fontSize: '0.9rem'
+                                                    }}
+                                                >✕</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         );
                     })}

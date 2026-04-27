@@ -1,673 +1,354 @@
 {
   "isProduct": true,
-  "title": "[힐링산책큐슈] 후쿠오카/유후인/벳부/구마모토 4일(신상온천호텔+월드체인+호텔식+술음료무제한)",
-  "destination": "구마모토, 후쿠오카, 히타, 유후인, 벳부, 사가",
-  "price": "1129000",
-  "departureDate": "2026-10-14",
-  "returnDate": "2026-10-17",
-  "duration": "3박 4일",
-  "airline": "이스타항공",
-  "departureFlightNumber": "ZE645",
-  "returnFlightNumber": "ZE646",
-  "departureAirport": "인천",
-  "arrivalAirport": "후쿠오카",
-  "departureTime": "08:40",
-  "arrivalTime": "10:20",
-  "departureDuration": "01:40",
-  "returnDepartureAirport": "후쿠오카",
-  "returnDepartureTime": "11:30",
-  "returnArrivalTime": "12:50",
-  "returnDuration": "01:30",
-  "url": "https://www.modetour.com/package/107391327?MLoc=99&Pnum=107391327&ANO=81440&sno=C117876&thru=crs",
+  "title": "[픽업포함/6인기준] 다낭 자유 5일 (메리어트리조트 3베드풀빌라)",
+  "destination": "부산, 다낭, 호이안",
+  "price": "1049900",
+  "departureDate": "2026-07-01",
+  "returnDate": "2026-07-05",
+  "duration": "4박 5일",
+  "airline": "진에어",
+  "departureFlightNumber": "LJ111",
+  "returnFlightNumber": "LJ112",
+  "departureAirport": "부산",
+  "arrivalAirport": "다낭",
+  "departureTime": "21:15",
+  "arrivalTime": "23:55",
+  "departureDuration": "04:40",
+  "returnDepartureAirport": "다낭",
+  "returnDepartureTime": "01:00",
+  "returnArrivalTime": "07:15",
+  "returnDuration": "04:15",
+  "url": "https://www.modetour.com/package/105053370?MLoc=99&Pnum=105053370&ANO=81440&sno=C117876&thru=crs, https://www.modetour.com/package/105057436?MLoc=99&Pnum=105057436&ANO=81440&sno=C117876&thru=crs",
   "itinerary": [
     {
       "day": 1,
       "date": "",
-      "title": "인천 → 구마모토",
-      "transport": "대형버스",
+      "title": "부산 → 다낭",
+      "transport": "승합차",
       "flight": {
-        "flightNo": "ZE645",
-        "airline": "이스타항공",
-        "departureCity": "인천",
-        "departureTime": "08:40",
-        "arrivalCity": "후쿠오카",
-        "arrivalTime": "10:20",
-        "duration": "01:40"
+        "flightNo": "LJ111",
+        "airline": "진에어",
+        "departureCity": "부산",
+        "departureTime": "21:15",
+        "arrivalCity": "다낭",
+        "arrivalTime": "23:55",
+        "duration": "04:40"
       },
       "timeline": [
         {
           "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "인천 국제공항 출발"
+          "title": "김해국제공항",
+          "subtitle": "이동수단(교통)",
+          "description": "부산 김해 국제공항 출발"
         },
         {
           "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "후쿠오카 공항 도착 - 입국 수속 후 전용차량탑승"
+          "title": "다낭 국제공항",
+          "subtitle": "현지공항미팅",
+          "description": "다낭 국제공항 도착 후 '모두투어' 미팅보드를 든 현지인 차량기사와 미팅"
         },
         {
           "type": "default",
-          "title": "한국-일본 여행 입국시 관련 안내",
+          "title": "일정 안내",
           "subtitle": "",
-          "description": "<b>■ 여권/비자</b></font>\r\n- 여권 : 유효기간 6개월 이상\r\n- 비자 : 일본 관광비자 불필요 (단, 장기체류 및 유학/기타 목적 따른 입국시 해당 비자 필요)\r\n* 여권/비자의 경우 경미한 훼손이라도 출입국시 불이익을 받을 수 있으니, 미리 확인하여 주시기 바랍니다.</br>\r\n<b>[출입국 관련사이트]</b></font>\t\t\r\n- 주 일본 대한민국 대사관  <font color=\"#0000FF\"><A href=\"https://overseas.mofa.go.kr/jp-ko/index.do\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font>\r\n- 주 대한민국 일본 대사관  <font color=\"#0000FF\"><A href=\"https://www.kr.emb-japan.go.jp/itprtop_ko/index.html\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font>\r\n- 일본 후생노동성 홈페이지  <font color=\"#0000FF\"><A href=\"https://www.mhlw.go.jp/index.html\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font>\r\n*출입국관련 제한 사항은 사전 안내없이 변경되는 경우도 있습니다. 자세한 내용은  관련 홈페이지를 참고 부탁드리겠습니다.</br>\r\n<b>[외국/이중국적자 주의사항]</b></font>\r\n- 외국/이중국적자의 해외여행은 도착지국가(경유국가 포함)의 출입국정책이 상이하므로, 반드시 여행자본인이 해당국의 대사관에 확인하셔야 합니다. (비자 대행 불가)\r\n- K-ETA가 필요할 수 있으니 개별 준비 부탁드리며, 아래 홈페이지 내용 참고 부탁드립니다.\r\n- K-ETA 홈페이지  <font color=\"#0000FF\"><A href=\"https://www.k-eta.go.kr/portal/apply/index.do\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font></br>\r\n<b>■ 일본 입국시 금제품 반입 주의</b></font>\r\n최근 일본세관의 강화된 심사로 인해 불편을 겪는 사례가 자주 발생하고 있습니다.\r\n우리국민 여행객 여러분께서는 아래의 내용을 참고하시어 입국 시 세관 단속 관련 불이익을 입지 않도록 주의하시기 바라오며, 평소 착용하시던 고가의 금제품은 한국에 보관하시고 오시기를 권합니다.</br>\r\n<b>[일본 세관의 금 또는 금제품 관련 신고기준]</b></font>\r\n- 순도와 중량, 사용(착용) 여부와 관계없이 금 또는 금제품을 휴대하여 반입하는 경우에는 「휴대품·별송품 신고서」에 해당 물품에 대한 정보를 반드시 신고(금지금 또는 금제품 란에 있음으로 체크)하여야 하며, 면세범위(20만엔)를 넘는 경우 해당 물품에 소비세 등이 과세됩니다, 또한 이를 신고하지않고 반입할 시, 일본 관세법상 허위신고로 처벌 및 물품 압수 등이 될 수 있습니다."
+          "description": "※ 미팅대기시간은 최대 2시간입니다. 비행기 도착시간으로부터 2시간까지 미팅장소에 나타나지 않을경우 미팅이 불가합니다. (환불 불가)\r\n※ 현지인 기사를 못찾을 경우 바우처 내 비상연락망으로 연락 부탁드립니다.\r\n※ 개인사정으로 미팅 불가시 사전에 연락 부탁드립니다.\r\n※ 비상연락망\r\n-이승민 과장 081-220-9001 (+84-81-220-9001)\r\n-송지성 과장 087-771-4540 (+84-87-771-4540)"
         },
         {
           "type": "default",
-          "title": "이동정보 안내",
+          "title": "일정 안내",
           "subtitle": "",
-          "description": "구마모토로 이동"
-        },
-        {
-          "type": "location",
-          "title": "구마모토성",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷일본 3대 명성, 웅장한 천수각과 성벽으로 유명한 \"구마모토성\""
-        },
-        {
-          "type": "location",
-          "title": "사쿠라노바바",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷옛 무사마을을 재현한 구마모토 핫플레이스 \"사쿠라노바바 조사이엔\""
+          "description": "여러 호텔 손님들과 같이 미팅이 진행될 수 있으며 공항에서부터 이동 동선에 따라서 순차적으로 내려드립니다. \r\n호텔 앞에 내려드리며 체크인은 따로 도와드리지 않습니다. (바우처 및 여권 체크인)"
         },
         {
           "type": "default",
-          "title": "이동정보 안내",
+          "title": "호텔 체크인 시 유의사항",
           "subtitle": "",
-          "description": "야마가로 이동"
-        },
-        {
-          "type": "location",
-          "title": "야마가 온천마을",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷온천과 전통이 이어져 내려오는 고즈넉한 \"야마가 온천마을\" 산책"
+          "description": "1. 일반적으로 호텔 체크인은 오후 3시 이후부터 가능합니다. 상이한 호텔이 있을 수 있으니 체크인 시간을 미리 확인해주세요.\r\n2. 호텔 프론트에서 여권으로 체크인하시면 됩니다. 체크인 시 여권을 호텔측에서 보관하였다가 체크 아웃시 돌려주는 호텔이 있을 수 있습니다. 이 점 참고해주세요. \r\n3. 체크인 시 보증금(Deposit) 을 위한 신용카드 또는 현금을 요구하는 경우가 있습니다. 호텔 숙박시 파손 및 개인 사용 경비에 대한 보증 개념으로 체크아웃 시 사용 내역이 없으면 자동취소 및 환불됩니다. \r\n4. 객실의 층수, 베드타입은 체크인 시 확정됩니다. 출발전 여행사에 요청을 하셨더라도 확정되는 부분이 아니오니 체크인시 호텔에 한번 더 요청 및 확인해주세요. \r\n5. 일반적인 체크아웃 시간은 12시입니다. 체크아웃 시간 이후에 체크아웃을 할 경우에 추가비용이 발생될 수 있습니다."
         },
         {
           "type": "default",
-          "title": "이동정보 안내",
+          "title": "유의 ㅣ 안내사항",
           "subtitle": "",
-          "description": "오무타로 이동"
-        },
-        {
-          "type": "location",
-          "title": "이온몰 오무타",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷쇼핑과 식사를 한 번에 즐길 수 있는 대형쇼핑몰 \"이온몰\"\n\r☆다양한 맛을 찾을 수 있는 이온몰에서 나만의 맛집을 찾아 즐겨보세요(석식 비용 불포함)"
+          "description": "※ 객실별 최대투숙인원 안내\n\r2베드룸 = 성인4명 + 아동2명(노베드)\r\n3베드룸 = 성인6명 + 아동4명(노베드)\r\n4베드룸 = 성인8명 + 아동5명(노베드)\r\n<b>※ 기준인원 미달시 추가요금이 발생합니다.</b>\r\n※ 엑스트라 베드는 1개만 추가 가능합니다.\r\n※ 성인2명+아동2명 2베드룸 이용시 전원 성인요금 적용됩니다.\r\n※ 아동은 12세미만입니다. 12세이상은 성인요금 적용됩니다."
         },
         {
           "type": "default",
-          "title": "이동정보 안내",
+          "title": "유의 ㅣ 안내사항",
           "subtitle": "",
-          "description": "호텔로 이동 체크인 후 휴식"
-        },
-        {
-          "type": "location",
-          "title": "루트인 오무타(3성급★★★)",
-          "subtitle": "관광(콘텐츠)",
-          "description": "※트리플룸 대응 불가하여 3인 예약 시 트윈+싱글 사용해주셔야 하는 점 양해부탁드립니다.(싱글차지별도)"
+          "description": "※ 레이트체크아웃 신청 안내\n\r※ 레이트체크아웃은 18시 기준으로 신청가능합니다. (추가요금 발생)\r\n※ 18시 이후는 18시 기준 추가요금의 2배가 발생합니다.\r\n<b>※ 추가요금이 룸타입에 따라 상이하니 예약담당자에게 문의 부탁드리겠습니다.</b>"
         }
       ],
       "items": [
         {
           "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "인천 국제공항 출발"
+          "title": "김해국제공항",
+          "subtitle": "이동수단(교통)",
+          "description": "부산 김해 국제공항 출발"
         },
         {
           "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "후쿠오카 공항 도착 - 입국 수속 후 전용차량탑승"
+          "title": "다낭 국제공항",
+          "subtitle": "현지공항미팅",
+          "description": "다낭 국제공항 도착 후 '모두투어' 미팅보드를 든 현지인 차량기사와 미팅"
         },
         {
           "type": "default",
-          "title": "한국-일본 여행 입국시 관련 안내",
+          "title": "일정 안내",
           "subtitle": "",
-          "description": "<b>■ 여권/비자</b></font>\r\n- 여권 : 유효기간 6개월 이상\r\n- 비자 : 일본 관광비자 불필요 (단, 장기체류 및 유학/기타 목적 따른 입국시 해당 비자 필요)\r\n* 여권/비자의 경우 경미한 훼손이라도 출입국시 불이익을 받을 수 있으니, 미리 확인하여 주시기 바랍니다.</br>\r\n<b>[출입국 관련사이트]</b></font>\t\t\r\n- 주 일본 대한민국 대사관  <font color=\"#0000FF\"><A href=\"https://overseas.mofa.go.kr/jp-ko/index.do\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font>\r\n- 주 대한민국 일본 대사관  <font color=\"#0000FF\"><A href=\"https://www.kr.emb-japan.go.jp/itprtop_ko/index.html\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font>\r\n- 일본 후생노동성 홈페이지  <font color=\"#0000FF\"><A href=\"https://www.mhlw.go.jp/index.html\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font>\r\n*출입국관련 제한 사항은 사전 안내없이 변경되는 경우도 있습니다. 자세한 내용은  관련 홈페이지를 참고 부탁드리겠습니다.</br>\r\n<b>[외국/이중국적자 주의사항]</b></font>\r\n- 외국/이중국적자의 해외여행은 도착지국가(경유국가 포함)의 출입국정책이 상이하므로, 반드시 여행자본인이 해당국의 대사관에 확인하셔야 합니다. (비자 대행 불가)\r\n- K-ETA가 필요할 수 있으니 개별 준비 부탁드리며, 아래 홈페이지 내용 참고 부탁드립니다.\r\n- K-ETA 홈페이지  <font color=\"#0000FF\"><A href=\"https://www.k-eta.go.kr/portal/apply/index.do\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font></br>\r\n<b>■ 일본 입국시 금제품 반입 주의</b></font>\r\n최근 일본세관의 강화된 심사로 인해 불편을 겪는 사례가 자주 발생하고 있습니다.\r\n우리국민 여행객 여러분께서는 아래의 내용을 참고하시어 입국 시 세관 단속 관련 불이익을 입지 않도록 주의하시기 바라오며, 평소 착용하시던 고가의 금제품은 한국에 보관하시고 오시기를 권합니다.</br>\r\n<b>[일본 세관의 금 또는 금제품 관련 신고기준]</b></font>\r\n- 순도와 중량, 사용(착용) 여부와 관계없이 금 또는 금제품을 휴대하여 반입하는 경우에는 「휴대품·별송품 신고서」에 해당 물품에 대한 정보를 반드시 신고(금지금 또는 금제품 란에 있음으로 체크)하여야 하며, 면세범위(20만엔)를 넘는 경우 해당 물품에 소비세 등이 과세됩니다, 또한 이를 신고하지않고 반입할 시, 일본 관세법상 허위신고로 처벌 및 물품 압수 등이 될 수 있습니다."
+          "description": "※ 미팅대기시간은 최대 2시간입니다. 비행기 도착시간으로부터 2시간까지 미팅장소에 나타나지 않을경우 미팅이 불가합니다. (환불 불가)\r\n※ 현지인 기사를 못찾을 경우 바우처 내 비상연락망으로 연락 부탁드립니다.\r\n※ 개인사정으로 미팅 불가시 사전에 연락 부탁드립니다.\r\n※ 비상연락망\r\n-이승민 과장 081-220-9001 (+84-81-220-9001)\r\n-송지성 과장 087-771-4540 (+84-87-771-4540)"
         },
         {
           "type": "default",
-          "title": "이동정보 안내",
+          "title": "일정 안내",
           "subtitle": "",
-          "description": "구마모토로 이동"
-        },
-        {
-          "type": "location",
-          "title": "구마모토성",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷일본 3대 명성, 웅장한 천수각과 성벽으로 유명한 \"구마모토성\""
-        },
-        {
-          "type": "location",
-          "title": "사쿠라노바바",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷옛 무사마을을 재현한 구마모토 핫플레이스 \"사쿠라노바바 조사이엔\""
+          "description": "여러 호텔 손님들과 같이 미팅이 진행될 수 있으며 공항에서부터 이동 동선에 따라서 순차적으로 내려드립니다. \r\n호텔 앞에 내려드리며 체크인은 따로 도와드리지 않습니다. (바우처 및 여권 체크인)"
         },
         {
           "type": "default",
-          "title": "이동정보 안내",
+          "title": "호텔 체크인 시 유의사항",
           "subtitle": "",
-          "description": "야마가로 이동"
-        },
-        {
-          "type": "location",
-          "title": "야마가 온천마을",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷온천과 전통이 이어져 내려오는 고즈넉한 \"야마가 온천마을\" 산책"
+          "description": "1. 일반적으로 호텔 체크인은 오후 3시 이후부터 가능합니다. 상이한 호텔이 있을 수 있으니 체크인 시간을 미리 확인해주세요.\r\n2. 호텔 프론트에서 여권으로 체크인하시면 됩니다. 체크인 시 여권을 호텔측에서 보관하였다가 체크 아웃시 돌려주는 호텔이 있을 수 있습니다. 이 점 참고해주세요. \r\n3. 체크인 시 보증금(Deposit) 을 위한 신용카드 또는 현금을 요구하는 경우가 있습니다. 호텔 숙박시 파손 및 개인 사용 경비에 대한 보증 개념으로 체크아웃 시 사용 내역이 없으면 자동취소 및 환불됩니다. \r\n4. 객실의 층수, 베드타입은 체크인 시 확정됩니다. 출발전 여행사에 요청을 하셨더라도 확정되는 부분이 아니오니 체크인시 호텔에 한번 더 요청 및 확인해주세요. \r\n5. 일반적인 체크아웃 시간은 12시입니다. 체크아웃 시간 이후에 체크아웃을 할 경우에 추가비용이 발생될 수 있습니다."
         },
         {
           "type": "default",
-          "title": "이동정보 안내",
+          "title": "유의 ㅣ 안내사항",
           "subtitle": "",
-          "description": "오무타로 이동"
-        },
-        {
-          "type": "location",
-          "title": "이온몰 오무타",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷쇼핑과 식사를 한 번에 즐길 수 있는 대형쇼핑몰 \"이온몰\"\n\r☆다양한 맛을 찾을 수 있는 이온몰에서 나만의 맛집을 찾아 즐겨보세요(석식 비용 불포함)"
+          "description": "※ 객실별 최대투숙인원 안내\n\r2베드룸 = 성인4명 + 아동2명(노베드)\r\n3베드룸 = 성인6명 + 아동4명(노베드)\r\n4베드룸 = 성인8명 + 아동5명(노베드)\r\n<b>※ 기준인원 미달시 추가요금이 발생합니다.</b>\r\n※ 엑스트라 베드는 1개만 추가 가능합니다.\r\n※ 성인2명+아동2명 2베드룸 이용시 전원 성인요금 적용됩니다.\r\n※ 아동은 12세미만입니다. 12세이상은 성인요금 적용됩니다."
         },
         {
           "type": "default",
-          "title": "이동정보 안내",
+          "title": "유의 ㅣ 안내사항",
           "subtitle": "",
-          "description": "호텔로 이동 체크인 후 휴식"
-        },
-        {
-          "type": "location",
-          "title": "루트인 오무타(3성급★★★)",
-          "subtitle": "관광(콘텐츠)",
-          "description": "※트리플룸 대응 불가하여 3인 예약 시 트윈+싱글 사용해주셔야 하는 점 양해부탁드립니다.(싱글차지별도)"
+          "description": "※ 레이트체크아웃 신청 안내\n\r※ 레이트체크아웃은 18시 기준으로 신청가능합니다. (추가요금 발생)\r\n※ 18시 이후는 18시 기준 추가요금의 2배가 발생합니다.\r\n<b>※ 추가요금이 룸타입에 따라 상이하니 예약담당자에게 문의 부탁드리겠습니다.</b>"
         }
       ],
-      "hotel": "루트인 오무타(3성급★★★)",
+      "hotel": "다낭 메리어트 리조트",
       "meals": {
-        "breakfast": "호텔식",
-        "lunch": "현지식",
-        "dinner": "불포함"
+        "breakfast": "-",
+        "lunch": "-",
+        "dinner": "-"
       }
     },
     {
       "day": 2,
       "date": "",
-      "title": "히타 → 유후인 → 벳부 → 후쿠오카",
-      "transport": "대형버스",
+      "title": "다낭",
+      "transport": "기타 (현지교통)",
       "flight": null,
       "timeline": [
         {
           "type": "default",
-          "title": "이동정보 안내",
+          "title": "전일 자유일정",
           "subtitle": "",
-          "description": "호텔 조식 후"
+          "description": ""
         },
         {
-          "type": "default",
-          "title": "이동정보 안내",
+          "type": "location",
+          "title": "바나힐+호이안 원데이투어",
           "subtitle": "",
-          "description": "히타로 이동"
+          "description": "<B>■데이투어 상세 안내■</B> \r\n<a href=\"https://www.vietbenefit.com/fit/33970\" target=\"_blank\" style=\"color:#ff6600; font-weight:bold; text-decoration:none;\"><B>&#x1F449;상세보기 클릭</B></a>\r\n※날짜 선택 후 예약 및 결제 전 우측 하단 카카오톡 아이콘 클릭 > 해당 날짜 조인 행사가 가능한지 꼭 재확인 후 결제 부탁드립니다.\r\n※원데이투어 관련 문의는 카카오톡채널 '비엣베네핏'을 통하여 상담이 가능합니다."
         },
         {
           "type": "location",
-          "title": "#지온폭포",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷시원한 물줄기가 계단처럼 이어지는 아름다운 자연명소 \"지온폭포\""
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
+          "title": "바나힐 원데이투어",
           "subtitle": "",
-          "description": "유후인으로 이동\n\r※ 세계에서 온천이 가장 많은 온천왕국 \"벳부\""
+          "description": "<B>■데이투어 상세 안내■</B> \r\n<a href=\"https://www.vietbenefit.com/fit/33438\" target=\"_blank\" style=\"color:#ff6600; font-weight:bold; text-decoration:none;\"><B>&#x1F449;상세보기 클릭</B></a>\r\n※날짜 선택 후 예약 및 결제 전 우측 하단 카카오톡 아이콘 클릭 > 해당 날짜 조인 행사가 가능한지 꼭 재확인 후 결제 부탁드립니다.\r\n※원데이투어 관련 문의는 카카오톡채널 '비엣베네핏'을 통하여 상담이 가능합니다."
         },
         {
           "type": "location",
-          "title": "긴린코호수",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷아침 물안개와 햇살이 어우러지는, 사계절 아름다운 \"긴린코 호수\"\n\r※ 물안개가 피어나는 몽환적인 호수로 인생 사진은 필수 v^^v"
-        },
-        {
-          "type": "location",
-          "title": "유후인상점거리",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷아기자기한 상점과 먹거리가 가득한 \"유후인 상점거리\" 자유시간"
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
+          "title": "호이안 원데이투어",
           "subtitle": "",
-          "description": "벳부로 이동"
-        },
-        {
-          "type": "location",
-          "title": "유노하나",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷온천의 꽃이라 불리는 천연입욕제를 만드는 \"유노하나 재배지\""
-        },
-        {
-          "type": "location",
-          "title": "가마도지옥",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷빨간도깨비가 지키는 벳부 지옥온천 \"가마도 지옥\" (족욕체험)"
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "호텔로 이동 체크인 후 휴식 및 온천욕♨"
-        },
-        {
-          "type": "location",
-          "title": "루트인 그란티아 후쿠오카 미야와카(3성급★★★)",
-          "subtitle": "관광(콘텐츠)",
-          "description": "※ 트리플룸 대응 불가하여 3인 예약 시 트윈+싱글 사용해주셔야 하는 점 양해부탁드립니다.(싱글차지별도)"
+          "description": "<B>■데이투어 상세 안내■</B> \r\n<a href=\"https://www.vietbenefit.com/fit/33966\" target=\"_blank\" style=\"color:#ff6600; font-weight:bold; text-decoration:none;\"><B>&#x1F449;상세보기 클릭</B></a>\r\n※날짜 선택 후 예약 및 결제 전 우측 하단 카카오톡 아이콘 클릭 > 해당 날짜 조인 행사가 가능한지 꼭 재확인 후 결제 부탁드립니다.\r\n※원데이투어 관련 문의는 카카오톡채널 '비엣베네핏'을 통하여 상담이 가능합니다."
         }
       ],
       "items": [
         {
           "type": "default",
-          "title": "이동정보 안내",
+          "title": "전일 자유일정",
           "subtitle": "",
-          "description": "호텔 조식 후"
+          "description": ""
         },
         {
-          "type": "default",
-          "title": "이동정보 안내",
+          "type": "location",
+          "title": "바나힐+호이안 원데이투어",
           "subtitle": "",
-          "description": "히타로 이동"
+          "description": "<B>■데이투어 상세 안내■</B> \r\n<a href=\"https://www.vietbenefit.com/fit/33970\" target=\"_blank\" style=\"color:#ff6600; font-weight:bold; text-decoration:none;\"><B>&#x1F449;상세보기 클릭</B></a>\r\n※날짜 선택 후 예약 및 결제 전 우측 하단 카카오톡 아이콘 클릭 > 해당 날짜 조인 행사가 가능한지 꼭 재확인 후 결제 부탁드립니다.\r\n※원데이투어 관련 문의는 카카오톡채널 '비엣베네핏'을 통하여 상담이 가능합니다."
         },
         {
           "type": "location",
-          "title": "#지온폭포",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷시원한 물줄기가 계단처럼 이어지는 아름다운 자연명소 \"지온폭포\""
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
+          "title": "바나힐 원데이투어",
           "subtitle": "",
-          "description": "유후인으로 이동\n\r※ 세계에서 온천이 가장 많은 온천왕국 \"벳부\""
+          "description": "<B>■데이투어 상세 안내■</B> \r\n<a href=\"https://www.vietbenefit.com/fit/33438\" target=\"_blank\" style=\"color:#ff6600; font-weight:bold; text-decoration:none;\"><B>&#x1F449;상세보기 클릭</B></a>\r\n※날짜 선택 후 예약 및 결제 전 우측 하단 카카오톡 아이콘 클릭 > 해당 날짜 조인 행사가 가능한지 꼭 재확인 후 결제 부탁드립니다.\r\n※원데이투어 관련 문의는 카카오톡채널 '비엣베네핏'을 통하여 상담이 가능합니다."
         },
         {
           "type": "location",
-          "title": "긴린코호수",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷아침 물안개와 햇살이 어우러지는, 사계절 아름다운 \"긴린코 호수\"\n\r※ 물안개가 피어나는 몽환적인 호수로 인생 사진은 필수 v^^v"
-        },
-        {
-          "type": "location",
-          "title": "유후인상점거리",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷아기자기한 상점과 먹거리가 가득한 \"유후인 상점거리\" 자유시간"
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
+          "title": "호이안 원데이투어",
           "subtitle": "",
-          "description": "벳부로 이동"
-        },
-        {
-          "type": "location",
-          "title": "유노하나",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷온천의 꽃이라 불리는 천연입욕제를 만드는 \"유노하나 재배지\""
-        },
-        {
-          "type": "location",
-          "title": "가마도지옥",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷빨간도깨비가 지키는 벳부 지옥온천 \"가마도 지옥\" (족욕체험)"
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "호텔로 이동 체크인 후 휴식 및 온천욕♨"
-        },
-        {
-          "type": "location",
-          "title": "루트인 그란티아 후쿠오카 미야와카(3성급★★★)",
-          "subtitle": "관광(콘텐츠)",
-          "description": "※ 트리플룸 대응 불가하여 3인 예약 시 트윈+싱글 사용해주셔야 하는 점 양해부탁드립니다.(싱글차지별도)"
+          "description": "<B>■데이투어 상세 안내■</B> \r\n<a href=\"https://www.vietbenefit.com/fit/33966\" target=\"_blank\" style=\"color:#ff6600; font-weight:bold; text-decoration:none;\"><B>&#x1F449;상세보기 클릭</B></a>\r\n※날짜 선택 후 예약 및 결제 전 우측 하단 카카오톡 아이콘 클릭 > 해당 날짜 조인 행사가 가능한지 꼭 재확인 후 결제 부탁드립니다.\r\n※원데이투어 관련 문의는 카카오톡채널 '비엣베네핏'을 통하여 상담이 가능합니다."
         }
       ],
-      "hotel": "루트인 그란티아 후쿠오카 미야와카(3성급★★★)",
+      "hotel": "호텔은 1일차와 동일합니다.",
       "meals": {
         "breakfast": "호텔식",
-        "lunch": "현지식(토반야끼)",
-        "dinner": "현지식(샤브샤브 무제한)"
+        "lunch": "불포함",
+        "dinner": "불포함"
       }
     },
     {
       "day": 3,
       "date": "",
-      "title": "후쿠오카 → 사가",
-      "transport": "대형버스",
+      "title": "호이안 → 다낭",
+      "transport": "기타 (현지교통)",
       "flight": null,
       "timeline": [
         {
-          "type": "default",
-          "title": "이동정보 안내",
+          "type": "location",
+          "title": "호이안 고대도시 투어",
           "subtitle": "",
-          "description": "호텔 조식 후"
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "후쿠오카로 이동"
+          "description": "약 180년 전의 모습이 그대로 남아있는 호이안 구시가지"
         },
         {
           "type": "location",
-          "title": "씨사이드 모모치해변공원",
-          "subtitle": "관광(콘텐츠)",
-          "description": "- 아름다운 바다와 도시 경관이 조화로워 해변 산책 코스로 최적의 장소"
-        },
-        {
-          "type": "location",
-          "title": "후쿠오카 타워",
-          "subtitle": "관광(콘텐츠)",
-          "description": "- 전체 높이 234m의 일본에서 가장 높은 해변 타워로 씨사이드 모모치의 랜드마크"
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
+          "title": "호이안 야경투어",
           "subtitle": "",
-          "description": "오고리로 이동"
+          "description": "밤이 되면 더욱 빛나는, 호이안 야경 투어"
         },
         {
           "type": "location",
-          "title": "개구리절(뇨이린지)",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷소원을 들어주는 개구리 석상으로 유명한 \"뇨이린지\""
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
+          "title": "호이안 씨클로",
           "subtitle": "",
-          "description": "다자이후로 이동"
-        },
-        {
-          "type": "location",
-          "title": "다자이후텐만구",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷학문의 신을 모시는 역사 깊은 신사로, 아름다운 건축물을 볼 수 있는 \"다자이후텐만구\""
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "사가로 이동"
-        },
-        {
-          "type": "location",
-          "title": "니지노마쓰바라",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷일본 3대 소나무 숲 중 하나인 \"니지노마쓰바라\" 카카미야마 전망대 관광"
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "호텔로 이동 체크인 후 휴식"
-        },
-        {
-          "type": "location",
-          "title": "머큐어 사가 카라츠 리조트&호텔(4성급★★★★)",
-          "subtitle": "관광(콘텐츠)",
-          "description": "※3인1실 요청하실 경우 트리플룸(엑베) 가능합니다. (다만, 현지 호텔상황상 불가할 경우 무료로 싱글+트윈 배정될 수 있습니다.)"
+          "description": "씨클로를 타고 호이안을 누비는 이색 체험"
         }
       ],
       "items": [
         {
-          "type": "default",
-          "title": "이동정보 안내",
+          "type": "location",
+          "title": "호이안 고대도시 투어",
           "subtitle": "",
-          "description": "호텔 조식 후"
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "후쿠오카로 이동"
+          "description": "약 180년 전의 모습이 그대로 남아있는 호이안 구시가지"
         },
         {
           "type": "location",
-          "title": "씨사이드 모모치해변공원",
-          "subtitle": "관광(콘텐츠)",
-          "description": "- 아름다운 바다와 도시 경관이 조화로워 해변 산책 코스로 최적의 장소"
-        },
-        {
-          "type": "location",
-          "title": "후쿠오카 타워",
-          "subtitle": "관광(콘텐츠)",
-          "description": "- 전체 높이 234m의 일본에서 가장 높은 해변 타워로 씨사이드 모모치의 랜드마크"
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
+          "title": "호이안 야경투어",
           "subtitle": "",
-          "description": "오고리로 이동"
+          "description": "밤이 되면 더욱 빛나는, 호이안 야경 투어"
         },
         {
           "type": "location",
-          "title": "개구리절(뇨이린지)",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷소원을 들어주는 개구리 석상으로 유명한 \"뇨이린지\""
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
+          "title": "호이안 씨클로",
           "subtitle": "",
-          "description": "다자이후로 이동"
-        },
-        {
-          "type": "location",
-          "title": "다자이후텐만구",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷학문의 신을 모시는 역사 깊은 신사로, 아름다운 건축물을 볼 수 있는 \"다자이후텐만구\""
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "사가로 이동"
-        },
-        {
-          "type": "location",
-          "title": "니지노마쓰바라",
-          "subtitle": "관광(콘텐츠)",
-          "description": "▷일본 3대 소나무 숲 중 하나인 \"니지노마쓰바라\" 카카미야마 전망대 관광"
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "호텔로 이동 체크인 후 휴식"
-        },
-        {
-          "type": "location",
-          "title": "머큐어 사가 카라츠 리조트&호텔(4성급★★★★)",
-          "subtitle": "관광(콘텐츠)",
-          "description": "※3인1실 요청하실 경우 트리플룸(엑베) 가능합니다. (다만, 현지 호텔상황상 불가할 경우 무료로 싱글+트윈 배정될 수 있습니다.)"
+          "description": "씨클로를 타고 호이안을 누비는 이색 체험"
         }
       ],
-      "hotel": "머큐어 사가 카라츠 리조트&호텔(4성급★★★★)",
+      "hotel": "호텔은 1일차와 동일합니다.",
       "meals": {
         "breakfast": "호텔식",
-        "lunch": "현지식(함바그정식)",
-        "dinner": "호텔식(뷔페식+노미호다이)"
+        "lunch": "불포함",
+        "dinner": "불포함"
       }
     },
     {
       "day": 4,
       "date": "",
-      "title": "인천",
-      "transport": "대형버스",
-      "flight": {
-        "flightNo": "ZE646",
-        "airline": "이스타항공",
-        "departureCity": "후쿠오카",
-        "departureTime": "11:30",
-        "arrivalCity": "인천",
-        "arrivalTime": "12:50",
-        "duration": "01:30"
-      },
+      "title": "",
+      "transport": "기타 (현지교통)",
+      "flight": null,
       "timeline": [
         {
           "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "호텔 조식 후"
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "후쿠오카 공항으로 이동 후 출국수속"
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "인천 국제공항 도착 후 해산"
-        },
-        {
-          "type": "default",
-          "title": "모두투어와 함께 특별한 여행이 되셨길 바랍니다. 감사합니다.",
+          "title": "전일 자유 일정",
           "subtitle": "",
           "description": ""
+        },
+        {
+          "type": "default",
+          "title": "공항으로 개별이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "다낭 국제공항",
+          "subtitle": "현지공항센딩",
+          "description": "다낭 국제공항 출발"
         }
       ],
       "items": [
         {
           "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "호텔 조식 후"
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "후쿠오카 공항으로 이동 후 출국수속"
-        },
-        {
-          "type": "default",
-          "title": "이동정보 안내",
-          "subtitle": "",
-          "description": "인천 국제공항 도착 후 해산"
-        },
-        {
-          "type": "default",
-          "title": "모두투어와 함께 특별한 여행이 되셨길 바랍니다. 감사합니다.",
+          "title": "전일 자유 일정",
           "subtitle": "",
           "description": ""
+        },
+        {
+          "type": "default",
+          "title": "공항으로 개별이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "다낭 국제공항",
+          "subtitle": "현지공항센딩",
+          "description": "다낭 국제공항 출발"
+        }
+      ],
+      "hotel": "호텔 확정 예정",
+      "meals": {
+        "breakfast": "호텔식",
+        "lunch": "불포함",
+        "dinner": "불포함"
+      }
+    },
+    {
+      "day": 5,
+      "date": "",
+      "title": "부산",
+      "transport": "대형버스",
+      "flight": {
+        "flightNo": "LJ112",
+        "airline": "진에어",
+        "departureCity": "다낭",
+        "departureTime": "01:00",
+        "arrivalCity": "부산",
+        "arrivalTime": "07:15",
+        "duration": "04:15"
+      },
+      "timeline": [
+        {
+          "type": "default",
+          "title": "김해국제공항",
+          "subtitle": "이동수단(교통)",
+          "description": "김해국제공항 도착"
+        }
+      ],
+      "items": [
+        {
+          "type": "default",
+          "title": "김해국제공항",
+          "subtitle": "이동수단(교통)",
+          "description": "김해국제공항 도착"
         }
       ],
       "hotel": "",
       "meals": {
-        "breakfast": "호텔식 ",
-        "lunch": "현지식",
-        "dinner": "현지식"
+        "breakfast": "-",
+        "lunch": "-",
+        "dinner": "-"
       }
     }
   ],
   "hotels": [
     {
-      "name": "루트인 오무타(3성급★★★)",
-      "address": "?836-0037 Fukuoka, Omuta, Misakimachi, 6番地67",
+      "name": "다낭 메리어트 리조트",
+      "address": "Truong Sa Street, Hoa Hai Ward, Ngu Hanh Son Dist, Da Nang 550000, Vietnam ",
       "images": [],
       "checkIn": "",
       "checkOut": ""
     },
     {
-      "name": "히타 루트인 에키마에 호텔(3성급★★★)",
-      "address": "?877-0013 大分?日田市元町21-14",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "루트인 구마모토 에키마에 호텔(3성급★★★)",
-      "address": "?860-0047 熊本?熊本市西?春日1-14-19",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "루트인 구마모토 오오즈 에키마에(3성급★★★)",
-      "address": "214-9 Muro, Ozu, Kikuchi District, Kumamoto 869-1235",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "구마모토 도미인 호텔(3성급★★★)",
-      "address": "?8600804\n熊本市中央?辛島町３－１",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "루트인 그란티아 후쿠오카 미야와카(3성급★★★)",
-      "address": "778-1 Wakita, Miyawaka, Fukuoka 822-0133 일본",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "루트인 그란티아 다자이후(3성급★★★)",
-      "address": "3 Chome-8-1 Rengaya, Dazaifu, Fukuoka 818-0119 일본",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "루트인 와카미야 인터 호텔(3성급★★★)",
-      "address": "234-1 Numaguchi, Miyawaka, Fukuoka 822-0152",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "루트인 기타큐슈 와카마츠 에키히가시 호텔(3성급★★★)",
-      "address": "3 Chome-6-6 Honmachi, Wakamatsu Ward, Kitakyushu, Fukuoka 808-0034",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "머큐어 사가 카라츠 리조트&호텔(4성급★★★★)",
-      "address": "mercure-sagakaratsu-resort.jp/",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "머큐어 후쿠오카 무나카타 리조트 & 스파(4성급★★★★)",
-      "address": "1303 Tano, Munakata, Fukuoka 811-3514",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "그랑비리오호텔 벳부만(4성급★★★★)",
-      "address": "1780-1 Hiramichi, Hiji, Hayami District, Oita 879-1508",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "그랜드 머큐어 벳부 베이 리조트 & 스파(4성급★★★★)",
-      "address": "?879-1508 Oita, Hayami District, Hiji, Hiramichi, 入江1825",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "호텔 세키아 리조트 & 스파(4성급★★★★)",
-      "address": "1556 Sekimura, Nankan, Tamana District, Kumamoto 861-0804 일본",
+      "name": "호텔은 1일차와 동일합니다.",
+      "address": "",
       "images": [],
       "checkIn": "",
       "checkOut": ""
@@ -676,22 +357,43 @@
   "meetingInfo": [
     {
       "type": "미팅안내",
-      "location": "인천국제공항 제1터미널 3층 출국장(가이드 별도 연락 예정)",
+      "location": "<b>공항 도착 후 별도 미팅 없이 바로 출국 수속을 진행할 수 있습니다.</b><br><br><b>김해국제공항 개별수속 (출발 최소 3시간전까지)</b>",
       "description": "",
-      "time": "05:40",
+      "time": "18:05",
       "imageUrl": null
     }
   ],
   "inclusions": [
-    "□&nbsp;최대 1억원 해외여행자보험",
-    "□ 국내/외공항세, 관광진흥개발기금,",
-    "유류할증료",
-    "□ 왕복항공료"
+    "① 해외여행자보험",
+    "② 왕복항공권, TAX 및 유류할증료(매월 변동가능)",
+    "③ 국내공항세+전쟁보험료, 관광진흥기금, 현지공항세",
+    "④ 전일정 호텔숙박비용",
+    "⑤ 전일정 호텔조식",
+    "⑥ 공항-&gt;호텔 편도 미팅픽업 서비스",
+    "모두케어 서비스 무료제공",
+    "- 아래 1,2,3번 혜택은 '모두CARE+카카오톡채널' 연결하여 이용 가능합니다.",
+    "- 검색창에 vietbenefit 검색 후 원하시는 지역의 채널 친구 추가",
+    "- 모두CARE+다낭 카카오톡채널 : @vietbenefit_dad",
+    "1. 예약 후 여행 전/여행 중 1:1문의 및 현지투어, 스파 등 예약 가능",
+    "2. 비엣베네핏 할인 : 현지 식당,스파,샵,투어 추가 할인",
+    "☞혜택 확인하기",
+    "3. 비엣베네핏 헬프 : 문제 발생 시(도난, 병원 등) 24시간 지원되는 헬프서비스",
+    "☞혜택 확인하기",
+    "4. 김해공항 할인쿠폰 증정 : 공항 내 식당 할인 혜택",
+    "☞혜택 확인하기",
+    "5. 3억원 해외여행자보험 가입"
   ],
   "exclusions": [
-    "□&nbsp;",
-    "가이드/기사 경비 1인당 4,000엔 (현지지불, 성인/아동 동일, 유아(만2세 미만) 제외)",
-    "□&nbsp;개인경비(생수 등)",
-    "□ 일정에 포함되지 않은 자유식"
+    "■ 상기상품은 항공 및 호텔예약이 실시간으로 이루어지므로 예약 후 컴펌여부를 꼭 확인하셔야 합니다.",
+    "■ 각종 개인경비 및 매너팁(객실팁, 포터, 테이블팁, 마사지팁 등)",
+    "■ 호텔-&gt;공항 샌딩 서비스 미제공(리턴시 개별 공항이동 및 출국수속)",
+    "2~4베드 상품 예약시 주의사항",
+    "- 기준인원 = 2베드룸 : 4명, 3베드룸 : 6명, 4베드룸 : 8명",
+    "- 성인/아동유무와 관계없이",
+    "기준인원까지 전부 성인요금",
+    "으로 적용됩니다.",
+    "- 기준인원 초과 아동은 엑스트라 베드가 가능한 리조트는 '소아엑스트라베드요금', 불가능한 리조트는 '소아노베드요금'으로 진행됩니다.(일정표 1일차 참조)",
+    "※ 베트남 지역은 파도가 강한 지역으로 해변에서 개별 수영은 삼가주시기 바랍니다.",
+    "※ 리조트 내 해변에서도 강한 파도와 조류에 유의해주시고 반드시 안전요원의 지시에 따라주시기 바랍니다."
   ]
 }
