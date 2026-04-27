@@ -31,13 +31,38 @@ export async function getTodayNotificationMessage(): Promise<string | null> {
             happyCall: { label: '해피콜', emoji: '🎉', list: [] as ConsultationData[] },
         };
 
-        consultations.forEach((item) => {
-            const { next_followup, prepaid_date, notice_date, balance_date, confirmation_sent, departure_notice, phone_notice, happy_call, balance_due_date } = item.automation || {};
+        const isCanceled = (status?: string) => {
+            return status === '취소/보류' || status === '취소';
+        };
 
-            const isNotDone = (val?: string) => {
-                if (!val) return false;
-                return !val.includes('(완료)');
-            };
+        const isNotDone = (val?: string) => {
+            if (!val) return false;
+            return !val.includes('(완료)');
+        };
+
+        // 중복 고객 합치기 (최신 상태만 남기기)
+        const map = new Map<string, ConsultationData>();
+        consultations.forEach(c => {
+            const phone = c.customer.phone ? String(c.customer.phone).replace(/[^0-9]/g, '') : '';
+            const key = phone && phone.length > 5 ? phone : c.customer.name;
+            if (!key) return;
+            
+            const existing = map.get(key);
+            if (!existing) {
+                map.set(key, c);
+            } else {
+                const curDate = new Date(c.timestamp || 0);
+                const extDate = new Date(existing.timestamp || 0);
+                if (curDate > extDate) map.set(key, c);
+            }
+        });
+
+        const latestConsultations = Array.from(map.values());
+
+        latestConsultations.forEach((item) => {
+            if (isCanceled(item.automation?.status)) return;
+
+            const { next_followup, prepaid_date, notice_date, balance_date, confirmation_sent, departure_notice, phone_notice, happy_call, balance_due_date } = item.automation || {};
 
             if (next_followup === today && isNotDone(next_followup)) categories.reminders.list.push(item);
             if (prepaid_date === today && isNotDone(prepaid_date)) categories.prepaid.list.push(item);
