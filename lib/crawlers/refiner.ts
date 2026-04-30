@@ -96,35 +96,7 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
         }
     }
 
-    // 4. 슬래시(/) 및 대괄호([]) 패턴
-    if (!refined.destination || refined.destination.length < 2) {
-        if (refined.title.includes('/')) {
-            const titleMatchRegex = /([가-힣]{2,5}(?:\/[가-힣]{2,5})+)/g;
-            let match;
-            let bestDest = '';
-            while ((match = titleMatchRegex.exec(refined.title)) !== null) {
-                const candidate = match[1].replace(/\//g, ', ');
-                const isForbidden = forbiddenWords.some(w => candidate.includes(w));
-                if (!isForbidden && candidate.length > bestDest.length) {
-                    bestDest = candidate;
-                }
-            }
-            if (bestDest) refined.destination = bestDest;
-        }
-    }
-    
-    if (!refined.destination || refined.destination.length < 2) {
-        const titleMatchRegex = /\[(.*?)\]/g;
-        let match;
-        while ((match = titleMatchRegex.exec(refined.title)) !== null) {
-            const candidate = match[1];
-            const isForbidden = forbiddenWords.some(w => candidate.includes(w));
-            if (!isForbidden && candidate.length > 1 && candidate.length < 10) {
-                refined.destination = candidate;
-                break;
-            }
-        }
-    }
+
 
     if (!refined.duration || refined.duration === '미정' || refined.duration.includes('0일')) {
         const itineraryLen = Array.isArray(refined.itinerary) ? refined.itinerary.length : 0;

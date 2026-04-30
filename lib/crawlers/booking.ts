@@ -23,13 +23,15 @@ ${nativeData ? `--- [중요: Native API 데이터] ---\n${JSON.stringify(nativeD
 {
   "isProduct": true,
   "title": "상품명",
+  "destination": "목적지 (국가 또는 도시명)",
   "departureDate": "YYYY-MM-DD",
   "returnDate": "YYYY-MM-DD"
 }
 
 [RULES]
 1. 상품명(title)을 정확하게 추출하세요.
-2. 출발일(departureDate)과 귀국일(returnDate)을 YYYY-MM-DD 형식으로 정확하게 추출하세요.
+2. 목적지(destination)는 반드시 국가명 또는 도시명(예: 일본, 오사카, 몽골, 다낭)으로 추출하세요. 행사나 특전, 상품명은 제외하세요.
+3. 출발일(departureDate)과 귀국일(returnDate)을 YYYY-MM-DD 형식으로 정확하게 추출하세요.
 
 입력 텍스트:
 ${text.substring(0, 1000)}`;
