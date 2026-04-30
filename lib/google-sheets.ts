@@ -1346,6 +1346,7 @@ export async function updateConsultationConfirmation(
         departureDate: string;
         returnDate: string;
         destination: string;
+        productName?: string;
         prepaidDate: string;
         noticeDate: string;
         balanceDate: string;
@@ -1383,6 +1384,11 @@ export async function updateConsultationConfirmation(
             { range: `${targetSheetName}!X${rowIndex}`, values: [[data.phoneNotice]] },
             { range: `${targetSheetName}!Y${rowIndex}`, values: [[data.happyCall]] },
         ];
+
+        if (data.productName && data.productName.trim() !== '') {
+            updates.push({ range: `${targetSheetName}!K${rowIndex}`, values: [[data.productName]] });
+            updates.push({ range: `${targetSheetName}!L${rowIndex}`, values: [[data.confirmedProductUrl]] });
+        }
 
         await sheets.spreadsheets.values.batchUpdate({
             spreadsheetId: sheetId,

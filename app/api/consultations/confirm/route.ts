@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
         let departureDate = '';
         let returnDate = '';
         let destination = '';
+        let productName = '';
 
         try {
             // [개정] 내부 API 호출 대신 직접 라이브러리 함수 호출하여 안정성 확보 (Vercel 네트워크 이슈 방지)
@@ -39,7 +40,8 @@ export async function POST(request: NextRequest) {
                 departureDate = info.departureDate || '';
                 returnDate = info.returnDate || '';
                 destination = info.destination || '';
-                console.log(`[Confirm] Analysis Success: dep=${departureDate}, ret=${returnDate}, dest=${destination}`);
+                productName = info.title || '';
+                console.log(`[Confirm] Analysis Success: dep=${departureDate}, ret=${returnDate}, dest=${destination}, title=${productName}`);
             } else {
                 console.warn('[Confirm] Crawler returned null. Native API or Gemini might have failed.');
             }
@@ -104,6 +106,7 @@ export async function POST(request: NextRequest) {
                 departureDate,
                 returnDate,
                 destination,
+                productName,
                 prepaidDate,
                 noticeDate,
                 balanceDate,
@@ -126,6 +129,7 @@ export async function POST(request: NextRequest) {
                     departureDate,
                     returnDate,
                     destination,
+                    productName,
                     prepaidDate,
                     noticeDate,
                     balanceDate,
