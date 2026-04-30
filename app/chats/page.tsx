@@ -58,7 +58,7 @@ export default function ChatsPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
-    const [selectedMonth, setSelectedMonth] = useState<string>(''); // 추가된 상태
+    const [selectedMonth, setSelectedMonth] = useState<string | null>(null); // 추가된 상태
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [updating, setUpdating] = useState<string | null>(null);
@@ -348,7 +348,7 @@ export default function ChatsPage() {
     }).filter(Boolean))).sort().reverse();
 
     useEffect(() => {
-        if (!selectedMonth && allMonths.length > 0) {
+        if (selectedMonth === null && allMonths.length > 0) {
             setSelectedMonth(allMonths[0]);
         }
     }, [allMonths, selectedMonth]);
@@ -359,9 +359,9 @@ export default function ChatsPage() {
 
     const filteredChats = searchQuery
         ? monthFilteredChats.filter(chat =>
-            chat.visitorName.includes(searchQuery) ||
-            chat.destination.includes(searchQuery) ||
-            chat.productName.includes(searchQuery)
+            (chat.visitorName || '').includes(searchQuery) ||
+            (chat.destination || '').includes(searchQuery) ||
+            (chat.productName || '').includes(searchQuery)
         )
         : monthFilteredChats;
 
@@ -512,11 +512,11 @@ export default function ChatsPage() {
                             padding: '8px 16px',
                             borderRadius: '20px',
                             border: '1px solid',
-                            borderColor: selectedMonth === '' ? '#3b82f6' : '#374151',
-                            backgroundColor: selectedMonth === '' ? '#3b82f620' : '#1f2937',
-                            color: selectedMonth === '' ? '#60a5fa' : '#9ca3af',
+                            borderColor: (selectedMonth === '' || selectedMonth === null) ? '#3b82f6' : '#374151',
+                            backgroundColor: (selectedMonth === '' || selectedMonth === null) ? '#3b82f620' : '#1f2937',
+                            color: (selectedMonth === '' || selectedMonth === null) ? '#60a5fa' : '#9ca3af',
                             cursor: 'pointer',
-                            fontWeight: selectedMonth === '' ? 600 : 400,
+                            fontWeight: (selectedMonth === '' || selectedMonth === null) ? 600 : 400,
                             whiteSpace: 'nowrap',
                             transition: 'all 0.2s',
                         }}
