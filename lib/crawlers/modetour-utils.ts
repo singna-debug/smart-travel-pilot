@@ -61,15 +61,25 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             // 항공 정보 추출 (가는 편 / 오는 편)
             const air = s.listAirRouteInfo;
             if ((air?.flightTypeName === "DEPARTURE" || air?.flightTypeName === "ARRIVAL") && air.item?.length) {
-                const merged = air.item.reduce((acc: any, cur: any) => {
-                    Object.keys(cur).forEach(key => {
-                        if (cur[key] && !acc[key]) acc[key] = cur[key];
-                    });
-                    return acc;
-                }, {});
+                const isLayover = air.item.length > 1;
+                const first = air.item[0];
+                const last = air.item[air.item.length - 1];
                 
-                if (air.flightTypeName === "DEPARTURE") deptAir = merged;
-                else returnAir = merged;
+                const flightNos = air.item.map((i: any) => i.departureFlight || i.arrivalFlight).filter(Boolean).join(' / ');
+                const airlines = Array.from(new Set(air.item.map((i: any) => i.transportName).filter(Boolean))).join(' / ');
+                
+                const merged = {
+                    transportName: isLayover ? `${airlines} (경유)` : first.transportName,
+                    departureFlight: flightNos,
+                    departureCityName: first.departureCityName,
+                    departureTime: first.departureTime,
+                    arrivalCityName: last.arrivalCityName,
+                    arrivalTime: last.arrivalTime,
+                    departureFlightDuration: first.departureFlightDuration,
+                };
+                
+                if (air.flightTypeName === "DEPARTURE" && !deptAir.departureFlight) deptAir = merged;
+                else if (air.flightTypeName === "ARRIVAL" && !returnAir.departureFlight) returnAir = merged;
             }
 
             // 도시 정보 추출
