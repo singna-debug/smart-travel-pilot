@@ -619,10 +619,18 @@ export default function ConfirmationPage() {
             });
             const json = await res.json();
             if (json.success) {
-                // 기존 데이터와 병합 (수정된 섹션만 덮어쓰기)
+                // 기존 데이터와 병합 (섹션 내부까지 깊은 병합 수행)
                 setSecondaryResearch((prev: any) => {
                     if (!prev) return json.data;
-                    return { ...prev, ...json.data };
+                    const newState = { ...prev };
+                    for (const key in json.data) {
+                        if (prev[key] && typeof prev[key] === 'object' && !Array.isArray(prev[key]) && json.data[key]) {
+                            newState[key] = { ...prev[key], ...json.data[key] };
+                        } else {
+                            newState[key] = json.data[key];
+                        }
+                    }
+                    return newState;
                 });
             }
         } catch (err: any) {
@@ -773,6 +781,25 @@ export default function ConfirmationPage() {
             if (!prev || !prev.weather || !prev.weather.forecast) return prev;
             const newForecast = [...prev.weather.forecast];
             newForecast[index] = { ...newForecast[index], [field]: value };
+            return { ...prev, weather: { ...prev.weather, forecast: newForecast } };
+        });
+    };
+
+    const addWeatherForecastDay = () => {
+        setSecondaryResearch((prev: any) => {
+            if (!prev) return prev;
+            const weather = prev.weather || { summary: '', forecast: [], clothingTips: [], packingSummary: '' };
+            const forecast = weather.forecast || [];
+            const nextDayNum = forecast.length + 1;
+            const newForecast = [...forecast, { date: `${nextDayNum}일차`, tempMin: '-', tempMax: '-', description: '맑음', icon: '☀️' }];
+            return { ...prev, weather: { ...weather, forecast: newForecast } };
+        });
+    };
+
+    const removeWeatherForecastDay = (index: number) => {
+        setSecondaryResearch((prev: any) => {
+            if (!prev || !prev.weather || !prev.weather.forecast) return prev;
+            const newForecast = prev.weather.forecast.filter((_: any, i: number) => i !== index);
             return { ...prev, weather: { ...prev.weather, forecast: newForecast } };
         });
     };
@@ -1048,53 +1075,80 @@ export default function ConfirmationPage() {
                     </div>
                 </div>
 
-                {/* 가는 편 경유 구간 */}
-                <div style={{ marginTop: '20px', padding: '16px', background: '#111827', borderRadius: '12px', border: '1px solid #374151' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <h4 style={{ margin: 0, fontSize: '14px', color: '#60a5fa' }}>가는 편 경유 구간 상세 (직항은 비워두세요)</h4>
-                        <button onClick={() => setDepartureSegments([...departureSegments, { airline: '', flightNo: '', departureCity: '', departureTime: '', arrivalCity: '', arrivalTime: '', duration: '', layoverDuration: '' }])} 
-                                style={{ padding: '4px 8px', fontSize: '12px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>+ 구간 추가</button>
-                    </div>
-                    {departureSegments.length === 0 && <p style={{ fontSize: '12px', color: '#6b7280', textAlign: 'center', margin: '20px 0' }}>경유 정보가 없습니다. 직항일 경우 설정하지 않아도 됩니다.</p>}
-                    {departureSegments.map((seg, idx) => (
-                        <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '12px', paddingBottom: '12px', borderBottom: idx < departureSegments.length - 1 ? '1px dashed #374151' : 'none' }}>
-                            <div className="confirm-field"><label>항공사</label><input value={seg.airline} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].airline = e.target.value; setDepartureSegments(newSegs); }} /></div>
-                            <div className="confirm-field"><label>편명</label><input value={seg.flightNo} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].flightNo = e.target.value; setDepartureSegments(newSegs); }} /></div>
-                            <div className="confirm-field"><label>출발지</label><input value={seg.departureCity} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].departureCity = e.target.value; setDepartureSegments(newSegs); }} /></div>
-                            <div className="confirm-field"><label>출발시간</label><input value={seg.departureTime} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].departureTime = e.target.value; setDepartureSegments(newSegs); }} /></div>
-                            <div className="confirm-field"><label>도착지</label><input value={seg.arrivalCity} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].arrivalCity = e.target.value; setDepartureSegments(newSegs); }} /></div>
-                            <div className="confirm-field"><label>도착시간</label><input value={seg.arrivalTime} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].arrivalTime = e.target.value; setDepartureSegments(newSegs); }} /></div>
-                            <div className="confirm-field"><label>소요시간</label><input value={seg.duration} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].duration = e.target.value; setDepartureSegments(newSegs); }} /></div>
-                            <div className="confirm-field"><label>대기시간</label><input value={seg.layoverDuration} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].layoverDuration = e.target.value; setDepartureSegments(newSegs); }} /></div>
-                            <button onClick={() => setDepartureSegments(departureSegments.filter((_, i) => i !== idx))} style={{ gridColumn: '4', justifySelf: 'end', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>구간 삭제</button>
+                {/* 경유 정보 상세 에디터 */}
+                {departureSegments.length > 0 && (
+                    <div style={{ marginTop: '20px', padding: '16px', background: '#111827', borderRadius: '12px', border: '1px solid #374151' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                            <h4 style={{ margin: 0, fontSize: '14px', color: '#60a5fa' }}>가는 편 경유 구간 상세</h4>
+                            <button onClick={() => setDepartureSegments([...departureSegments, { airline: '', flightNo: '', departureCity: '', departureTime: '', arrivalCity: '', arrivalTime: '', duration: '', layoverDuration: '' }])} 
+                                    style={{ padding: '4px 8px', fontSize: '12px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>+ 구간 추가</button>
                         </div>
-                    ))}
-                </div>
-
-                {/* 오는 편 경유 구간 */}
-                <div style={{ marginTop: '20px', padding: '16px', background: '#111827', borderRadius: '12px', border: '1px solid #374151' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <h4 style={{ margin: 0, fontSize: '14px', color: '#10b981' }}>오는 편 경유 구간 상세</h4>
-                        <button onClick={() => setReturnSegments([...returnSegments, { airline: '', flightNo: '', departureCity: '', departureTime: '', arrivalCity: '', arrivalTime: '', duration: '', layoverDuration: '' }])} 
-                                style={{ padding: '4px 8px', fontSize: '12px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>+ 구간 추가</button>
+                        {departureSegments.map((seg, idx) => (
+                            <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '12px', paddingBottom: '12px', borderBottom: idx < departureSegments.length - 1 ? '1px dashed #374151' : 'none' }}>
+                                <div className="confirm-field"><label>항공사</label><input value={seg.airline} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].airline = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                                <div className="confirm-field"><label>편명</label><input value={seg.flightNo} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].flightNo = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                                <div className="confirm-field"><label>출발지</label><input value={seg.departureCity} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].departureCity = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                                <div className="confirm-field"><label>출발시간</label><input value={seg.departureTime} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].departureTime = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                                <div className="confirm-field"><label>도착지</label><input value={seg.arrivalCity} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].arrivalCity = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                                <div className="confirm-field"><label>도착시간</label><input value={seg.arrivalTime} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].arrivalTime = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                                <div className="confirm-field"><label>소요시간</label><input value={seg.duration} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].duration = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                                <div className="confirm-field"><label>대기시간</label><input value={seg.layoverDuration} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].layoverDuration = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                                <button onClick={() => setDepartureSegments(departureSegments.filter((_, i) => i !== idx))} style={{ gridColumn: '4', justifySelf: 'end', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>구간 삭제</button>
+                            </div>
+                        ))}
                     </div>
-                    {returnSegments.length === 0 && <p style={{ fontSize: '12px', color: '#6b7280', textAlign: 'center', margin: '20px 0' }}>경유 정보가 없습니다.</p>}
-                    {returnSegments.map((seg, idx) => (
-                        <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '12px', paddingBottom: '12px', borderBottom: idx < returnSegments.length - 1 ? '1px dashed #374151' : 'none' }}>
-                            <div className="confirm-field"><label>항공사</label><input value={seg.airline} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].airline = e.target.value; setReturnSegments(newSegs); }} /></div>
-                            <div className="confirm-field"><label>편명</label><input value={seg.flightNo} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].flightNo = e.target.value; setReturnSegments(newSegs); }} /></div>
-                            <div className="confirm-field"><label>출발지</label><input value={seg.departureCity} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].departureCity = e.target.value; setReturnSegments(newSegs); }} /></div>
-                            <div className="confirm-field"><label>출발시간</label><input value={seg.departureTime} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].departureTime = e.target.value; setReturnSegments(newSegs); }} /></div>
-                            <div className="confirm-field"><label>도착지</label><input value={seg.arrivalCity} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].arrivalCity = e.target.value; setReturnSegments(newSegs); }} /></div>
-                            <div className="confirm-field"><label>도착시간</label><input value={seg.arrivalTime} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].arrivalTime = e.target.value; setReturnSegments(newSegs); }} /></div>
-                            <div className="confirm-field"><label>소요시간</label><input value={seg.duration} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].duration = e.target.value; setReturnSegments(newSegs); }} /></div>
-                            <div className="confirm-field"><label>대기시간</label><input value={seg.layoverDuration} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].layoverDuration = e.target.value; setReturnSegments(newSegs); }} /></div>
-                            <button onClick={() => setReturnSegments(returnSegments.filter((_, i) => i !== idx))} style={{ gridColumn: '4', justifySelf: 'end', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>구간 삭제</button>
-                        </div>
-                    ))}
-                </div>
+                )}
 
-                <div style={{ marginTop: '30px' }}></div>
+                {/* 오는 편 경유 구간 (경유 정보가 있을 때만 표시) */}
+                {returnSegments.length > 0 && (
+                    <div style={{ marginTop: '20px', padding: '16px', background: '#111827', borderRadius: '12px', border: '1px solid #374151' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                            <h4 style={{ margin: 0, fontSize: '14px', color: '#10b981' }}>오는 편 경유 구간 상세</h4>
+                            <button onClick={() => setReturnSegments([...returnSegments, { airline: '', flightNo: '', departureCity: '', departureTime: '', arrivalCity: '', arrivalTime: '', duration: '', layoverDuration: '' }])} 
+                                    style={{ padding: '4px 8px', fontSize: '12px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>+ 구간 추가</button>
+                        </div>
+                        {returnSegments.map((seg, idx) => (
+                            <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '12px', paddingBottom: '12px', borderBottom: idx < returnSegments.length - 1 ? '1px dashed #374151' : 'none' }}>
+                                <div className="confirm-field"><label>항공사</label><input value={seg.airline} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].airline = e.target.value; setReturnSegments(newSegs); }} /></div>
+                                <div className="confirm-field"><label>편명</label><input value={seg.flightNo} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].flightNo = e.target.value; setReturnSegments(newSegs); }} /></div>
+                                <div className="confirm-field"><label>출발지</label><input value={seg.departureCity} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].departureCity = e.target.value; setReturnSegments(newSegs); }} /></div>
+                                <div className="confirm-field"><label>출발시간</label><input value={seg.departureTime} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].departureTime = e.target.value; setReturnSegments(newSegs); }} /></div>
+                                <div className="confirm-field"><label>도착지</label><input value={seg.arrivalCity} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].arrivalCity = e.target.value; setReturnSegments(newSegs); }} /></div>
+                                <div className="confirm-field"><label>도착시간</label><input value={seg.arrivalTime} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].arrivalTime = e.target.value; setReturnSegments(newSegs); }} /></div>
+                                <div className="confirm-field"><label>소요시간</label><input value={seg.duration} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].duration = e.target.value; setReturnSegments(newSegs); }} /></div>
+                                <div className="confirm-field"><label>대기시간</label><input value={seg.layoverDuration} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].layoverDuration = e.target.value; setReturnSegments(newSegs); }} /></div>
+                                <button onClick={() => setReturnSegments(returnSegments.filter((_, i) => i !== idx))} style={{ gridColumn: '4', justifySelf: 'end', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>구간 삭제</button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* 경유 정보 수동 추가 버튼 (항공과 숙박 사이) */}
+                {departureSegments.length === 0 && returnSegments.length === 0 && (
+                    <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end' }}>
+                        <button 
+                            onClick={() => {
+                                setDepartureSegments([{ airline: airline, flightNo: departureFlightNumber, departureCity: departureAirport, departureTime: departureTime, arrivalCity: '', arrivalTime: '', duration: '', layoverDuration: '' }]);
+                                setReturnSegments([{ airline: airline, flightNo: returnFlightNumber, departureCity: '', departureTime: returnDepartureTime, arrivalCity: departureAirport, arrivalTime: returnArrivalTime, duration: '', layoverDuration: '' }]);
+                            }}
+                            style={{ 
+                                padding: '6px 14px', 
+                                background: 'transparent', 
+                                border: '1px solid #4b5563', 
+                                color: '#9ca3af', 
+                                borderRadius: '8px', 
+                                cursor: 'pointer',
+                                fontSize: '0.85rem',
+                                fontWeight: 600,
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            + 경유 추가
+                        </button>
+                    </div>
+                )}
+
+                <div style={{ marginTop: '24px' }}></div>
 
                 {hotels.map((h, i) => (
                     <div key={i} className="hotel-edit-card" style={{ marginBottom: '24px', padding: '16px', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
@@ -1224,20 +1278,21 @@ export default function ConfirmationPage() {
                 <div className="confirm-section-title">
                     <span className="section-icon">📎</span> 전자 서류 업로드
                 </div>
-                <div className="file-upload-grid">
-                    {[
-                        { type: 'boarding_pass' as const, label: '보딩패스 / e-티켓', icon: '🎫' },
-                        { type: 'visa' as const, label: '비자(VISA) 확인서', icon: '📋' },
-                        { type: 'insurance' as const, label: '여행자 보험 증서', icon: '🛡️' },
-                        { type: 'other' as const, label: '기타 서류', icon: '📄' },
-                    ].map(slot => {
-                        const slotFiles = getFilesByType(slot.type);
-                        const isUploading = uploading === slot.type;
-                        return (
-                            <div key={slot.type} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <div className={`file-upload-slot ${slotFiles.length > 0 ? 'uploaded' : ''} ${isUploading ? 'uploading' : ''}`}>
-                                    <div className="slot-icon">{isUploading ? '⌛' : slot.icon}</div>
-                                    <div className="slot-label">{isUploading ? '업로드 중...' : slot.label}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    {/* 상단: 업로드 버튼 2x2 그리드 */}
+                    <div className="file-upload-grid" style={{ gridTemplateColumns: '1fr 1fr', height: 'fit-content' }}>
+                        {[
+                            { type: 'boarding_pass' as const, label: '보딩패스 / e-티켓', icon: '🎫' },
+                            { type: 'visa' as const, label: '비자(VISA) 확인서', icon: '📋' },
+                            { type: 'insurance' as const, label: '여행자 보험 증서', icon: '🛡️' },
+                            { type: 'other' as const, label: '기타 서류', icon: '📄' },
+                        ].map(slot => {
+                            const isUploading = uploading === slot.type;
+                            const hasFiles = getFilesByType(slot.type).length > 0;
+                            return (
+                                <div key={slot.type} className={`file-upload-slot ${hasFiles ? 'uploaded' : ''} ${isUploading ? 'uploading' : ''}`} style={{ height: '100px' }}>
+                                    <div className="slot-icon" style={{ fontSize: '1.2rem' }}>{isUploading ? '⌛' : slot.icon}</div>
+                                    <div className="slot-label" style={{ fontSize: '0.75rem' }}>{isUploading ? '업로드 중...' : slot.label}</div>
                                     <input
                                         type="file"
                                         accept=".pdf,.jpg,.jpeg,.png"
@@ -1245,41 +1300,75 @@ export default function ConfirmationPage() {
                                         disabled={isUploading}
                                     />
                                 </div>
-                                {slotFiles.length > 0 && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                        {slotFiles.map(file => (
-                                            <div key={file.id} style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'space-between',
-                                                padding: '8px 12px',
-                                                background: 'var(--bg-tertiary)',
-                                                border: '1px solid var(--border-color)',
-                                                borderRadius: '8px',
-                                                fontSize: '0.75rem'
-                                            }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                                                    <span>📄</span>
-                                                    <span style={{ color: 'var(--accent-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</span>
-                                                </div>
-                                                <button
-                                                    onClick={() => removeFile(file.id)}
-                                                    style={{
-                                                        background: 'none',
-                                                        border: 'none',
-                                                        color: '#ef4444',
-                                                        cursor: 'pointer',
-                                                        padding: '2px 6px',
-                                                        fontSize: '0.9rem'
-                                                    }}
-                                                >✕</button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                            );
+                        })}
+                    </div>
+
+                    {/* 하단: 업로드된 파일 통합 목록 (가로형 또는 리스트형) */}
+                    {files.length > 0 && (
+                        <div style={{ 
+                            background: 'var(--bg-secondary)', 
+                            border: '1px solid var(--border-color)', 
+                            borderRadius: '12px', 
+                            padding: '16px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px'
+                        }}>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span>📁 업로드된 서류 목록</span>
+                                <span style={{ fontSize: '0.75rem', background: 'var(--accent-primary)', color: '#fff', padding: '1px 6px', borderRadius: '10px' }}>{files.length}</span>
                             </div>
-                        );
-                    })}
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                {['boarding_pass', 'visa', 'insurance', 'other'].map(type => {
+                                    const slotFiles = getFilesByType(type as any);
+                                    if (slotFiles.length === 0) return null;
+                                    
+                                    const label = type === 'boarding_pass' ? '보딩패스' : type === 'visa' ? '비자' : type === 'insurance' ? '보험' : '기타';
+                                    
+                                    return (
+                                        <div key={type} style={{ background: 'var(--bg-tertiary)', padding: '12px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '4px' }}>{label}</div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                {slotFiles.map(file => (
+                                                    <div key={file.id} style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between',
+                                                        fontSize: '0.75rem'
+                                                    }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden', flex: 1, minWidth: 0 }}>
+                                                            <span style={{ fontSize: '0.8rem' }}>📄</span>
+                                                            <span style={{ 
+                                                                color: 'var(--text-primary)', 
+                                                                whiteSpace: 'nowrap', 
+                                                                overflow: 'hidden', 
+                                                                textOverflow: 'ellipsis',
+                                                                flex: 1
+                                                            }}>{file.name}</span>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => removeFile(file.id)}
+                                                            style={{
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                color: '#ef4444',
+                                                                cursor: 'pointer',
+                                                                padding: '2px 4px',
+                                                                fontSize: '0.8rem',
+                                                                marginLeft: '8px'
+                                                            }}
+                                                        >✕</button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -1561,11 +1650,11 @@ export default function ConfirmationPage() {
                             <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span>💱 환전 및 결제 {secondaryResearch.currency?.localCurrency ? `(${safeStr(secondaryResearch.currency.localCurrency)})` : ''}</span>
                                 <button
-                                    onClick={() => runPartialResearch('essentials')}
-                                    disabled={partialLoading['essentials']}
+                                    onClick={() => runPartialResearch('currency')}
+                                    disabled={partialLoading['currency']}
                                     style={{ fontSize: '0.75rem', padding: '4px 10px', background: '#334155', border: '1px solid #475569', borderRadius: '6px', cursor: 'pointer', color: '#cbd5e1', fontWeight: 600 }}
                                 >
-                                    {partialLoading['essentials'] ? '⏳ 조사 중' : '🔄 다시 조사'}
+                                    {partialLoading['currency'] ? '⏳ 조사 중' : '🔄 다시 조사'}
                                 </button>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -1591,14 +1680,18 @@ export default function ConfirmationPage() {
                             <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span>📱 로밍·통신</span>
                                 <button
-                                    onClick={() => runPartialResearch('essentials')}
-                                    disabled={partialLoading['essentials']}
+                                    onClick={() => runPartialResearch('roaming')}
+                                    disabled={partialLoading['roaming']}
                                     style={{ fontSize: '0.75rem', padding: '4px 10px', background: '#334155', border: '1px solid #475569', borderRadius: '6px', cursor: 'pointer', color: '#cbd5e1', fontWeight: 600 }}
                                 >
-                                    {partialLoading['essentials'] ? '⏳ 조사 중' : '🔄 다시 조사'}
+                                    {partialLoading['roaming'] ? '⏳ 조사 중' : '🔄 다시 조사'}
                                 </button>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div className="confirm-field">
+                                    <label style={{ color: 'var(--text-secondary)' }}>로밍 개요</label>
+                                    <textarea rows={2} value={secondaryResearch.roaming?.description || ''} onChange={e => updateSRField('roaming', 'description', e.target.value)} />
+                                </div>
                                 <div className="confirm-field">
                                     <label style={{ color: 'var(--text-secondary)' }}>통신사 안내문</label>
                                     <textarea rows={2} value={secondaryResearch.roaming?.carriers || ''} onChange={e => updateSRField('roaming', 'carriers', e.target.value)} />
@@ -1621,11 +1714,11 @@ export default function ConfirmationPage() {
                             <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span>🌡️ 날씨 및 복장 가이드</span>
                                 <button
-                                    onClick={() => runPartialResearch('basics')}
-                                    disabled={partialLoading['basics']}
+                                    onClick={() => runPartialResearch('weather')}
+                                    disabled={partialLoading['weather']}
                                     style={{ fontSize: '0.75rem', padding: '4px 10px', background: '#334155', border: '1px solid #475569', borderRadius: '6px', cursor: 'pointer', color: '#cbd5e1', fontWeight: 600 }}
                                 >
-                                    {partialLoading['basics'] ? '⏳ 조사 중' : '🔄 다시 조사'}
+                                    {partialLoading['weather'] ? '⏳ 조사 중' : '🔄 다시 조사'}
                                 </button>
                             </div>
 
@@ -1675,13 +1768,41 @@ export default function ConfirmationPage() {
                                             };
 
                                             return (
-                                                <div key={idx} style={{ background: 'var(--bg-tertiary)', padding: '12px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                                                <div key={idx} style={{ background: 'var(--bg-tertiary)', padding: '12px', borderRadius: '10px', border: '1px solid var(--border-color)', position: 'relative' }}>
+                                                    <button 
+                                                        onClick={() => removeWeatherForecastDay(idx)}
+                                                        style={{ position: 'absolute', top: '8px', right: '8px', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.75rem' }}
+                                                    >
+                                                        ✕
+                                                    </button>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                                                         <div>
                                                             <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-primary)' }}>{day.date}</div>
                                                             {displayDate && <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '2px' }}>{displayDate}</div>}
                                                         </div>
-                                                        <div style={{ fontSize: '1.2rem' }}>{getWeatherIcon(day.description)}</div>
+                                                        <select 
+                                                            value={day.icon || getWeatherIcon(day.description)} 
+                                                            onChange={e => updateSRWeatherForecast(idx, 'icon', e.target.value)}
+                                                            style={{ 
+                                                                fontSize: '0.85rem', 
+                                                                background: 'transparent', 
+                                                                border: 'none', 
+                                                                cursor: 'pointer', 
+                                                                padding: '0', 
+                                                                textAlign: 'left',
+                                                                color: '#fff',
+                                                                outline: 'none'
+                                                            }}
+                                                        >
+                                                            <option value="☀️" style={{ background: '#1e293b', color: '#fff' }}>☀️ 맑음</option>
+                                                            <option value="⛅" style={{ background: '#1e293b', color: '#fff' }}>⛅ 구름조금</option>
+                                                            <option value="☁️" style={{ background: '#1e293b', color: '#fff' }}>☁️ 흐림</option>
+                                                            <option value="🌦️" style={{ background: '#1e293b', color: '#fff' }}>🌦️ 소나기</option>
+                                                            <option value="🌧️" style={{ background: '#1e293b', color: '#fff' }}>🌧️ 비</option>
+                                                            <option value="❄️" style={{ background: '#1e293b', color: '#fff' }}>❄️ 눈</option>
+                                                            <option value="⚡" style={{ background: '#1e293b', color: '#fff' }}>⚡ 천둥번개</option>
+                                                            <option value="🌫️" style={{ background: '#1e293b', color: '#fff' }}>🌫️ 안개</option>
+                                                        </select>
                                                     </div>
                                                     <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                                                         <div style={{ flex: 1 }}>
@@ -1710,6 +1831,23 @@ export default function ConfirmationPage() {
                                                 </div>
                                             );
                                         })}
+                                        <button 
+                                            onClick={addWeatherForecastDay}
+                                            style={{ 
+                                                background: 'var(--bg-tertiary)', 
+                                                border: '1px dashed var(--border-color)', 
+                                                borderRadius: '10px', 
+                                                display: 'flex', 
+                                                alignItems: 'center', 
+                                                justifyContent: 'center',
+                                                fontSize: '0.8rem',
+                                                color: 'var(--text-muted)',
+                                                cursor: 'pointer',
+                                                minHeight: '100px'
+                                            }}
+                                        >
+                                            + 일차 추가
+                                        </button>
                                     </div>
                                 </div>
 
@@ -1750,11 +1888,11 @@ export default function ConfirmationPage() {
                             <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span>🛃 입국·세관 · 공식 링크</span>
                                 <button
-                                    onClick={() => runPartialResearch('rules')}
-                                    disabled={partialLoading['rules']}
+                                    onClick={() => runPartialResearch('customs')}
+                                    disabled={partialLoading['customs']}
                                     style={{ fontSize: '0.75rem', padding: '4px 10px', background: '#334155', border: '1px solid #475569', borderRadius: '6px', cursor: 'pointer', color: '#cbd5e1', fontWeight: 600 }}
                                 >
-                                    {partialLoading['rules'] ? '⏳ 조사 중' : '🔄 다시 조사'}
+                                    {partialLoading['customs'] ? '⏳ 조사 중' : '🔄 다시 조사'}
                                 </button>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -1910,11 +2048,11 @@ export default function ConfirmationPage() {
                             <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span>🧳 수하물 규정</span>
                                 <button
-                                    onClick={() => runPartialResearch('rules')}
-                                    disabled={partialLoading['rules']}
+                                    onClick={() => runPartialResearch('baggage')}
+                                    disabled={partialLoading['baggage']}
                                     style={{ fontSize: '0.75rem', padding: '4px 10px', background: '#334155', border: '1px solid #475569', borderRadius: '6px', cursor: 'pointer', color: '#cbd5e1', fontWeight: 600 }}
                                 >
-                                    {partialLoading['rules'] ? '⏳ 조사 중' : '🔄 다시 조사'}
+                                    {partialLoading['baggage'] ? '⏳ 조사 중' : '🔄 다시 조사'}
                                 </button>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

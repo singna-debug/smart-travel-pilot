@@ -191,7 +191,15 @@ const GuideAccordion = ({
     children: React.ReactNode;
 }) => {
     return (
-        <div className={`mc-section guide-accordion ${isOpen ? 'open' : ''}`}>
+        <div 
+            className={`mc-section guide-accordion ${isOpen ? 'open' : ''}`}
+            style={{ 
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)', 
+                border: '1px solid #f1f5f9', 
+                borderRadius: '16px',
+                marginBottom: '16px' 
+            }}
+        >
             <div className="ga-header" onClick={() => onToggle(id)}>
                 <div className="ga-title">{title}</div>
                 <div className="ga-chevron">
@@ -869,7 +877,12 @@ export default function ConfirmationViewerPage() {
         setExpandedSections(prev => ({ ...prev, [sec]: !prev[sec] }));
     };
 
-    const currencyKoMap: Record<string, string> = { VND: '동', JPY: '엔', USD: '달러', EUR: '유로', PHP: '페소', THB: '바트', TWD: '대만 달러', CNY: '위안', HKD: '홍콩 달러', SGD: '싱가포르 달러', IDR: '루피아', MYR: '링깃' };
+    const currencyKoMap: Record<string, string> = { 
+        VND: '베트남', JPY: '일본', USD: '미국', EUR: '유럽', PHP: '필리핀', 
+        THB: '태국', TWD: '대만', CNY: '중국', HKD: '홍콩', SGD: '싱가포르', 
+        IDR: '인도네시아', MYR: '말레이시아', DKK: '덴마크', NOK: '노르웨이', 
+        SEK: '스웨덴', ISK: '아이슬란드', GBP: '영국', CHF: '스위스' 
+    };
 
     useEffect(() => {
         const loadDoc = async () => {
@@ -894,18 +907,51 @@ export default function ConfirmationViewerPage() {
         loadDoc();
     }, [id]);
 
-    // 환율 가져오기
+    // 환율 관련 설정 초기화 및 통화 목록 추출
     useEffect(() => {
-        if (!doc?.secondaryResearch?.currency?.localCurrency) return;
-        const curr = doc.secondaryResearch.currency.localCurrency;
-        setTargetCurrency(curr);
-        setRateLoading(true);
-        fetch(`/api/exchange-rate?from=KRW&to=${curr}`)
-            .then(r => r.json())
-            .then(json => { if (json.success) setExchangeRate(json.data.rate); })
-            .catch(() => { })
-            .finally(() => setRateLoading(false));
+        if (!doc?.secondaryResearch?.currency) return;
+        const cur = doc.secondaryResearch.currency;
+        
+        // 통화 목록 추출 (targetCodes가 없으면 localCurrency에서 파싱)
+        let codes = cur.targetCodes || [];
+        if (codes.length === 0 && cur.localCurrency) {
+            // 쉼표, 공백, 괄호 등으로 구분된 3자리 대문자 코드들을 모두 찾음
+            const matches = cur.localCurrency.match(/[A-Z]{3}/g);
+            if (matches) {
+                codes = Array.from(new Set(matches)); // 중복 제거
+            }
+        }
+
+        const initialCurr = codes[0] || cur.localCurrency;
+        if (initialCurr && (!targetCurrency || targetCurrency.includes(','))) {
+            setTargetCurrency(initialCurr);
+        }
     }, [doc]);
+
+    // 환율 가져오기 (선택된 통화가 바뀔 때마다)
+    useEffect(() => {
+        if (!targetCurrency) return;
+        
+        // 통화 코드 세척 (설명이 포함된 경우 대비: "DKK (덴마크)" -> "DKK")
+        // 쉼표로 연결된 경우 첫 번째 것만 취함
+        const cleanCode = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
+        if (cleanCode.length !== 3) return;
+
+        setRateLoading(true);
+        fetch(`/api/exchange-rate?from=KRW&to=${cleanCode}`)
+            .then(r => r.json())
+            .then(json => { 
+                if (json.success) {
+                    setExchangeRate(json.data.rate); 
+                } else {
+                    setExchangeRate(null);
+                }
+            })
+            .catch(() => { 
+                setExchangeRate(null);
+            })
+            .finally(() => setRateLoading(false));
+    }, [targetCurrency]);
 
     // 브라우저 탭 타이틀 동적 변경
     useEffect(() => {
@@ -1637,7 +1683,7 @@ export default function ConfirmationViewerPage() {
                             {/* ── 현지 날씨 & 복장 ── */}
                             <GuideAccordion
                                 id="weather"
-                                title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><path d="M12 2v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="M20 12h2"></path><path d="m19.07 4.93-1.41 1.41"></path><path d="M15.94 14.94a1.5 1.5 0 0 1-2.12 0 1.5 1.5 0 0 1 0-2.12l5.53-5.53a2.5 2.5 0 0 1 3.54 0 2.5 2.5 0 0 1 0 3.54Z"></path><path d="M15 12V9a2 2 0 0 0-2-2c-.73 0-1.38.4-1.73 1.02"></path><path d="M7 10a2 2 0 0 0-2 2c0 1.1.9 2 2 2h7a2 2 0 0 0 2-2c0-1.1-.9-2-2-2Z"></path></svg> 현지 날씨 & 복장</>}
+                                title={<><span style={{ fontSize: '1.2rem', marginRight: '4px' }}>☀️</span> 현지 날씨 & 복장</>}
                                 isOpen={expandedSections['weather'] !== false}
                                 onToggle={toggleSection}
                             >
@@ -2020,7 +2066,7 @@ export default function ConfirmationViewerPage() {
                             {/* ── 환전 & 계산기 ── */}
                             <GuideAccordion
                                 id="currency"
-                                title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> 환전 가이드 ({safeStr(sr.currency?.localCurrency)})</>}
+                                title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> 환전 가이드</>}
                                 isOpen={expandedSections['currency'] || false}
                                 onToggle={toggleSection}
                             >
@@ -2057,14 +2103,72 @@ export default function ConfirmationViewerPage() {
                                 {/* 환전 계산기 위젯 (양방향) */}
                                 <div className="mc-calc-widget">
                                     <div className="mc-calc-title">실시간 환전 계산기</div>
+                                    
+                                    {/* 다중 통화 드롭다운 (감지된 통화가 2개 이상일 때) */}
+                                    {(() => {
+                                        const cur = sr.currency;
+                                        let codes = cur?.targetCodes || [];
+                                        if (codes.length === 0 && cur?.localCurrency) {
+                                            const matches = cur.localCurrency.match(/[A-Z]{3}/g);
+                                            if (matches) codes = Array.from(new Set(matches));
+                                        }
+                                        
+                                        if (codes.length <= 1) return null;
+
+                                        return (
+                                            <div style={{ marginBottom: '16px' }}>
+                                                <select
+                                                    value={targetCurrency}
+                                                    onChange={(e) => {
+                                                        setTargetCurrency(e.target.value);
+                                                        setCalcAmount('');
+                                                    }}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '12px 16px',
+                                                        borderRadius: '12px',
+                                                        fontSize: '0.9rem',
+                                                        fontWeight: 600,
+                                                        border: '1.5px solid #e2e8f0',
+                                                        background: '#fff',
+                                                        color: '#1e293b',
+                                                        cursor: 'pointer',
+                                                        appearance: 'none',
+                                                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E")`,
+                                                        backgroundRepeat: 'no-repeat',
+                                                        backgroundPosition: 'right 12px center',
+                                                        backgroundSize: '16px',
+                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                                                    }}
+                                                >
+                                                    {codes.map((code: string) => {
+                                                        const cleanCode = code.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
+                                                        return (
+                                                            <option key={code} value={code}>
+                                                                {cleanCode}{currencyKoMap[cleanCode] ? ` (${currencyKoMap[cleanCode]})` : ''}
+                                                                {code.includes('(') && !currencyKoMap[cleanCode] ? ` ${code.substring(code.indexOf('('))}` : ''}
+                                                        </option>
+                                                        );
+                                                    })}
+                                                </select>
+                                            </div>
+                                        );
+                                    })()}
+
                                     {rateLoading ? (
                                         <div style={{ textAlign: 'center', padding: '20px', opacity: 0.6 }}>환율 로딩 중...</div>
                                     ) : exchangeRate ? (
                                         <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                             <div className="mc-calc-row">
                                                 <label>
-                                                    {calcDirection === 'krwToTarget' ? 'KRW' : targetCurrency}
-                                                    <span className="mc-calc-sublabel">({calcDirection === 'krwToTarget' ? '원' : (currencyKoMap[targetCurrency] || '현지 화폐')})</span>
+                                                    {(() => {
+                                                        const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
+                                                        return calcDirection === 'krwToTarget' ? 'KRW' : clean;
+                                                    })()}
+                                                    <span className="mc-calc-sublabel">({(() => {
+                                                        const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
+                                                        return calcDirection === 'krwToTarget' ? '원' : (currencyKoMap[clean] || '현지 화폐');
+                                                    })()})</span>
                                                 </label>
                                                 <input
                                                     type="number"
@@ -2087,8 +2191,14 @@ export default function ConfirmationViewerPage() {
 
                                             <div className="mc-calc-row">
                                                 <label>
-                                                    {calcDirection === 'krwToTarget' ? targetCurrency : 'KRW'}
-                                                    <span className="mc-calc-sublabel">({calcDirection === 'krwToTarget' ? (currencyKoMap[targetCurrency] || '현지 화폐') : '원'})</span>
+                                                    {(() => {
+                                                        const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
+                                                        return calcDirection === 'krwToTarget' ? clean : 'KRW';
+                                                    })()}
+                                                    <span className="mc-calc-sublabel">({(() => {
+                                                        const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
+                                                        return calcDirection === 'krwToTarget' ? (currencyKoMap[clean] || '현지 화폐') : '원';
+                                                    })()})</span>
                                                 </label>
                                                 <div className="mc-calc-result">
                                                     {calcAmount ? (
@@ -2099,7 +2209,9 @@ export default function ConfirmationViewerPage() {
                                                 </div>
                                             </div>
                                             <div className="mc-calc-rate">
-                                                기준 환율: 1 KRW = {exchangeRate.toFixed(6)} {targetCurrency}
+                                                기준 환율: 1 KRW = {exchangeRate.toFixed(6)} {(() => {
+                                                    return targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
+                                                })()}
                                             </div>
                                         </div>
                                     ) : (
@@ -2122,7 +2234,7 @@ export default function ConfirmationViewerPage() {
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> 통신 환경 안내
                                     </div>
                                     <p className="mc-roaming-subtitle" style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '14px', lineHeight: 1.5 }}>
-                                        베트남 {safeStr(doc.trip.destination).split(' ').pop()}은(는) 주요 관광지와 리조트 내에서 사용이 원활합니다. 출국 전 <strong>데이터 로밍 차단</strong> 또는 <strong>로밍 요금제 신청</strong>이 필수입니다.
+                                        {sr?.roaming?.description || `${safeStr(doc.trip.destination).split(' ').pop()}은(는) 주요 관광지와 리조트 내에서 사용이 원활합니다. 출국 전 데이터 로밍 차단 또는 로밍 요금제 신청이 필수입니다.`}
                                     </p>
                                     <div className="roaming-option-cards">
                                         <div className="roaming-opt-card" style={{ flexDirection: 'column' }}>
@@ -2153,6 +2265,11 @@ export default function ConfirmationViewerPage() {
                                                     <a href="tel:1544-0010" style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', textDecoration: 'none' }}>1544-0010</a>
                                                 </div>
                                             </div>
+                                            {sr.roaming?.carriers && (
+                                                <div style={{ fontSize: '0.72rem', color: '#64748b', background: '#f1f5f9', padding: '8px 12px', borderRadius: '8px', marginTop: '10px', lineHeight: 1.4 }}>
+                                                    <strong>💡 현지 통신사 파트너:</strong> {sr.roaming.carriers}
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="roaming-opt-card">
                                             <div className="r-opt-badge">2</div>
@@ -2183,6 +2300,15 @@ export default function ConfirmationViewerPage() {
                                         </strong>
                                         {safeStr(sr.roaming?.simEsim) || '그랩(Grab) 호출이나 길찾기 시 데이터가 필요하므로 유심이나 로밍 준비를 추천합니다.'}
                                     </div>
+
+                                    {sr.roaming?.roamingTip && (
+                                        <div className="roaming-tip-box" style={{ background: '#fffbeb', borderRadius: '10px', padding: '12px', marginTop: '10px', fontSize: '0.8rem', color: '#92400e', lineHeight: 1.5, border: '1px solid #fef3c7' }}>
+                                            <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg> 통신 이용 꿀팁
+                                            </strong>
+                                            {sr.roaming.roamingTip}
+                                        </div>
+                                    )}
                                 </div>
                             </GuideAccordion>
 

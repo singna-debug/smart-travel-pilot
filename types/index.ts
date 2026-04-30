@@ -297,9 +297,11 @@ export interface SecondaryResearch {
     calculationTip: string;
     exchangeTip: string;
     tipCulture: string;
+    targetCodes?: string[];      // 계산기용 통화 코드 (예: ["EUR", "DKK"])
   };
   // 로밍·통신
   roaming: {
+    description: string;          // 로밍 개요 설명
     carriers: string;
     simEsim: string;
     roamingTip?: string;          // 통신 꿀팁 (예: 산간지역 신호 약함)

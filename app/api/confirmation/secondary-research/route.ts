@@ -247,26 +247,35 @@ export async function POST(request: NextRequest) {
         const isPartial = Array.isArray(targets) && targets.length > 0;
         const tasks: any[] = [];
 
-        if (!isPartial || targets.includes('basics') || targets.includes('essentials')) {
+        // 1. 환전/로밍 (essentials)
+        if (!isPartial || targets.includes('currency') || targets.includes('roaming') || targets.includes('essentials')) {
             tasks.push({
-                name: 'basics',
+                name: 'essentials',
+                prompt: `
+컨텍스트: ${context}
+미션: 위 여행지의 환전 및 로밍 정보를 JSON으로 작성하세요.
+{
+  "currency": { "localCurrency": "예: JPY", "currencySymbol": "예: ¥", "calculationTip": "환산 팁 1줄", "exchangeTip": "환전 요령", "tipCulture": "팁 문화 유무" },
+  "roaming": { "description": "현지 로밍 환경 안내 (예: '현지 주요 관광지와 리조트 내에서 사용이 원활합니다.')", "carriers": "통신사 로밍 안내", "simEsim": "유심/eSIM 추천", "roamingTip": "관련 꿀팁" }
+}  `
+            });
+        }
+
+        // 2. 날씨 (weather)
+        if (!isPartial || targets.includes('weather') || targets.includes('basics')) {
+            tasks.push({
+                name: 'weather',
                 prompt: `
 컨텍스트: ${context}
 실시간 일자별 도시 날씨 데이터: ${JSON.stringify(dailyWeatherData)}
 
 미션: 위 실시간 날씨 데이터(dailyWeatherData)를 바탕으로 **전체 일정(${dailyWeatherData.length}일)**에 대한 일별 기온을 JSON으로 작성하세요.
-**중요: 입력값에 '인천', '청주', '부산' 등 한국 도시명이 포함되어 있더라도, 이는 출발지일 뿐입니다. 반드시 실제 해외 여행 목적지(${pureDestination})의 날씨와 정보를 생성해야 합니다. 한국 도시의 정보를 생성하면 절대 안 됩니다.**
-공급된 데이터의 최고/최저 기온이 동일하거나(예: 27/27) 비현실적일 경우, 해당 도시의 해당 월 평균 기온을 참고하여 상식적인 범위로 보정하세요.
-각 일차별로 명시된 도시(city)의 날씨를 정확히 반영하여 조언을 작성하세요.
-모든 결과물은 반드시 한국어로 작성하며, 날씨 설명(description)은 '맑음', '흐림', '비'와 같이 핵심 상태만 짧게 표현하세요.
-
+**중요: 목적지(${pureDestination})의 날씨와 정보를 생성해야 합니다. 한국 도시의 정보를 생성하면 절대 안 됩니다.**
 {
-  "currency": { "localCurrency": "예: JPY", "currencySymbol": "예: ¥", "calculationTip": "환산 팁 1줄", "exchangeTip": "환전 요령", "tipCulture": "팁 문화 유무" },
-  "roaming": { "carriers": "통신사 로밍 안내", "simEsim": "유심/eSIM 추천", "roamingTip": "관련 꿀팁" },
   "weather": {
     "summary": "방문 도시별 날씨를 종합한 요약",
     "forecast": [
-      { "date": "1일차", "tempMin": "숫자", "tempMax": "숫자", "description": "반드시 한국어로 날씨 상태만 짧게 작성 (예: '맑음', '흐림', '비', '소나기' 등)" }
+      { "date": "1일차", "tempMin": "숫자", "tempMax": "숫자", "description": "반드시 한국어로 날씨 상태만 짧게 작성" }
     ],
     "clothingTips": [
       { "title": "상의 & 외투", "content": "옷차림 상세 조언" },
@@ -274,19 +283,19 @@ export async function POST(request: NextRequest) {
       { "title": "하의 준비", "content": "하의 조언" },
       { "title": "기타 준비물", "content": "선글라스, 우산 등" }
     ],
-    "packingSummary": "전체 조언 요약 한 줄 (예: 일교차가 크니 가벼운 겉옷을 준비하세요)"
+    "packingSummary": "전체 조언 요약 한 줄"
   }
-}
-`
+}`
             });
         }
 
-        if (!isPartial || targets.includes('rules')) {
+        // 3. 입국 규정 (customs)
+        if (!isPartial || targets.includes('customs') || targets.includes('rules')) {
             tasks.push({
-                name: 'rules',
+                name: 'customs',
                 prompt: `
 컨텍스트: ${context}
-위 여행지의 세관 및 입국 규정을 생성하세요. 이 여행지(국가) 특유의 제재사항을 구체적으로 명시하되, 금(Gold) 관련 이야기는 꼭 필요한 국가가 아니면 생략하고 수하물 규정에 집중하세요. (마크다운 없이 순수 JSON만 반환)
+미션: 위 여행지의 세관 및 입국 규정을 JSON으로 작성하세요.
 {
   "customs": {
     "warningTitle": "해당 국가의 가장 중요한 세관 경고",
@@ -298,7 +307,19 @@ export async function POST(request: NextRequest) {
     "majorAlert": { "title": "핵심 주의사항", "content": "위반 사례 등", "penalty": "처벌 내역" },
     "prohibitedItems": [ { "category": "카테고리명", "items": ["항목1", "항목2"], "note": "비고" } ],
     "arrivalProcedure": { "title": "사전 입국 절차", "timing": "언제까지", "steps": [{ "step": "단계", "description": "설명" }] }
-  },
+  }
+}`
+            });
+        }
+
+        // 4. 수하물 규정 (baggage)
+        if (!isPartial || targets.includes('baggage') || targets.includes('rules')) {
+            tasks.push({
+                name: 'baggage',
+                prompt: `
+컨텍스트: ${context}
+미션: 위 여행지의 수하물 규정을 JSON으로 작성하세요.
+{
   "baggage": {
     "checkedWeight": "${airline || '항공사'} 위탁수하물 제한",
     "carryonWeight": "기내수하물 제한",
@@ -366,35 +387,27 @@ ${customGuides && customGuides.length > 0 ? `요청 가이드 주제: ${customGu
 
         console.timeEnd('[SecondaryResearch] Parallel Calls');
 
-        // ✨ 에러 방지를 위한 초기 객체 세팅 (UI 요구사항에 맞춰 필드 강화)
-        let finalResearch: any = {
-            currency: { localCurrency: "-", currencySymbol: "", calculationTip: "-", exchangeTip: "-", tipCulture: "-" },
-            roaming: { carriers: "-", simEsim: "-", roamingTip: "-" },
-            weather: { summary: "날씨 정보를 불러오는 중입니다...", forecast: [], clothingTips: [], packingSummary: "-" },
-            customs: { links: [], warningTitle: "-", warningContent: "-", dutyFree: "-", passportNote: "-", majorAlert: {}, prohibitedItems: [], arrivalProcedure: {} },
-            baggage: { checkedWeight: "-", carryonWeight: "-", checkedNote: "-", carryonNote: "-", additionalNotes: [] },
-            landmarks: [],
-            customGuides: []
-        };
+        // ✨ 에러 방지를 위한 필드 추출 및 병합 (요청된 태스크의 데이터만 포함)
+        let finalResearch: any = {};
 
         results.forEach(r => {
             if (r.data) {
-                if (r.data.currency) finalResearch.currency = { ...finalResearch.currency, ...r.data.currency };
-                if (r.data.roaming) finalResearch.roaming = { ...finalResearch.roaming, ...r.data.roaming };
-                if (r.data.weather) finalResearch.weather = { ...finalResearch.weather, ...r.data.weather };
-                if (r.data.customs) finalResearch.customs = { ...finalResearch.customs, ...r.data.customs };
-                if (r.data.baggage) finalResearch.baggage = { ...finalResearch.baggage, ...r.data.baggage };
-                if (r.data.landmarks) finalResearch.landmarks = r.data.landmarks;
-                if (r.data.customGuides) finalResearch.customGuides = r.data.customGuides;
+                // 병합 수행
+                for (const key in r.data) {
+                    finalResearch[key] = r.data[key];
+                }
             }
         });
 
-        const verifiedLinks = getHardcodedLinks(destination);
-        if (verifiedLinks) {
-            finalResearch.customs.links = verifiedLinks;
+        // 입국 링크 하드코딩 데이터 추가 (customs가 결과에 포함된 경우에만)
+        if (finalResearch.customs) {
+            const verifiedLinks = getHardcodedLinks(destination);
+            if (verifiedLinks) {
+                finalResearch.customs.links = verifiedLinks;
+            }
         }
 
-        return NextResponse.json({ success: true, data: finalResearch as SecondaryResearch });
+        return NextResponse.json({ success: true, data: finalResearch });
 
     } catch (error: any) {
         console.error('[Secondary Research API] Final Error:', error.message);

@@ -76,7 +76,20 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                         (current.departureCityName || current.arrivalCityName || current.departureTime || current.arrivalTime) && 
                         !(current.departureFlight || current.arrivalFlight || current.transportName) &&
                         (rawItems[i+1].departureFlight || rawItems[i+1].arrivalFlight || rawItems[i+1].transportName)) {
-                        mergedRawItems.push({ ...current, ...rawItems[i+1] });
+                        // Merge current and next, but preserve schedule info from current (the City info item)
+                        const next = rawItems[i+1];
+                        const merged = { ...current, ...next }; // Start with next's flight info
+                        
+                        // BUT, if current had better schedule info, take it back
+                        if (current.departureCityName) merged.departureCityName = current.departureCityName;
+                        if (current.arrivalCityName) merged.arrivalCityName = current.arrivalCityName;
+                        if (current.departureTime && current.departureTime !== '00:00') merged.departureTime = current.departureTime;
+                        if (current.arrivalTime && current.arrivalTime !== '00:00') merged.arrivalTime = current.arrivalTime;
+                        if (current.startCityName) merged.startCityName = current.startCityName;
+                        if (current.endCityName) merged.endCityName = current.endCityName;
+                        if (current.departureFlightDuration) merged.departureFlightDuration = current.departureFlightDuration;
+
+                        mergedRawItems.push(merged);
                         i++;
                     } else {
                         mergedRawItems.push(current);
@@ -114,15 +127,19 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                         };
                     });
                 
+                const hasRealLayover = segments.length > 1;
+                const fSeg = segments[0] || {};
+                const lSeg = segments[segments.length - 1] || {};
+
                 const merged = {
-                    transportName: isLayover ? `${airlines} (경유)` : first.transportName,
-                    departureFlight: flightNos,
-                    departureCityName: first.departureCityName,
-                    departureTime: first.departureTime,
-                    arrivalCityName: last.arrivalCityName,
-                    arrivalTime: last.arrivalTime,
-                    departureFlightDuration: first.departureFlightDuration,
-                    segments
+                    transportName: hasRealLayover ? `${airlines} (경유)` : fSeg.airline,
+                    departureFlight: hasRealLayover ? flightNos : fSeg.flightNo,
+                    departureCityName: fSeg.departureCity,
+                    departureTime: fSeg.departureTime,
+                    arrivalCityName: lSeg.arrivalCity,
+                    arrivalTime: lSeg.arrivalTime,
+                    departureFlightDuration: hasRealLayover ? segments.reduce((acc, s) => acc + (s.duration || ''), '') : fSeg.duration,
+                    segments: hasRealLayover ? segments : [],
                 };
                 
                 if (air.flightTypeName === "DEPARTURE" && !deptAir.departureFlight) deptAir = merged;
@@ -371,5 +388,13 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
 }
 
 function parseHtml(h: string): string[] {
-    return (h || '').replace(/<[^>]+>/g, '\n').split('\n').map(s => s.trim()).filter(s => s.length > 2);
+    if (!h) return [];
+    // 1. <style>, <script>, <title> 태그와 그 내부 콘텐츠를 완전히 제거
+    let clean = h.replace(/<(style|script|title)[^>]*>[\s\S]*?<\/\1>/gi, '');
+    // 2. 나머지 HTML 태그를 줄바꿈으로 치환하여 텍스트만 추출
+    return clean.replace(/<[^>]+>/g, '\n')
+        .split('\n')
+        .map(s => s.trim())
+        // 3. 'Untitled' 같은 의미 없는 텍스트나 너무 짧은 줄 제외
+        .filter(s => s.length > 2 && s.toLowerCase() !== 'untitled');
 }

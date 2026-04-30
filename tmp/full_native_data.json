@@ -1,338 +1,594 @@
 {
   "isProduct": true,
-  "title": "[픽업포함/6인기준] 다낭 자유 5일 (메리어트리조트 3베드풀빌라)",
-  "destination": "부산, 다낭, 호이안",
-  "price": "1049900",
-  "departureDate": "2026-07-01",
-  "returnDate": "2026-07-05",
+  "title": "[출발확정][감성트립⛺] 몽골/테를지(노팁/노쇼핑/노옵션) 5일<별빛포차/승마/푸르공체험/초원썰매/나랑톨시장/마동상내부/신게르3인실/4성호텔>",
+  "destination": "울란바타르, 테를지",
+  "price": "1659900",
+  "departureDate": "2026-07-14",
+  "returnDate": "2026-07-18",
   "duration": "4박 5일",
-  "airline": "진에어",
-  "departureFlightNumber": "LJ111",
-  "returnFlightNumber": "LJ112",
-  "departureAirport": "부산",
-  "arrivalAirport": "다낭",
-  "departureTime": "21:15",
-  "arrivalTime": "23:55",
-  "departureDuration": "04:40",
-  "returnDepartureAirport": "다낭",
-  "returnDepartureTime": "01:00",
-  "returnArrivalTime": "07:15",
-  "returnDuration": "04:15",
-  "url": "https://www.modetour.com/package/105053370?MLoc=99&Pnum=105053370&ANO=81440&sno=C117876&thru=crs, https://www.modetour.com/package/105057436?MLoc=99&Pnum=105057436&ANO=81440&sno=C117876&thru=crs",
+  "airline": "제주항공",
+  "departureFlightNumber": "7C5203",
+  "returnFlightNumber": "7C5204",
+  "departureAirport": "인천",
+  "arrivalAirport": "울란바타르",
+  "departureTime": "10:00",
+  "arrivalTime": "12:40",
+  "departureDuration": "03:40",
+  "returnDepartureAirport": "울란바타르",
+  "returnDepartureTime": "13:40",
+  "returnArrivalTime": "17:55",
+  "returnDuration": "03:15",
+  "departureSegments": [],
+  "returnSegments": [],
+  "url": "https://www.modetour.com/package/104367617?MLoc=99&Pnum=104367617&ANO=81440&sno=C117876&thru=crs",
   "itinerary": [
     {
       "day": 1,
       "date": "",
-      "title": "부산 → 다낭",
-      "transport": "승합차",
+      "title": "인천 → 울란바타르",
+      "transport": "승합차, 대형버스",
       "flight": {
-        "flightNo": "LJ111",
-        "airline": "진에어",
-        "departureCity": "부산",
-        "departureTime": "21:15",
-        "arrivalCity": "다낭",
-        "arrivalTime": "23:55",
-        "duration": "04:40"
+        "flightNo": "7C5203",
+        "airline": "제주항공",
+        "departureCity": "인천",
+        "departureTime": "10:00",
+        "arrivalCity": "울란바타르",
+        "arrivalTime": "12:40",
+        "duration": "03:40",
+        "segments": []
       },
       "timeline": [
         {
           "type": "default",
-          "title": "김해국제공항",
-          "subtitle": "이동수단(교통)",
-          "description": "부산 김해 국제공항 출발"
+          "title": "인천국제공항 출발",
+          "subtitle": "",
+          "description": ""
         },
         {
           "type": "default",
-          "title": "다낭 국제공항",
-          "subtitle": "현지공항미팅",
-          "description": "다낭 국제공항 도착 후 '모두투어' 미팅보드를 든 현지인 차량기사와 미팅"
+          "title": "울란바토르 국제공항 도착",
+          "subtitle": "",
+          "description": ""
         },
         {
           "type": "default",
           "title": "일정 안내",
           "subtitle": "",
-          "description": "※ 미팅대기시간은 최대 2시간입니다. 비행기 도착시간으로부터 2시간까지 미팅장소에 나타나지 않을경우 미팅이 불가합니다. (환불 불가)\r\n※ 현지인 기사를 못찾을 경우 바우처 내 비상연락망으로 연락 부탁드립니다.\r\n※ 개인사정으로 미팅 불가시 사전에 연락 부탁드립니다.\r\n※ 비상연락망\r\n-이승민 과장 081-220-9001 (+84-81-220-9001)\r\n-송지성 과장 087-771-4540 (+84-87-771-4540)"
+          "description": "◆본 상품은 모두투어의 동일항공 또는 타 항공의 다른상품과 현지에서 조인(합류) 되어 진행 될 수 있으며 이용 항공과 이용 호텔 등에 따라 상품가격과 일정의 차이가 있습니다."
         },
         {
           "type": "default",
-          "title": "일정 안내",
+          "title": "몽골 여행시 유의사항",
           "subtitle": "",
-          "description": "여러 호텔 손님들과 같이 미팅이 진행될 수 있으며 공항에서부터 이동 동선에 따라서 순차적으로 내려드립니다. \r\n호텔 앞에 내려드리며 체크인은 따로 도와드리지 않습니다. (바우처 및 여권 체크인)"
+          "description": "몽골 지역 여행시 유의사항을 안내드립니다."
         },
         {
           "type": "default",
-          "title": "호텔 체크인 시 유의사항",
+          "title": "- 한국어가 능통한 몽골 현지인 가이드가 행사합니다.",
           "subtitle": "",
-          "description": "1. 일반적으로 호텔 체크인은 오후 3시 이후부터 가능합니다. 상이한 호텔이 있을 수 있으니 체크인 시간을 미리 확인해주세요.\r\n2. 호텔 프론트에서 여권으로 체크인하시면 됩니다. 체크인 시 여권을 호텔측에서 보관하였다가 체크 아웃시 돌려주는 호텔이 있을 수 있습니다. 이 점 참고해주세요. \r\n3. 체크인 시 보증금(Deposit) 을 위한 신용카드 또는 현금을 요구하는 경우가 있습니다. 호텔 숙박시 파손 및 개인 사용 경비에 대한 보증 개념으로 체크아웃 시 사용 내역이 없으면 자동취소 및 환불됩니다. \r\n4. 객실의 층수, 베드타입은 체크인 시 확정됩니다. 출발전 여행사에 요청을 하셨더라도 확정되는 부분이 아니오니 체크인시 호텔에 한번 더 요청 및 확인해주세요. \r\n5. 일반적인 체크아웃 시간은 12시입니다. 체크아웃 시간 이후에 체크아웃을 할 경우에 추가비용이 발생될 수 있습니다."
+          "description": "- 한국어가 능통한 몽골 현지인 가이드가 행사합니다.\r\n- 인원수별로 차량이 제공됩니다.\r\n   4~5인 : 7인승 밴(드라이빙 가이드)\r\n   6~13인 : 15인승/19인승/25인승 버스\r\n   14인 이상 : 45인승 버스"
+        },
+        {
+          "type": "location",
+          "title": "징기스후레",
+          "subtitle": "",
+          "description": "대규모 게르 캠프 관광"
+        },
+        {
+          "type": "location",
+          "title": "몽골 나랑톨 시장",
+          "subtitle": "",
+          "description": "★모두 특전 : 나랑톨 시장 관광"
         },
         {
           "type": "default",
-          "title": "유의 ㅣ 안내사항",
+          "title": "호텔 투숙 및 휴식",
           "subtitle": "",
-          "description": "※ 객실별 최대투숙인원 안내\n\r2베드룸 = 성인4명 + 아동2명(노베드)\r\n3베드룸 = 성인6명 + 아동4명(노베드)\r\n4베드룸 = 성인8명 + 아동5명(노베드)\r\n<b>※ 기준인원 미달시 추가요금이 발생합니다.</b>\r\n※ 엑스트라 베드는 1개만 추가 가능합니다.\r\n※ 성인2명+아동2명 2베드룸 이용시 전원 성인요금 적용됩니다.\r\n※ 아동은 12세미만입니다. 12세이상은 성인요금 적용됩니다."
-        },
-        {
-          "type": "default",
-          "title": "유의 ㅣ 안내사항",
-          "subtitle": "",
-          "description": "※ 레이트체크아웃 신청 안내\n\r※ 레이트체크아웃은 18시 기준으로 신청가능합니다. (추가요금 발생)\r\n※ 18시 이후는 18시 기준 추가요금의 2배가 발생합니다.\r\n<b>※ 추가요금이 룸타입에 따라 상이하니 예약담당자에게 문의 부탁드리겠습니다.</b>"
+          "description": ""
         }
       ],
       "items": [
         {
           "type": "default",
-          "title": "김해국제공항",
-          "subtitle": "이동수단(교통)",
-          "description": "부산 김해 국제공항 출발"
+          "title": "인천국제공항 출발",
+          "subtitle": "",
+          "description": ""
         },
         {
           "type": "default",
-          "title": "다낭 국제공항",
-          "subtitle": "현지공항미팅",
-          "description": "다낭 국제공항 도착 후 '모두투어' 미팅보드를 든 현지인 차량기사와 미팅"
+          "title": "울란바토르 국제공항 도착",
+          "subtitle": "",
+          "description": ""
         },
         {
           "type": "default",
           "title": "일정 안내",
           "subtitle": "",
-          "description": "※ 미팅대기시간은 최대 2시간입니다. 비행기 도착시간으로부터 2시간까지 미팅장소에 나타나지 않을경우 미팅이 불가합니다. (환불 불가)\r\n※ 현지인 기사를 못찾을 경우 바우처 내 비상연락망으로 연락 부탁드립니다.\r\n※ 개인사정으로 미팅 불가시 사전에 연락 부탁드립니다.\r\n※ 비상연락망\r\n-이승민 과장 081-220-9001 (+84-81-220-9001)\r\n-송지성 과장 087-771-4540 (+84-87-771-4540)"
+          "description": "◆본 상품은 모두투어의 동일항공 또는 타 항공의 다른상품과 현지에서 조인(합류) 되어 진행 될 수 있으며 이용 항공과 이용 호텔 등에 따라 상품가격과 일정의 차이가 있습니다."
         },
         {
           "type": "default",
-          "title": "일정 안내",
+          "title": "몽골 여행시 유의사항",
           "subtitle": "",
-          "description": "여러 호텔 손님들과 같이 미팅이 진행될 수 있으며 공항에서부터 이동 동선에 따라서 순차적으로 내려드립니다. \r\n호텔 앞에 내려드리며 체크인은 따로 도와드리지 않습니다. (바우처 및 여권 체크인)"
+          "description": "몽골 지역 여행시 유의사항을 안내드립니다."
         },
         {
           "type": "default",
-          "title": "호텔 체크인 시 유의사항",
+          "title": "- 한국어가 능통한 몽골 현지인 가이드가 행사합니다.",
           "subtitle": "",
-          "description": "1. 일반적으로 호텔 체크인은 오후 3시 이후부터 가능합니다. 상이한 호텔이 있을 수 있으니 체크인 시간을 미리 확인해주세요.\r\n2. 호텔 프론트에서 여권으로 체크인하시면 됩니다. 체크인 시 여권을 호텔측에서 보관하였다가 체크 아웃시 돌려주는 호텔이 있을 수 있습니다. 이 점 참고해주세요. \r\n3. 체크인 시 보증금(Deposit) 을 위한 신용카드 또는 현금을 요구하는 경우가 있습니다. 호텔 숙박시 파손 및 개인 사용 경비에 대한 보증 개념으로 체크아웃 시 사용 내역이 없으면 자동취소 및 환불됩니다. \r\n4. 객실의 층수, 베드타입은 체크인 시 확정됩니다. 출발전 여행사에 요청을 하셨더라도 확정되는 부분이 아니오니 체크인시 호텔에 한번 더 요청 및 확인해주세요. \r\n5. 일반적인 체크아웃 시간은 12시입니다. 체크아웃 시간 이후에 체크아웃을 할 경우에 추가비용이 발생될 수 있습니다."
+          "description": "- 한국어가 능통한 몽골 현지인 가이드가 행사합니다.\r\n- 인원수별로 차량이 제공됩니다.\r\n   4~5인 : 7인승 밴(드라이빙 가이드)\r\n   6~13인 : 15인승/19인승/25인승 버스\r\n   14인 이상 : 45인승 버스"
+        },
+        {
+          "type": "location",
+          "title": "징기스후레",
+          "subtitle": "",
+          "description": "대규모 게르 캠프 관광"
+        },
+        {
+          "type": "location",
+          "title": "몽골 나랑톨 시장",
+          "subtitle": "",
+          "description": "★모두 특전 : 나랑톨 시장 관광"
         },
         {
           "type": "default",
-          "title": "유의 ㅣ 안내사항",
+          "title": "호텔 투숙 및 휴식",
           "subtitle": "",
-          "description": "※ 객실별 최대투숙인원 안내\n\r2베드룸 = 성인4명 + 아동2명(노베드)\r\n3베드룸 = 성인6명 + 아동4명(노베드)\r\n4베드룸 = 성인8명 + 아동5명(노베드)\r\n<b>※ 기준인원 미달시 추가요금이 발생합니다.</b>\r\n※ 엑스트라 베드는 1개만 추가 가능합니다.\r\n※ 성인2명+아동2명 2베드룸 이용시 전원 성인요금 적용됩니다.\r\n※ 아동은 12세미만입니다. 12세이상은 성인요금 적용됩니다."
-        },
-        {
-          "type": "default",
-          "title": "유의 ㅣ 안내사항",
-          "subtitle": "",
-          "description": "※ 레이트체크아웃 신청 안내\n\r※ 레이트체크아웃은 18시 기준으로 신청가능합니다. (추가요금 발생)\r\n※ 18시 이후는 18시 기준 추가요금의 2배가 발생합니다.\r\n<b>※ 추가요금이 룸타입에 따라 상이하니 예약담당자에게 문의 부탁드리겠습니다.</b>"
+          "description": ""
         }
       ],
-      "hotel": "다낭 메리어트 리조트",
+      "hotel": "울란바타르 4성급 호텔",
       "meals": {
         "breakfast": "-",
         "lunch": "-",
-        "dinner": "-"
+        "dinner": "현지식"
       }
     },
     {
       "day": 2,
       "date": "",
-      "title": "다낭",
-      "transport": "기타 (현지교통)",
+      "title": "테를지",
+      "transport": "대형버스",
       "flight": null,
       "timeline": [
         {
           "type": "default",
-          "title": "전일 자유일정",
+          "title": "호텔 조식 후 가이드 미팅",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "※ 이동 중 마트를 방문하오니, 간단한 간식거리를 구매하실 수 있습니다!",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "location",
-          "title": "바나힐+호이안 원데이투어",
+          "title": "어워",
           "subtitle": "",
-          "description": "<B>■데이투어 상세 안내■</B> \r\n<a href=\"https://www.vietbenefit.com/fit/33970\" target=\"_blank\" style=\"color:#ff6600; font-weight:bold; text-decoration:none;\"><B>&#x1F449;상세보기 클릭</B></a>\r\n※날짜 선택 후 예약 및 결제 전 우측 하단 카카오톡 아이콘 클릭 > 해당 날짜 조인 행사가 가능한지 꼭 재확인 후 결제 부탁드립니다.\r\n※원데이투어 관련 문의는 카카오톡채널 '비엣베네핏'을 통하여 상담이 가능합니다."
+          "description": "몽골의 샤머니즘을 보여주는 돌무지"
         },
         {
           "type": "location",
-          "title": "바나힐 원데이투어",
+          "title": "거북바위",
           "subtitle": "",
-          "description": "<B>■데이투어 상세 안내■</B> \r\n<a href=\"https://www.vietbenefit.com/fit/33438\" target=\"_blank\" style=\"color:#ff6600; font-weight:bold; text-decoration:none;\"><B>&#x1F449;상세보기 클릭</B></a>\r\n※날짜 선택 후 예약 및 결제 전 우측 하단 카카오톡 아이콘 클릭 > 해당 날짜 조인 행사가 가능한지 꼭 재확인 후 결제 부탁드립니다.\r\n※원데이투어 관련 문의는 카카오톡채널 '비엣베네핏'을 통하여 상담이 가능합니다."
+          "description": "거북이 모양의 기암 괴석"
+        },
+        {
+          "type": "default",
+          "title": "책읽는 바위 조망",
+          "subtitle": "",
+          "description": ""
         },
         {
           "type": "location",
-          "title": "호이안 원데이투어",
+          "title": "야리야발 사원",
           "subtitle": "",
-          "description": "<B>■데이투어 상세 안내■</B> \r\n<a href=\"https://www.vietbenefit.com/fit/33966\" target=\"_blank\" style=\"color:#ff6600; font-weight:bold; text-decoration:none;\"><B>&#x1F449;상세보기 클릭</B></a>\r\n※날짜 선택 후 예약 및 결제 전 우측 하단 카카오톡 아이콘 클릭 > 해당 날짜 조인 행사가 가능한지 꼭 재확인 후 결제 부탁드립니다.\r\n※원데이투어 관련 문의는 카카오톡채널 '비엣베네핏'을 통하여 상담이 가능합니다."
+          "description": "테를지의 라마 불교 사원"
+        },
+        {
+          "type": "location",
+          "title": "유목민게르방문",
+          "subtitle": "",
+          "description": "전통 유목민의 집 방문하여 수태차 및 몽골 치즈 시식 체험\n\r※수태차 및 몽골 치즈 시식 체험"
+        },
+        {
+          "type": "location",
+          "title": "[특전] 몽골 푸르공 체험",
+          "subtitle": "",
+          "description": "★모두 특전 : 푸르공타고 물 건너 산 정상에서 인생사진 한 컷! + 초원썰매까지!\n\r- 낭만을 느낄수 있는 푸르공을 탑승하여 몽골의 대초원을 느낄 수 있으며 컵라면과 커피를 제공해 드립니다."
+        },
+        {
+          "type": "default",
+          "title": "- 게르 캠프는 기본 3인1실로 배정됩니다.",
+          "subtitle": "",
+          "description": "- 게르 캠프는 기본 3인1실로 배정됩니다.\r\n- 상황에 따라 동성끼리 임의 배정될 수 있으며(부부예약, 일행예약 제외), 게르 숙박 시 다른 팀 손님과 조인될 수 있습니다.\r\n- 게르 내 화장실 및 샤워실이 있습니다.\r\n- 220V이며 드라이어, 커피포트 비치되어 있습니다.\r\n- 1인실 사용을 원하시는 경우 예약 시 미리 확인하셔야 하며 추가요금 발생합니다.\r\n[게르 숙박 인원별 추가요금]\r\n- 2인 사용 시 5만원/인/박\r\n- 1인 사용 시 13만원/인/박\r\n★게르 안 욕실/화장실 구비\r\n★개인 세면도구 필수준비"
         }
       ],
       "items": [
         {
           "type": "default",
-          "title": "전일 자유일정",
+          "title": "호텔 조식 후 가이드 미팅",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "※ 이동 중 마트를 방문하오니, 간단한 간식거리를 구매하실 수 있습니다!",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "location",
-          "title": "바나힐+호이안 원데이투어",
+          "title": "어워",
           "subtitle": "",
-          "description": "<B>■데이투어 상세 안내■</B> \r\n<a href=\"https://www.vietbenefit.com/fit/33970\" target=\"_blank\" style=\"color:#ff6600; font-weight:bold; text-decoration:none;\"><B>&#x1F449;상세보기 클릭</B></a>\r\n※날짜 선택 후 예약 및 결제 전 우측 하단 카카오톡 아이콘 클릭 > 해당 날짜 조인 행사가 가능한지 꼭 재확인 후 결제 부탁드립니다.\r\n※원데이투어 관련 문의는 카카오톡채널 '비엣베네핏'을 통하여 상담이 가능합니다."
+          "description": "몽골의 샤머니즘을 보여주는 돌무지"
         },
         {
           "type": "location",
-          "title": "바나힐 원데이투어",
+          "title": "거북바위",
           "subtitle": "",
-          "description": "<B>■데이투어 상세 안내■</B> \r\n<a href=\"https://www.vietbenefit.com/fit/33438\" target=\"_blank\" style=\"color:#ff6600; font-weight:bold; text-decoration:none;\"><B>&#x1F449;상세보기 클릭</B></a>\r\n※날짜 선택 후 예약 및 결제 전 우측 하단 카카오톡 아이콘 클릭 > 해당 날짜 조인 행사가 가능한지 꼭 재확인 후 결제 부탁드립니다.\r\n※원데이투어 관련 문의는 카카오톡채널 '비엣베네핏'을 통하여 상담이 가능합니다."
+          "description": "거북이 모양의 기암 괴석"
+        },
+        {
+          "type": "default",
+          "title": "책읽는 바위 조망",
+          "subtitle": "",
+          "description": ""
         },
         {
           "type": "location",
-          "title": "호이안 원데이투어",
+          "title": "야리야발 사원",
           "subtitle": "",
-          "description": "<B>■데이투어 상세 안내■</B> \r\n<a href=\"https://www.vietbenefit.com/fit/33966\" target=\"_blank\" style=\"color:#ff6600; font-weight:bold; text-decoration:none;\"><B>&#x1F449;상세보기 클릭</B></a>\r\n※날짜 선택 후 예약 및 결제 전 우측 하단 카카오톡 아이콘 클릭 > 해당 날짜 조인 행사가 가능한지 꼭 재확인 후 결제 부탁드립니다.\r\n※원데이투어 관련 문의는 카카오톡채널 '비엣베네핏'을 통하여 상담이 가능합니다."
+          "description": "테를지의 라마 불교 사원"
+        },
+        {
+          "type": "location",
+          "title": "유목민게르방문",
+          "subtitle": "",
+          "description": "전통 유목민의 집 방문하여 수태차 및 몽골 치즈 시식 체험\n\r※수태차 및 몽골 치즈 시식 체험"
+        },
+        {
+          "type": "location",
+          "title": "[특전] 몽골 푸르공 체험",
+          "subtitle": "",
+          "description": "★모두 특전 : 푸르공타고 물 건너 산 정상에서 인생사진 한 컷! + 초원썰매까지!\n\r- 낭만을 느낄수 있는 푸르공을 탑승하여 몽골의 대초원을 느낄 수 있으며 컵라면과 커피를 제공해 드립니다."
+        },
+        {
+          "type": "default",
+          "title": "- 게르 캠프는 기본 3인1실로 배정됩니다.",
+          "subtitle": "",
+          "description": "- 게르 캠프는 기본 3인1실로 배정됩니다.\r\n- 상황에 따라 동성끼리 임의 배정될 수 있으며(부부예약, 일행예약 제외), 게르 숙박 시 다른 팀 손님과 조인될 수 있습니다.\r\n- 게르 내 화장실 및 샤워실이 있습니다.\r\n- 220V이며 드라이어, 커피포트 비치되어 있습니다.\r\n- 1인실 사용을 원하시는 경우 예약 시 미리 확인하셔야 하며 추가요금 발생합니다.\r\n[게르 숙박 인원별 추가요금]\r\n- 2인 사용 시 5만원/인/박\r\n- 1인 사용 시 13만원/인/박\r\n★게르 안 욕실/화장실 구비\r\n★개인 세면도구 필수준비"
         }
       ],
-      "hotel": "호텔은 1일차와 동일합니다.",
+      "hotel": "테를지 신게르(4인실 기준)",
       "meals": {
         "breakfast": "호텔식",
-        "lunch": "불포함",
-        "dinner": "불포함"
+        "lunch": "허르헉",
+        "dinner": "현지식"
       }
     },
     {
       "day": 3,
       "date": "",
-      "title": "호이안 → 다낭",
-      "transport": "기타 (현지교통)",
+      "title": "테를지",
+      "transport": "대형버스",
       "flight": null,
       "timeline": [
         {
-          "type": "location",
-          "title": "호이안 고대도시 투어",
+          "type": "default",
+          "title": "캠프 조식 후 가이드 미팅",
           "subtitle": "",
-          "description": "약 180년 전의 모습이 그대로 남아있는 호이안 구시가지"
+          "description": ""
         },
         {
           "type": "location",
-          "title": "호이안 야경투어",
+          "title": "테를지 올레길 트레킹",
           "subtitle": "",
-          "description": "밤이 되면 더욱 빛나는, 호이안 야경 투어"
+          "description": "테를지 올레길 트래킹[산책] (약 3시간/난이도:하)"
         },
         {
           "type": "location",
-          "title": "호이안 씨클로",
+          "title": "[특전] 테를지 승마 체험",
           "subtitle": "",
-          "description": "씨클로를 타고 호이안을 누비는 이색 체험"
+          "description": "★모두 특전 : 몽골 필수! 승마 체험 (마부 매너팁 별도)"
+        },
+        {
+          "type": "default",
+          "title": "일정 안내",
+          "subtitle": "",
+          "description": "-미 참가자의 경우 승마 15,000원/인을 상품가에서 환불 진행해드리며, 출발 전 예약 담당에게 환불 요청 부탁드립니다.\r\n-나이 제한으로 승마/낙타 진행이 불가능하신 분들에 한하여, 기념 촬영 진행해드립니다.\r\n-기념 촬영은 마부가 말/낙타를 단단히 잡고 있을때(★1인 1마부) 탑승하여 사진 촬영 후 내려오시면 되며, 안전에 유의 부탁드립니다."
+        },
+        {
+          "type": "default",
+          "title": "일정 안내",
+          "subtitle": "",
+          "description": "-승마/낙타 체험은 동물들의 돌발 상황으로 인해 예기치 못한 사고가 빈번하게 발생하오니, 안전에 꼭 유의하시기 바랍니다.\r\n-개인의 부주의로 인한 사고는 당사가 책임지지 않으므로, 가이드가 고지한 안내 사항은 꼭 지켜주시길 바라며, 예외의 행동을 하지 않도록 당부 드립니다."
+        },
+        {
+          "type": "default",
+          "title": "테를지 자유시간",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "★테를지 별빛 포차",
+          "subtitle": "",
+          "description": "[심야 수다 타임] 몽골 별빛 아래 동행들과 별빛 포차를 즐겨보세요."
+        },
+        {
+          "type": "default",
+          "title": "- 게르 캠프는 기본 3인1실로 배정됩니다.",
+          "subtitle": "",
+          "description": "- 게르 캠프는 기본 3인1실로 배정됩니다.\r\n- 상황에 따라 동성끼리 임의 배정될 수 있으며(부부예약, 일행예약 제외), 게르 숙박 시 다른 팀 손님과 조인될 수 있습니다.\r\n- 게르 내 화장실 및 샤워실이 있습니다.\r\n- 220V이며 드라이어, 커피포트 비치되어 있습니다.\r\n- 1인실 사용을 원하시는 경우 예약 시 미리 확인하셔야 하며 추가요금 발생합니다.\r\n[게르 숙박 인원별 추가요금]\r\n- 2인 사용 시 5만원/인/박\r\n- 1인 사용 시 13만원/인/박\r\n★게르 안 욕실/화장실 구비\r\n★개인 세면도구 필수준비"
         }
       ],
       "items": [
         {
-          "type": "location",
-          "title": "호이안 고대도시 투어",
+          "type": "default",
+          "title": "캠프 조식 후 가이드 미팅",
           "subtitle": "",
-          "description": "약 180년 전의 모습이 그대로 남아있는 호이안 구시가지"
+          "description": ""
         },
         {
           "type": "location",
-          "title": "호이안 야경투어",
+          "title": "테를지 올레길 트레킹",
           "subtitle": "",
-          "description": "밤이 되면 더욱 빛나는, 호이안 야경 투어"
+          "description": "테를지 올레길 트래킹[산책] (약 3시간/난이도:하)"
         },
         {
           "type": "location",
-          "title": "호이안 씨클로",
+          "title": "[특전] 테를지 승마 체험",
           "subtitle": "",
-          "description": "씨클로를 타고 호이안을 누비는 이색 체험"
+          "description": "★모두 특전 : 몽골 필수! 승마 체험 (마부 매너팁 별도)"
+        },
+        {
+          "type": "default",
+          "title": "일정 안내",
+          "subtitle": "",
+          "description": "-미 참가자의 경우 승마 15,000원/인을 상품가에서 환불 진행해드리며, 출발 전 예약 담당에게 환불 요청 부탁드립니다.\r\n-나이 제한으로 승마/낙타 진행이 불가능하신 분들에 한하여, 기념 촬영 진행해드립니다.\r\n-기념 촬영은 마부가 말/낙타를 단단히 잡고 있을때(★1인 1마부) 탑승하여 사진 촬영 후 내려오시면 되며, 안전에 유의 부탁드립니다."
+        },
+        {
+          "type": "default",
+          "title": "일정 안내",
+          "subtitle": "",
+          "description": "-승마/낙타 체험은 동물들의 돌발 상황으로 인해 예기치 못한 사고가 빈번하게 발생하오니, 안전에 꼭 유의하시기 바랍니다.\r\n-개인의 부주의로 인한 사고는 당사가 책임지지 않으므로, 가이드가 고지한 안내 사항은 꼭 지켜주시길 바라며, 예외의 행동을 하지 않도록 당부 드립니다."
+        },
+        {
+          "type": "default",
+          "title": "테를지 자유시간",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "★테를지 별빛 포차",
+          "subtitle": "",
+          "description": "[심야 수다 타임] 몽골 별빛 아래 동행들과 별빛 포차를 즐겨보세요."
+        },
+        {
+          "type": "default",
+          "title": "- 게르 캠프는 기본 3인1실로 배정됩니다.",
+          "subtitle": "",
+          "description": "- 게르 캠프는 기본 3인1실로 배정됩니다.\r\n- 상황에 따라 동성끼리 임의 배정될 수 있으며(부부예약, 일행예약 제외), 게르 숙박 시 다른 팀 손님과 조인될 수 있습니다.\r\n- 게르 내 화장실 및 샤워실이 있습니다.\r\n- 220V이며 드라이어, 커피포트 비치되어 있습니다.\r\n- 1인실 사용을 원하시는 경우 예약 시 미리 확인하셔야 하며 추가요금 발생합니다.\r\n[게르 숙박 인원별 추가요금]\r\n- 2인 사용 시 5만원/인/박\r\n- 1인 사용 시 13만원/인/박\r\n★게르 안 욕실/화장실 구비\r\n★개인 세면도구 필수준비"
         }
       ],
-      "hotel": "호텔은 1일차와 동일합니다.",
+      "hotel": "테를지 신게르(4인실 기준)",
       "meals": {
-        "breakfast": "호텔식",
-        "lunch": "불포함",
-        "dinner": "불포함"
+        "breakfast": "캠프식",
+        "lunch": "현지식",
+        "dinner": "현지식"
       }
     },
     {
       "day": 4,
       "date": "",
-      "title": "",
-      "transport": "기타 (현지교통)",
+      "title": "테를지 → 울란바타르",
+      "transport": "대형버스",
       "flight": null,
       "timeline": [
         {
           "type": "default",
-          "title": "전일 자유 일정",
+          "title": "캠프 조식 후 가이드 미팅",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "default",
-          "title": "공항으로 개별이동",
+          "title": "테를지 열트산 이지트레킹(약 2시간 소요)",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "default",
-          "title": "다낭 국제공항",
-          "subtitle": "현지공항센딩",
-          "description": "다낭 국제공항 출발"
+          "title": "천진별덕 지역으로 이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "징기스칸 마동상",
+          "subtitle": "",
+          "description": "★모두 특전 : 마동상 외부&내부 관람"
+        },
+        {
+          "type": "default",
+          "title": "울란바토르로 이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "자이승 전망대",
+          "subtitle": "",
+          "description": "울란바토르 시내를 조망 할 수 있는 전망대"
+        },
+        {
+          "type": "location",
+          "title": "대형불상공원",
+          "subtitle": "",
+          "description": "16M 높이의 대형 불상 관람"
+        },
+        {
+          "type": "location",
+          "title": "이태준열사 기념공원",
+          "subtitle": "",
+          "description": "독립운동가이자 의사인 이태준열사를 기념하기 위한 공원"
+        },
+        {
+          "type": "location",
+          "title": "서울의 거리",
+          "subtitle": "",
+          "description": "[심야 수다 타임] 몽골의 핫플! 서울의 거리에서 자유시간이 제공됩니다."
+        },
+        {
+          "type": "default",
+          "title": "호텔 투숙 및 휴식",
+          "subtitle": "",
+          "description": ""
         }
       ],
       "items": [
         {
           "type": "default",
-          "title": "전일 자유 일정",
+          "title": "캠프 조식 후 가이드 미팅",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "default",
-          "title": "공항으로 개별이동",
+          "title": "테를지 열트산 이지트레킹(약 2시간 소요)",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "default",
-          "title": "다낭 국제공항",
-          "subtitle": "현지공항센딩",
-          "description": "다낭 국제공항 출발"
+          "title": "천진별덕 지역으로 이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "징기스칸 마동상",
+          "subtitle": "",
+          "description": "★모두 특전 : 마동상 외부&내부 관람"
+        },
+        {
+          "type": "default",
+          "title": "울란바토르로 이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "자이승 전망대",
+          "subtitle": "",
+          "description": "울란바토르 시내를 조망 할 수 있는 전망대"
+        },
+        {
+          "type": "location",
+          "title": "대형불상공원",
+          "subtitle": "",
+          "description": "16M 높이의 대형 불상 관람"
+        },
+        {
+          "type": "location",
+          "title": "이태준열사 기념공원",
+          "subtitle": "",
+          "description": "독립운동가이자 의사인 이태준열사를 기념하기 위한 공원"
+        },
+        {
+          "type": "location",
+          "title": "서울의 거리",
+          "subtitle": "",
+          "description": "[심야 수다 타임] 몽골의 핫플! 서울의 거리에서 자유시간이 제공됩니다."
+        },
+        {
+          "type": "default",
+          "title": "호텔 투숙 및 휴식",
+          "subtitle": "",
+          "description": ""
         }
       ],
-      "hotel": "호텔 확정 예정",
+      "hotel": "울란바타르 4성급 호텔",
       "meals": {
-        "breakfast": "호텔식",
-        "lunch": "불포함",
-        "dinner": "불포함"
+        "breakfast": "캠프식",
+        "lunch": "현지식",
+        "dinner": "현지식"
       }
     },
     {
       "day": 5,
       "date": "",
-      "title": "부산",
+      "title": "울란바타르 → 인천",
       "transport": "대형버스",
       "flight": {
-        "flightNo": "LJ112",
-        "airline": "진에어",
-        "departureCity": "다낭",
-        "departureTime": "01:00",
-        "arrivalCity": "부산",
-        "arrivalTime": "07:15",
-        "duration": "04:15"
+        "flightNo": "7C5204",
+        "airline": "제주항공",
+        "departureCity": "울란바타르",
+        "departureTime": "13:40",
+        "arrivalCity": "인천",
+        "arrivalTime": "17:55",
+        "duration": "03:15",
+        "segments": []
       },
       "timeline": [
         {
           "type": "default",
-          "title": "김해국제공항",
-          "subtitle": "이동수단(교통)",
-          "description": "김해국제공항 도착"
+          "title": "호텔 조식 후 가이드 미팅",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "징기스칸 광장",
+          "subtitle": "",
+          "description": "울란바토르 중심부에 있는 광장"
+        },
+        {
+          "type": "default",
+          "title": "울란바토르 징기스칸 국제 공항으로 이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "울란바토르 공항 출발/인천 국제공항 도착",
+          "subtitle": "",
+          "description": ""
         }
       ],
       "items": [
         {
           "type": "default",
-          "title": "김해국제공항",
-          "subtitle": "이동수단(교통)",
-          "description": "김해국제공항 도착"
+          "title": "호텔 조식 후 가이드 미팅",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "징기스칸 광장",
+          "subtitle": "",
+          "description": "울란바토르 중심부에 있는 광장"
+        },
+        {
+          "type": "default",
+          "title": "울란바토르 징기스칸 국제 공항으로 이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "울란바토르 공항 출발/인천 국제공항 도착",
+          "subtitle": "",
+          "description": ""
         }
       ],
       "hotel": "",
       "meals": {
-        "breakfast": "-",
+        "breakfast": "호텔식",
         "lunch": "-",
         "dinner": "-"
       }
@@ -340,14 +596,14 @@
   ],
   "hotels": [
     {
-      "name": "다낭 메리어트 리조트",
-      "address": "Truong Sa Street, Hoa Hai Ward, Ngu Hanh Son Dist, Da Nang 550000, Vietnam ",
+      "name": "울란바타르 4성급 호텔",
+      "address": "울란바타르 4성급 호텔",
       "images": [],
       "checkIn": "",
       "checkOut": ""
     },
     {
-      "name": "호텔은 1일차와 동일합니다.",
+      "name": "테를지 신게르(4인실 기준)",
       "address": "",
       "images": [],
       "checkIn": "",
@@ -357,43 +613,23 @@
   "meetingInfo": [
     {
       "type": "미팅안내",
-      "location": "<b>공항 도착 후 별도 미팅 없이 바로 출국 수속을 진행할 수 있습니다.</b><br><br><b>김해국제공항 개별수속 (출발 최소 3시간전까지)</b>",
+      "location": "<b>공항 도착 후 별도 미팅 없이 바로 출국 수속을 진행할 수 있습니다.</b><br><br><b>인천국제공항 1터미널 개별수속 (출발 최소 3시간전까지)</b><br>-미팅서비스 사전신청고객 : N카운터 14번출구 앞 9~10번 모두투어 테이블 미팅",
       "description": "",
-      "time": "18:05",
+      "time": "06:40",
       "imageUrl": null
     }
   ],
   "inclusions": [
-    "① 해외여행자보험",
-    "② 왕복항공권, TAX 및 유류할증료(매월 변동가능)",
-    "③ 국내공항세+전쟁보험료, 관광진흥기금, 현지공항세",
-    "④ 전일정 호텔숙박비용",
-    "⑤ 전일정 호텔조식",
-    "⑥ 공항-&gt;호텔 편도 미팅픽업 서비스",
-    "모두케어 서비스 무료제공",
-    "- 아래 1,2,3번 혜택은 '모두CARE+카카오톡채널' 연결하여 이용 가능합니다.",
-    "- 검색창에 vietbenefit 검색 후 원하시는 지역의 채널 친구 추가",
-    "- 모두CARE+다낭 카카오톡채널 : @vietbenefit_dad",
-    "1. 예약 후 여행 전/여행 중 1:1문의 및 현지투어, 스파 등 예약 가능",
-    "2. 비엣베네핏 할인 : 현지 식당,스파,샵,투어 추가 할인",
-    "☞혜택 확인하기",
-    "3. 비엣베네핏 헬프 : 문제 발생 시(도난, 병원 등) 24시간 지원되는 헬프서비스",
-    "☞혜택 확인하기",
-    "4. 김해공항 할인쿠폰 증정 : 공항 내 식당 할인 혜택",
-    "☞혜택 확인하기",
-    "5. 3억원 해외여행자보험 가입"
+    "국제선 왕복 항공료",
+    "일정상의 관광지 입장료",
+    "일정상의 식사",
+    "전일 호텔숙박 비용",
+    "전용 차량 비용",
+    "▣ 해외여행자보험",
+    "항공 TAX",
+    "▣ 기사/가이드팁 포함"
   ],
   "exclusions": [
-    "■ 상기상품은 항공 및 호텔예약이 실시간으로 이루어지므로 예약 후 컴펌여부를 꼭 확인하셔야 합니다.",
-    "■ 각종 개인경비 및 매너팁(객실팁, 포터, 테이블팁, 마사지팁 등)",
-    "■ 호텔-&gt;공항 샌딩 서비스 미제공(리턴시 개별 공항이동 및 출국수속)",
-    "2~4베드 상품 예약시 주의사항",
-    "- 기준인원 = 2베드룸 : 4명, 3베드룸 : 6명, 4베드룸 : 8명",
-    "- 성인/아동유무와 관계없이",
-    "기준인원까지 전부 성인요금",
-    "으로 적용됩니다.",
-    "- 기준인원 초과 아동은 엑스트라 베드가 가능한 리조트는 '소아엑스트라베드요금', 불가능한 리조트는 '소아노베드요금'으로 진행됩니다.(일정표 1일차 참조)",
-    "※ 베트남 지역은 파도가 강한 지역으로 해변에서 개별 수영은 삼가주시기 바랍니다.",
-    "※ 리조트 내 해변에서도 강한 파도와 조류에 유의해주시고 반드시 안전요원의 지시에 따라주시기 바랍니다."
+    "추가적인 개인 물값, 호텔등에서의 룸서비스및 포터 TIP, 각종개인경비, 마부팁"
   ]
 }

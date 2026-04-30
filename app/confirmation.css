@@ -261,7 +261,7 @@
 /* 파일 업로드 */
 .file-upload-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 12px;
 }
 
