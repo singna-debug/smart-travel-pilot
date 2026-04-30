@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import { useParams } from 'next/navigation';
 import type { ConfirmationDocument } from '@/types';
 import { AIRLINE_MAP, CITY_CODE_MAP } from '@/lib/constants/travel-data';
@@ -829,7 +829,7 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
             )}
             
             {segments.map((seg: any, idx: number) => (
-                <React.Fragment key={idx}>
+                <Fragment key={idx}>
                     <FlightSegmentCard 
                         segment={seg} 
                         dateStr={idx === 0 ? dateStr : undefined} 
@@ -838,7 +838,7 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
                     {idx < segments.length - 1 && (
                         <LayoverConnector duration={seg.layoverDuration || '정보 없음'} />
                     )}
-                </React.Fragment>
+                </Fragment>
             ))}
         </div>
     );
