@@ -297,6 +297,7 @@ export default function ChatsPage() {
                         departureDate: data.data.departureDate || c.departureDate,
                         returnDate: data.data.returnDate || c.returnDate,
                         destination: data.data.destination || c.destination,
+                        productName: data.data.productName || c.productName,
                         prepaidDate: data.data.prepaidDate,
                         noticeDate: data.data.noticeDate,
                         balanceDate: data.data.balanceDate,
