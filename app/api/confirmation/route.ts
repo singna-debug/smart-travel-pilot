@@ -92,6 +92,7 @@ export async function POST(request: NextRequest) {
                 airline: '', departureAirport: '',
                 departureTime: '', arrivalTime: '', departureDuration: '',
                 returnDepartureTime: '', returnArrivalTime: '', returnDuration: '',
+                departureSegments: [], returnSegments: [],
             },
             hotels: body.hotels || [],
             itinerary: body.itinerary || [],

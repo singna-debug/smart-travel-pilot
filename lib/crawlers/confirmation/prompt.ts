@@ -12,9 +12,8 @@ export const CONFIRMATION_PROMPT = `당신은 여행 상품 페이지 전문 분
 1. '간략일정' 우선 원칙: 요약된 일정 정보를 최우선으로 참고하여 핵심 동선을 파악하세요.
 2. 이모지 사용 절대 금지: 모든 텍스트에서 이모지를 절대 사용하지 마세요. 깔끔한 텍스트만 사용합니다.
 3. 일정표 상세화 (Timeline 구조): 일차별 상세 동선(방문지 등)을 **빠짐없이** 'timeline' 객체로 도출하세요.
-4. 항공 정보 필수 추출: 항공사, 편명, 시간을 정확히 찾아내세요. (추측 절대 금지)
-   - 만약 경유(Layover/Transit) 항공편이라면, 편명은 '/'로 연결하고 항공사 이름 뒤에 '(경유)'를 붙여주세요.
-   - 예시: "airline": "대한항공 / 스칸디나비아 항공 (경유)", "departureFlightNumber": "KE925 / SK1558", "departureTime": "11:55", "arrivalTime": "23:20" (최종 도착시간)
+15. 4. 항공 정보 필수 추출: 항공사, 편명, 시간을 정확히 찾아내세요. (추측 절대 금지)
+   - 만약 경유(Layover/Transit) 항공편이라면, 경유 정보를 departureSegments 및 returnSegments 배열에 각 비행 구간(segment)으로 분리하여 파악하세요.
 5. JSON만 반환하세요. 다른 설명 텍스트는 제외하세요.
 6. 텍스트 정제 및 오타 수정:
    - '&nbsp;', '&lt;', '&gt;' 등 모든 HTML 엔티티와 태그 잔해를 완벽히 제거하세요.
@@ -33,10 +32,34 @@ export const CONFIRMATION_PROMPT = `당신은 여행 상품 페이지 전문 분
   "departureFlightNumber": "가는편 편명 (예: 7C201)",
   "returnFlightNumber": "오는편 편명 (예: 7C202)",
   "departureAirport": "출발공항",
-  "departureTime": "가는편 출발 시각 (HH:MM)",
-  "arrivalTime": "가는편 도착 시각 (HH:MM)",
+  "departureTime": "가는편 출발 시각 (HH:MM) - 직항이거나 첫 구간 기준",
+  "arrivalTime": "가는편 도착 시각 (HH:MM) - 최종 도착지 기준",
   "returnDepartureTime": "오는편 출발 시각 (HH:MM)",
   "returnArrivalTime": "오는편 도착 시각 (HH:MM)",
+  "departureSegments": [
+    {
+      "airline": "항공사명",
+      "flightNo": "비행편명",
+      "departureCity": "출발도시",
+      "departureTime": "출발시간",
+      "arrivalCity": "도착도시",
+      "arrivalTime": "도착시간",
+      "duration": "소요시간",
+      "layoverDuration": "다음 비행기까지 대기시간 (경유가 있는 첫번째/중간 구간에만 작성, 예: '2시간 25분')"
+    }
+  ],
+  "returnSegments": [
+    {
+      "airline": "항공사명",
+      "flightNo": "비행편명",
+      "departureCity": "출발도시",
+      "departureTime": "출발시간",
+      "arrivalCity": "도착도시",
+      "arrivalTime": "도착시간",
+      "duration": "소요시간",
+      "layoverDuration": "대기시간"
+    }
+  ],
   "hotel": {
     "name": "대표 호텔명 (한글 명칭)",
     "englishName": "호텔 영문명",

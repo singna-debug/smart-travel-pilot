@@ -3,20 +3,20 @@ import type { DetailedProductInfo } from '../../types';
 
 export async function fetchModeTourNative(url: string, isSummaryOnly = false, html?: string): Promise<DetailedProductInfo | null> {
     let productNo = '';
-    
+
     // 1. URL에서 추출 시도
-    const productNoMatch = url.match(/package\/(\d+)/i) || 
-                           url.match(/goodsNo=(\d+)/i) || 
-                           url.match(/productNo=(\d+)/i) || 
-                           url.match(/Pnum=(\d+)/i) || 
-                           url.match(/\/(\d+)\?/);
-    
+    const productNoMatch = url.match(/package\/(\d+)/i) ||
+        url.match(/goodsNo=(\d+)/i) ||
+        url.match(/productNo=(\d+)/i) ||
+        url.match(/Pnum=(\d+)/i) ||
+        url.match(/\/(\d+)\?/);
+
     if (productNoMatch) {
         productNo = productNoMatch[1];
     } else if (html) {
-        const htmlMatch = html.match(/"productNo":\s*(\d+)/) || 
-                           html.match(/productNo=(\d+)/) ||
-                           html.match(/productNo\s*:\s*["'](\d+)["']/);
+        const htmlMatch = html.match(/"productNo":\s*(\d+)/) ||
+            html.match(/productNo=(\d+)/) ||
+            html.match(/productNo\s*:\s*["'](\d+)["']/);
         if (htmlMatch) productNo = htmlMatch[1];
     }
 
@@ -52,7 +52,7 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
     if (dataDetail?.result || dataDetail?.productName) {
         const d = dataDetail.result || dataDetail;
         const scheduleRaw = dataSchedule?.result?.scheduleItemList || [];
-        
+
         let deptAir: any = {}, returnAir: any = {};
 
         // 목적지 도시 집계 및 항공 데이터 전수 조사
@@ -68,6 +68,35 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                 const flightNos = air.item.map((i: any) => i.departureFlight || i.arrivalFlight).filter(Boolean).join(' / ');
                 const airlines = Array.from(new Set(air.item.map((i: any) => i.transportName).filter(Boolean))).join(' / ');
                 
+                const segments = air.item.map((i: any, index: number, arr: any[]) => {
+                    let layoverDuration = '';
+                    if (index < arr.length - 1) {
+                        const arrTime = i.arrivalTime;
+                        const nextDepTime = arr[index + 1].departureTime;
+                        if (arrTime && nextDepTime) {
+                            try {
+                                const [h1, m1] = arrTime.split(':').map(Number);
+                                const [h2, m2] = nextDepTime.split(':').map(Number);
+                                let mins = (h2 * 60 + m2) - (h1 * 60 + m1);
+                                if (mins <= 0) mins += 1440;
+                                const lh = Math.floor(mins / 60);
+                                const lm = mins % 60;
+                                layoverDuration = lm > 0 ? `${lh}시간 ${lm}분` : `${lh}시간`;
+                            } catch (e) {}
+                        }
+                    }
+                    return {
+                        airline: i.transportName || '',
+                        flightNo: i.departureFlight || i.arrivalFlight || '',
+                        departureCity: i.departureCityName || '',
+                        departureTime: i.departureTime || '',
+                        arrivalCity: i.arrivalCityName || '',
+                        arrivalTime: i.arrivalTime || '',
+                        duration: i.departureFlightDuration || '',
+                        layoverDuration,
+                    };
+                });
+                
                 const merged = {
                     transportName: isLayover ? `${airlines} (경유)` : first.transportName,
                     departureFlight: flightNos,
@@ -76,6 +105,7 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                     arrivalCityName: last.arrivalCityName,
                     arrivalTime: last.arrivalTime,
                     departureFlightDuration: first.departureFlightDuration,
+                    segments
                 };
                 
                 if (air.flightTypeName === "DEPARTURE" && !deptAir.departureFlight) deptAir = merged;
@@ -107,26 +137,26 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                 // '간략일정' 우선: itiSummaryDes 사용, 없으면 detailDes
                 let summary = (t.itiSummaryDes || t.summaryDes || t.detailDes || t.itiDetailDes || t.serviceExplaination || '').trim();
                 const serviceType = t.itiServiceCode || '';
-                
+
                 let subtitle = (t.itiServiceName || '').trim();
                 const genericPlaceholders = ['안내', '기타단문', '안내사항', '서비스안내', '유의 | 안내사항', '유의사항', '관광(콘텐츠)', '관광', '기타', '일정', '안내문구'];
-                
+
                 // 자막(Subtitle) 처리
                 if (genericPlaceholders.some(p => subtitle.includes(p))) subtitle = '';
 
                 // 제목(Title) 추출: 최대한 많은 필드를 검사
                 const titleCandidates = [
-                    t.itiPlaceName, 
-                    t.placeNameK, 
-                    t.itiServiceName, 
+                    t.itiPlaceName,
+                    t.placeNameK,
+                    t.itiServiceName,
                     t.itiServiceNm,
                     t.itiContentTitle,
                     t.contentTitle,
                     t.title
                 ]
-                .map(v => (v || '').trim())
-                .filter(v => v && v.length > 0 && !genericPlaceholders.includes(v));
-                
+                    .map(v => (v || '').trim())
+                    .filter(v => v && v.length > 0 && !genericPlaceholders.includes(v));
+
                 let finalTitle = titleCandidates[0] || '';
 
                 // 제목이 예약어이거나 비어있으면 summary의 첫 줄 사용
@@ -144,12 +174,12 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                 // 사용자 요청: 케이블카 등정, 촬영지 원가계 등은 동그라미여야 함
                 const activityKeywords = ['케이블카', '등정', '이동', '촬영지', '탑승', '안내', '설명', '감상', '조망', '경유', '도착', '출발', '휴식'];
                 let isSight = serviceType === 'SSCSPT';
-                
+
                 // 핀 아이콘 제외 조건: 키워드 포함 시 또는 제목이 너무 길 때(대체로 설명문)
                 if (isSight && (activityKeywords.some(k => finalTitle.includes(k)) || finalTitle.length > 20)) {
                     isSight = false;
                 }
-                
+
                 return {
                     type: isSight ? 'location' : 'default',
                     title: finalTitle ? finalTitle.trim() : '일정 안내',
@@ -161,7 +191,7 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             // 숙소 정보 보강 (확정 호텔 이름 찾기)
             let hotelStr = (day.scheduleHotel || day.hotel || '').trim();
             const badHotelWords = ['미정', '대기', '확정되는대로', '홈페이지', '알림톡', '숙박 장소가'];
-            
+
             if (day.listHotelPlace?.length) {
                 const hotelObj = day.listHotelPlace.find((h: any) => {
                     const name = h.itiPlaceName || h.placeNameK || '';
@@ -171,7 +201,7 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                     hotelStr = hotelObj.itiPlaceName || hotelObj.placeNameK;
                 }
             }
-            
+
             // 만약 여전히 미정이면 요약 필드에서 찾기
             if (badHotelWords.some(w => hotelStr.includes(w))) {
                 hotelStr = '호텔 확정 예정';
@@ -192,6 +222,7 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                 arrivalCity: deptAir.arrivalCityName,
                 arrivalTime: deptAir.arrivalTime,
                 duration: deptAir.departureFlightDuration,
+                segments: deptAir.segments,
             } : (idx === scheduleRaw.length - 1 ? {
                 flightNo: returnAir.departureFlight,
                 airline: returnAir.transportName,
@@ -200,6 +231,7 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                 arrivalCity: returnAir.arrivalCityName,
                 arrivalTime: returnAir.arrivalTime,
                 duration: returnAir.departureFlightDuration,
+                segments: returnAir.segments,
             } : null);
 
             return {
@@ -236,8 +268,8 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
         } else if (scheduleRaw.length > 0) {
             // Fallback: 첫날 일정에서 파싱
             const firstDayEvents = scheduleRaw[0].ortherActions || [];
-            const meetingItem = firstDayEvents.find((a: any) => 
-                (a.itiServiceName || '').includes('미팅') || 
+            const meetingItem = firstDayEvents.find((a: any) =>
+                (a.itiServiceName || '').includes('미팅') ||
                 (a.itiPlaceName || '').includes('미팅') ||
                 (a.detailDes || '').includes('미팅')
             );
@@ -254,7 +286,7 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
         }
 
         const dayCount = scheduleRaw.length;
-        let finalDuration = `${dayCount-1}박 ${dayCount}일`;
+        let finalDuration = `${dayCount - 1}박 ${dayCount}일`;
         if (dayCount === 9) finalDuration = "7박 9일"; // 동유럽 9일 특화
 
         // 호텔 상세 정보 추출 배열
@@ -298,7 +330,7 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             duration: finalDuration,
             airline: deptAir.transportName || d.transportName || '',
             departureFlightNumber: deptAir.departureFlight || '',
-            returnFlightNumber: returnAir.departureFlight || returnAir.arrivalFlight || '', 
+            returnFlightNumber: returnAir.departureFlight || returnAir.arrivalFlight || '',
             departureAirport: deptAir.departureCityName || '인천',
             arrivalAirport: deptAir.arrivalCityName || '',
             departureTime: deptAir.departureTime || '',
@@ -308,6 +340,8 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             returnDepartureTime: returnAir.departureTime || '',
             returnArrivalTime: returnAir.arrivalTime || '',
             returnDuration: returnAir.departureFlightDuration || '',
+            departureSegments: deptAir.segments || [],
+            returnSegments: returnAir.segments || [],
             url: url,
             itinerary: itinerary,
             hotels: hotels, // 복구된 호텔 상세 정보 배열

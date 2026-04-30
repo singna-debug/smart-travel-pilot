@@ -701,17 +701,35 @@ const getDepartureKST = (arrTimeKST: string, durationStr: string) => {
     } catch { return null; }
 };
 
-const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, dateStr?: string, title?: string }) => {
-    const planeSrc = flightInfo.airline || flightInfo.flightNo;
+const LayoverConnector = ({ duration }: { duration: string }) => (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '4px 0' }}>
+        <div style={{ width: '2px', height: '16px', background: 'repeating-linear-gradient(to bottom, #cbd5e1 0, #cbd5e1 4px, transparent 4px, transparent 8px)' }}></div>
+        <div style={{ 
+            background: '#10b981', 
+            color: 'white', 
+            fontSize: '0.75rem', 
+            fontWeight: 800, 
+            padding: '4px 12px', 
+            borderRadius: '20px',
+            margin: '4px 0',
+            boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)'
+        }}>
+            경유 ({duration})
+        </div>
+        <div style={{ width: '2px', height: '16px', background: 'repeating-linear-gradient(to bottom, #cbd5e1 0, #cbd5e1 4px, transparent 4px, transparent 8px)' }}></div>
+    </div>
+);
+
+const FlightSegmentCard = ({ segment, dateStr, isLastSegment }: { segment: any, dateStr?: string, isLastSegment?: boolean }) => {
+    const planeSrc = segment.airline || segment.flightNo;
     const info = getAirlineInfo(planeSrc);
 
-    const deptCity = (flightInfo.departureCity || '출발지').trim();
-    const arrCity = (flightInfo.arrivalCity || '도착지').trim();
+    const deptCity = (segment.departureCity || '출발지').trim();
+    const arrCity = (segment.arrivalCity || '도착지').trim();
     const deptCode = CITY_CODE_MAP[deptCity] ? ` (${CITY_CODE_MAP[deptCity]})` : '';
     const arrCode = CITY_CODE_MAP[arrCity] ? ` (${CITY_CODE_MAP[arrCity]})` : '';
 
-    // API 제공 소요 시간(13:00 등) 우선 처리 및 포맷 변환
-    let durationText = flightInfo.duration || calculateFlightDuration(flightInfo.departureTime, deptCode, flightInfo.arrivalTime, arrCode);
+    let durationText = segment.duration || calculateFlightDuration(segment.departureTime, deptCode, segment.arrivalTime, arrCode);
     if (durationText && durationText.includes(':') && durationText.length <= 5) {
         const [hh, mm] = durationText.split(':').map(Number);
         if (!isNaN(hh)) {
@@ -719,9 +737,74 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
         }
     }
 
-    // 시차가 존재할 경우에만 한국 시간 표시
-    const ktDept = getKoreaTimeText(flightInfo.departureTime, deptCode);
-    const ktArr = getKoreaTimeText(flightInfo.arrivalTime, arrCode);
+    const ktDept = getKoreaTimeText(segment.departureTime, deptCode);
+    const ktArr = getKoreaTimeText(segment.arrivalTime, arrCode);
+
+    return (
+        <div style={{
+            background: '#fff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '20px',
+            padding: '24px 20px 20px',
+            position: 'relative',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
+        }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ textAlign: 'left', width: '32%', minWidth: '95px' }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '4px', wordBreak: 'keep-all' }}>{deptCity}{deptCode}</div>
+                    {dateStr && <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px' }}>{formatDateStr(dateStr)}</div>}
+                    <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>{segment.departureTime}</div>
+                    {ktDept && (
+                        <div style={{ fontSize: '0.65rem', color: '#3b82f6', fontWeight: 700, marginTop: '6px', background: '#eff6ff', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center' }}>
+                            {ktDept}
+                        </div>
+                    )}
+                </div>
+
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px' }}>
+                    {segment.flightNo && (
+                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#2563eb', marginBottom: '4px' }}>
+                            {segment.flightNo}
+                        </div>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                        {info.logoUrl ? (
+                            <img src={info.logoUrl} alt={info.name} style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                        ) : (
+                            <div style={{ width: '16px', height: '16px', background: info.color, color: 'white', fontSize: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '3px' }}>
+                                {info.name.slice(0, 1)}
+                            </div>
+                        )}
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569' }}>{info.name}</span>
+                    </div>
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0' }}>
+                        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#cbd5e1' }}></div>
+                        <div style={{ flex: 1, height: '1.5px', background: 'linear-gradient(90deg, #cbd5e1 0%, #e2e8f0 50%, #cbd5e1 100%)' }}></div>
+                        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#cbd5e1' }}></div>
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 700, marginTop: '8px', background: '#f0fdf4', padding: '2px 8px', borderRadius: '10px' }}>
+                        {durationText} 소요
+                    </div>
+                </div>
+
+                <div style={{ textAlign: 'right', width: '32%', minWidth: '95px' }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '4px', wordBreak: 'keep-all' }}>{arrCity}{arrCode}</div>
+                    {/* 첫 출발일자가 아니라 마지막 도착일자면 dateStr을 보여주지 않아도 되지만, 일단 동일하게 표시 */}
+                    {dateStr && <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px', visibility: 'hidden' }}>-</div>}
+                    <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>{segment.arrivalTime}</div>
+                    {ktArr && (
+                        <div style={{ fontSize: '0.65rem', color: '#3b82f6', fontWeight: 700, marginTop: '6px', background: '#eff6ff', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center' }}>
+                            {ktArr}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, dateStr?: string, title?: string }) => {
+    const segments = flightInfo.segments && flightInfo.segments.length > 0 ? flightInfo.segments : [flightInfo];
 
     return (
         <div style={{ marginBottom: '24px', marginTop: title ? '16px' : '0', position: 'relative' }}>
@@ -744,94 +827,19 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
                     {title}
                 </div>
             )}
-            <div style={{
-                background: '#fff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '20px',
-                padding: '24px 20px 20px',
-                position: 'relative',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
-            }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    
-                    {/* 왼쪽: 출발 정보 */}
-                    <div style={{ textAlign: 'left', width: '32%', minWidth: '95px' }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '4px', wordBreak: 'keep-all' }}>{deptCity}{deptCode}</div>
-                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px' }}>{formatDateStr(dateStr)}</div>}
-                        <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>{flightInfo.departureTime}</div>
-                        
-                        {ktDept && (
-                            <div style={{ 
-                                fontSize: '0.65rem', 
-                                color: '#3b82f6', 
-                                fontWeight: 700, 
-                                marginTop: '6px', 
-                                background: '#eff6ff', 
-                                padding: '2px 6px', 
-                                borderRadius: '4px',
-                                display: 'inline-flex',
-                                alignItems: 'center'
-                            }}>
-                                {ktDept}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* 중앙: 아이콘, 노선, 시간 */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px' }}>
-                        {flightInfo.flightNo && (
-                            <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#2563eb', marginBottom: '4px' }}>
-                                {flightInfo.flightNo}
-                            </div>
-                        )}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                            {info.logoUrl ? (
-                                <img src={info.logoUrl} alt={info.name} style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
-                            ) : (
-                                <div style={{ width: '16px', height: '16px', background: info.color, color: 'white', fontSize: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '3px' }}>
-                                    {info.name.slice(0, 1)}
-                                </div>
-                            )}
-                            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569' }}>{info.name}</span>
-                        </div>
-
-                        {/* 타임라인 바 */}
-                        <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0' }}>
-                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#cbd5e1' }}></div>
-                            <div style={{ flex: 1, height: '1.5px', background: 'linear-gradient(90deg, #cbd5e1 0%, #e2e8f0 50%, #cbd5e1 100%)' }}></div>
-                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#cbd5e1' }}></div>
-                        </div>
-
-                        <div style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 700, marginTop: '8px', background: '#f0fdf4', padding: '2px 8px', borderRadius: '10px' }}>
-                            {durationText} 소요
-                        </div>
-                    </div>
-
-                    {/* 오른쪽: 도착 정보 */}
-                    <div style={{ textAlign: 'right', width: '32%', minWidth: '95px' }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '4px', wordBreak: 'keep-all' }}>{arrCity}{arrCode}</div>
-                        {dateStr && <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px' }}>{formatDateStr(dateStr)}</div>}
-                        <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>{flightInfo.arrivalTime}</div>
-                        
-                        {ktArr && (
-                            <div style={{ 
-                                fontSize: '0.65rem', 
-                                color: '#3b82f6', 
-                                fontWeight: 700, 
-                                marginTop: '6px', 
-                                background: '#eff6ff', 
-                                padding: '2px 6px', 
-                                borderRadius: '4px',
-                                display: 'inline-flex',
-                                alignItems: 'center'
-                            }}>
-                                {ktArr}
-                            </div>
-                        )}
-                    </div>
-
-                </div>
-            </div>
+            
+            {segments.map((seg: any, idx: number) => (
+                <React.Fragment key={idx}>
+                    <FlightSegmentCard 
+                        segment={seg} 
+                        dateStr={idx === 0 ? dateStr : undefined} 
+                        isLastSegment={idx === segments.length - 1} 
+                    />
+                    {idx < segments.length - 1 && (
+                        <LayoverConnector duration={seg.layoverDuration || '정보 없음'} />
+                    )}
+                </React.Fragment>
+            ))}
         </div>
     );
 };

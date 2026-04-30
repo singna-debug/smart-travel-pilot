@@ -152,6 +152,8 @@ export interface DetailedProductInfo {
   arrivalTime?: string;
   returnDepartureTime?: string;
   returnArrivalTime?: string;
+  departureSegments?: FlightSegment[];
+  returnSegments?: FlightSegment[];
   returnDate?: string;
   isProduct?: boolean;
   index?: number;
@@ -203,6 +205,17 @@ export interface HotelInfo {
   amenities?: string[];
 }
 
+export interface FlightSegment {
+  airline: string;
+  flightNo: string;
+  departureCity: string;
+  departureTime: string;
+  arrivalCity: string;
+  arrivalTime: string;
+  duration?: string;
+  layoverDuration?: string;
+}
+
 // 모바일 확정서 데이터
 export interface ConfirmationDocument {
   id: string;
@@ -243,6 +256,8 @@ export interface ConfirmationDocument {
     returnFlightNumber?: string;
     returnDepartureTime: string;
     returnArrivalTime: string;
+    departureSegments?: FlightSegment[];
+    returnSegments?: FlightSegment[];
   };
 
   // 숙박 정보
