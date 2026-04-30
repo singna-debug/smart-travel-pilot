@@ -68,34 +68,51 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                 const flightNos = air.item.map((i: any) => i.departureFlight || i.arrivalFlight).filter(Boolean).join(' / ');
                 const airlines = Array.from(new Set(air.item.map((i: any) => i.transportName).filter(Boolean))).join(' / ');
                 
-                const segments = air.item.map((i: any, index: number, arr: any[]) => {
-                    let layoverDuration = '';
-                    if (index < arr.length - 1) {
-                        const arrTime = i.arrivalTime;
-                        const nextDepTime = arr[index + 1].departureTime;
-                        if (arrTime && nextDepTime) {
-                            try {
-                                const [h1, m1] = arrTime.split(':').map(Number);
-                                const [h2, m2] = nextDepTime.split(':').map(Number);
-                                let mins = (h2 * 60 + m2) - (h1 * 60 + m1);
-                                if (mins <= 0) mins += 1440;
-                                const lh = Math.floor(mins / 60);
-                                const lm = mins % 60;
-                                layoverDuration = lm > 0 ? `${lh}시간 ${lm}분` : `${lh}시간`;
-                            } catch (e) {}
-                        }
+                const rawItems = air.item;
+                const mergedRawItems = [];
+                for (let i = 0; i < rawItems.length; i++) {
+                    const current = rawItems[i];
+                    if (i < rawItems.length - 1 && 
+                        (current.departureCityName || current.arrivalCityName || current.departureTime || current.arrivalTime) && 
+                        !(current.departureFlight || current.arrivalFlight || current.transportName) &&
+                        (rawItems[i+1].departureFlight || rawItems[i+1].arrivalFlight || rawItems[i+1].transportName)) {
+                        mergedRawItems.push({ ...current, ...rawItems[i+1] });
+                        i++;
+                    } else {
+                        mergedRawItems.push(current);
                     }
-                    return {
-                        airline: i.transportName || '',
-                        flightNo: i.departureFlight || i.arrivalFlight || '',
-                        departureCity: i.departureCityName || '',
-                        departureTime: i.departureTime || '',
-                        arrivalCity: i.arrivalCityName || '',
-                        arrivalTime: i.arrivalTime || '',
-                        duration: i.departureFlightDuration || '',
-                        layoverDuration,
-                    };
-                });
+                }
+
+                const segments = mergedRawItems
+                    .filter((i: any) => i.transportName || i.departureFlight || i.arrivalFlight || i.departureCityName || i.arrivalCityName)
+                    .map((i: any, index: number, arr: any[]) => {
+                        let layoverDuration = '';
+                        if (index < arr.length - 1) {
+                            const arrTime = i.arrivalTime;
+                            const nextDepTime = arr[index + 1].departureTime;
+                            if (arrTime && nextDepTime) {
+                                try {
+                                    const [h1, m1] = arrTime.split(':').map(Number);
+                                    const [h2, m2] = nextDepTime.split(':').map(Number);
+                                    let mins = (h2 * 60 + m2) - (h1 * 60 + m1);
+                                    if (mins <= 0) mins += 1440;
+                                    const lh = Math.floor(mins / 60);
+                                    const lm = mins % 60;
+                                    layoverDuration = lm > 0 ? `${lh}시간 ${lm}분` : `${lh}시간`;
+                                } catch (e) {}
+                            }
+                        }
+                        return {
+                            airline: i.transportName || '',
+                            flightNo: i.departureFlight || i.arrivalFlight || '',
+                            departureCity: i.departureCityName || i.startCityName || '',
+                            departureTime: i.departureTime || '',
+                            arrivalCity: i.arrivalCityName || i.endCityName || '',
+                            arrivalTime: i.arrivalTime || '',
+                            duration: i.departureFlightDuration || '',
+                            layoverDuration,
+                        };
+                    });
                 
                 const merged = {
                     transportName: isLayover ? `${airlines} (경유)` : first.transportName,

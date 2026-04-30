@@ -1047,6 +1047,55 @@ export default function ConfirmationPage() {
                         <input value={returnArrivalTime} onChange={e => setReturnArrivalTime(e.target.value)} placeholder="21:00" />
                     </div>
                 </div>
+
+                {/* 가는 편 경유 구간 */}
+                <div style={{ marginTop: '20px', padding: '16px', background: '#111827', borderRadius: '12px', border: '1px solid #374151' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                        <h4 style={{ margin: 0, fontSize: '14px', color: '#60a5fa' }}>가는 편 경유 구간 상세 (직항은 비워두세요)</h4>
+                        <button onClick={() => setDepartureSegments([...departureSegments, { airline: '', flightNo: '', departureCity: '', departureTime: '', arrivalCity: '', arrivalTime: '', duration: '', layoverDuration: '' }])} 
+                                style={{ padding: '4px 8px', fontSize: '12px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>+ 구간 추가</button>
+                    </div>
+                    {departureSegments.length === 0 && <p style={{ fontSize: '12px', color: '#6b7280', textAlign: 'center', margin: '20px 0' }}>경유 정보가 없습니다. 직항일 경우 설정하지 않아도 됩니다.</p>}
+                    {departureSegments.map((seg, idx) => (
+                        <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '12px', paddingBottom: '12px', borderBottom: idx < departureSegments.length - 1 ? '1px dashed #374151' : 'none' }}>
+                            <div className="confirm-field"><label>항공사</label><input value={seg.airline} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].airline = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                            <div className="confirm-field"><label>편명</label><input value={seg.flightNo} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].flightNo = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                            <div className="confirm-field"><label>출발지</label><input value={seg.departureCity} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].departureCity = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                            <div className="confirm-field"><label>출발시간</label><input value={seg.departureTime} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].departureTime = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                            <div className="confirm-field"><label>도착지</label><input value={seg.arrivalCity} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].arrivalCity = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                            <div className="confirm-field"><label>도착시간</label><input value={seg.arrivalTime} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].arrivalTime = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                            <div className="confirm-field"><label>소요시간</label><input value={seg.duration} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].duration = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                            <div className="confirm-field"><label>대기시간</label><input value={seg.layoverDuration} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].layoverDuration = e.target.value; setDepartureSegments(newSegs); }} /></div>
+                            <button onClick={() => setDepartureSegments(departureSegments.filter((_, i) => i !== idx))} style={{ gridColumn: '4', justifySelf: 'end', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>구간 삭제</button>
+                        </div>
+                    ))}
+                </div>
+
+                {/* 오는 편 경유 구간 */}
+                <div style={{ marginTop: '20px', padding: '16px', background: '#111827', borderRadius: '12px', border: '1px solid #374151' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                        <h4 style={{ margin: 0, fontSize: '14px', color: '#10b981' }}>오는 편 경유 구간 상세</h4>
+                        <button onClick={() => setReturnSegments([...returnSegments, { airline: '', flightNo: '', departureCity: '', departureTime: '', arrivalCity: '', arrivalTime: '', duration: '', layoverDuration: '' }])} 
+                                style={{ padding: '4px 8px', fontSize: '12px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>+ 구간 추가</button>
+                    </div>
+                    {returnSegments.length === 0 && <p style={{ fontSize: '12px', color: '#6b7280', textAlign: 'center', margin: '20px 0' }}>경유 정보가 없습니다.</p>}
+                    {returnSegments.map((seg, idx) => (
+                        <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '12px', paddingBottom: '12px', borderBottom: idx < returnSegments.length - 1 ? '1px dashed #374151' : 'none' }}>
+                            <div className="confirm-field"><label>항공사</label><input value={seg.airline} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].airline = e.target.value; setReturnSegments(newSegs); }} /></div>
+                            <div className="confirm-field"><label>편명</label><input value={seg.flightNo} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].flightNo = e.target.value; setReturnSegments(newSegs); }} /></div>
+                            <div className="confirm-field"><label>출발지</label><input value={seg.departureCity} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].departureCity = e.target.value; setReturnSegments(newSegs); }} /></div>
+                            <div className="confirm-field"><label>출발시간</label><input value={seg.departureTime} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].departureTime = e.target.value; setReturnSegments(newSegs); }} /></div>
+                            <div className="confirm-field"><label>도착지</label><input value={seg.arrivalCity} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].arrivalCity = e.target.value; setReturnSegments(newSegs); }} /></div>
+                            <div className="confirm-field"><label>도착시간</label><input value={seg.arrivalTime} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].arrivalTime = e.target.value; setReturnSegments(newSegs); }} /></div>
+                            <div className="confirm-field"><label>소요시간</label><input value={seg.duration} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].duration = e.target.value; setReturnSegments(newSegs); }} /></div>
+                            <div className="confirm-field"><label>대기시간</label><input value={seg.layoverDuration} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].layoverDuration = e.target.value; setReturnSegments(newSegs); }} /></div>
+                            <button onClick={() => setReturnSegments(returnSegments.filter((_, i) => i !== idx))} style={{ gridColumn: '4', justifySelf: 'end', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>구간 삭제</button>
+                        </div>
+                    ))}
+                </div>
+
+                <div style={{ marginTop: '30px' }}></div>
+
                 {hotels.map((h, i) => (
                     <div key={i} className="hotel-edit-card" style={{ marginBottom: '24px', padding: '16px', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
