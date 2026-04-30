@@ -142,6 +142,8 @@ export default function ConfirmationPage() {
     const [returnDepartureTime, setReturnDepartureTime] = useState('');
     const [returnArrivalTime, setReturnArrivalTime] = useState('');
     const [returnDuration, setReturnDuration] = useState('');
+    const [departureSegments, setDepartureSegments] = useState<any[]>([]);
+    const [returnSegments, setReturnSegments] = useState<any[]>([]);
 
     // 숙박 (다중 지원)
     const [hotels, setHotels] = useState<any[]>([{
@@ -296,6 +298,9 @@ export default function ConfirmationPage() {
                 setArrivalTime(raw.arrivalTime || '');
                 setReturnDepartureTime(raw.returnDepartureTime || '');
                 setReturnArrivalTime(raw.returnArrivalTime || '');
+
+                setDepartureSegments(raw.departureSegments || []);
+                setReturnSegments(raw.returnSegments || []);
 
                 // ---- 호텔 상세 (유연한 객체 처리) ----
                 const finalHotels: any[] = [];
@@ -821,6 +826,7 @@ export default function ConfirmationPage() {
                     airline, departureAirport,
                     departureFlightNumber, departureTime, arrivalTime, departureDuration,
                     returnFlightNumber, returnDepartureTime, returnArrivalTime, returnDuration,
+                    departureSegments, returnSegments,
                 },
                 hotels: hotels.map(h => ({
                     ...h,

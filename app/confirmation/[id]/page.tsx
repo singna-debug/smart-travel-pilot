@@ -1168,7 +1168,8 @@ export default function ConfirmationViewerPage() {
                                                     doc.trip.destination
                                                 ),
                                                 arrivalTime: doc.flight.arrivalTime,
-                                                duration: (doc.flight as any).departureDuration || (doc.itinerary[0] as any)?.flight?.duration
+                                                duration: (doc.flight as any).departureDuration || (doc.itinerary[0] as any)?.flight?.duration,
+                                                segments: doc.flight.departureSegments
                                             }} 
                                         />
                                     )}
@@ -1187,7 +1188,8 @@ export default function ConfirmationViewerPage() {
                                                 departureTime: doc.flight.returnDepartureTime,
                                                 arrivalCity: simplifyDestination(doc.flight.departureAirport),
                                                 arrivalTime: doc.flight.returnArrivalTime,
-                                                duration: (doc.flight as any).returnDuration || (doc.itinerary[doc.itinerary.length-1] as any)?.flight?.duration
+                                                duration: (doc.flight as any).returnDuration || (doc.itinerary[doc.itinerary.length-1] as any)?.flight?.duration,
+                                                segments: doc.flight.returnSegments
                                             }} 
                                         />
                                     )}
