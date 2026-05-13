@@ -19,7 +19,7 @@ async function fetchWeatherFromAPI(city: string) {
         });
         if (!res.ok) return null;
         const data = await res.json();
-        
+
         return {
             current: data.current_condition?.[0],
             forecast: data.weather?.map((w: any, idx: number) => ({
@@ -32,103 +32,146 @@ async function fetchWeatherFromAPI(city: string) {
                     const prevKo = prev.lang_ko?.[0]?.value;
                     if (currKo && !prevKo) return curr;
                     return prev;
-                }, w.hourly?.[4])?.lang_ko?.[0]?.value || w.hourly?.[Math.floor(w.hourly.length/2)]?.weatherDesc?.[0]?.value
+                }, w.hourly?.[4])?.lang_ko?.[0]?.value || w.hourly?.[Math.floor(w.hourly.length / 2)]?.weatherDesc?.[0]?.value
             }))
         };
     } catch (e) {
-        console.error('[WeatherAPI] Error:', e);
-        return null;
-    }
-}
-
-/* ── 국가별 필수 입국/세관 절차 참조 데이터 ── */
-const ENTRY_REQUIREMENTS: Record<string, { links: { label: string; url: string; type: 'visa' | 'arrival_card' | 'customs' | 'other'; description: string; howTo: string }[] }> = {
-    '괌': {
-        links: [
-            { label: 'G-CNMI ETA (전자입국허가)', url: 'https://g-cnmi-eta.cbp.dhs.gov/', type: 'visa', description: '한국 국적자가 괌/사이판에 입국하기 위해 반드시 사전 신청해야 하는 전자입국허가(ETA)입니다. 45일 이내 관광 시 비자 면제이며, 대신 ETA를 발급받아야 합니다.', howTo: '공식 웹사이트(g-cnmi-eta.cbp.dhs.gov)에 접속하여 여권 정보, 항공편 정보, 체류지 주소를 입력하고 제출합니다. 승인 후 이메일로 확인서를 받으며, 출력 또는 캡처하여 공항에서 제시합니다.' },
-            { label: 'Guam Electronic Declaration (전자세관신고)', url: 'https://dca.guam.gov/', type: 'customs', description: '괌 입국 시 세관 신고를 사전에 온라인으로 작성할 수 있는 전자 신고 시스템입니다. 면세 한도 초과 물품이 없더라도 작성하면 입국 수속이 빨라집니다.', howTo: 'dca.guam.gov 웹사이트에서 여권 정보와 반입 물품 정보를 입력하고 제출합니다. 완료 후 생성된 QR코드를 캡처하여 입국 시 세관에 제시합니다.' },
-        ]
+        const ENTRY_REQUIREMENTS: Record<string, {
+            arrivalProcedure?: { title: string; timing: string; steps: { step: string; description: string }[] };
+            links: { label: string; url: string; type: 'visa' | 'arrival_card' | 'customs' | 'other'; description: string; howTo: string }[];
+            majorAlert?: { title: string; content: string; penalty: string };
+        }> = {
+            '괌': {
+                links: [
+                    { label: 'G-CNMI ETA (전자입국허가)', url: 'https://g-cnmi-eta.cbp.dhs.gov/', type: 'visa', description: '한국 국적자가 괌/사이판에 입국하기 위해 반드시 사전 신청해야 하는 전자입국허가(ETA)입니다. 45일 이내 관광 시 비자 면제이며, 대신 ETA를 발급받아야 합니다.', howTo: '공식 웹사이트(g-cnmi-eta.cbp.dhs.gov)에 접속하여 여권 정보, 항공편 정보, 체류지 주소를 입력하고 제출합니다. 승인 후 이메일로 확인서를 받으며, 출력 또는 캡처하여 공항에서 제시합니다.' },
+                    { label: 'Guam Electronic Declaration (전자세관신고)', url: 'https://dca.guam.gov/', type: 'customs', description: '괌 입국 시 세관 신고를 사전에 온라인으로 작성할 수 있는 전자 신고 시스템입니다. 면세 한도 초과 물품이 없더라도 작성하면 입국 수속이 빨라집니다.', howTo: 'dca.guam.gov 웹사이트에서 여권 정보와 반입 물품 정보를 입력하고 제출합니다. 완료 후 생성된 QR코드를 캡처하여 입국 시 세관에 제시합니다.' },
+                ]
+            },
+            '사이판': {
+                links: [
+                    { label: 'G-CNMI ETA (전자입국허가)', url: 'https://g-cnmi-eta.cbp.dhs.gov/', type: 'visa', description: '한국 국적자가 사이판(CNMI)에 입국하기 위해 반드시 사전 신청해야 하는 전자입국허가(ETA)입니다.', howTo: '공식 웹사이트(g-cnmi-eta.cbp.dhs.gov)에 접속하여 여권 정보, 항공편 정보를 입력하고 제출합니다. 승인 이메일을 받으면 완료입니다.' },
+                ]
+            },
+            '미국': {
+                links: [
+                    { label: 'ESTA (전자여행허가)', url: 'https://esta.cbp.dhs.gov/', type: 'visa', description: '미국 입국 전 반드시 사전 신청이 필요한 전자여행허가(ESTA)입니다. 2년간 유효하며 최대 90일 체류 가능합니다.', howTo: 'esta.cbp.dhs.gov에서 여권 정보, 이메일, 미국 내 체류 주소를 입력합니다. 수수료 $21 온라인 결제 후 보통 72시간 이내 승인됩니다.' },
+                ]
+            },
+            '중국': {
+                arrivalProcedure: {
+                    title: '중국 무비자 입국 및 온라인 신고 절차',
+                    timing: '출발 전 작성 권장',
+                    steps: [
+                        { step: '1단계: 비자 면제 확인 (Visa-Free)', description: '대한민국 여권 소지자 대상, 최대 15일 무비자 입국이 가능합니다 (2026년 말까지 확대). 관광, 비즈니스, 친지 방문 목적일 때 해당하며, 여권 유효기간은 반드시 6개월 이상 남아있어야 합니다.' },
+                        { step: '2단계: 온라인 입국 신고서 작성 (NIA)', description: "종이 신고서 대신 온라인으로 미리 입국 신고서를 작성할 수 있습니다. NIA 공식 웹사이트 또는 모바일 앱을 통해 작성 후 생성된 QR 코드를 저장하세요." },
+                        { step: '3단계: 입국 심사 및 지문 등록', description: '공항 내 키오스크에서 지문 등록 후, 무비자 입국 목적(관광 등)을 설명하고 입국 수속을 진행합니다.' }
+                    ]
+                },
+                links: [
+                    { label: 'NIA 온라인 입국 카드 (모바일)', url: 'https://s.nia.gov.cn/ArrivalCardFillingPhone/', type: 'arrival_card', description: '모바일 기기에서 간편하게 중국 입국 신고서를 작성할 수 있습니다.', howTo: '스마트폰으로 접속하여 여권 정보를 입력하고 QR코드를 발급받아 저장합니다.' },
+                    { label: 'NIA 온라인 입국 카드 (PC버전)', url: 'https://s.nia.gov.cn/ArrivalCardFillingPC/', type: 'arrival_card', description: '중국 입국 시 필요한 입국 신고를 온라인으로 미리 작성할 수 있는 시스템입니다.', howTo: 'PC에서 접속하여 개인 정보 및 방문 목적을 입력하고 QR코드를 발급받습니다.' },
+                ]
+            },
+            '일본': {
+                links: [
+                    { label: 'Visit Japan Web (입국심사·세관)', url: 'https://vjw-lp.digital.go.jp/ko/', type: 'arrival_card', description: '일본 입국 시 입국심사와 세관 신고를 사전에 등록할 수 있는 디지털 서비스입니다. 등록하면 QR코드로 빠르게 수속할 수 있습니다.', howTo: '웹사이트 접속 후 여권 정보, 항공편, 체류 호텔 정보를 등록합니다. 입국심사 및 세관신고 QR코드를 각각 발급받아 캡처합니다.' },
+                ]
+            },
+            '대만': {
+                links: [
+                    { label: '대만 온라인 입국신고서', url: 'https://oa1.immigration.gov.tw/nia_acard/acardAddAction.action', type: 'arrival_card', description: '대만 입국 전 온라인으로 입국신고서를 미리 작성하면 공항에서 종이 신고서를 쓸 필요가 없습니다.', howTo: '공식 사이트에 접속하여 여권 정보, 대만 내 숙소 주소를 입력합니다. 제출 후 생성된 승인 정보를 확인합니다.' },
+                ]
+            },
+            '베트남': {
+                links: [
+                    { label: '베트남 e-Visa 신청 (45일 초과 시)', url: 'https://evisa.xuatnhapcanh.gov.vn/', type: 'visa', description: '한국 국적자는 45일 이내 무비자 입국이 가능합니다. 단, 45일 이상 체류 시 반드시 e-Visa를 사전 신청해야 합니다.', howTo: '공식 사이트에서 여권 정보와 입국 예정일을 입력하고 수수료를 결제합니다. 약 3영업일 내 승인 결과를 이메일로 받습니다.' },
+                ]
+            },
+            '태국': {
+                links: [
+                    { label: '태국 입국 신고서 (TM6)', url: 'https://tdapp.immigration.go.th/', type: 'arrival_card', description: '태국 입국 시 전자 입국신고서(TM6)를 미리 작성하면 수속이 빨라집니다. 현재 일부 기내 작성이 병행될 수 있습니다.', howTo: '이민국 웹사이트에서 여권 정보와 체류지 정보를 입력한 후 제출합니다.' },
+                ]
+            },
+            '필리핀': {
+                links: [
+                    { label: 'eTravel (전자입국신고)', url: 'https://etravel.gov.ph/', type: 'arrival_card', description: '필리핀 입국을 위한 필수 사전 등록 시스템입니다. 출발 72시간 전부터 등록 가능하며 비자 없이 30일 체류 가능합니다.', howTo: 'etravel.gov.ph 사이트에서 정보를 입력하고 완료 후 생성된 QR코드를 캡처하여 제시합니다.' },
+                ]
+            },
+            '싱가포르': {
+                links: [
+                    { label: 'SG Arrival Card (입국신고서)', url: 'https://eservices.ica.gov.sg/sgarrivalcard/', type: 'arrival_card', description: '싱가포르 입국 전 3일 이내에 온라인으로 작성해야 하는 필수 입국 신고서입니다.', howTo: '공식 사이트에서 여권 정보 및 숙소 정보를 입력하고 확인 이메일을 수령합니다.' },
+                ]
+            },
+            '인도네시아': {
+                links: [
+                    { label: '인도네시아 전자 세관신고 (e-CD)', url: 'https://ecd.beacukai.go.id/', type: 'customs', description: '발리 등 인도네시아 입국 시 필수인 세관 신고 시스템입니다. VOA(도착비자)와 별도로 작성해야 합니다.', howTo: '도착 전 웹사이트에서 반입 물품 정보를 입력하고 QR코드를 생성하여 세관 통과 시 제시합니다.' },
+                ]
+            },
+            '말레이시아': {
+                links: [
+                    { label: 'MDAC (디지털 입국카드)', url: 'https://imigresen-online.imi.gov.my/mdac/main', type: 'arrival_card', description: '말레이시아 입국 전 3일 이내에 온라인으로 작성해야 하는 디지털 입국 신고서입니다.', howTo: '웹사이트에서 인적사항과 여행 일정을 입력한 후 제출합니다.' },
+                ]
+            },
+            '호주': {
+                links: [
+                    { label: '호주 ETA 신청 (안드로이드)', url: 'https://play.google.com/store/apps/details?id=au.gov.homeaffairs.eta', type: 'visa', description: '호주 입국을 위한 전자여행허가(ETA) 신청 앱입니다. 수수료 AUD 20이 발생합니다.', howTo: '앱 설치 후 여권 스캔 및 안면 인식을 통해 신청합니다.' },
+                    { label: '호주 ETA 신청 (애플 iOS)', url: 'https://apps.apple.com/kr/app/australianeta/id1527982364', type: 'visa', description: '아이폰용 호주 ETA 신청 전용 앱입니다.', howTo: '앱 스토어에서 앱을 다운로드하여 정보를 입력하고 수수료를 결제합니다.' },
+                ]
+            },
+            '캐나다': {
+                links: [
+                    { label: 'eTA (전자여행허가)', url: 'https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/eta.html', type: 'visa', description: '캐나다 항공 입국 시 필수인 사전 승인 제도입니다. 5년간 유효하며 신청 비용은 CAD 7입니다.', howTo: '공식 사이트에서 정보를 입력하고 결제하면 수분 내 이메일 승인이 완료됩니다.' },
+                ]
+            },
+            '뉴질랜드': {
+                links: [
+                    { label: 'NZeTA (전자여행허가)', url: 'https://nzeta.immigration.govt.nz/', type: 'visa', description: '뉴질랜드 무비자 입국 전 반드시 승인받아야 하는 허가증입니다. 환경세 포함 약 5만원의 비용이 발생합니다.', howTo: '공식 웹사이트 또는 전용 앱에서 여권 정보를 입력하고 승인 결과를 기다립니다.' },
+                ]
+            },
+        };
+        description: '필리핀 입국을 위한 필수 사전 등록 시스템입니다. 출발 72시간 전부터 등록 가능하며 비자 없이 30일 체류 가능합니다.', howTo: 'etravel.gov.ph 사이트에서 정보를 입력하고 완료 후 생성된 QR코드를 캡처하여 제시합니다.'
     },
-    '사이판': {
-        links: [
-            { label: 'G-CNMI ETA (전자입국허가)', url: 'https://g-cnmi-eta.cbp.dhs.gov/', type: 'visa', description: '한국 국적자가 사이판(CNMI)에 입국하기 위해 반드시 사전 신청해야 하는 전자입국허가(ETA)입니다.', howTo: '공식 웹사이트(g-cnmi-eta.cbp.dhs.gov)에 접속하여 여권 정보, 항공편 정보를 입력하고 제출합니다. 승인 이메일을 받으면 완료입니다.' },
         ]
-    },
-    '미국': {
-        links: [
-            { label: 'ESTA (전자여행허가)', url: 'https://esta.cbp.dhs.gov/', type: 'visa', description: '미국 입국 전 반드시 사전 신청이 필요한 전자여행허가(ESTA)입니다. 2년간 유효하며 최대 90일 체류 가능합니다.', howTo: 'esta.cbp.dhs.gov에서 여권 정보, 이메일, 미국 내 체류 주소를 입력합니다. 수수료 $21 온라인 결제 후 보통 72시간 이내 승인됩니다.' },
-        ]
-    },
-    '중국': {
-        links: [
-            { label: 'NIA 온라인 입국 카드 (PC버전)', url: 'https://s.nia.gov.cn/ArrivalCardFillingPC/', type: 'arrival_card', description: '중국 입국 시 필요한 입국 신고를 온라인으로 미리 작성할 수 있습니다. 한국 국적자는 현재 30일 무비자 입국이 가능합니다.', howTo: 'PC에서 링크 접속 후 개인 정보 및 방문 목적을 입력합니다. 생성된 QR코드를 캡처하여 입국 시 제시합니다.' },
-            { label: 'NIA 온라인 입국 카드 (모바일버전)', url: 'https://s.nia.gov.cn/ArrivalCardFillingPhone/', type: 'arrival_card', description: '모바일 기기에서 간편하게 중국 입국 신고서를 작성할 수 있습니다.', howTo: '스마트폰으로 접속하여 여권 및 항공권 정보를 입력하고 QR코드를 발급받아 저장합니다.' },
-        ]
-    },
-    '일본': {
-        links: [
-            { label: 'Visit Japan Web (입국심사·세관)', url: 'https://vjw-lp.digital.go.jp/ko/', type: 'arrival_card', description: '일본 입국 시 입국심사와 세관 신고를 사전에 등록할 수 있는 디지털 서비스입니다. 등록하면 QR코드로 빠르게 수속할 수 있습니다.', howTo: '웹사이트 접속 후 여권 정보, 항공편, 체류 호텔 정보를 등록합니다. 입국심사 및 세관신고 QR코드를 각각 발급받아 캡처합니다.' },
-        ]
-    },
-    '대만': {
-        links: [
-            { label: '대만 온라인 입국신고서', url: 'https://oa1.immigration.gov.tw/nia_acard/acardAddAction.action', type: 'arrival_card', description: '대만 입국 전 온라인으로 입국신고서를 미리 작성하면 공항에서 종이 신고서를 쓸 필요가 없습니다.', howTo: '공식 사이트에 접속하여 여권 정보, 대만 내 숙소 주소를 입력합니다. 제출 후 생성된 승인 정보를 확인합니다.' },
-        ]
-    },
-    '베트남': {
-        links: [
-            { label: '베트남 e-Visa 신청 (45일 초과 시)', url: 'https://evisa.xuatnhapcanh.gov.vn/', type: 'visa', description: '한국 국적자는 45일 이내 무비자 입국이 가능합니다. 단, 45일 이상 체류 시 반드시 e-Visa를 사전 신청해야 합니다.', howTo: '공식 사이트에서 여권 정보와 입국 예정일을 입력하고 수수료를 결제합니다. 약 3영업일 내 승인 결과를 이메일로 받습니다.' },
-        ]
-    },
-    '태국': {
-        links: [
-            { label: '태국 입국 신고서 (TM6)', url: 'https://tdapp.immigration.go.th/', type: 'arrival_card', description: '태국 입국 시 전자 입국신고서(TM6)를 미리 작성하면 수속이 빨라집니다. 현재 일부 기내 작성이 병행될 수 있습니다.', howTo: '이민국 웹사이트에서 여권 정보와 체류지 정보를 입력한 후 제출합니다.' },
-        ]
-    },
-    '필리핀': {
-        links: [
-            { label: 'eTravel (전자입국신고)', url: 'https://etravel.gov.ph/', type: 'arrival_card', description: '필리핀 입국을 위한 필수 사전 등록 시스템입니다. 출발 72시간 전부터 등록 가능하며 비자 없이 30일 체류 가능합니다.', howTo: 'etravel.gov.ph 사이트에서 정보를 입력하고 완료 후 생성된 QR코드를 캡처하여 제시합니다.' },
-        ]
-    },
-    '싱가포르': {
-        links: [
-            { label: 'SG Arrival Card (입국신고서)', url: 'https://eservices.ica.gov.sg/sgarrivalcard/', type: 'arrival_card', description: '싱가포르 입국 전 3일 이내에 온라인으로 작성해야 하는 필수 입국 신고서입니다.', howTo: '공식 사이트에서 여권 정보 및 숙소 정보를 입력하고 확인 이메일을 수령합니다.' },
-        ]
-    },
-    '인도네시아': {
-        links: [
-            { label: '인도네시아 전자 세관신고 (e-CD)', url: 'https://ecd.beacukai.go.id/', type: 'customs', description: '발리 등 인도네시아 입국 시 필수인 세관 신고 시스템입니다. VOA(도착비자)와 별도로 작성해야 합니다.', howTo: '도착 전 웹사이트에서 반입 물품 정보를 입력하고 QR코드를 생성하여 세관 통과 시 제시합니다.' },
-        ]
-    },
-    '말레이시아': {
-        links: [
-            { label: 'MDAC (디지털 입국카드)', url: 'https://imigresen-online.imi.gov.my/mdac/main', type: 'arrival_card', description: '말레이시아 입국 전 3일 이내에 온라인으로 작성해야 하는 디지털 입국 신고서입니다.', howTo: '웹사이트에서 인적사항과 여행 일정을 입력한 후 제출합니다.' },
-        ]
-    },
-    '호주': {
-        links: [
-            { label: '호주 ETA 신청 (안드로이드)', url: 'https://play.google.com/store/apps/details?id=au.gov.homeaffairs.eta', type: 'visa', description: '호주 입국을 위한 전자여행허가(ETA) 신청 앱입니다. 수수료 AUD 20이 발생합니다.', howTo: '앱 설치 후 여권 스캔 및 안면 인식을 통해 신청합니다.' },
-            { label: '호주 ETA 신청 (애플 iOS)', url: 'https://apps.apple.com/kr/app/australianeta/id1527982364', type: 'visa', description: '아이폰용 호주 ETA 신청 전용 앱입니다.', howTo: '앱 스토어에서 앱을 다운로드하여 정보를 입력하고 수수료를 결제합니다.' },
-        ]
-    },
-    '캐나다': {
-        links: [
-            { label: 'eTA (전자여행허가)', url: 'https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/eta.html', type: 'visa', description: '캐나다 항공 입국 시 필수인 사전 승인 제도입니다. 5년간 유효하며 신청 비용은 CAD 7입니다.', howTo: '공식 사이트에서 정보를 입력하고 결제하면 수분 내 이메일 승인이 완료됩니다.' },
-        ]
-    },
-    '뉴질랜드': {
-        links: [
-            { label: 'NZeTA (전자여행허가)', url: 'https://nzeta.immigration.govt.nz/', type: 'visa', description: '뉴질랜드 무비자 입국 전 반드시 승인받아야 하는 허가증입니다. 환경세 포함 약 5만원의 비용이 발생합니다.', howTo: '공식 웹사이트 또는 전용 앱에서 여권 정보를 입력하고 승인 결과를 기다립니다.' },
-        ]
-    },
+},
+'싱가포르': {
+    links: [
+        { label: 'SG Arrival Card (입국신고서)', url: 'https://eservices.ica.gov.sg/sgarrivalcard/', type: 'arrival_card', description: '싱가포르 입국 전 3일 이내에 온라인으로 작성해야 하는 필수 입국 신고서입니다.', howTo: '공식 사이트에서 여권 정보 및 숙소 정보를 입력하고 확인 이메일을 수령합니다.' },
+    ]
+},
+'인도네시아': {
+    links: [
+        { label: '인도네시아 전자 세관신고 (e-CD)', url: 'https://ecd.beacukai.go.id/', type: 'customs', description: '발리 등 인도네시아 입국 시 필수인 세관 신고 시스템입니다. VOA(도착비자)와 별도로 작성해야 합니다.', howTo: '도착 전 웹사이트에서 반입 물품 정보를 입력하고 QR코드를 생성하여 세관 통과 시 제시합니다.' },
+    ]
+},
+'말레이시아': {
+    links: [
+        { label: 'MDAC (디지털 입국카드)', url: 'https://imigresen-online.imi.gov.my/mdac/main', type: 'arrival_card', description: '말레이시아 입국 전 3일 이내에 온라인으로 작성해야 하는 디지털 입국 신고서입니다.', howTo: '웹사이트에서 인적사항과 여행 일정을 입력한 후 제출합니다.' },
+    ]
+},
+'호주': {
+    links: [
+        { label: '호주 ETA 신청 (안드로이드)', url: 'https://play.google.com/store/apps/details?id=au.gov.homeaffairs.eta', type: 'visa', description: '호주 입국을 위한 전자여행허가(ETA) 신청 앱입니다. 수수료 AUD 20이 발생합니다.', howTo: '앱 설치 후 여권 스캔 및 안면 인식을 통해 신청합니다.' },
+        { label: '호주 ETA 신청 (애플 iOS)', url: 'https://apps.apple.com/kr/app/australianeta/id1527982364', type: 'visa', description: '아이폰용 호주 ETA 신청 전용 앱입니다.', howTo: '앱 스토어에서 앱을 다운로드하여 정보를 입력하고 수수료를 결제합니다.' },
+    ]
+},
+'캐나다': {
+    links: [
+        { label: 'eTA (전자여행허가)', url: 'https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/eta.html', type: 'visa', description: '캐나다 항공 입국 시 필수인 사전 승인 제도입니다. 5년간 유효하며 신청 비용은 CAD 7입니다.', howTo: '공식 사이트에서 정보를 입력하고 결제하면 수분 내 이메일 승인이 완료됩니다.' },
+    ]
+},
+'뉴질랜드': {
+    links: [
+        { label: 'NZeTA (전자여행허가)', url: 'https://nzeta.immigration.govt.nz/', type: 'visa', description: '뉴질랜드 무비자 입국 전 반드시 승인받아야 하는 허가증입니다. 환경세 포함 약 5만원의 비용이 발생합니다.', howTo: '공식 웹사이트 또는 전용 앱에서 여권 정보를 입력하고 승인 결과를 기다립니다.' },
+    ]
+},
 };
 
-function getHardcodedLinks(destination: string) {
+function getHardcodedData(destination: string) {
     const d = destination.toLowerCase();
     for (const [key, val] of Object.entries(ENTRY_REQUIREMENTS)) {
-        if (d.includes(key.toLowerCase())) return val.links;
+        if (d.includes(key.toLowerCase())) return val;
     }
-    
+
     // 주요 도시별 국가 매핑 (매칭 확률 향상)
     const cityMap: Record<string, string> = {
         // 동남아 / 동아시아 (기존)
@@ -149,9 +192,9 @@ function getHardcodedLinks(destination: string) {
         '토론토': '캐나다', '밴쿠버': '캐나다', '캘거리': '캐나다', '몬트리올': '캐나다',
         '오클랜드': '뉴질랜드', '크라이스트처치': '뉴질랜드', '퀸스타운': '뉴질랜드'
     };
-    
+
     for (const [city, country] of Object.entries(cityMap)) {
-        if (d.includes(city)) return ENTRY_REQUIREMENTS[country]?.links || null;
+        if (d.includes(city)) return ENTRY_REQUIREMENTS[country] || null;
     }
     return null;
 }
@@ -162,13 +205,13 @@ function getHardcodedLinks(destination: string) {
 function getPureDestination(dest: string): string {
     if (!dest) return "";
     let pure = dest;
-    
+
     // 1. [...] 괄호 및 그 안의 내용 제거 (보통 [청주출발] 등)
     pure = pure.replace(/\[.*?\]/g, '');
-    
+
     // 2. "XX 출발", "XX발" 패턴 제거
     pure = pure.replace(/[가-힣]{2,4}\s*(출발|발)\b/g, '');
-    
+
     // 3. 한국 주요 출발 도시명 제거 (명시적으로 목적지가 아님을 알림)
     const departureCities = ['인천', '김포', '김해', '부산', '대구', '청주', '광주', '무안', '양양', '제주'];
     departureCities.forEach(city => {
@@ -184,7 +227,7 @@ function getPureDestination(dest: string): string {
 
     // 5. 남은 특수문자 정화 및 정리
     pure = pure.replace(/[()]/g, '').replace(/[/, ]+/g, ' ').trim();
-    
+
     return pure || dest;
 }
 
@@ -204,40 +247,40 @@ export async function POST(request: NextRequest) {
         let dailyWeatherData: any[] = [];
         if (!targets || targets.length === 0 || targets.includes('basics')) {
             try {
-            // 1. 일정(Itinerary)에서 일자별 주요 도시 추출
-            const itineraryArr = Array.isArray(itinerary) ? itinerary : [];
-            const dailyCities = itineraryArr.map((day: any) => {
-                // '도쿄/오사카/교토' 처럼 여러 도시가 있으면 첫 번째 도시 선택
-                const locations = (day.location || "").split(/[/,]/);
-                return locations[0]?.trim() || pureDestination.split(/[/,]/)[0]?.trim();
-            });
+                // 1. 일정(Itinerary)에서 일자별 주요 도시 추출
+                const itineraryArr = Array.isArray(itinerary) ? itinerary : [];
+                const dailyCities = itineraryArr.map((day: any) => {
+                    // '도쿄/오사카/교토' 처럼 여러 도시가 있으면 첫 번째 도시 선택
+                    const locations = (day.location || "").split(/[/,]/);
+                    return locations[0]?.trim() || pureDestination.split(/[/,]/)[0]?.trim();
+                });
 
-            // 2. 고유 도시 리스트 생성 (API 호출 최소화)
-            const uniqueCities = Array.from(new Set(dailyCities)).filter(Boolean);
-            const weatherCache: Record<string, any> = {};
+                // 2. 고유 도시 리스트 생성 (API 호출 최소화)
+                const uniqueCities = Array.from(new Set(dailyCities)).filter(Boolean);
+                const weatherCache: Record<string, any> = {};
 
-            // 3. 도시별 날씨 실시간 병렬 조회
-            await Promise.all(uniqueCities.map(async (city) => {
-                const w = await fetchWeatherFromAPI(city as string);
-                if (w) weatherCache[city as string] = w;
-            }));
+                // 3. 도시별 날씨 실시간 병렬 조회
+                await Promise.all(uniqueCities.map(async (city) => {
+                    const w = await fetchWeatherFromAPI(city as string);
+                    if (w) weatherCache[city as string] = w;
+                }));
 
-            // 4. 일자별로 날씨 데이터 매핑
-            dailyWeatherData = dailyCities.map((city, idx) => {
-                const cityWeather = weatherCache[city];
-                if (!cityWeather) return { date: `${idx + 1}일차`, city, tempMin: "-", tempMax: "-", desc: "정보 없음" };
-                
-                // wttr.in은 최대 14일치를 주지만, 보통 인덱스가 일치하지 않을 수 있으므로
-                // 안전하게 현시점의 forecast 정보를 idx에 맞춰 매칭
-                const forecast = cityWeather.forecast?.[idx] || cityWeather.current; 
-                return {
-                    date: `${idx + 1}일차`,
-                    city,
-                    tempMin: forecast?.tempMin || cityWeather.current?.temp_C,
-                    tempMax: forecast?.tempMax || cityWeather.current?.temp_C,
-                    desc: forecast?.desc || cityWeather.current?.weatherDesc?.[0]?.value
-                };
-            });
+                // 4. 일자별로 날씨 데이터 매핑
+                dailyWeatherData = dailyCities.map((city, idx) => {
+                    const cityWeather = weatherCache[city];
+                    if (!cityWeather) return { date: `${idx + 1}일차`, city, tempMin: "-", tempMax: "-", desc: "정보 없음" };
+
+                    // wttr.in은 최대 14일치를 주지만, 보통 인덱스가 일치하지 않을 수 있으므로
+                    // 안전하게 현시점의 forecast 정보를 idx에 맞춰 매칭
+                    const forecast = cityWeather.forecast?.[idx] || cityWeather.current;
+                    return {
+                        date: `${idx + 1}일차`,
+                        city,
+                        tempMin: forecast?.tempMin || cityWeather.current?.temp_C,
+                        tempMax: forecast?.tempMax || cityWeather.current?.temp_C,
+                        desc: forecast?.desc || cityWeather.current?.weatherDesc?.[0]?.value
+                    };
+                });
             } catch (e) {
                 console.error('[MultiWeather] Error:', e);
             }
@@ -399,11 +442,13 @@ ${customGuides && customGuides.length > 0 ? `요청 가이드 주제: ${customGu
             }
         });
 
-        // 입국 링크 하드코딩 데이터 추가 (customs가 결과에 포함된 경우에만)
+        // 입국 규정 하드코딩 데이터 병합 (AI 결과보다 우선순위 높음)
         if (finalResearch.customs) {
-            const verifiedLinks = getHardcodedLinks(destination);
-            if (verifiedLinks) {
-                finalResearch.customs.links = verifiedLinks;
+            const hardcoded = getHardcodedData(destination);
+            if (hardcoded) {
+                if (hardcoded.links) finalResearch.customs.links = hardcoded.links;
+                if (hardcoded.arrivalProcedure) finalResearch.customs.arrivalProcedure = hardcoded.arrivalProcedure;
+                if (hardcoded.majorAlert) finalResearch.customs.majorAlert = hardcoded.majorAlert;
             }
         }
 

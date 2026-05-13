@@ -491,57 +491,69 @@ export default function ConfirmationPage() {
 
     // 파일 핸들러 (Supabase Storage 사용)
     const handleFileUpload = async (type: DocumentFile['type'], label: string, e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !supabase) return;
+        const selectedFiles = e.target.files;
+        if (!selectedFiles || selectedFiles.length === 0 || !supabase) return;
 
         setUploading(type);
         try {
-            // 파일명 중복 방지를 위한 타임스탬프 조합
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-            const filePath = `confirmations/${fileName}`;
+            const newUploadedFiles: DocumentFile[] = [];
+            
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                // 파일명 중복 방지를 위한 타임스탬프 조합
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+                const filePath = `confirmations/${fileName}`;
 
-            // 서버 사이드 업로드 호출 (RLS 우회)
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('filePath', filePath);
+                // 서버 사이드 업로드 호출 (RLS 우회)
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('filePath', filePath);
 
-            const res = await fetch('/api/admin/upload-file', {
-                method: 'POST',
-                body: formData
-            });
+                const res = await fetch('/api/admin/upload-file', {
+                    method: 'POST',
+                    body: formData
+                });
 
-            const result = await res.json();
+                const result = await res.json();
 
-            if (!result.success) {
-                if (result.error?.includes('bucket not found')) {
-                    if (confirm('Supabase Storage에 "confirmations" 버킷이 없습니다. 지금 바로 자동으로 생성하시겠습니까?')) {
-                        const setupRes = await fetch('/api/admin/setup-storage');
-                        const setupJson = await setupRes.json();
-                        if (setupJson.success) alert('버킷이 성공적으로 생성되었습니다. 다시 업로드해 주세요.');
+                if (!result.success) {
+                    if (result.error?.includes('bucket not found')) {
+                        if (confirm('Supabase Storage에 "confirmations" 버킷이 없습니다. 지금 바로 자동으로 생성하시겠습니까?')) {
+                            const setupRes = await fetch('/api/admin/setup-storage');
+                            const setupJson = await setupRes.json();
+                            if (setupJson.success) {
+                                alert('버킷이 성공적으로 생성되었습니다. 다시 업로드해 주세요.');
+                                break; // 중단하고 다시 시도하게 함
+                            }
+                        }
+                    } else {
+                        alert(`업로드 실패 (${file.name}): ${result.error}`);
                     }
-                } else {
-                    alert(`업로드 실패: ${result.error}`);
+                    continue; // 다음 파일 시도
                 }
-                return;
+
+                const publicUrl = result.publicUrl;
+
+                newUploadedFiles.push({
+                    id: `file-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 5)}`,
+                    name: file.name,
+                    type,
+                    label,
+                    url: publicUrl,
+                    uploadedAt: new Date().toISOString(),
+                });
             }
 
-            const publicUrl = result.publicUrl;
-
-            const newFile: DocumentFile = {
-                id: `file-${Date.now()}`,
-                name: file.name,
-                type,
-                label,
-                url: publicUrl,
-                uploadedAt: new Date().toISOString(),
-            };
-
-            setFiles(prev => [...prev, newFile]);
+            if (newUploadedFiles.length > 0) {
+                setFiles(prev => [...prev, ...newUploadedFiles]);
+            }
         } catch (err: any) {
             alert(`오류 발생: ${err.message}`);
         } finally {
             setUploading(null);
+            // input 초기화 (같은 파일을 다시 올릴 수 있도록)
+            e.target.value = '';
         }
     };
 
@@ -1298,6 +1310,7 @@ export default function ConfirmationPage() {
                                         accept=".pdf,.jpg,.jpeg,.png"
                                         onChange={e => handleFileUpload(slot.type, slot.label, e)}
                                         disabled={isUploading}
+                                        multiple
                                     />
                                 </div>
                             );
