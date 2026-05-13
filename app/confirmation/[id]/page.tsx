@@ -872,9 +872,38 @@ export default function ConfirmationViewerPage() {
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [viewerFile, setViewerFile] = useState<any>(null); // {url: string, name: string}
+    
+    // 가이드 섹션 스크롤용 Refs
+    const weatherRef = useRef<HTMLDivElement>(null);
+    const clothingRef = useRef<HTMLDivElement>(null);
+    const landmarksRef = useRef<HTMLDivElement>(null);
+    const customsRef = useRef<HTMLDivElement>(null);
+    const currencyRef = useRef<HTMLDivElement>(null);
+    const roamingRef = useRef<HTMLDivElement>(null);
 
     const toggleSection = (sec: string) => {
         setExpandedSections(prev => ({ ...prev, [sec]: !prev[sec] }));
+    };
+
+    const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>, sectionId?: string) => {
+        if (sectionId) {
+            // 해당 섹션 아코디언이 닫혀있다면 엽니다.
+            setExpandedSections(prev => ({ ...prev, [sectionId]: true }));
+        }
+        
+        // 아코디언이 열리는 애니메이션 시간을 고려하여 약간의 지연 후 스크롤
+        setTimeout(() => {
+            if (ref.current) {
+                const offset = 120; // 상단 탭바 오프셋
+                const elementPosition = ref.current.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        }, 150);
     };
 
     const currencyKoMap: Record<string, string> = { 
@@ -1680,9 +1709,20 @@ export default function ConfirmationViewerPage() {
                                 <h2>{safeStr(doc.trip.destination)} 맞춤 가이드</h2>
                             </div>
 
+                            {/* ── 가이드 서브 네비게이션 ── */}
+                            <div className="guide-sub-nav">
+                                <button className="guide-nav-btn" onClick={() => scrollToSection(weatherRef, 'weather')}>날씨</button>
+                                <button className="guide-nav-btn" onClick={() => scrollToSection(clothingRef, 'weather')}>복장</button>
+                                <button className="guide-nav-btn" onClick={() => scrollToSection(landmarksRef, 'landmarks')}>관광지</button>
+                                <button className="guide-nav-btn" onClick={() => scrollToSection(currencyRef, 'currency')}>환전</button>
+                                <button className="guide-nav-btn" onClick={() => scrollToSection(roamingRef, 'roaming')}>로밍</button>
+                                <button className="guide-nav-btn prep" onClick={() => setActiveTab('준비물')}>준비물</button>
+                            </div>
+
                             {/* ── 현지 날씨 & 복장 ── */}
-                            <GuideAccordion
-                                id="weather"
+                            <div ref={weatherRef}>
+                                <GuideAccordion
+                                    id="weather"
                                 title={<><span style={{ fontSize: '1.2rem', marginRight: '4px' }}>☀️</span> 현지 날씨 & 복장</>}
                                 isOpen={expandedSections['weather'] !== false}
                                 onToggle={toggleSection}
@@ -1788,7 +1828,7 @@ export default function ConfirmationViewerPage() {
                                     </div>
 
                                     {/* 의류 및 준비물 가이드 */}
-                                    <div style={{ marginBottom: '24px' }}>
+                                    <div style={{ marginBottom: '24px' }} ref={clothingRef}>
                                         <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.62 1.96v.18A2 2 0 0 0 3 7.5V19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7.5a2 2 0 0 0 1-1.9v-.18a2 2 0 0 0-1.62-1.96Z"></path><path d="M12 21V7"></path><path d="M16 21V11"></path><path d="M8 21V11"></path></svg>
                                             상세기후 및 복장 가이드
@@ -1830,10 +1870,12 @@ export default function ConfirmationViewerPage() {
                                     </div>
                                 </div>
                             </GuideAccordion>
+                            </div>
 
                             {/* ── 관광지 소개 ── */}
-                            <GuideAccordion
-                                id="landmarks"
+                            <div ref={landmarksRef}>
+                                <GuideAccordion
+                                    id="landmarks"
                                 title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> 주요 관광지</>}
                                 isOpen={expandedSections['landmarks'] || false}
                                 onToggle={toggleSection}
@@ -1885,6 +1927,7 @@ export default function ConfirmationViewerPage() {
                                     ))}
                                 </div>
                             </GuideAccordion>
+                            </div>
 
                             {/* ── 입국·세관 유의사항 ── */}
                             <GuideAccordion
@@ -2063,9 +2106,12 @@ export default function ConfirmationViewerPage() {
                                  </div>
                             </GuideAccordion>
 
+
+
                             {/* ── 환전 & 계산기 ── */}
-                            <GuideAccordion
-                                id="currency"
+                            <div ref={currencyRef}>
+                                <GuideAccordion
+                                    id="currency"
                                 title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> 환전 가이드</>}
                                 isOpen={expandedSections['currency'] || false}
                                 onToggle={toggleSection}
@@ -2219,12 +2265,12 @@ export default function ConfirmationViewerPage() {
                                     )}
                                 </div>
                             </GuideAccordion>
-
-
+                            </div>
 
                             {/* ── 로밍·통신 ── */}
-                            <GuideAccordion
-                                id="roaming"
+                            <div ref={roamingRef}>
+                                <GuideAccordion
+                                    id="roaming"
                                 title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg> 로밍 · 통신</>}
                                 isOpen={expandedSections['roaming'] || false}
                                 onToggle={toggleSection}
@@ -2311,6 +2357,7 @@ export default function ConfirmationViewerPage() {
                                     )}
                                 </div>
                             </GuideAccordion>
+                            </div>
 
 
                             {sr.customGuides?.map((guide, gi) => (
@@ -2382,8 +2429,8 @@ export default function ConfirmationViewerPage() {
                                 </GuideAccordion>
                             ))}
                         </div>
-                    );
-                })()}
+                );
+            })()}
 
                 {activeTab === '여행가이드' && !doc.secondaryResearch && (
                     <div className="mc-section">

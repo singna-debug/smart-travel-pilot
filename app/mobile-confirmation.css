@@ -163,6 +163,49 @@
     margin-bottom: 8px;
 }
 
+/* ── 가이드 내부 서브 네비게이션 ── */
+.guide-sub-nav {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 4px 20px;
+    margin-bottom: 4px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.guide-sub-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.guide-nav-btn {
+    flex-shrink: 0;
+    padding: 10px 20px;
+    background: #1e293b;
+    color: #fff;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.guide-nav-btn:active {
+    transform: scale(0.94);
+    background: #334155;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.guide-nav-btn.prep {
+    background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+}
+
 .landmark-list {
     display: flex;
     flex-direction: column;
