@@ -175,12 +175,12 @@
     font-size: 14px;
 }
 
-.info-label {
+.info-row .info-label {
     color: #9ca3af;
     font-weight: 500;
 }
 
-.info-value {
+.info-row .info-value {
     color: #f3f4f6;
     font-weight: 500;
     text-align: right;

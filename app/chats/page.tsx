@@ -38,6 +38,7 @@ interface ChatItem {
     sheetName?: string;
     sheetGid?: number;
     specific_reminder_date: string;
+    reservationNumber?: string;
 }
 
 const STATUS_OPTIONS = ['상담중', '예약확정', '선금완료', '잔금완료', '여행완료', '취소/보류', '상담완료'];
@@ -68,6 +69,7 @@ export default function ChatsPage() {
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [confirmModal, setConfirmModal] = useState<{ chat: ChatItem; } | null>(null);
     const [confirmUrl, setConfirmUrl] = useState('');
+    const [confirmReservationNumber, setConfirmReservationNumber] = useState('');
     const [confirming, setConfirming] = useState(false);
     const [reminderModal, setReminderModal] = useState<ChatItem | null>(null);
     const [reminderDateInput, setReminderDateInput] = useState('');
@@ -218,6 +220,7 @@ export default function ChatsPage() {
         if (newStatus === '예약확정') {
             setConfirmModal({ chat });
             setConfirmUrl('');
+            setConfirmReservationNumber(chat.reservationNumber || '');
             return;
         }
 
@@ -282,6 +285,7 @@ export default function ChatsPage() {
                     rowIndex: chat.sheetRowIndex,
                     sheetName: chat.sheetName,
                     confirmedProductUrl: confirmUrl.trim(),
+                    reservationNumber: confirmReservationNumber.trim(),
                 }),
             });
 
@@ -305,10 +309,12 @@ export default function ChatsPage() {
                         departureNotice: data.data.departureNotice,
                         phoneNotice: data.data.phoneNotice,
                         happyCall: data.data.happyCall,
+                        reservationNumber: data.data.reservationNumber,
                     } : c
                 ));
                 setConfirmModal(null);
                 setConfirmUrl('');
+                setConfirmReservationNumber('');
                 alert(`출발일: ${data.data.departureDate || '확인필요'}, 귀국일: ${data.data.returnDate || '확인필요'}`);
             } else {
                 alert('예약확정 실패: ' + data.error);
@@ -1291,6 +1297,28 @@ export default function ChatsPage() {
                                 onChange={(e) => setConfirmUrl(e.target.value)}
                                 disabled={confirming}
                                 autoFocus
+                                style={{
+                                    width: '100%', padding: '12px 14px',
+                                    backgroundColor: '#111827', border: '1px solid #374151',
+                                    borderRadius: '8px', color: '#fff', fontSize: '14px',
+                                    outline: 'none', transition: 'border-color 0.2s',
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = '#10b981'}
+                                onBlur={(e) => e.target.style.borderColor = '#374151'}
+                                onKeyDown={(e) => e.key === 'Enter' && handleConfirmReservation()}
+                            />
+                        </div>
+
+                        <div style={{ marginBottom: '16px' }}>
+                            <label style={{ fontSize: '12px', color: '#9ca3af', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
+                                예약번호 (선택사항)
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="예약번호를 입력하세요 (예: R1234567)"
+                                value={confirmReservationNumber}
+                                onChange={(e) => setConfirmReservationNumber(e.target.value)}
+                                disabled={confirming}
                                 style={{
                                     width: '100%', padding: '12px 14px',
                                     backgroundColor: '#111827', border: '1px solid #374151',

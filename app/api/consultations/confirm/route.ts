@@ -11,7 +11,7 @@ import { crawlForBooking } from '@/lib/url-crawler';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { rowIndex, sheetName, confirmedProductUrl } = body;
+        const { rowIndex, sheetName, confirmedProductUrl, reservationNumber } = body;
 
         if (!rowIndex || !confirmedProductUrl) {
             return NextResponse.json(
@@ -95,6 +95,7 @@ export async function POST(request: NextRequest) {
             departureNotice,
             phoneNotice,
             happyCall,
+            reservationNumber,
         });
 
         // 3. Google Sheets 일괄 업데이트
@@ -114,6 +115,7 @@ export async function POST(request: NextRequest) {
                 departureNotice,
                 phoneNotice,
                 happyCall,
+                reservationNumber,
             },
             sheetName
         );
@@ -137,6 +139,7 @@ export async function POST(request: NextRequest) {
                     departureNotice,
                     phoneNotice,
                     happyCall,
+                    reservationNumber,
                 },
             });
         } else {

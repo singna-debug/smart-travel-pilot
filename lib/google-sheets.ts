@@ -262,12 +262,12 @@ async function getOrCreateMonthlySheet(sheets: any, spreadsheetId: string, month
         // 헤더 초기화
         const consultationHeaders = [
             '상담일시', '고객성함', '연락처', '총인원', '재방문여부', '유입경로', '목적지', '출발일', '귀국일', '기간', '상품명', '상품URL', '상담요약', '상담단계', '등록방식', '팔로업일',
-            '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호'
+            '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호', '확정서 링크'
         ];
 
         await sheets.spreadsheets.values.update({
             spreadsheetId,
-            range: `${month}!A1:Z1`,
+            range: `${month}!A1:AD1`,
             valueInputOption: 'USER_ENTERED',
             requestBody: { values: [consultationHeaders] },
         });
@@ -649,7 +649,7 @@ export async function initializeSheetHeaders(): Promise<boolean> {
         // 1. 상담 요약 시트
         const consultationHeaders = [
             '상담일시', '고객성함', '연락처', '총인원', '재방문여부', '유입경로', '목적지', '출발일', '귀국일', '기간', '상품명', '상품URL', '상담요약', '상담단계', '등록방식', '팔로업일',
-            '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호'
+            '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호', '확정서 링크'
         ];
 
         // 2. 메시지 로그 시트
@@ -684,7 +684,7 @@ export async function initializeSheetHeaders(): Promise<boolean> {
         // 상담 요약 업데이트
         await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
-            range: `${consultationsSheet}!A1:Z1`,
+            range: `${consultationsSheet}!A1:AD1`,
             valueInputOption: 'USER_ENTERED',
             requestBody: { values: [consultationHeaders] },
         });
@@ -882,6 +882,7 @@ export async function getConsultationHistory(customerPhone: string): Promise<Con
                 },
                 specific_reminder_date: row[27] || '', // AB: 리마인드 (index 27)
                 reservation_number: row[28] || '',     // AC: 예약번호 (index 28)
+                confirmation_link: row[29] || '',      // AD: 확정서 링크 (index 29)
                 source: row[14] || '',                // O: 등록방식 (index 14)
                 timestamp: row[0],
                 visitor_id: row[25] || '',            // Z: visitor_id (index 25)
@@ -1005,6 +1006,7 @@ export async function getAllConsultations(forceRefresh = false): Promise<Consult
                 },
                 specific_reminder_date: row[27] || '', // AB: 리마인드 (index 27)
                 reservation_number: row[28] || '',     // AC: 예약번호 (index 28)
+                confirmation_link: row[29] || '',      // AD: 확정서 링크 (index 29)
                 source: row[14] || '수동등록',        // O: 등록방식 (index 14)
                 visitor_id: row[25] || '',            // Z: visitor_id (index 25)
                 sheetName: row._sheetName,
@@ -1354,6 +1356,7 @@ export async function updateConsultationConfirmation(
         departureNotice: string;
         phoneNotice: string;
         happyCall: string;
+        reservationNumber?: string;
     },
     sheetName?: string
 ): Promise<boolean> {
@@ -1389,6 +1392,10 @@ export async function updateConsultationConfirmation(
             updates.push({ range: `${targetSheetName}!K${rowIndex}`, values: [[data.productName]] });
             updates.push({ range: `${targetSheetName}!L${rowIndex}`, values: [[data.confirmedProductUrl]] });
         }
+        
+        if (data.reservationNumber) {
+            updates.push({ range: `${targetSheetName}!AC${rowIndex}`, values: [[data.reservationNumber]] });
+        }
 
         await sheets.spreadsheets.values.batchUpdate({
             spreadsheetId: sheetId,
@@ -1404,6 +1411,37 @@ export async function updateConsultationConfirmation(
         return true;
     } catch (error: any) {
         console.error('[Google Sheets] 예약확정 업데이트 오류:', error.message);
+        return false;
+    }
+}
+
+export async function updateConfirmationLink(rowIndex: number, link: string, sheetName?: string): Promise<boolean> {
+    try {
+        const sheets = getGoogleSheetsClient();
+        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
+
+        if (!sheetId) return false;
+
+        const targetSheetName = sheetName || '시트1';
+
+        await sheets.spreadsheets.values.update({
+            spreadsheetId: sheetId,
+            range: `${targetSheetName}!AD${rowIndex}`,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: {
+                values: [[link]],
+            },
+        });
+
+        console.log(`[Google Sheets] 행 ${rowIndex} 확정서 링크 업데이트 완료 (${link})`);
+        
+        // Use require to avoid circular dependencies if cached properties are needed
+        // but here we can't easily reset cachedConsultations since it's module scoped and we don't export it
+        // Actually cachedConsultations is declared let in this file, we can reset it.
+        // wait, cachedConsultations is scoped to lib/google-sheets.ts.
+        return true;
+    } catch (error: any) {
+        console.error('[Google Sheets] 확정서 링크 업데이트 오류:', error.message);
         return false;
     }
 }

@@ -357,7 +357,26 @@ ${customGuides && customGuides.length > 0 ? `요청 가이드 주제: ${customGu
     { "name": "명소 한글 이름", "nameLocal": "영문 또는 현지어 이름", "description": "1-2줄 핵심 소개", "imageUrl": "" }
   ],
   "customGuides": [
-    ${customGuides && customGuides.length > 0 ? customGuides.map((g: string) => `{ "topic": "${g}", "icon": "📝", "sections": [{ "title": "정보 요약", "type": "text", "content": "상세 내용" }] }`).join(',') : ''}
+    {
+      "topic": "요청된 각 가이드 주제명 (위 '요청 가이드 주제' 목록에 지정된 주제명들과 정확하게 동일하게 작성할 것)",
+      "icon": "주제와 어울리는 이모지 (예: '🎡')",
+      "sections": [
+        {
+          "title": "섹션 제목 (예: '기본 정보', '입장권 예매 팁', '추천 동선' 등)",
+          "type": "text 또는 list 또는 steps 또는 table 또는 route 중 가장 알맞은 타입 선택",
+          "content": "type이 text일 때 사용할 내용. 일반적인 정보 설명용.",
+          "items": ["type이 list일 때 사용할 개별 리스트 항목 배열. 여러 팁이나 준비물을 나열할 때 사용."],
+          "steps": [
+            { "step": "단계명 (예: '1단계: 선착장 이동')", "detail": "상세 설명" }
+          ],
+          "headers": ["type이 table일 때 표의 컬럼명 배열 (예: ['구분', '요금', '비고'])"],
+          "rows": [
+            ["type이 table일 때 표의 행 데이터 배열 (예: ['대인', '800,000 VND', '왕복 케이블카 포함'])"]
+          ],
+          "route": ["type이 route일 때 동선 순서대로 장소명 배열 (예: ['푸꾸이 선착장', '케이블카 탑승', '테마파크 입구'])"]
+        }
+      ]
+    }
   ]
 }`
             });

@@ -118,6 +118,41 @@ export async function POST(request: NextRequest) {
         }
 
         console.log(`[Confirmation] Created: ${id} (visitorId: ${visitorId}, reservationNumber: ${reservationNumber})`);
+
+        // 생성된 확정서 링크를 구글 시트에 저장
+        let targetRowIndex = body.sheetRowIndex;
+        let targetSheetName = body.sheetName;
+
+        if (body.customer?.name && body.customer?.phone) {
+            try {
+                const { getAllConsultations } = await import('@/lib/google-sheets');
+                const consultations = await getAllConsultations(true); // force refresh to get latest data
+                const cleanPhone = body.customer.phone.replace(/[^0-9]/g, '');
+                
+                const matches = consultations.filter(c => {
+                    const cName = c.customer?.name || '';
+                    const cPhone = (c.customer?.phone || '').replace(/[^0-9]/g, '');
+                    return cName === body.customer.name && cPhone === cleanPhone;
+                });
+
+                if (matches.length > 0) {
+                    // consultations is sorted DESCENDING by timestamp, so matches[0] is the most recent entry
+                    targetRowIndex = matches[0].sheetRowIndex;
+                    targetSheetName = matches[0].sheetName;
+                    console.log(`[Confirmation API] Dynamically selected most recent row ${targetRowIndex} in sheet ${targetSheetName} for customer ${body.customer.name}`);
+                }
+            } catch (err: any) {
+                console.error('[Confirmation API] Failed to dynamically find most recent row, falling back to body index:', err.message);
+            }
+        }
+
+        if (targetRowIndex) {
+            const baseUrl = request.headers.get('origin') || (process.env.NEXT_PUBLIC_BASE_URL || 'https://clubmode.kr');
+            const confirmationUrl = `${baseUrl}/confirmation/${id}`;
+            const { updateConfirmationLink } = await import('@/lib/google-sheets');
+            await updateConfirmationLink(targetRowIndex, confirmationUrl, targetSheetName);
+        }
+
         return NextResponse.json({ success: true, data: doc });
     } catch (error: any) {
         console.error('[Confirmation API] POST Error:', error.message);

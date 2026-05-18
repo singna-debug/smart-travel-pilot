@@ -358,6 +358,22 @@
     font-family: 'Noto Sans KR', sans-serif;
 }
 
+.msg-preview-textarea {
+    width: 100%;
+    min-height: 500px;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.8;
+    font-family: 'Noto Sans KR', sans-serif;
+    white-space: pre-wrap;
+    padding: 0;
+    margin: 0;
+}
+
 .msg-preview-empty {
     display: flex;
     flex-direction: column;

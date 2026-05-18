@@ -10,17 +10,29 @@ export async function GET(request: NextRequest) {
         
         // Fetch all consultations (it uses internal caching in google-sheets.ts)
         const consultations = await getAllConsultations(false);
+
+        // 중복 제거 (이름 + 전화번호 기준, 가장 최근 행만 유지)
+        const uniqueConsultations: any[] = [];
+        const seen = new Set<string>();
+        for (const c of consultations) {
+            const phone = (c.customer?.phone || '').replace(/[^0-9]/g, '');
+            const key = `${c.customer?.name || ''}-${phone}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueConsultations.push(c);
+            }
+        }
         
         if (!query) {
-            // Return top 20 recent customers if no query
+            // Return top 20 recent unique customers if no query
             return NextResponse.json({ 
                 success: true, 
-                data: consultations.slice(0, 20) 
+                data: uniqueConsultations.slice(0, 20) 
             });
         }
 
         const lowerQuery = query.toLowerCase();
-        const filtered = consultations.filter(c => {
+        const filtered = uniqueConsultations.filter(c => {
             const name = (c.customer?.name || '').toLowerCase();
             const phone = (c.customer?.phone || '').replace(/[^0-9]/g, '');
             const cleanQuery = query.replace(/[^0-9]/g, '');

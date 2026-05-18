@@ -40,6 +40,7 @@ export interface ConsultationData {
   visitor_id?: string;
   specific_reminder_date?: string;
   reservation_number?: string; // 예약번호 (AC열)
+  confirmation_link?: string;  // 확정서 링크 (AD열)
 }
 
 // 채팅 메시지 타입

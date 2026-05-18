@@ -130,6 +130,8 @@ export default function ConfirmationPage() {
     const [travelers, setTravelers] = useState<TravelerInfo[]>([{ name: '', type: 'adult' }]);
     const [visitorId, setVisitorId] = useState('');
     const [reservationNumber, setReservationNumber] = useState('');
+    const [sheetRowIndex, setSheetRowIndex] = useState<number | null>(null);
+    const [sheetName, setSheetName] = useState<string>('');
 
     // 항공
     const [airline, setAirline] = useState('');
@@ -206,6 +208,8 @@ export default function ConfirmationPage() {
         setCustomerPhone(c.customer.phone);
         const vId = c.visitorId || c.visitor_id || '';
         setVisitorId(vId);
+        if (c.sheetRowIndex) setSheetRowIndex(c.sheetRowIndex);
+        if (c.sheetName) setSheetName(c.sheetName);
         if (c.trip.destination) setDestination(c.trip.destination);
         if (c.trip.product_name) setProductName(c.trip.product_name);
         if (c.trip.departure_date) setDepartureDate(formatToHtmlDate(c.trip.departure_date));
@@ -843,6 +847,82 @@ export default function ConfirmationPage() {
         });
     };
 
+    // 추가 가이드 수정 핸들러
+    const updateSRCustomGuideTopic = (guideIndex: number, topic: string) => {
+        setSecondaryResearch((prev: any) => {
+            if (!prev || !prev.customGuides) return prev;
+            const newGuides = [...prev.customGuides];
+            newGuides[guideIndex] = { ...newGuides[guideIndex], topic };
+            return { ...prev, customGuides: newGuides };
+        });
+    };
+
+    const updateSRCustomGuideIcon = (guideIndex: number, icon: string) => {
+        setSecondaryResearch((prev: any) => {
+            if (!prev || !prev.customGuides) return prev;
+            const newGuides = [...prev.customGuides];
+            newGuides[guideIndex] = { ...newGuides[guideIndex], icon };
+            return { ...prev, customGuides: newGuides };
+        });
+    };
+
+    const removeSRCustomGuide = (guideIndex: number) => {
+        if (!confirm('이 커스텀 가이드를 전체 삭제하시겠습니까?')) return;
+        setSecondaryResearch((prev: any) => {
+            if (!prev || !prev.customGuides) return prev;
+            const newGuides = prev.customGuides.filter((_: any, idx: number) => idx !== guideIndex);
+            return { ...prev, customGuides: newGuides };
+        });
+    };
+
+    const addSRCustomGuide = () => {
+        setSecondaryResearch((prev: any) => {
+            if (!prev) return prev;
+            const customGuides = prev.customGuides || [];
+            const newGuide = {
+                topic: '새로운 가이드 주제',
+                icon: '📝',
+                sections: [
+                    { title: '정보 요약', type: 'text', content: '여기에 내용을 입력하세요.' }
+                ]
+            };
+            return { ...prev, customGuides: [...customGuides, newGuide] };
+        });
+    };
+
+    const updateSRCustomGuideSectionField = (guideIndex: number, secIndex: number, field: string, value: any) => {
+        setSecondaryResearch((prev: any) => {
+            if (!prev || !prev.customGuides || !prev.customGuides[guideIndex]?.sections) return prev;
+            const newGuides = [...prev.customGuides];
+            const newSections = [...newGuides[guideIndex].sections];
+            newSections[secIndex] = { ...newSections[secIndex], [field]: value };
+            newGuides[guideIndex] = { ...newGuides[guideIndex], sections: newSections };
+            return { ...prev, customGuides: newGuides };
+        });
+    };
+
+    const addSRCustomGuideSection = (guideIndex: number) => {
+        setSecondaryResearch((prev: any) => {
+            if (!prev || !prev.customGuides) return prev;
+            const newGuides = [...prev.customGuides];
+            const sections = newGuides[guideIndex].sections || [];
+            const newSection = { title: '새로운 섹션', type: 'text', content: '' };
+            newGuides[guideIndex] = { ...newGuides[guideIndex], sections: [...sections, newSection] };
+            return { ...prev, customGuides: newGuides };
+        });
+    };
+
+    const removeSRCustomGuideSection = (guideIndex: number, secIndex: number) => {
+        if (!confirm('이 섹션을 삭제하시겠습니까?')) return;
+        setSecondaryResearch((prev: any) => {
+            if (!prev || !prev.customGuides || !prev.customGuides[guideIndex]?.sections) return prev;
+            const newGuides = [...prev.customGuides];
+            const newSections = newGuides[guideIndex].sections.filter((_: any, idx: number) => idx !== secIndex);
+            newGuides[guideIndex] = { ...newGuides[guideIndex], sections: newSections };
+            return { ...prev, customGuides: newGuides };
+        });
+    };
+
     // 확정서 생성
     const generateConfirmation = async () => {
         if (!customerName) {
@@ -855,6 +935,8 @@ export default function ConfirmationPage() {
                 status: '예약확정',
                 visitorId: visitorId,
                 reservationNumber: reservationNumber.trim(),
+                sheetRowIndex: sheetRowIndex,
+                sheetName: sheetName,
                 customer: { name: customerName, phone: customerPhone, visitorId: visitorId },
                 trip: {
                     productName, productUrl, destination,
@@ -985,6 +1067,10 @@ export default function ConfirmationPage() {
                     <div className="confirm-field full-width">
                         <label>여행 상품명</label>
                         <input value={productName} onChange={e => setProductName(e.target.value)} placeholder="상품명 입력" />
+                    </div>
+                    <div className="confirm-field">
+                        <label>예약번호</label>
+                        <input value={reservationNumber} onChange={e => setReservationNumber(e.target.value)} placeholder="선택사항 (예: R12345)" />
                     </div>
                     <div className="confirm-field">
                         <label>목적지</label>
@@ -2111,15 +2197,153 @@ export default function ConfirmationPage() {
                     {secondaryResearch?.customGuides && secondaryResearch.customGuides.length > 0 && (
                         <>
                             {secondaryResearch.customGuides.map((guide, i) => (
-                                <div key={i} style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
-                                    <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: '12px', fontSize: '1rem' }}>{safeStr(guide.icon)} {safeStr(guide.topic)} ({guide.sections?.length || 0}개 섹션)</div>
-                                    {guide.sections?.map((sec, si) => (
-                                        <div key={si} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                                            • <strong>{safeStr(sec.title)}</strong> [{sec.type}]
+                                <div key={i} style={{ background: 'var(--bg-secondary)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '20px' }}>
+                                    {/* 가이드 헤더 */}
+                                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flex: 1 }}>
+                                            <input 
+                                                value={guide.icon || '📝'} 
+                                                onChange={e => updateSRCustomGuideIcon(i, e.target.value)} 
+                                                placeholder="이모지"
+                                                style={{ width: '40px', fontSize: '1.1rem', textAlign: 'center', padding: '6px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#fff' }}
+                                            />
+                                            <input 
+                                                value={guide.topic || ''} 
+                                                onChange={e => updateSRCustomGuideTopic(i, e.target.value)} 
+                                                placeholder="추가 가이드 주제"
+                                                style={{ flex: 1, fontSize: '1rem', fontWeight: 700, padding: '8px 12px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#fff' }}
+                                            />
                                         </div>
-                                    ))}
+                                        <button 
+                                            onClick={() => removeSRCustomGuide(i)}
+                                            style={{ padding: '6px 12px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: '8px', color: '#ef4444', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
+                                        >
+                                            🗑️ 가이드 삭제
+                                        </button>
+                                    </div>
+
+                                    {/* 서브 섹션 리스트 */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                        {(guide.sections || []).map((sec, si) => (
+                                            <div key={si} style={{ background: 'var(--bg-tertiary)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-color)', position: 'relative' }}>
+                                                <button 
+                                                    onClick={() => removeSRCustomGuideSection(i, si)}
+                                                    style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.85rem' }}
+                                                    title="섹션 삭제"
+                                                >
+                                                    ✕
+                                                </button>
+                                                
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '12px', marginBottom: '10px', width: '90%' }}>
+                                                    <div className="confirm-field" style={{ marginBottom: 0 }}>
+                                                        <label style={{ color: 'var(--text-secondary)' }}>섹션 제목</label>
+                                                        <input 
+                                                            value={sec.title || ''} 
+                                                            onChange={e => updateSRCustomGuideSectionField(i, si, 'title', e.target.value)} 
+                                                            placeholder="예: 이용 팁"
+                                                        />
+                                                    </div>
+                                                    <div className="confirm-field" style={{ marginBottom: 0, width: '120px' }}>
+                                                        <label style={{ color: 'var(--text-secondary)' }}>타입</label>
+                                                        <select
+                                                            value={sec.type || 'text'}
+                                                            onChange={e => updateSRCustomGuideSectionField(i, si, 'type', e.target.value)}
+                                                            style={{ padding: '8px 10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', color: '#fff', fontSize: '0.85rem', width: '100%', outline: 'none' }}
+                                                        >
+                                                            <option value="text">텍스트</option>
+                                                            <option value="list">리스트 (줄바꿈)</option>
+                                                            <option value="steps">단계별 설명</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                {/* 타입에 따른 입력 창 */}
+                                                {sec.type === 'list' ? (
+                                                    <div className="confirm-field">
+                                                        <label style={{ color: 'var(--text-secondary)' }}>리스트 항목 (한 줄에 하나씩 입력)</label>
+                                                        <textarea 
+                                                            rows={3} 
+                                                            value={(sec.items || []).join('\n')} 
+                                                            onChange={e => updateSRCustomGuideSectionField(i, si, 'items', e.target.value.split('\n'))} 
+                                                            placeholder="예:&#10;첫 번째 항목&#10;두 번째 항목"
+                                                        />
+                                                    </div>
+                                                ) : sec.type === 'steps' ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '6px' }}>
+                                                        <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>단계별 상세 내용</label>
+                                                        {(sec.steps || []).map((step, sidx) => (
+                                                            <div key={sidx} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                                                                <input 
+                                                                    value={step.step || ''} 
+                                                                    onChange={e => {
+                                                                        const newSteps = [...(sec.steps || [])];
+                                                                        newSteps[sidx] = { ...newSteps[sidx], step: e.target.value };
+                                                                        updateSRCustomGuideSectionField(i, si, 'steps', newSteps);
+                                                                    }} 
+                                                                    placeholder="단계명"
+                                                                    style={{ width: '120px', padding: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', color: '#fff', fontSize: '0.8rem' }}
+                                                                />
+                                                                <textarea 
+                                                                    rows={1}
+                                                                    value={step.detail || ''} 
+                                                                    onChange={e => {
+                                                                        const newSteps = [...(sec.steps || [])];
+                                                                        newSteps[sidx] = { ...newSteps[sidx], detail: e.target.value };
+                                                                        updateSRCustomGuideSectionField(i, si, 'steps', newSteps);
+                                                                    }} 
+                                                                    placeholder="상세 설명"
+                                                                    style={{ flex: 1, padding: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', color: '#fff', fontSize: '0.8rem', resize: 'vertical' }}
+                                                                />
+                                                                <button 
+                                                                    onClick={() => {
+                                                                        const newSteps = (sec.steps || []).filter((_, sidx2) => sidx2 !== sidx);
+                                                                        updateSRCustomGuideSectionField(i, si, 'steps', newSteps);
+                                                                    }}
+                                                                    style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.9rem', cursor: 'pointer', padding: '6px' }}
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                        <button 
+                                                            onClick={() => {
+                                                                const newSteps = [...(sec.steps || []), { step: `${(sec.steps || []).length + 1}단계`, detail: '' }];
+                                                                updateSRCustomGuideSectionField(i, si, 'steps', newSteps);
+                                                            }}
+                                                            style={{ alignSelf: 'flex-start', padding: '4px 10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', color: '#cbd5e1', fontSize: '0.75rem', cursor: 'pointer' }}
+                                                        >
+                                                            + 단계 추가
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="confirm-field">
+                                                        <label style={{ color: 'var(--text-secondary)' }}>내용</label>
+                                                        <textarea 
+                                                            rows={3} 
+                                                            value={sec.content || ''} 
+                                                            onChange={e => updateSRCustomGuideSectionField(i, si, 'content', e.target.value)} 
+                                                            placeholder="내용을 입력하세요."
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+
+                                        <button 
+                                            onClick={() => addSRCustomGuideSection(i)}
+                                            style={{ width: '100%', padding: '10px', background: 'var(--bg-tertiary)', border: '1px dashed var(--border-color)', borderRadius: '10px', color: 'var(--text-muted)', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
+                                        >
+                                            + 섹션 추가
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
+                            <button 
+                                onClick={addSRCustomGuide}
+                                style={{ width: '100%', padding: '14px', background: 'var(--bg-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px', color: '#cbd5e1', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '20px' }}
+                            >
+                                ➕ 새로운 추가 가이드 주제 생성
+                            </button>
                         </>
                     )}
                 </div>

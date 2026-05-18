@@ -60,8 +60,8 @@ const calculateFlightDuration = (dept: string, deptCity: string | undefined, arr
     } catch { return null; }
 };
 
-type TabKey = '개요' | '일정표' | '여행가이드' | '서류' | '준비물' | '안내사항';
-const TABS: TabKey[] = ['개요', '일정표', '여행가이드', '서류', '준비물', '안내사항'];
+type TabKey = '개요' | '일정표' | '필요서류' | '안내사항' | '준비물' | '날씨' | '복장' | '환전/로밍' | '관광지' | '기타';
+const TABS: TabKey[] = ['개요', '일정표', '필요서류', '안내사항', '준비물', '날씨', '복장', '환전/로밍', '관광지', '기타'];
 
 // AI 응답에서 객체/배열이 올 수 있으므로 안전하게 문자열로 변환
 function safeStr(val: any): string {
@@ -88,6 +88,133 @@ function safeStr(val: any): string {
     }
     return String(val);
 }
+
+const formatBulletPoints = (text: string) => {
+    if (!text) return null;
+    const cleanText = safeStr(text);
+    
+    // Split by common delimiters like " - " or newline followed by "-" or "* " or "· "
+    const parts = cleanText
+        .split(/[\r\n]+|(?:\s+|^)-\s+|(?:\s+|^)\*\s+|(?:\s+|^)·\s+/)
+        .map(p => p.trim())
+        .filter(p => p.length > 0);
+        
+    if (parts.length <= 1) {
+        const inlineParts = cleanText
+            .split(/\s+-\s+/)
+            .map(p => p.trim())
+            .filter(p => p.length > 0);
+            
+        if (inlineParts.length > 1) {
+            let prefix = '';
+            let listContent = inlineParts;
+            if (inlineParts[0].startsWith('-')) {
+                listContent[0] = listContent[0].replace(/^-/, '').trim();
+            } else if (inlineParts[0].endsWith(':') || inlineParts[0].includes('면세 한도') || inlineParts[0].includes('유의사항')) {
+                prefix = inlineParts[0];
+                listContent = inlineParts.slice(1);
+            }
+            
+            return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {prefix && <div style={{ fontWeight: 700, fontSize: '0.8rem', opacity: 0.9 }}>{prefix}</div>}
+                    <ul style={{ margin: 0, paddingLeft: '16px', listStyleType: 'disc', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {listContent.map((item, idx) => (
+                            <li key={idx} style={{ fontSize: '0.8rem', lineHeight: 1.5, wordBreak: 'keep-all' }}>
+                                {item}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            );
+        }
+        
+        return <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.5, wordBreak: 'keep-all' }}>{cleanText}</p>;
+    }
+    
+    let prefix = '';
+    let listContent = parts;
+    if (!cleanText.startsWith('-') && !cleanText.startsWith('*') && !cleanText.startsWith('·') && (parts[0].endsWith(':') || parts[0].includes('면세 한도') || parts[0].includes('유의사항'))) {
+        prefix = parts[0];
+        listContent = parts.slice(1);
+    }
+    
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {prefix && <div style={{ fontWeight: 700, fontSize: '0.8rem', opacity: 0.9 }}>{prefix}</div>}
+            <ul style={{ margin: 0, paddingLeft: '16px', listStyleType: 'disc', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {listContent.map((item, idx) => {
+                    const cleanItem = item.replace(/^[-*·]\s*/, '').trim();
+                    if (!cleanItem) return null;
+                    return (
+                        <li key={idx} style={{ fontSize: '0.8rem', lineHeight: 1.5, wordBreak: 'keep-all' }}>
+                            {cleanItem}
+                        </li>
+                    );
+                })}
+            </ul>
+        </div>
+    );
+};
+
+const renderFormattedText = (text: string) => {
+    if (!text) return null;
+    const cleanText = safeStr(text);
+    const lines = cleanText.split('\n');
+    
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {lines.map((line, idx) => {
+                let trimmed = line.trim();
+                if (!trimmed) {
+                    return <div key={idx} style={{ height: '6px' }} />;
+                }
+
+                // Inline bold formatting using **text**
+                const formatInlineBold = (str: string) => {
+                    const parts = str.split('**');
+                    return parts.map((part, pIdx) => {
+                        if (pIdx % 2 === 1) {
+                            return <strong key={pIdx} style={{ color: '#0f172a', fontWeight: 700 }}>{part}</strong>;
+                        }
+                        return part;
+                    });
+                };
+
+                // Identify if the line is a styled header/numbered header
+                const isTitle = trimmed.startsWith('**') && trimmed.endsWith('**') && !trimmed.slice(2, -2).includes('**');
+                const isNumberedTitle = /^\**\d+\./.test(trimmed);
+
+                if (isTitle || isNumberedTitle) {
+                    const cleanTitle = trimmed.replace(/\*\*/g, '').replace(/^[#\s]*/, '');
+                    return (
+                        <h5 key={idx} style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', margin: '14px 0 6px 0', borderBottom: '1px solid #f1f5f9', paddingBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {cleanTitle}
+                        </h5>
+                    );
+                }
+
+                // Bullet point matching (* or - or •)
+                if (trimmed.startsWith('*') || trimmed.startsWith('-') || trimmed.startsWith('•')) {
+                    const cleanBullet = trimmed.replace(/^[\*\-•]\s*/, '');
+                    return (
+                        <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', paddingLeft: '8px', fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, wordBreak: 'keep-all' }}>
+                            <span style={{ color: '#3b82f6', flexShrink: 0, marginTop: '4px', fontSize: '0.6rem' }}>●</span>
+                            <span style={{ flex: 1 }}>{formatInlineBold(cleanBullet)}</span>
+                        </div>
+                    );
+                }
+
+                return (
+                    <p key={idx} style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, wordBreak: 'keep-all' }}>
+                        {formatInlineBold(trimmed)}
+                    </p>
+                );
+            })}
+        </div>
+    );
+};
+
 
 const WeatherIcon = ({ description }: { description: string }) => {
     const d = description || '';
@@ -1547,12 +1674,12 @@ export default function ConfirmationViewerPage() {
                     </>
                 )}
 
-                {/* ============================== 3. 서류 ============================== */}
-                {activeTab === '서류' && (
+                {/* ============================== 3. 필요서류 ============================== */}
+                {activeTab === '필요서류' && (
                     <>
                         <div className="mc-section">
                             <div className="mc-section-title">
-                                <span className="sec-icon">📎</span> 전자 서류
+                                <span className="sec-icon">📎</span> 필수 전자 서류
                             </div>
                             {doc.files && doc.files.length > 0 ? (
                                 <div className="mc-file-list">
@@ -1593,6 +1720,168 @@ export default function ConfirmationViewerPage() {
                                 </div>
                             )}
                         </div>
+
+                        {/* 입국 및 비자/세관 정보 */}
+                        {doc.secondaryResearch?.customs && (
+                            <div className="mc-section" style={{ background: 'transparent', boxShadow: 'none', padding: 0 }}>
+                                <div className="mc-section-title" style={{ paddingLeft: '4px', marginBottom: '14px' }}>
+                                    <span className="sec-icon">🛂</span> 국가별 입국 & 비자/세관 가이드
+                                </div>
+
+                                 {/* (1) 국가별 핵심 경보 (식품류 등) */}
+                                 {doc.secondaryResearch.customs.majorAlert?.title && (
+                                     <div style={{ marginBottom: '16px', border: '1.5px solid #fecaca', background: '#fff', padding: '16px', borderRadius: '16px', boxShadow: '0 4px 6px rgba(239, 68, 68, 0.03)' }}>
+                                         <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#dc2626', marginBottom: '8px', textAlign: 'center' }}>
+                                             🚨 {safeStr(doc.secondaryResearch.customs.majorAlert.title)}
+                                         </div>
+                                         <div style={{ fontSize: '0.8rem', color: '#7f1d1d', lineHeight: 1.5, marginBottom: '10px', textAlign: 'center', wordBreak: 'keep-all' }}>
+                                             {safeStr(doc.secondaryResearch.customs.majorAlert.content)}
+                                         </div>
+                                         {doc.secondaryResearch.customs.majorAlert.penalty && (
+                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#dc2626', fontSize: '0.75rem', fontWeight: 700, background: '#fef2f2', padding: '6px 10px', borderRadius: '8px', border: '1px solid #fee2e2' }}>
+                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                                 {safeStr(doc.secondaryResearch.customs.majorAlert.penalty)}
+                                             </div>
+                                         )}
+                                     </div>
+                                 )}
+
+                                 {/* (2) 사전 입국 준비 및 비자/ETA 퀵링크 */}
+                                 {doc.secondaryResearch.customs.links && doc.secondaryResearch.customs.links.length > 0 && (
+                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
+                                         {doc.secondaryResearch.customs.links.map((link: any, li: number) => (
+                                             <div key={li} style={{ border: '1.5px solid #005a96', borderRadius: '16px', overflow: 'hidden', background: '#fff', boxShadow: '0 4px 8px rgba(0, 90, 150, 0.03)' }}>
+                                                 <div style={{ background: '#005a96', padding: '10px 16px', display: 'flex', alignItems: 'center', color: '#fff', gap: '10px' }}>
+                                                     <span style={{ background: '#fff', color: '#005a96', padding: '3px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                                                         {link.type === 'visa' ? '비자/ETA' : (link.type === 'customs' ? '세관신고' : '입국신고')}
+                                                     </span>
+                                                     <span style={{ fontSize: '0.88rem', fontWeight: 800, lineHeight: 1.3, wordBreak: 'keep-all' }}>{safeStr(link.label)}</span>
+                                                 </div>
+                                                 <div style={{ padding: '14px' }}>
+                                                     <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '12px', marginBottom: '10px' }}>
+                                                         <div style={{ fontSize: '0.78rem', color: '#334155', lineHeight: 1.5, wordBreak: 'keep-all' }}>
+                                                             {safeStr(link.description)}
+                                                         </div>
+                                                     </div>
+                                                     {link.howTo && (
+                                                         <div style={{ marginBottom: '10px' }}>
+                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0284c7', fontSize: '0.78rem', fontWeight: 800, marginBottom: '2px' }}>
+                                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                                                 신청 및 준비 방법
+                                                             </div>
+                                                             <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4, wordBreak: 'keep-all' }}>
+                                                                 {safeStr(link.howTo)}
+                                                             </div>
+                                                         </div>
+                                                     )}
+                                                     <a
+                                                         href={link.url}
+                                                         target="_blank"
+                                                         rel="noopener noreferrer"
+                                                         style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(to right, #00ace2, #008ebc)', color: '#fff', padding: '10px', borderRadius: '10px', fontWeight: 800, gap: '6px', fontSize: '0.82rem', boxShadow: '0 4px 8px rgba(0, 172, 226, 0.1)' }}
+                                                     >
+                                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                                         공식 사이트 바로가기
+                                                     </a>
+                                                 </div>
+                                             </div>
+                                         ))}
+                                     </div>
+                                 )}
+
+                                 {/* (3) 면세 한도 & 여권 유의사항 */}
+                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
+                                     <div style={{ background: '#f0f9ff', border: '1.5px solid #bae6fd', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 6px rgba(14, 165, 233, 0.03)' }}>
+                                         <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0369a1', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> 면세 한도
+                                         </div>
+                                         <div style={{ fontSize: '0.8rem', color: '#075985', lineHeight: 1.5 }}>
+                                             {formatBulletPoints(doc.secondaryResearch.customs.dutyFree)}
+                                         </div>
+                                     </div>
+                                     <div style={{ background: '#f5f3ff', border: '1.5px solid #ddd6fe', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 6px rgba(124, 58, 237, 0.03)' }}>
+                                         <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#6d28d9', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg> 여권 유의사항
+                                         </div>
+                                         <div style={{ fontSize: '0.8rem', color: '#5b21b6', lineHeight: 1.5 }}>
+                                             {formatBulletPoints(doc.secondaryResearch.customs.passportNote)}
+                                         </div>
+                                     </div>
+                                </div>
+
+                                 {/* (4) 입국 절차 */}
+                                 {doc.secondaryResearch.customs.arrivalProcedure && doc.secondaryResearch.customs.arrivalProcedure.steps?.length > 0 && (
+                                     <div style={{ marginBottom: '16px', border: '1.5px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.01)' }}>
+                                         <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
+                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                             <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1e293b' }}>{safeStr(doc.secondaryResearch.customs.arrivalProcedure.title || '입국 절차')}</span>
+                                         </div>
+                                         <div style={{ padding: '14px' }}>
+                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                 {doc.secondaryResearch.customs.arrivalProcedure.steps.map((st: any, i: number) => (
+                                                     <div key={i} style={{ display: 'flex', gap: '10px' }}>
+                                                         <div style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 800, flexShrink: 0, marginTop: '2px' }}>{i + 1}</div>
+                                                         <div>
+                                                             <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', marginBottom: '2px' }}>{safeStr(st.step)}</div>
+                                                             <div style={{ fontSize: '0.75rem', color: '#64748b', lineHeight: 1.4, wordBreak: 'keep-all' }}>{safeStr(st.description)}</div>
+                                                         </div>
+                                                     </div>
+                                                 ))}
+                                             </div>
+                                         </div>
+                                     </div>
+                                 )}
+
+                                 {/* (5) 미성년자 자녀 입국 규정 */}
+                                 {(doc.secondaryResearch.customs.minorEntry || doc.secondaryResearch.customs.minorDetail) && (
+                                     <div style={{ marginBottom: '16px', background: '#fffde7', border: '1.5px solid #fef08a', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 2px 6px rgba(254, 240, 138, 0.1)' }}>
+                                         <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '6px', color: '#854d0e', borderBottom: '1px solid #fef9c3', background: '#fefcbf' }}>
+                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                                             <span style={{ fontSize: '0.82rem', fontWeight: 800 }}>미성년자 동반 입국 규정</span>
+                                         </div>
+                                         <div style={{ padding: '14px' }}>
+                                             {doc.secondaryResearch.customs.minorEntry && (
+                                                 <div style={{ fontSize: '0.78rem', color: '#713f12', lineHeight: 1.5, marginBottom: '8px', wordBreak: 'keep-all' }}>
+                                                     {safeStr(doc.secondaryResearch.customs.minorEntry)}
+                                                 </div>
+                                             )}
+                                             {doc.secondaryResearch.customs.minorDetail && (
+                                                 <div style={{ background: '#fff', border: '1px solid #fef9c3', borderRadius: '10px', padding: '10px', borderLeft: '4px solid #facc15' }}>
+                                                     <div style={{ color: '#854d0e', fontSize: '0.75rem', lineHeight: 1.4, display: 'flex', gap: '6px' }}>
+                                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0, marginTop: '2px' }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                                         <span style={{ wordBreak: 'keep-all' }}>{safeStr(doc.secondaryResearch.customs.minorDetail)}</span>
+                                                     </div>
+                                                 </div>
+                                             )}
+                                         </div>
+                                     </div>
+                                 )}
+
+                                 {/* (6) 반입 금지/제한 품목 */}
+                                 {doc.secondaryResearch.customs.prohibitedItems && doc.secondaryResearch.customs.prohibitedItems.length > 0 && (
+                                     <div style={{ marginBottom: '16px', border: '1.5px solid #fee2e2', background: '#fff5f5', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 2px 6px rgba(239, 68, 68, 0.01)' }}>
+                                         <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid #fde2e2', background: '#fee2e2' }}>
+                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                                             <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#dc2626' }}>반입 금지 및 제한 품목</span>
+                                         </div>
+                                         <div style={{ padding: '14px' }}>
+                                             {doc.secondaryResearch.customs.prohibitedItems.map((pi: any, pii: number) => (
+                                                 <div key={pii} style={{ marginBottom: '10px' }}>
+                                                     <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#991b1b', marginBottom: '4px' }}>{safeStr(pi.category)}</div>
+                                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                         {pi.items.map((it: any, iti: number) => (
+                                                             <span key={iti} style={{ fontSize: '0.72rem', background: '#fff', color: '#dc2626', border: '1px solid #fee2e2', padding: '3px 8px', borderRadius: '20px', fontWeight: 700 }}>
+                                                                 {safeStr(it)}
+                                                             </span>
+                                                         ))}
+                                                     </div>
+                                                 </div>
+                                             ))}
+                                         </div>
+                                     </div>
+                                 )}
+                            </div>
+                        )}
                     </>
                 )}
 
@@ -1699,458 +1988,246 @@ export default function ConfirmationViewerPage() {
                         )}
                     </>
                 )}
-                {/* 여행가이드 탭 */}
-                {activeTab === '여행가이드' && doc.secondaryResearch && (() => {
+                {/* ============================== 6. 날씨 ============================== */}
+                {activeTab === '날씨' && doc.secondaryResearch && (() => {
                     const sr = doc.secondaryResearch;
                     return (
-                        <div className="mc-guide-container">
-                            <div className="guide-header-banner" style={{ background: '#0f172a', marginBottom: '20px' }}>
-                                <div className="guide-header-label">TRAVEL GUIDE</div>
-                                <h2>{safeStr(doc.trip.destination)} 맞춤 가이드</h2>
-                            </div>
-
-                            {/* ── 가이드 서브 네비게이션 ── */}
-                            <div className="guide-sub-nav">
-                                <button className="guide-nav-btn" onClick={() => scrollToSection(weatherRef, 'weather')}>날씨</button>
-                                <button className="guide-nav-btn" onClick={() => scrollToSection(clothingRef, 'weather')}>복장</button>
-                                <button className="guide-nav-btn" onClick={() => scrollToSection(landmarksRef, 'landmarks')}>관광지</button>
-                                <button className="guide-nav-btn" onClick={() => scrollToSection(currencyRef, 'currency')}>환전</button>
-                                <button className="guide-nav-btn" onClick={() => scrollToSection(roamingRef, 'roaming')}>로밍</button>
-                                <button className="guide-nav-btn prep" onClick={() => setActiveTab('준비물')}>준비물</button>
-                            </div>
-
-                            {/* ── 현지 날씨 & 복장 ── */}
-                            <div ref={weatherRef}>
-                                <GuideAccordion
-                                    id="weather"
-                                title={<><span style={{ fontSize: '1.2rem', marginRight: '4px' }}>☀️</span> 현지 날씨 & 복장</>}
-                                isOpen={expandedSections['weather'] !== false}
-                                onToggle={toggleSection}
-                            >
-                                <div className="weather-guide-wrap">
-                                    <div style={{ marginBottom: '20px', background: '#f8fafc', padding: '16px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
-                                        <p style={{ fontSize: '0.9rem', color: '#334155', lineHeight: 1.6, wordBreak: 'keep-all', margin: 0 }}>
-                                            {safeStr(sr.weather?.summary)}
-                                        </p>
+                        <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
+                            {sr.weather?.summary && (
+                                <div className="mc-section" style={{ margin: '0 0 16px 0' }}>
+                                    <div className="mc-section-title">
+                                        <span className="sec-icon">☀️</span> 현지 날씨 & 기후 요약
                                     </div>
+                                    <p style={{ fontSize: '0.9rem', color: '#334155', lineHeight: 1.6, wordBreak: 'keep-all', margin: 0 }}>
+                                        {safeStr(sr.weather?.summary)}
+                                    </p>
+                                </div>
+                            )}
 
-                                    {/* 일별 예보 카드 (미니멀 디자인) */}
-                                    <div style={{ marginBottom: '24px' }}>
-                                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                            일별 기온 및 날씨
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '12px', WebkitOverflowScrolling: 'touch', paddingLeft: '4px', paddingRight: '4px' }}>
-                                            {sr.weather?.forecast?.map((day: any, i: number) => {
-                                                let displayDate = day.date;
-                                                try {
-                                                    if (doc.trip.departureDate) {
-                                                        const d = new Date(doc.trip.departureDate);
-                                                        d.setDate(d.getDate() + i);
-                                                        const month = d.getMonth() + 1;
-                                                        const date = d.getDate();
-                                                        const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-                                                        const dayName = dayNames[d.getDay()];
-                                                        displayDate = `${month}.${date} (${dayName})`;
-                                                    }
-                                                } catch (e) {}
+                            {/* 일별 예보 카드 */}
+                            {sr.weather?.forecast && sr.weather.forecast.length > 0 && (
+                                <div className="mc-section" style={{ background: 'transparent', boxShadow: 'none', padding: 0, margin: 0 }}>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '4px' }}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                        일별 기온 및 날씨
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '12px', WebkitOverflowScrolling: 'touch', paddingLeft: '4px', paddingRight: '4px' }}>
+                                        {sr.weather.forecast.map((day: any, i: number) => {
+                                            let displayDate = day.date;
+                                            try {
+                                                if (doc.trip.departureDate) {
+                                                    const d = new Date(doc.trip.departureDate);
+                                                    d.setDate(d.getDate() + i);
+                                                    const month = d.getMonth() + 1;
+                                                    const date = d.getDate();
+                                                    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                                                    const dayName = dayNames[d.getDay()];
+                                                    displayDate = `${month}.${date} (${dayName})`;
+                                                }
+                                            } catch (e) {}
 
-                                                return (
-                                                    <div key={i} style={{ 
-                                                        minWidth: '165px', 
-                                                        background: 'rgba(15, 23, 42, 0.9)', 
-                                                        backdropFilter: 'blur(10px)',
-                                                        borderRadius: '22px', 
-                                                        padding: '24px 16px 20px', 
-                                                        border: '1px solid rgba(255, 255, 255, 0.08)',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        textAlign: 'center',
-                                                        minHeight: '265px', // 전체 높이 소폭 확보
-                                                        height: '265px' // 고정 높이로 통일감 부여
+                                            return (
+                                                <div key={i} style={{ 
+                                                    minWidth: '165px', 
+                                                    background: 'rgba(15, 23, 42, 0.9)', 
+                                                    backdropFilter: 'blur(10px)',
+                                                    borderRadius: '22px', 
+                                                    padding: '24px 16px 20px', 
+                                                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    textAlign: 'center',
+                                                    minHeight: '265px',
+                                                    height: '265px'
+                                                }}>
+                                                    <div style={{ height: '82px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                                                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', marginBottom: '4px', letterSpacing: '-0.02em' }}>{i + 1}일차</div>
+                                                        <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>{displayDate}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500, opacity: 0.9 }}>
+                                                            {`(${String(day.location || simplifyDestination(doc.trip.destination)).replace(/[\(\)]/g, '')})`}
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div style={{ 
+                                                        flex: 1, 
+                                                        display: 'flex', 
+                                                        alignItems: 'center', 
+                                                        justifyContent: 'center', 
+                                                        width: '100%',
+                                                        margin: '10px 0'
                                                     }}>
-                                                        {/* 상단 정보 영역: 높이 고정 */}
-                                                        <div style={{ height: '82px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                                                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', marginBottom: '4px', letterSpacing: '-0.02em' }}>{i + 1}일차</div>
-                                                            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>{displayDate}</div>
-                                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500, opacity: 0.9 }}>
-                                                                {`(${String(day.location || simplifyDestination(doc.trip.destination)).replace(/[\(\)]/g, '')})`}
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        {/* 아이콘 영역: flex: 1을 사용하여 상하 텍스트 사이의 정중앙에 배치 */}
-                                                        <div style={{ 
-                                                            flex: 1, 
-                                                            display: 'flex', 
-                                                            alignItems: 'center', 
-                                                            justifyContent: 'center', 
-                                                            width: '100%',
-                                                            margin: '10px 0'
-                                                        }}>
-                                                            <div style={{ transform: 'scale(1.65)' }}>
-                                                                <WeatherIcon description={cleanWeatherDesc(day.description, doc.trip.destination)} />
-                                                            </div>
-                                                        </div>
-
-                                                        {/* 날씨 설명 영역: 하단 기온과의 균형을 위해 높이 고정 */}
-                                                        <div style={{ 
-                                                            height: '42px', // 2줄 내외 텍스트를 위한 최적 높이
-                                                            fontSize: '0.82rem', 
-                                                            color: '#e2e8f0', 
-                                                            fontWeight: 500, 
-                                                            lineHeight: 1.4,
-                                                            wordBreak: 'keep-all',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            width: '100%',
-                                                            padding: '0 4px',
-                                                            marginBottom: '10px'
-                                                        }}>
-                                                            {cleanWeatherDesc(day.description, doc.trip.destination)}
-                                                        </div>
-                                                        
-                                                        {/* 온도 정보: 최하단 고정 */}
-                                                        <div style={{ 
-                                                            display: 'flex', 
-                                                            alignItems: 'baseline', 
-                                                            gap: '8px',
-                                                            paddingBottom: '4px'
-                                                        }}>
-                                                            <span style={{ fontSize: '1.35rem', fontWeight: 900, color: '#fff' }}>{String(day.tempMax ?? '').replace(/[^0-9.-]/g, '')}°</span>
-                                                            <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'rgba(148, 163, 184, 0.7)' }}>/ {String(day.tempMin ?? '').replace(/[^0-9.-]/g, '')}°</span>
+                                                        <div style={{ transform: 'scale(1.65)' }}>
+                                                            <WeatherIcon description={cleanWeatherDesc(day.description, doc.trip.destination)} />
                                                         </div>
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
 
-                                    {/* 의류 및 준비물 가이드 */}
-                                    <div style={{ marginBottom: '24px' }} ref={clothingRef}>
-                                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.62 1.96v.18A2 2 0 0 0 3 7.5V19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7.5a2 2 0 0 0 1-1.9v-.18a2 2 0 0 0-1.62-1.96Z"></path><path d="M12 21V7"></path><path d="M16 21V11"></path><path d="M8 21V11"></path></svg>
-                                            상세기후 및 복장 가이드
-                                        </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                                            {sr.weather?.clothingTips?.map((tip: any, i: number) => {
-                                                const getIcon = (title: string) => {
-                                                    if (title.includes('상의') || title.includes('외투')) return '🧥';
-                                                    if (title.includes('하의')) return '👖';
-                                                    if (title.includes('신발')) return '👟';
-                                                    return '🎒';
-                                                };
-                                                return (
-                                                    <div key={i} style={{ background: '#f8fafc', padding: '16px', borderRadius: '16px', border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                            <span style={{ fontSize: '1rem' }}>{getIcon(tip.title)}</span>
-                                                            <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1e293b' }}>{tip.title}</div>
-                                                        </div>
-                                                        <div style={{ fontSize: '0.8rem', color: '#475569', lineHeight: 1.6, wordBreak: 'keep-all', fontWeight: 500 }}>
-                                                            {tip.content.split('. ').map((s: string, idx: number) => (
-                                                                <div key={idx} style={{ marginBottom: '4px', display: 'flex', gap: '4px' }}>
-                                                                    <span style={{ color: '#94a3b8' }}>•</span>
-                                                                    <span>{s.trim()}{!s.trim().endsWith('.') && s.trim().length > 0 ? '.' : ''}</span>
-                                                                </div>
-                                                            ))}
-                                                        </div>
+                                                    <div style={{ 
+                                                        height: '42px', 
+                                                        fontSize: '0.82rem', 
+                                                        color: '#e2e8f0', 
+                                                        fontWeight: 500, 
+                                                        lineHeight: 1.4,
+                                                        wordBreak: 'keep-all',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        width: '100%',
+                                                        padding: '0 4px',
+                                                        marginBottom: '10px'
+                                                    }}>
+                                                        {cleanWeatherDesc(day.description, doc.trip.destination)}
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-
-                                    {/* 최종 요약 */}
-                                    <div style={{ background: '#eff6ff', border: '1px solid #dbeafe', borderRadius: '12px', padding: '14px', display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                        <div style={{ fontSize: '1.2rem' }}>🎒</div>
-                                        <div style={{ fontSize: '0.82rem', color: '#1e40af', fontWeight: 600, lineHeight: 1.5, wordBreak: 'keep-all' }}>
-                                            {safeStr(sr.weather?.packingSummary)}
-                                        </div>
+                                                    
+                                                    <div style={{ 
+                                                        display: 'flex', 
+                                                        alignItems: 'baseline', 
+                                                        gap: '8px',
+                                                        paddingBottom: '4px'
+                                                    }}>
+                                                        <span style={{ fontSize: '1.35rem', fontWeight: 900, color: '#fff' }}>{String(day.tempMax ?? '').replace(/[^0-9.-]/g, '')}°</span>
+                                                        <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'rgba(148, 163, 184, 0.7)' }}>/ {String(day.tempMin ?? '').replace(/[^0-9.-]/g, '')}°</span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
-                            </GuideAccordion>
-                            </div>
+                            )}
+                        </div>
+                    );
+                })()}
+                {activeTab === '날씨' && !doc.secondaryResearch && (
+                    <div className="mc-section">
+                        <div className="mc-empty-guide">
+                            <span style={{ fontSize: '2.5rem' }}>🔬</span>
+                            <p style={{ fontWeight: 600, fontSize: '1rem' }}>날씨 정보가 아직 준비되지 않았습니다.</p>
+                        </div>
+                    </div>
+                )}
 
-                            {/* ── 관광지 소개 ── */}
-                            <div ref={landmarksRef}>
-                                <GuideAccordion
-                                    id="landmarks"
-                                title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> 주요 관광지</>}
-                                isOpen={expandedSections['landmarks'] || false}
-                                onToggle={toggleSection}
-                            >
-                                <div style={{ 
-                                    marginBottom: '20px', 
-                                    background: '#f1f5f9', 
-                                    padding: '12px 16px', 
-                                    borderRadius: '12px', 
-                                    fontSize: '0.8rem', 
-                                    color: '#64748b', 
-                                    lineHeight: 1.5,
-                                    display: 'flex',
-                                    gap: '8px',
-                                    alignItems: 'flex-start'
-                                }}>
-                                    <span style={{ flexShrink: 0, fontSize: '0.9rem' }}>💡</span>
-                                    <span>아래 내용은 해당 도시의 주요 명소를 소개하는 가이드이며, 실제 확정된 일정상 방문지 구성과는 차이가 있을 수 있습니다.</span>
-                                </div>
-
-                                {/* 첫 번째 랜드마크: 히어로 카드 */}
-                                {sr.landmarks?.[0] && (
-                                    <div className="landmark-hero">
-                                        {sr.landmarks[0].imageUrl && (
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            <img src={sr.landmarks[0].imageUrl} alt={safeStr(sr.landmarks[0].name)} className="landmark-hero-img" />
-                                        )}
-                                        <div className="landmark-hero-info">
-                                            <h4>{safeStr(sr.landmarks[0].name)}</h4>
-                                            {sr.landmarks[0].nameLocal && <span className="landmark-local">{safeStr(sr.landmarks[0].nameLocal)}</span>}
-                                            <p>{safeStr(sr.landmarks[0].description)}</p>
-                                        </div>
+                {/* ============================== 7. 복장 ============================== */}
+                {activeTab === '복장' && doc.secondaryResearch && (() => {
+                    const sr = doc.secondaryResearch;
+                    return (
+                        <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
+                            {sr.weather?.clothingTips && sr.weather.clothingTips.length > 0 && (
+                                <div className="mc-section" style={{ background: 'transparent', boxShadow: 'none', padding: 0, margin: '0 0 20px 0' }}>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '4px' }}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.62 1.96v.18A2 2 0 0 0 3 7.5V19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7.5a2 2 0 0 0 1-1.9v-.18a2 2 0 0 0-1.62-1.96Z"></path><path d="M12 21V7"></path><path d="M16 21V11"></path><path d="M8 21V11"></path></svg>
+                                        상세기후 및 복장 가이드
                                     </div>
-                                )}
-                                {/* 나머지 랜드마크: 그리드 카드 */}
-                                <div className="landmark-grid">
-                                    {sr.landmarks?.slice(1).map((lm, i) => (
-                                        <div key={i} className="landmark-card">
-                                            {lm.imageUrl && (
-                                                // eslint-disable-next-line @next/next/no-img-element
-                                                <img src={lm.imageUrl} alt={safeStr(lm.name)} className="landmark-card-img" />
-                                            )}
-                                            <div className="landmark-card-body">
-                                                <h4>{safeStr(lm.name)}</h4>
-                                                {lm.nameLocal && <span className="landmark-local-sm">{safeStr(lm.nameLocal)}</span>}
-                                                <p>{safeStr(lm.description)}</p>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                        {sr.weather.clothingTips.map((tip: any, i: number) => {
+                                            const getIcon = (title: string) => {
+                                                if (title.includes('상의') || title.includes('외투')) return '🧥';
+                                                if (title.includes('하의')) return '👖';
+                                                if (title.includes('신발')) return '👟';
+                                                return '🎒';
+                                            };
+                                            return (
+                                                <div key={i} style={{ background: '#fff', padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        <span style={{ fontSize: '1rem' }}>{getIcon(tip.title)}</span>
+                                                        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1e293b' }}>{tip.title}</div>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#475569', lineHeight: 1.6, wordBreak: 'keep-all', fontWeight: 500 }}>
+                                                        {tip.content.split('. ').map((s: string, idx: number) => (
+                                                            <div key={idx} style={{ marginBottom: '4px', display: 'flex', gap: '4px' }}>
+                                                                <span style={{ color: '#94a3b8' }}>•</span>
+                                                                <span>{s.trim()}{!s.trim().endsWith('.') && s.trim().length > 0 ? '.' : ''}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 최종 요약 */}
+                            {sr.weather?.packingSummary && (
+                                <div style={{ background: '#eff6ff', border: '1px solid #dbeafe', borderRadius: '12px', padding: '14px', display: 'flex', gap: '12px', alignItems: 'center', margin: 0 }}>
+                                    <div style={{ fontSize: '1.2rem' }}>🎒</div>
+                                    <div style={{ fontSize: '0.82rem', color: '#1e40af', fontWeight: 600, lineHeight: 1.5, wordBreak: 'keep-all' }}>
+                                        {safeStr(sr.weather?.packingSummary)}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
+                {activeTab === '복장' && !doc.secondaryResearch && (
+                    <div className="mc-section">
+                        <div className="mc-empty-guide">
+                            <span style={{ fontSize: '2.5rem' }}>🧥</span>
+                            <p style={{ fontWeight: 600, fontSize: '1rem' }}>복장 정보가 아직 준비되지 않았습니다.</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* ============================== 8. 환전/로밍 ============================== */}
+                {activeTab === '환전/로밍' && doc.secondaryResearch && (() => {
+                    const sr = doc.secondaryResearch;
+                    return (
+                        <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
+                            {/* 환전 정보 카드 */}
+                            {sr.currency && (
+                                <div className="mc-section" style={{ margin: '0 0 16px 0' }}>
+                                    <div className="mc-section-title">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> 환전 가이드
+                                    </div>
+                                    <div className="currency-tip-cards" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        {sr.currency.calculationTip && (
+                                            <div className="currency-tip-card highlight" style={{ background: '#eff6ff', border: '1px solid #dbeafe', padding: '14px', borderRadius: '10px' }}>
+                                                <div className="ct-title" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e40af', marginBottom: '6px' }}>간편 환산법</div>
+                                                <p style={{ fontSize: '0.8rem', color: '#1e40af', lineHeight: 1.5, margin: 0 }}>{safeStr(sr.currency.calculationTip)}</p>
+                                                <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '6px', lineHeight: 1.4 }}>
+                                                    *정확한 현재 환율이 아닌, 현지에서 체감 물가를 빠르게 계산하기 위한 대략적인 암산법입니다.
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </GuideAccordion>
-                            </div>
+                                        )}
+                                        
+                                        {sr.currency.exchangeTip && (
+                                            <div className="currency-tip-card" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '14px', borderRadius: '10px' }}>
+                                                <div className="ct-title" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', marginBottom: '6px' }}>환전 팁</div>
+                                                <ul className="guide-list-wrap" style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                                                    {safeStr(sr.currency.exchangeTip).split(/[\n·\-\*]/).filter(t => t.trim().length > 1).map((text, i) => (
+                                                        <li key={i} className="guide-list-item" style={{ position: 'relative', paddingLeft: '14px', fontSize: '0.8rem', color: '#475569', lineHeight: 1.5, marginBottom: '4px' }}>
+                                                            <span style={{ position: 'absolute', left: 0, color: '#94a3b8' }}>•</span>
+                                                            {text.trim()}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
 
-                            {/* ── 입국·세관 유의사항 ── */}
-                            <GuideAccordion
-                                id="customs"
-                                title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> 입국 · 세관 유의사항</>}
-                                isOpen={expandedSections['customs'] || false}
-                                onToggle={toggleSection}
-                            >
-                                 {/* (1) 국가별 핵심 경보 (식품류 등) - 프리미엄 경고 스타일 */}
-                                 {sr.customs?.majorAlert && sr.customs.majorAlert.title && (
-                                     <div style={{ marginBottom: '24px', border: '1px solid #fee2e2', background: 'linear-gradient(135deg, #fff5f5 0%, #fff 100%)', padding: '24px 20px', borderRadius: '20px', boxShadow: '0 4px 15px rgba(220, 38, 38, 0.05)' }}>
-                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '1.05rem', fontWeight: 900, color: '#dc2626', marginBottom: '14px' }}>
-                                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                                             {safeStr(sr.customs.majorAlert.title)}
-                                         </div>
-                                         <div style={{ fontSize: '0.88rem', color: '#7f1d1d', lineHeight: 1.7, marginBottom: '16px', textAlign: 'center', wordBreak: 'keep-all', fontWeight: 500 }}>
-                                             {safeStr(sr.customs.majorAlert.content)}
-                                         </div>
-                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#fff', fontSize: '0.8rem', fontWeight: 800, background: '#dc2626', padding: '10px 16px', borderRadius: '12px', boxShadow: '0 4px 10px rgba(220, 38, 38, 0.2)' }}>
-                                             {safeStr(sr.customs.majorAlert.penalty || '위반 시 항공기 탑승 거절 또는 압수')}
-                                         </div>
-                                     </div>
-                                 )}
-
-                                 {/* (2) 반입 금지/제한 품목 - 세련된 레드 테마 디자인 */}
-                                 {sr.customs?.prohibitedItems && sr.customs.prohibitedItems.length > 0 && (
-                                     <div style={{ marginBottom: '24px', border: '1px solid #fee2e2', background: '#fff', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 2px 10px rgba(220, 38, 38, 0.03)' }}>
-                                         <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(220, 38, 38, 0.03)', borderBottom: '1px solid #fee2e2' }}>
-                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
-                                             <span style={{ fontSize: '1rem', fontWeight: 900, color: '#dc2626', letterSpacing: '-0.02em' }}>반입 금지 · 제한 품목</span>
-                                         </div>
-                                         <div style={{ padding: '20px' }}>
-                                             {sr.customs?.prohibitedItems?.map((pi, pii) => (
-                                                 <div key={pii} style={{ marginBottom: pii === sr.customs.prohibitedItems.length - 1 ? 0 : '18px' }}>
-                                                     <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#991b1b', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                         <div style={{ width: '4px', height: '14px', background: '#dc2626', borderRadius: '2px' }}></div>
-                                                         {safeStr(pi.category)}
-                                                     </div>
-                                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                                         {(pi.items || []).map((it: any, iti: number) => (
-                                                             <span key={iti} style={{ fontSize: '0.78rem', background: '#fff', color: '#dc2626', border: '1px solid #fee2e2', padding: '6px 14px', borderRadius: '12px', fontWeight: 700, boxShadow: '0 2px 4px rgba(220,38,38,0.05)' }}>
-                                                                 {safeStr(it)}
-                                                             </span>
-                                                         ))}
-                                                     </div>
-                                                 </div>
-                                             ))}
-                                         </div>
-                                     </div>
-                                 )}
-
-                                 {/* (3) 면세 한도 & 여권 유의사항 - 세로 정렬 카드 스타일 */}
-                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-                                     <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(12, 148, 217, 0.05)' }}>
-                                         <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#0369a1', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                             <div style={{ width: '32px', height: '32px', background: '#fff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
-                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" strokeWidth="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-                                             </div>
-                                             면세 한도
-                                         </div>
-                                         <div style={{ fontSize: '0.85rem', color: '#075985', lineHeight: 1.6, wordBreak: 'keep-all', paddingLeft: '2px', fontWeight: 500 }}>
-                                             {safeStr(sr.customs?.dutyFree || '담배 1보루, 주류 1리터 등')}
-                                         </div>
-                                     </div>
-                                     <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(124, 58, 237, 0.05)' }}>
-                                         <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#6d28d9', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                             <div style={{ width: '32px', height: '32px', background: '#fff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
-                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                                             </div>
-                                             여권 유의사항
-                                         </div>
-                                         <div style={{ fontSize: '0.85rem', color: '#5b21b6', lineHeight: 1.6, wordBreak: 'keep-all', paddingLeft: '2px', fontWeight: 500 }}>
-                                             {safeStr(sr.customs?.passportNote || '만료일 6개월 이상 권장')}
-                                         </div>
-                                     </div>
-                                 </div>
-
-                                 {/* (4) 입국 절차 - 이미지 번호 리스트 스타일 */}
-                                 {sr.customs?.arrivalProcedure && sr.customs.arrivalProcedure.steps?.length > 0 && (
-                                     <div style={{ marginBottom: '24px', border: '1.5px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden', background: '#fff' }}>
-                                         <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                             <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1e293b' }}>{safeStr(sr?.customs?.arrivalProcedure?.title || '여행지 입국 절차')}</span>
-                                         </div>
-                                         <div style={{ padding: '0 18px 18px 18px' }}>
-                                             <div style={{ background: '#e0f2fe', color: '#0369a1', padding: '8px 12px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
-                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                                                 미리 준비하면 편리합니다.
-                                             </div>
-                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                                 {sr.customs?.arrivalProcedure?.steps?.map((st, i) => (
-                                                     <div key={i} style={{ display: 'flex', gap: '14px' }}>
-                                                         <div style={{ background: '#0284c7', color: '#fff', width: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, flexShrink: 0, marginTop: '2px' }}>{i + 1}</div>
-                                                         <div>
-                                                             <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a', marginBottom: '2px' }}>{safeStr(st.step)}</div>
-                                                             <div style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: 1.4 }}>{safeStr(st.description)}</div>
-                                                         </div>
-                                                     </div>
-                                                 ))}
-                                             </div>
-                                         </div>
-                                     </div>
-                                 )}
-
-                                 {/* (5) 미성년자 자녀 입국 규정 - 이미지 스타일 매칭 */}
-                                 {(sr.customs?.minorEntry || sr.customs?.minorDetail) && (
-                                     <div style={{ marginBottom: '24px', background: '#fffde7', border: '1.5px solid #fef08a', borderRadius: '16px', overflow: 'hidden' }}>
-                                         <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '8px', color: '#854d0e' }}>
-                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                                             <span style={{ fontSize: '0.92rem', fontWeight: 800 }}>미성년자 입국 규정</span>
-                                         </div>
-                                         <div style={{ padding: '0 18px 18px 18px' }}>
-                                             <div style={{ fontSize: '0.85rem', color: '#713f12', lineHeight: 1.6, marginBottom: '14px', wordBreak: 'keep-all' }}>
-                                                 {safeStr(sr?.customs?.minorEntry)}
-                                             </div>
-                                             {sr.customs.minorDetail && (
-                                                 <div style={{ background: '#fff', border: '1px solid #fdf4ff', borderRadius: '12px', padding: '16px', borderLeft: '4px solid #facc15' }}>
-                                                     <div style={{ color: '#854d0e', fontSize: '0.82rem', lineHeight: 1.6, display: 'flex', gap: '10px' }}>
-                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0, marginTop: '2px' }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                                                         <span style={{ wordBreak: 'keep-all' }}>{safeStr(sr?.customs?.minorDetail)}</span>
-                                                     </div>
-                                                 </div>
-                                             )}
-                                         </div>
-                                     </div>
-                                 )}
-
-                                 {/* (6) 공식 사이트 퀵링크 - 이미지 스타일 매칭 (Dark Blue Header) */}
-                                 {sr.customs?.links && sr.customs.links.length > 0 && (
-                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
-                                         <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                                             사전 입국 준비 사항
-                                         </div>
-                                         {sr.customs?.links?.map((link, li) => (
-                                             <div key={li} style={{ border: '1.5px solid #005a96', borderRadius: '16px', overflow: 'hidden', background: '#fff' }}>
-                                                 <div style={{ background: '#005a96', padding: '14px 20px', display: 'flex', alignItems: 'center', color: '#fff', gap: '14px' }}>
-                                                     <span style={{ background: '#fff', color: '#005a96', padding: '6px 12px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                                         {link.type === 'visa' ? '비자/ETA' : (link.type === 'customs' ? '세관신고' : '입국신고')}
-                                                     </span>
-                                                     <span style={{ fontSize: '1.05rem', fontWeight: 800, lineHeight: 1.3, marginTop: '4px', wordBreak: 'keep-all' }}>{safeStr(link.label)}</span>
-                                                 </div>
-                                                 <div style={{ padding: '24px' }}>
-                                                     <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '18px', marginBottom: '20px' }}>
-                                                         <div style={{ fontSize: '0.9rem', color: '#334155', lineHeight: 1.7, wordBreak: 'keep-all' }}>
-                                                             {safeStr(link.description) || "한국 국적자가 해당 국가에 입국하기 위해 사전 준비가 필요한 절차입니다. 세부 내용을 확인해 주세요."}
-                                                         </div>
-                                                     </div>
-                                                     <div style={{ marginBottom: '20px' }}>
-                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0284c7', fontSize: '0.88rem', fontWeight: 800, marginBottom: '8px' }}>
-                                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                                             신청 방법
-                                                         </div>
-                                                         <div style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: 1.6 }}>
-                                                             공식 홈페이지({link.url.replace('https://', '').split('/')[0]})에 접속하여 여권 정보 및 체류지 주소를 입력하고 제출합니다. 승인 후 안내에 따라 절차를 완료합니다.
-                                                         </div>
-                                                     </div>
-                                                     <a
-                                                         href={link.url}
-                                                         target="_blank"
-                                                         rel="noopener noreferrer"
-                                                         style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(to right, #00ace2, #008ebc)', color: '#fff', padding: '16px', borderRadius: '14px', fontWeight: 800, gap: '10px', fontSize: '1rem', boxShadow: '0 4px 12px rgba(0, 172, 226, 0.2)' }}
-                                                     >
-                                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                                                         공식 사이트 바로가기
-                                                     </a>
-                                                 </div>
-                                             </div>
-                                         ))}
-                                     </div>
-                                 )}
-
-                                 <div className="customs-warning-card" style={{ marginTop: '10px', opacity: 0.6 }}>
-                                     <h3>기타 기본 유의사항</h3>
-                                     <p>{safeStr(sr.customs?.warningContent)}</p>
-                                 </div>
-                            </GuideAccordion>
-
-
-
-                            {/* ── 환전 & 계산기 ── */}
-                            <div ref={currencyRef}>
-                                <GuideAccordion
-                                    id="currency"
-                                title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> 환전 가이드</>}
-                                isOpen={expandedSections['currency'] || false}
-                                onToggle={toggleSection}
-                            >
-                                <div className="currency-tip-cards">
-                                    <div className="currency-tip-card highlight">
-                                        <div className="ct-title">
-                                            간편 환산법
-                                        </div>
-                                        <p>{safeStr(sr?.currency?.calculationTip)}</p>
-                                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '6px', lineHeight: 1.4 }}>
-                                            *정확한 현재 환율이 아닌, 현지에서 체감 물가를 빠르게 계산하기 위한 대략적인 암산법입니다.
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="currency-tip-card">
-                                        <div className="ct-title">환전 팁</div>
-                                        <ul className="guide-list-wrap">
-                                            {safeStr(sr?.currency?.exchangeTip).split(/[\n·\-\*]/).filter(t => t.trim().length > 1).map((text, i) => (
-                                                <li key={i} className="guide-list-item">{text.trim()}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-
-                                    <div className="currency-tip-card">
-                                        <div className="ct-title">팁 문화</div>
-                                        <ul className="guide-list-wrap">
-                                            {safeStr(sr?.currency?.tipCulture).split(/[\n·\-\*]/).filter(t => t.trim().length > 1).map((text, i) => (
-                                                <li key={i} className="guide-list-item">{text.trim()}</li>
-                                            ))}
-                                        </ul>
+                                        {sr.currency.tipCulture && (
+                                            <div className="currency-tip-card" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '14px', borderRadius: '10px' }}>
+                                                <div className="ct-title" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', marginBottom: '6px' }}>팁 문화</div>
+                                                <ul className="guide-list-wrap" style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                                                    {safeStr(sr.currency.tipCulture).split(/[\n·\-\*]/).filter(t => t.trim().length > 1).map((text, i) => (
+                                                        <li key={i} className="guide-list-item" style={{ position: 'relative', paddingLeft: '14px', fontSize: '0.8rem', color: '#475569', lineHeight: 1.5, marginBottom: '4px' }}>
+                                                            <span style={{ position: 'absolute', left: 0, color: '#94a3b8' }}>•</span>
+                                                            {text.trim()}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
+                            )}
 
-                                {/* 환전 계산기 위젯 (양방향) */}
-                                <div className="mc-calc-widget">
-                                    <div className="mc-calc-title">실시간 환전 계산기</div>
+                            {/* 환전 계산기 위젯 */}
+                            {sr.currency && (
+                                <div className="mc-calc-widget mc-section" style={{ margin: '0 0 16px 0' }}>
+                                    <div className="mc-calc-title" style={{ fontSize: '0.9rem', fontWeight: 700, color: '#334155', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><line x1="16" y1="10" x2="16" y2="10.01"></line><line x1="12" y1="10" x2="12" y2="10.01"></line><line x1="8" y1="10" x2="8" y2="10.01"></line><line x1="12" y1="14" x2="12" y2="14.01"></line><line x1="8" y1="14" x2="8" y2="14.01"></line><line x1="12" y1="18" x2="12" y2="18.01"></line><line x1="8" y1="18" x2="8" y2="18.01"></line></svg>
+                                        실시간 환전 계산기
+                                    </div>
                                     
-                                    {/* 다중 통화 드롭다운 (감지된 통화가 2개 이상일 때) */}
                                     {(() => {
                                         const cur = sr.currency;
                                         let codes = cur?.targetCodes || [];
@@ -2193,7 +2270,7 @@ export default function ConfirmationViewerPage() {
                                                             <option key={code} value={code}>
                                                                 {cleanCode}{currencyKoMap[cleanCode] ? ` (${currencyKoMap[cleanCode]})` : ''}
                                                                 {code.includes('(') && !currencyKoMap[cleanCode] ? ` ${code.substring(code.indexOf('('))}` : ''}
-                                                        </option>
+                                                            </option>
                                                         );
                                                     })}
                                                 </select>
@@ -2205,13 +2282,13 @@ export default function ConfirmationViewerPage() {
                                         <div style={{ textAlign: 'center', padding: '20px', opacity: 0.6 }}>환율 로딩 중...</div>
                                     ) : exchangeRate ? (
                                         <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                            <div className="mc-calc-row">
-                                                <label>
+                                            <div className="mc-calc-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                                                <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569' }}>
                                                     {(() => {
                                                         const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
                                                         return calcDirection === 'krwToTarget' ? 'KRW' : clean;
                                                     })()}
-                                                    <span className="mc-calc-sublabel">({(() => {
+                                                    <span className="mc-calc-sublabel" style={{ fontSize: '0.72rem', color: '#94a3b8', marginLeft: '4px' }}>({(() => {
                                                         const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
                                                         return calcDirection === 'krwToTarget' ? '원' : (currencyKoMap[clean] || '현지 화폐');
                                                     })()})</span>
@@ -2222,6 +2299,7 @@ export default function ConfirmationViewerPage() {
                                                     onChange={e => setCalcAmount(e.target.value)}
                                                     placeholder="금액 입력"
                                                     className="mc-calc-input"
+                                                    style={{ border: 'none', background: 'transparent', textAlign: 'right', fontSize: '1rem', fontWeight: 700, color: '#1e293b', width: '60%', outline: 'none' }}
                                                 />
                                             </div>
 
@@ -2231,22 +2309,23 @@ export default function ConfirmationViewerPage() {
                                                     setCalcDirection(prev => prev === 'krwToTarget' ? 'targetToKrw' : 'krwToTarget');
                                                     setCalcAmount('');
                                                 }}
+                                                style={{ alignSelf: 'center', cursor: 'pointer', background: '#f1f5f9', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', margin: '4px 0' }}
                                             >
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="4" x2="12" y2="20"></line><polyline points="17 9 12 4 7 9"></polyline><polyline points="7 15 12 20 17 15"></polyline></svg>
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline><polyline points="5 12 12 5 19 12"></polyline></svg>
                                             </div>
 
-                                            <div className="mc-calc-row">
-                                                <label>
+                                            <div className="mc-calc-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                                                <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569' }}>
                                                     {(() => {
                                                         const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
                                                         return calcDirection === 'krwToTarget' ? clean : 'KRW';
                                                     })()}
-                                                    <span className="mc-calc-sublabel">({(() => {
+                                                    <span className="mc-calc-sublabel" style={{ fontSize: '0.72rem', color: '#94a3b8', marginLeft: '4px' }}>({(() => {
                                                         const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
                                                         return calcDirection === 'krwToTarget' ? (currencyKoMap[clean] || '현지 화폐') : '원';
                                                     })()})</span>
                                                 </label>
-                                                <div className="mc-calc-result">
+                                                <div className="mc-calc-result" style={{ fontSize: '1rem', fontWeight: 700, color: '#0ea5e9' }}>
                                                     {calcAmount ? (
                                                         calcDirection === 'krwToTarget'
                                                             ? (parseFloat(calcAmount) * exchangeRate).toLocaleString(undefined, { maximumFractionDigits: 0 })
@@ -2254,7 +2333,7 @@ export default function ConfirmationViewerPage() {
                                                     ) : '0'}
                                                 </div>
                                             </div>
-                                            <div className="mc-calc-rate">
+                                            <div className="mc-calc-rate" style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'right', marginTop: '4px' }}>
                                                 기준 환율: 1 KRW = {exchangeRate.toFixed(6)} {(() => {
                                                     return targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
                                                 })()}
@@ -2264,180 +2343,249 @@ export default function ConfirmationViewerPage() {
                                         <div style={{ textAlign: 'center', padding: '20px', opacity: 0.6 }}>환율 정보를 불러올 수 없습니다.</div>
                                     )}
                                 </div>
-                            </GuideAccordion>
-                            </div>
+                            )}
 
-                            {/* ── 로밍·통신 ── */}
-                            <div ref={roamingRef}>
-                                <GuideAccordion
-                                    id="roaming"
-                                title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg> 로밍 · 통신</>}
-                                isOpen={expandedSections['roaming'] || false}
-                                onToggle={toggleSection}
-                            >
-                                <div className="mc-roaming-grid">
-                                    <div className="mc-roaming-header-banner">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> 통신 환경 안내
+                            {/* 로밍 및 통신 */}
+                            {sr.roaming && (
+                                <div className="mc-section" style={{ margin: 0 }}>
+                                    <div className="mc-section-title">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg> 로밍 · 통신
                                     </div>
-                                    <p className="mc-roaming-subtitle" style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '14px', lineHeight: 1.5 }}>
-                                        {sr?.roaming?.description || `${safeStr(doc.trip.destination).split(' ').pop()}은(는) 주요 관광지와 리조트 내에서 사용이 원활합니다. 출국 전 데이터 로밍 차단 또는 로밍 요금제 신청이 필수입니다.`}
-                                    </p>
-                                    <div className="roaming-option-cards">
-                                        <div className="roaming-opt-card" style={{ flexDirection: 'column' }}>
-                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: '100%' }}>
-                                                <div className="r-opt-badge">1</div>
-                                                <strong style={{ fontSize: '0.9rem', color: '#1e293b' }}>통신사 데이터 로밍 (가장 편리)</strong>
-                                            </div>
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)', gap: '8px', marginTop: '4px', width: '100%' }}>
-                                                <div style={{ background: '#f8fafc', padding: '12px 4px', borderRadius: '10px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
-                                                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg> SKT
+                                    <div className="mc-roaming-grid">
+                                        <div className="mc-roaming-header-banner" style={{ background: '#f1f5f9', padding: '8px 12px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg> 통신 환경 안내
+                                        </div>
+                                        <p className="mc-roaming-subtitle" style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '14px', lineHeight: 1.5, margin: '0 0 12px 0' }}>
+                                            {sr.roaming.description || `${safeStr(doc.trip.destination).split(' ').pop()}은(는) 주요 관광지와 리조트 내에서 사용이 원활합니다. 출국 전 데이터 로밍 차단 또는 로밍 요금제 신청이 필수입니다.`}
+                                        </p>
+                                        <div className="roaming-option-cards" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                            <div className="roaming-opt-card" style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: '#fff', border: '1px solid #e2e8f0', padding: '14px', borderRadius: '12px' }}>
+                                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%' }}>
+                                                    <div className="r-opt-badge" style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800 }}>1</div>
+                                                    <strong style={{ fontSize: '0.85rem', color: '#1e293b' }}>통신사 데이터 로밍 (가장 편리)</strong>
+                                                </div>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', width: '100%' }}>
+                                                    <div style={{ background: '#f8fafc', padding: '8px 2px', borderRadius: '10px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                                                        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>SKT</div>
+                                                        <a href="tel:02-6343-9000" style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '2px' }}>02-6343-9000</a>
+                                                        <a href="tel:1599-2011" style={{ display: 'block', fontSize: '0.65rem', color: '#64748b', textDecoration: 'none' }}>1599-2011</a>
                                                     </div>
-                                                    <a href="tel:02-6343-9000" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '4px' }}>02-6343-9000</a>
-                                                    <a href="tel:1599-2011" style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', textDecoration: 'none' }}>1599-2011</a>
-                                                </div>
-                                                <div style={{ background: '#f8fafc', padding: '12px 4px', borderRadius: '10px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
-                                                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg> KT
+                                                    <div style={{ background: '#f8fafc', padding: '8px 2px', borderRadius: '10px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                                                        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>KT</div>
+                                                        <a href="tel:02-2190-0901" style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '2px' }}>02-2190-0901</a>
+                                                        <a href="tel:1588-0608" style={{ display: 'block', fontSize: '0.65rem', color: '#64748b', textDecoration: 'none' }}>1588-0608</a>
                                                     </div>
-                                                    <a href="tel:02-2190-0901" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '4px' }}>02-2190-0901</a>
-                                                    <a href="tel:1588-0608" style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', textDecoration: 'none' }}>1588-0608</a>
-                                                </div>
-                                                <div style={{ background: '#f8fafc', padding: '12px 4px', borderRadius: '10px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
-                                                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg> LG U+
+                                                    <div style={{ background: '#f8fafc', padding: '8px 2px', borderRadius: '10px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                                                        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>LG U+</div>
+                                                        <a href="tel:02-3416-7010" style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '2px' }}>02-3416-7010</a>
+                                                        <a href="tel:1544-0010" style={{ display: 'block', fontSize: '0.65rem', color: '#64748b', textDecoration: 'none' }}>1544-0010</a>
                                                     </div>
-                                                    <a href="tel:02-3416-7010" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '4px' }}>02-3416-7010</a>
-                                                    <a href="tel:1544-0010" style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', textDecoration: 'none' }}>1544-0010</a>
+                                                </div>
+                                                {sr.roaming.carriers && (
+                                                    <div style={{ fontSize: '0.72rem', color: '#64748b', background: '#f1f5f9', padding: '6px 10px', borderRadius: '8px', marginTop: '4px', lineHeight: 1.4 }}>
+                                                        <strong>💡 현지 통신사 파트너:</strong> {sr.roaming.carriers}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            
+                                            <div className="roaming-opt-card" style={{ display: 'flex', gap: '10px', background: '#fff', border: '1px solid #e2e8f0', padding: '12px 14px', borderRadius: '12px', alignItems: 'center' }}>
+                                                <div className="r-opt-badge" style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800, flexShrink: 0 }}>2</div>
+                                                <div className="r-opt-body" style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <strong style={{ fontSize: '0.82rem', color: '#1e293b' }}>현지 유심 (USIM)</strong>
+                                                    <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>현지 번호 제공, 한국 사전 구매 권장</span>
                                                 </div>
                                             </div>
-                                            {sr.roaming?.carriers && (
-                                                <div style={{ fontSize: '0.72rem', color: '#64748b', background: '#f1f5f9', padding: '8px 12px', borderRadius: '8px', marginTop: '10px', lineHeight: 1.4 }}>
-                                                    <strong>💡 현지 통신사 파트너:</strong> {sr.roaming.carriers}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="roaming-opt-card">
-                                            <div className="r-opt-badge">2</div>
-                                            <div className="r-opt-body">
-                                                <strong>현지 유심 (USIM)</strong>
-                                                <span>현지 번호 제공, 한국 사전 구매 권장</span>
-                                            </div>
-                                        </div>
-                                        <div className="roaming-opt-card">
-                                            <div className="r-opt-badge">3</div>
-                                            <div className="r-opt-body">
-                                                <strong>E-심 (eSIM)</strong>
-                                                <span>QR코드로 간편 개통 (지원 단말기 확인 요망)</span>
-                                            </div>
-                                        </div>
-                                        <div className="roaming-opt-card">
-                                            <div className="r-opt-badge">4</div>
-                                            <div className="r-opt-body">
-                                                <strong>와이파이 도시락</strong>
-                                                <span>가족 단위 기기 여러 대 연결 추천</span>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div className="roaming-tip-box" style={{ background: '#eff6ff', borderRadius: '10px', padding: '12px', marginTop: '12px', fontSize: '0.8rem', color: '#1e3a8a', lineHeight: 1.5 }}>
-                                        <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> 유심/eSIM 추천
-                                        </strong>
-                                        {safeStr(sr.roaming?.simEsim) || '그랩(Grab) 호출이나 길찾기 시 데이터가 필요하므로 유심이나 로밍 준비를 추천합니다.'}
-                                    </div>
+                                            <div className="roaming-opt-card" style={{ display: 'flex', gap: '10px', background: '#fff', border: '1px solid #e2e8f0', padding: '12px 14px', borderRadius: '12px', alignItems: 'center' }}>
+                                                <div className="r-opt-badge" style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800, flexShrink: 0 }}>3</div>
+                                                <div className="r-opt-body" style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <strong style={{ fontSize: '0.82rem', color: '#1e293b' }}>E-심 (eSIM)</strong>
+                                                    <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>QR코드로 간편 개통 (지원 단말기 확인 요망)</span>
+                                                </div>
+                                            </div>
 
-                                    {sr.roaming?.roamingTip && (
-                                        <div className="roaming-tip-box" style={{ background: '#fffbeb', borderRadius: '10px', padding: '12px', marginTop: '10px', fontSize: '0.8rem', color: '#92400e', lineHeight: 1.5, border: '1px solid #fef3c7' }}>
+                                            <div className="roaming-opt-card" style={{ display: 'flex', gap: '10px', background: '#fff', border: '1px solid #e2e8f0', padding: '12px 14px', borderRadius: '12px', alignItems: 'center' }}>
+                                                <div className="r-opt-badge" style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800, flexShrink: 0 }}>4</div>
+                                                <div className="r-opt-body" style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <strong style={{ fontSize: '0.82rem', color: '#1e293b' }}>와이파이 도시락</strong>
+                                                    <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>가족 단위 기기 여러 대 연결 추천</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="roaming-tip-box" style={{ background: '#eff6ff', borderRadius: '10px', padding: '12px', marginTop: '12px', fontSize: '0.8rem', color: '#1e3a8a', lineHeight: 1.5 }}>
                                             <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg> 통신 이용 꿀팁
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> 유심/eSIM 추천
                                             </strong>
-                                            {sr.roaming.roamingTip}
+                                            {safeStr(sr.roaming.simEsim) || '그랩(Grab) 호출이나 길찾기 시 데이터가 필요하므로 유심이나 로밍 준비를 추천합니다.'}
                                         </div>
-                                    )}
+
+                                        {sr.roaming.roamingTip && (
+                                            <div className="roaming-tip-box" style={{ background: '#fffbeb', borderRadius: '10px', padding: '12px', marginTop: '10px', fontSize: '0.8rem', color: '#92400e', lineHeight: 1.5, border: '1px solid #fef3c7' }}>
+                                                <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg> 통신 이용 꿀팁
+                                                </strong>
+                                                {sr.roaming.roamingTip}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </GuideAccordion>
-                            </div>
-
-
-                            {sr.customGuides?.map((guide, gi) => (
-                                <GuideAccordion
-                                    key={gi}
-                                    id={`customGuide-${gi}`}
-                                    title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg> {safeStr(guide.topic)}</>}
-                                    isOpen={expandedSections[`customGuide-${gi}`] || false}
-                                    onToggle={toggleSection}
-                                >
-                                    {guide.sections?.map((sec, si) => (
-                                        <div key={si} className="custom-sub-section">
-                                            <h4 className="css-title">{safeStr(sec.title)}</h4>
-
-                                            {/* steps 타입 */}
-                                            {sec.type === 'steps' && sec.steps && (
-                                                <div className="css-steps">
-                                                    {sec.steps.map((s, idx) => (
-                                                        <div key={idx} className="css-step">
-                                                            <div className="css-step-num">{idx + 1}</div>
-                                                            <div>
-                                                                <div className="css-step-label">{safeStr(s.step)}</div>
-                                                                <div className="css-step-detail">{safeStr(s.detail)}</div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-
-                                            {/* table 타입 */}
-                                            {sec.type === 'table' && sec.headers && sec.rows && (
-                                                <div className="css-table-wrap">
-                                                    <table className="css-table">
-                                                        <thead><tr>{sec.headers.map((h, hi) => <th key={hi}>{safeStr(h)}</th>)}</tr></thead>
-                                                        <tbody>
-                                                            {sec.rows.map((row, ri) => (
-                                                                <tr key={ri}>{row.map((c, ci) => <td key={ci}>{safeStr(c)}</td>)}</tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            )}
-
-                                            {/* list 타입 */}
-                                            {sec.type === 'list' && sec.items && (
-                                                <ul className="css-list">
-                                                    {sec.items.map((item, ii) => <li key={ii}>{safeStr(item)}</li>)}
-                                                </ul>
-                                            )}
-
-                                            {/* text 타입 */}
-                                            {sec.type === 'text' && sec.content && (
-                                                <div className="css-text">{safeStr(sec.content)}</div>
-                                            )}
-
-                                            {/* route 타입 */}
-                                            {sec.type === 'route' && sec.route && (
-                                                <div className="css-route">
-                                                    {sec.route.map((r, ri) => (
-                                                        <span key={ri}>
-                                                            <span className="css-route-badge">{safeStr(r)}</span>
-                                                            {ri < (sec.route?.length || 0) - 1 && <span className="css-route-arrow">→</span>}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </GuideAccordion>
-                            ))}
+                            )}
                         </div>
-                );
-            })()}
-
-                {activeTab === '여행가이드' && !doc.secondaryResearch && (
+                    );
+                })()}
+                {activeTab === '환전/로밍' && !doc.secondaryResearch && (
                     <div className="mc-section">
                         <div className="mc-empty-guide">
-                            <span style={{ fontSize: '2.5rem' }}>🔬</span>
-                            <p style={{ fontWeight: 600, fontSize: '1rem' }}>여행 가이드가 아직 준비되지 않았습니다.</p>
-                            <p style={{ fontSize: '0.82rem', color: '#94a3b8' }}>담당자가 2차 조사를 완료하면 여행지 맞춤 가이드가 표시됩니다.</p>
+                            <span style={{ fontSize: '2.5rem' }}>💸</span>
+                            <p style={{ fontWeight: 600, fontSize: '1rem' }}>환전/로밍 정보가 아직 준비되지 않았습니다.</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* ============================== 9. 관광지 ============================== */}
+                {activeTab === '관광지' && doc.secondaryResearch && (() => {
+                    const sr = doc.secondaryResearch;
+                    return (
+                        <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
+                            <div style={{ 
+                                marginBottom: '20px', 
+                                background: '#f1f5f9', 
+                                padding: '12px 16px', 
+                                borderRadius: '12px', 
+                                fontSize: '0.8rem', 
+                                color: '#64748b', 
+                                lineHeight: 1.5,
+                                display: 'flex',
+                                gap: '8px',
+                                alignItems: 'flex-start'
+                            }}>
+                                <span style={{ flexShrink: 0, fontSize: '0.9rem' }}>💡</span>
+                                <span>아래 내용은 해당 도시의 주요 명소를 소개하는 가이드이며, 실제 확정된 일정상 방문지 구성과는 차이가 있을 수 있습니다.</span>
+                            </div>
+
+                            {/* 첫 번째 랜드마크: 히어로 카드 */}
+                            {sr.landmarks?.[0] && (
+                                <div className="landmark-hero" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '20px', overflow: 'hidden', marginBottom: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', margin: '0' }}>
+                                    {sr.landmarks[0].imageUrl && (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={sr.landmarks[0].imageUrl} alt={safeStr(sr.landmarks[0].name)} className="landmark-hero-img" style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+                                    )}
+                                    <div className="landmark-hero-info" style={{ padding: '20px' }}>
+                                        <h4 style={{ margin: '0 0 4px 0', fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>{safeStr(sr.landmarks[0].name)}</h4>
+                                        {sr.landmarks[0].nameLocal && <span className="landmark-local" style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', marginBottom: '10px', fontWeight: 500 }}>{safeStr(sr.landmarks[0].nameLocal)}</span>}
+                                        <p style={{ margin: 0, fontSize: '0.88rem', color: '#475569', lineHeight: 1.6, wordBreak: 'keep-all' }}>{safeStr(sr.landmarks[0].description)}</p>
+                                    </div>
+                                </div>
+                            )}
+                            {/* 나머지 랜드마크: 그리드 카드 */}
+                            <div className="landmark-grid" style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
+                                {sr.landmarks?.slice(1).map((lm: any, i: number) => (
+                                    <div key={i} className="landmark-card" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+                                        {lm.imageUrl && (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img src={lm.imageUrl} alt={safeStr(lm.name)} className="landmark-card-img" style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
+                                        )}
+                                        <div className="landmark-card-body" style={{ padding: '20px' }}>
+                                            <h4 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>{safeStr(lm.name)}</h4>
+                                            {lm.nameLocal && <span className="landmark-local-sm" style={{ display: 'block', fontSize: '0.78rem', color: '#64748b', marginBottom: '8px', fontWeight: 500 }}>{safeStr(lm.nameLocal)}</span>}
+                                            <p style={{ margin: 0, fontSize: '0.85rem', color: '#475569', lineHeight: 1.6, wordBreak: 'keep-all' }}>{safeStr(lm.description)}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                })()}
+                {activeTab === '관광지' && !doc.secondaryResearch && (
+                    <div className="mc-section">
+                        <div className="mc-empty-guide">
+                            <span style={{ fontSize: '2.5rem' }}>🗺️</span>
+                            <p style={{ fontWeight: 600, fontSize: '1rem' }}>관광지 정보가 아직 준비되지 않았습니다.</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* ============================== 10. 기타 ============================== */}
+                {activeTab === '기타' && doc.secondaryResearch?.customGuides && doc.secondaryResearch.customGuides.length > 0 && (
+                    <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
+                        {doc.secondaryResearch.customGuides.map((guide: any, gi: number) => (
+                            <GuideAccordion
+                                key={gi}
+                                id={`customGuide-${gi}`}
+                                title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg> {safeStr(guide.topic)}</>}
+                                isOpen={expandedSections[`customGuide-${gi}`] || false}
+                                onToggle={toggleSection}
+                            >
+                                {guide.sections?.map((sec: any, si: number) => (
+                                    <div key={si} className="custom-sub-section" style={{ marginBottom: '20px' }}>
+                                        <h4 className="css-title" style={{ fontSize: '0.9rem', fontWeight: 800, color: '#1e293b', margin: '0 0 10px 0', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>{safeStr(sec.title)}</h4>
+
+                                        {/* steps 타입 */}
+                                        {sec.type === 'steps' && sec.steps && (
+                                            <div className="css-steps" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                {sec.steps.map((s: any, idx: number) => (
+                                                    <div key={idx} className="css-step" style={{ display: 'flex', gap: '10px' }}>
+                                                        <div className="css-step-num" style={{ background: '#e2e8f0', color: '#475569', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800, flexShrink: 0 }}>{idx + 1}</div>
+                                                        <div>
+                                                            <div className="css-step-label" style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '2px' }}>{safeStr(s.step)}</div>
+                                                            <div className="css-step-detail" style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>{safeStr(s.detail)}</div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* table 타입 */}
+                                        {sec.type === 'table' && sec.headers && sec.rows && (
+                                            <div className="css-table-wrap" style={{ overflowX: 'auto' }}>
+                                                <table className="css-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left' }}>
+                                                    <thead><tr style={{ background: '#f8fafc' }}>{sec.headers.map((h: any, hi: number) => <th key={hi} style={{ padding: '8px 10px', borderBottom: '1.5px solid #e2e8f0', fontWeight: 700, color: '#475569' }}>{safeStr(h)}</th>)}</tr></thead>
+                                                    <tbody>
+                                                        {sec.rows.map((row: any, ri: number) => (
+                                                            <tr key={ri} style={{ borderBottom: '1px solid #f1f5f9' }}>{row.map((c: any, ci: number) => <td key={ci} style={{ padding: '8px 10px', color: '#475569' }}>{safeStr(c)}</td>)}</tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+
+                                        {/* list 타입 */}
+                                        {sec.type === 'list' && sec.items && (
+                                            <ul className="css-list" style={{ margin: 0, paddingLeft: '20px', fontSize: '0.82rem', color: '#475569', lineHeight: 1.6 }}>
+                                                {sec.items.map((item: any, ii: number) => <li key={ii} style={{ marginBottom: '4px' }}>{safeStr(item)}</li>)}
+                                            </ul>
+                                        )}
+
+                                        {/* text 타입 */}
+                                        {sec.type === 'text' && sec.content && (
+                                            <div className="css-text" style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6 }}>
+                                                {renderFormattedText(sec.content)}
+                                            </div>
+                                        )}
+
+                                        {/* route 타입 */}
+                                        {sec.type === 'route' && sec.route && (
+                                            <div className="css-route" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px' }}>
+                                                {sec.route.map((r: any, ri: number) => (
+                                                    <span key={ri} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                                        <span className="css-route-badge" style={{ background: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600 }}>{safeStr(r)}</span>
+                                                        {ri < (sec.route?.length || 0) - 1 && <span className="css-route-arrow" style={{ color: '#94a3b8', fontSize: '0.8rem' }}>→</span>}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </GuideAccordion>
+                        ))}
+                    </div>
+                )}
+                {activeTab === '기타' && (!doc.secondaryResearch?.customGuides || doc.secondaryResearch.customGuides.length === 0) && (
+                    <div className="mc-section">
+                        <div className="mc-empty-guide">
+                            <span style={{ fontSize: '2.5rem' }}>🗂️</span>
+                            <p style={{ fontWeight: 600, fontSize: '1rem' }}>추가 가이드 정보가 없습니다.</p>
                         </div>
                     </div>
                 )}

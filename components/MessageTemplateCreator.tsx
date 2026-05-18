@@ -16,6 +16,7 @@ interface Customer {
     travelersCount: string;
     visitorId: string;
     reservationNumber?: string;
+    confirmationLink?: string;
     timestamp: string;
 }
 
@@ -123,9 +124,19 @@ export default function MessageTemplateCreator() {
             if (selectedCustomer.url) setUrl(selectedCustomer.url);
             if (selectedCustomer.travelersCount) setTravelers(selectedCustomer.travelersCount);
             if (selectedCustomer.departureDate) setDepartureDate(selectedCustomer.departureDate);
-            if (selectedCustomer.visitorId) {
-                const baseUrl = 'https://clubmode.vercel.app';
-                setConfirmationLink(`${baseUrl}/confirmation/${selectedCustomer.visitorId}`);
+            
+            // 예약번호 로드
+            const resNum = selectedCustomer.reservationNumber || '';
+            setBookingNumber(resNum);
+
+            if (selectedCustomer.confirmationLink) {
+                setConfirmationLink(selectedCustomer.confirmationLink);
+            } else {
+                const resId = resNum || selectedCustomer.visitorId || '';
+                if (resId) {
+                    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://clubmode.kr';
+                    setConfirmationLink(`${baseUrl}/confirmation/${resId}`);
+                }
             }
         }
     }, [selectedCustomer]);
@@ -278,9 +289,9 @@ export default function MessageTemplateCreator() {
 + 0(유류 할증료 매월 변동되며 잔금 시 최종 확정 적용됩니다.) 
 ${travelersNum > 0 && priceNum > 0 ? ` = ${price} * ${travelersNum}명 = ${totalPriceStr}` : ''}`;
 
-                text = `✈️ [모두투어] 여행 예약 안내 (담당: ${AGENT_NAME})
+                text = `✈️ [모두투어] 여행 예약 안내
 
-안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
+안녕하세요, ${name}님! 모두투어 ${AGENT_NAME}입니다. 😊
 예약을 진심으로 감사드립니다.
 원활한 여행 준비를 위해 주요 사항을 안내해 드립니다.
 
@@ -310,8 +321,6 @@ ${(() => {
                     })()}
 - 상세일정 : ${url}
 (위 주소를 클릭하시면 일정, 호텔 등 세부 사항을 확인할 수 있습니다.)
-
-- 계  약  금: ${depositDisplay}${depositDeadline ? ` (${depositDeadline}까지)` : ''}
 
 ──────────────────
 
@@ -369,7 +378,7 @@ ${specialTerms || `■ 여행자의 여행계약 해제 요청 시 여행약관�
 7) 출발: 즐거운 여행!
 
 📞 상담 및 문의
-• 담당자: (주)클럽모두투어 ${AGENT_NAME}
+• 담당자: 모두투어 ${AGENT_NAME}
 • 직통전화: 02-951-9004
 • 휴대폰: 010-9307-9004`;
                 break;
@@ -541,8 +550,10 @@ ${bankAccount}
                 text = `안녕하세요! ${name} 고객님
 이번 여행의 모바일 가이드북을 보내드립니다. ✈️
 
-이 가이드북은 모두투어 일정을 바탕으로 고객님의 여행 날짜에 맞게 
-저희 여행사에서 별도로 만들었습니다. 
+1. 세부 일정은 아래 모두투어 일정표를 기준으로 움직입니다.
+${url}
+
+2. 아래 가이드북은 모두투어 일정을 바탕으로 고객님의 여행 날짜에 맞게 저희 여행사에서 별도로 만들었습니다. 
 
 📍 날씨 정보
 🧳 준비물 
@@ -553,8 +564,6 @@ ${bankAccount}
 
 출발 전 아래 링크에서 확인하셔서 
 즐거운 여행을 만드세요! 🌟
-
-🔗 모바일 가이드북 링크
 ${confirmationLink}`;
                 break;
 
@@ -1000,7 +1009,11 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                 </div>
                 <div className="msg-preview-body">
                     {generatedText ? (
-                        <div className="msg-preview-text">{generatedText}</div>
+                        <textarea
+                            className="msg-preview-textarea"
+                            value={generatedText}
+                            onChange={(e) => setGeneratedText(e.target.value)}
+                        />
                     ) : (
                         <div className="msg-preview-empty">
                             <div className="msg-preview-empty-icon">✉️</div>
