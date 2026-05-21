@@ -15,12 +15,12 @@ const debugLog = (msg: string) => {
 };
 
 // Gemini AI 초기화
-const apiKey = (process.env.GEMINI_API_KEY || '').replace(/[\x00-\x1F\x7F]/g, '').trim();
+const apiKey = (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY || '').replace(/[\x00-\x1F\x7F]/g, '').trim();
 if (!apiKey) {
-    console.error('[AI Engine] GEMINI_API_KEY가 설정되지 않았습니다!');
+    console.error('[AI Engine] GEMINI_API_KEY 또는 GOOGLE_GENAI_API_KEY가 설정되지 않았습니다!');
 }
 const genAI = new GoogleGenerativeAI(apiKey);
-const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.0-flash';
+const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash';
 const model = genAI.getGenerativeModel({ model: modelName }); // 환경변수에서 모델명을 가져옴
 
 // 대화 컨텍스트 (메모리)
