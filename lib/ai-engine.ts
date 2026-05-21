@@ -288,3 +288,74 @@ ${historyText}
 export function resetConversation(userId: string): void {
     conversationContexts.delete(userId);
 }
+
+/**
+ * 텔레그램으로 입력된 오프라인 전화 문의 메시지를 자연어 분석하여 구조화합니다.
+ */
+export async function parseTelegramInquiry(text: string): Promise<{
+    name: string;
+    phone: string;
+    destination: string;
+    inflowChannel: string;
+    inquiryDetails: string;
+}> {
+    const prompt = `
+당신은 여행사 전화 문의 자연어 분석 전문가입니다. 관리자가 퇴근 후 모바일 메신저(텔레그램)로 자유롭게 남긴 메모를 분석하여 정형화된 JSON 데이터로 추출하세요.
+
+[입력 메시지]
+"${text}"
+
+[추출 및 분석 규칙]
+1. name: 고객의 한글/영문 성함 (예: "홍길동", "유수진"). 발견되지 않으면 "미정"으로 설정하세요.
+2. phone: 010으로 시작하는 연락처. 발견되면 반드시 "010-XXXX-XXXX" 형식으로 대시(-)를 추가하여 포맷팅하세요. 예: "01012345678" -> "010-1234-5678". 발견되지 않으면 "미정"으로 설정하세요.
+3. destination: 여행 목적지 (예: "일본", "다낭", "규슈"). 발견되지 않으면 빈 문자열("")로 설정하세요.
+4. inflowChannel: 고객이 유입된 경로. 반드시 아래 제공되는 **표준 유입경로 리스트** 중 하나로 완벽히 매핑하세요:
+   - "블로그": 입력글에 '블로그', '네이버 블로그', 'blog' 등이 포함되는 경우
+   - "인스타그램": 입력글에 '인스타', '인스타그램', 'instagram', 'dm' 등이 포함되는 경우
+   - "당근": 입력글에 '당근', '당근마켓', '당근글' 등이 포함되는 경우
+   - "지인소개": 입력글에 '소개', '추천', '지인' 등이 포함되는 경우
+   - "카카오톡": 입력글에 '카톡', '카카오', '카카오톡', 'kakao' 등이 포함되는 경우
+   - "전화": 입력글에 '전화', '콜', '전화옴', '통화' 등이 포함되는 경우이거나, 유입경로를 추론할 수 없을 때 기본값으로 사용
+   - "기타": 그 외 표준에 부합하지 않거나 특이한 경로
+5. inquiryDetails: 대화에 언급된 문의 목적, 일정, 상세 메모 내용을 1-2문장의 깔끔하고 정중한 설명으로 요약하세요. (예: "6월 중순 3박 4일 일본 온천 여행 패키지 견적 요청").
+
+[응답 주의사항]
+- 마크다운 기호(예: \`\`\`json)나 부가 설명 없이, 오직 유효한 JSON 형식의 문자열 하나만 반환하세요.
+- JSON 키 명칭은 반드시 아래와 일치해야 합니다:
+  {
+    "name": "성함",
+    "phone": "연락처",
+    "destination": "목적지",
+    "inflowChannel": "표준유입경로",
+    "inquiryDetails": "문의요약"
+  }
+`;
+
+    try {
+        const result = await model.generateContent(prompt);
+        let responseText = result.response.text().trim();
+        
+        // 마크다운 블록 제거
+        responseText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+        
+        const extracted = JSON.parse(responseText);
+        
+        return {
+            name: extracted.name || '미정',
+            phone: extracted.phone || '미정',
+            destination: extracted.destination || '',
+            inflowChannel: extracted.inflowChannel || '전화',
+            inquiryDetails: extracted.inquiryDetails || text
+        };
+    } catch (e) {
+        console.error('[AI Engine] Telegram Parsing Error:', e);
+        // 파싱 실패 시 기본값 리턴
+        return {
+            name: '미정',
+            phone: '미정',
+            destination: '',
+            inflowChannel: '전화',
+            inquiryDetails: text
+        };
+    }
+}

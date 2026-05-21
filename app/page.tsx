@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import StatsCard from '@/components/StatsCard';
 import ConsultationList from '@/components/ConsultationList';
 import { ConsultationData } from '@/types';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, X } from 'lucide-react';
 
 interface DashboardResponse {
   summary: {
@@ -44,6 +44,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<string>('recentInquiries'); // Default view
   const [activeTitle, setActiveTitle] = useState('최근 신규 문의');
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+
+  const pendingCount = data?.lists.recentInquiries.filter(c => c.automation.status === '확인필요').length || 0;
 
   useEffect(() => {
     fetchDashboardData();
@@ -78,6 +81,43 @@ export default function DashboardPage() {
 
   return (
     <div>
+      {pendingCount > 0 && !bannerDismissed && (
+        <div className="telegram-alert-banner">
+          <div className="telegram-alert-content">
+            <div className="telegram-alert-icon">🚨</div>
+            <div className="telegram-alert-text">
+              <div className="telegram-alert-title">퇴근 시간 중 접수된 새로운 텔레그램 문의</div>
+              <div className="telegram-alert-desc">
+                확인이 필요한 새로운 문의가 <strong>{pendingCount}건</strong> 있습니다. 상담목록에서 내용을 확인하고 상태를 업데이트해 주세요.
+              </div>
+            </div>
+          </div>
+          <div className="telegram-alert-actions">
+            <button 
+              className="telegram-alert-btn" 
+              onClick={() => {
+                handleCardClick('recentInquiries', '최근 신규 문의');
+                setTimeout(() => {
+                  const element = document.querySelector('.dashboard-list-section');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }, 100);
+              }}
+            >
+              상담목록 확인하기
+            </button>
+            <button 
+              className="telegram-alert-close" 
+              onClick={() => setBannerDismissed(true)}
+              title="닫기"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+      )}
+
       <header className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <h1 className="page-title">여행 상담 대시보드</h1>

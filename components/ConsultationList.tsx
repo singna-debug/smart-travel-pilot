@@ -191,14 +191,14 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                 <React.Fragment key={`row-${index}`}>
                                     <tr
                                         onClick={() => toggleExpand(index)}
-                                        className={`expandable-row ${isExpanded ? 'expanded' : ''}`}
+                                        className={`expandable-row ${isExpanded ? 'expanded' : ''} ${item.automation.status === '확인필요' ? 'pending-confirm-row' : ''}`}
                                         style={{ cursor: 'pointer' }}
                                     >
                                         <td style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-muted)' }}>
                                             <span className={`expand-arrow ${isExpanded ? 'open' : ''}`}>▶</span>
                                         </td>
                                         <td>
-                                            <div className="cell-primary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <div className="cell-primary" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                                                 {item.customer.name === '미정' && item.source === '카카오톡' ? '[K]미정' : item.customer.name}
                                                 {item.source === '카카오톡' && (
                                                     <span style={{
@@ -207,6 +207,15 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                                         borderRadius: '4px', fontWeight: '600',
                                                         marginLeft: '4px'
                                                     }}>K</span>
+                                                )}
+                                                {item.source === '텔레그램' && (
+                                                    <span style={{
+                                                        backgroundColor: '#0088cc', color: '#ffffff',
+                                                        fontSize: '0.65rem', padding: '2px 6px',
+                                                        borderRadius: '4px', fontWeight: '600',
+                                                        marginLeft: '4px', display: 'inline-flex',
+                                                        alignItems: 'center', gap: '2px'
+                                                     }}>📲 TG</span>
                                                 )}
                                             </div>
                                         </td>
@@ -233,7 +242,8 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                                 ${['상담중', '견적제공'].includes(item.automation.status) ? 'consulting' : ''}
                                                 ${['취소', '취소/보류'].includes(item.automation.status) ? 'canceled' : ''}
                                                 ${['상담완료'].includes(item.automation.status) ? 'completed' : ''}
-                                                ${!['예약확정', '선금완료', '잔금완료', '여행완료', '상담중', '견적제공', '취소', '취소/보류', '상담완료'].includes(item.automation.status) ? 'default' : ''}
+                                                ${item.automation.status === '확인필요' ? 'pending-confirm' : ''}
+                                                ${!['예약확정', '선금완료', '잔금완료', '여행완료', '상담중', '견적제공', '취소', '취소/보류', '상담완료', '확인필요'].includes(item.automation.status) ? 'default' : ''}
                                             `}>
                                                 {item.automation.status}
                                             </span>

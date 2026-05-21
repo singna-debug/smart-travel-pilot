@@ -2,9 +2,9 @@
  * Telegram API Utility
  */
 
-export async function sendTelegramMessage(message: string): Promise<{ success: boolean; error?: string }> {
+export async function sendTelegramMessage(message: string, overrideChatId?: string): Promise<{ success: boolean; error?: string }> {
     const token = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID;
+    const chatId = overrideChatId || process.env.TELEGRAM_CHAT_ID;
 
     if (!token || !chatId) {
         console.error('[Telegram] Missing environment variables: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID');

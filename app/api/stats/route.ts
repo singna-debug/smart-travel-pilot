@@ -68,8 +68,9 @@ export async function GET() {
 
         const latestConsultations = getLatestConsultations(consultations);
 
-        // 1. 최근 7일 이내 생성된 신규 문의 목록 (Summary 용 유지)
+        // 1. 최근 7일 이내 생성된 신규 문의 목록 (Summary 용 유지) 또는 상태가 '확인필요'인 건
         const recentInquiries = latestConsultations.filter(c => {
+            if (c.automation.status === '확인필요') return true;
             const d = parseD(c.timestamp);
             if (!d) return false;
             const diff = differenceInDays(todayObj, d);
