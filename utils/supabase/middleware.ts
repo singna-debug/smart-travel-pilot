@@ -42,11 +42,15 @@ export async function updateSession(request: NextRequest) {
   const isPublicConfirmationApi = request.nextUrl.pathname.startsWith('/api/confirmation/') && request.nextUrl.pathname !== '/api/confirmation'
   // 환율 API도 확정서 뷰어에서 사용
   const isPublicUtilApi = request.nextUrl.pathname.startsWith('/api/exchange-rate')
+  // 텔레그램 웹훅 API도 공개
+  const isTelegramWebhook = request.nextUrl.pathname.startsWith('/api/telegram-webhook')
+  // 카카오 스킬 API도 공개
+  const isKakaoSkill = request.nextUrl.pathname.startsWith('/api/kakao-skill')
 
   if (isStaticAsset) return supabaseResponse
 
   // 공개 페이지는 로그인 체크 없이 통과
-  if (isAuthPage || isPublicConfirmationViewer || isPublicConfirmationApi || isPublicUtilApi) {
+  if (isAuthPage || isPublicConfirmationViewer || isPublicConfirmationApi || isPublicUtilApi || isTelegramWebhook || isKakaoSkill) {
       return supabaseResponse
   }
 
