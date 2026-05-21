@@ -97,6 +97,7 @@ export default function DashboardPage() {
               className="telegram-alert-btn" 
               onClick={() => {
                 handleCardClick('recentInquiries', '최근 신규 문의');
+                setBannerDismissed(true); // 배너 닫기 추가
                 setTimeout(() => {
                   const element = document.querySelector('.dashboard-list-section');
                   if (element) {

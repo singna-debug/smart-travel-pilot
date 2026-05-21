@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
                 url: '',
             },
             automation: {
-                status: '확인필요', // '확인필요' 상태 설정
+                status: '상담중', // '상담중' 상태 설정
                 inquirySource: parsed.inflowChannel, // AI 표준 유입경로 매핑 결과 기입
                 recurringCustomer: '신규고객',
                 balance_due_date: '미정',
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
                     customer_phone: parsed.phone,
                     destination: parsed.destination,
                     departure_date: '',
-                    status: '확인필요',
+                    status: '상담중',
                     summary: parsed.inquiryDetails,
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'visitor_id' });
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
 • <b>목적지:</b> ${parsed.destination || '미지정'}
 • <b>상세내용:</b> ${parsed.inquiryDetails}
 
-📢 <i>상태가 <b>[확인필요]</b>로 정상 등록되었습니다. 구글 시트 기입 완료 및 다음날 아침 출근 시 웹 사이트 상담 목록 화면에서 배너 알림으로 확인해 보실 수 있습니다.</i>`;
+📢 <i>상태가 <b>[상담중]</b>으로 정상 등록되었습니다. 구글 시트 기입 완료 및 다음날 아침 출근 시 웹 사이트 상담 목록 화면에서 배너 알림으로 확인해 보실 수 있습니다.</i>`;
 
         await sendTelegramMessage(responseCard, chatId);
 
