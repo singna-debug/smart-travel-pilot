@@ -42,6 +42,14 @@ interface ProductInfo {
 
 type TemplateType = 'remind' | 'booking' | 'dotcom' | 'balance' | 'ticket' | 'confirmation' | 'pre_4w' | 'departure' | 'happy_call' | 'china_barcode';
 
+export interface FeeItem {
+    id: string;
+    label: string;
+    amount: string;
+    type: 'add' | 'discount';
+    applyType: 'per_person' | 'total';
+}
+
 const TEMPLATE_LABELS: Record<TemplateType, { label: string; icon: string }> = {
     remind: { label: '리마인드', icon: '⏰' },
     booking: { label: '예약 및 결제', icon: '✅' },
@@ -82,6 +90,31 @@ export default function MessageTemplateCreator() {
 
     const [templateType, setTemplateType] = useState<TemplateType>('remind');
     const [productPrice, setProductPrice] = useState('');
+
+    // 추가/할인 및 수동 최종 잔금 상태
+    const [feeItems, setFeeItems] = useState<FeeItem[]>([]);
+    const [isManualBalance, setIsManualBalance] = useState(false);
+    const [manualBalanceValue, setManualBalanceValue] = useState('');
+
+    // 행 추가/삭제/수정 헬퍼 함수
+    const addFeeItem = (type: 'add' | 'discount') => {
+        const newItem: FeeItem = {
+            id: Date.now().toString() + Math.random().toString(36).substring(2, 7),
+            label: type === 'add' ? '추가 비용' : '할인 혜택',
+            amount: '',
+            type,
+            applyType: 'per_person'
+        };
+        setFeeItems([...feeItems, newItem]);
+    };
+
+    const removeFeeItem = (id: string) => {
+        setFeeItems(feeItems.filter(item => item.id !== id));
+    };
+
+    const updateFeeItem = (id: string, fields: Partial<FeeItem>) => {
+        setFeeItems(feeItems.map(item => item.id === id ? { ...item, ...fields } : item));
+    };
 
     // 추가 입력 필드
     const [bookingNumber, setBookingNumber] = useState('');
@@ -168,7 +201,7 @@ export default function MessageTemplateCreator() {
         bookingNumber, travelers, deposit, depositDeadline, 
         bankAccount, bankHolder, excludedCosts, depositPerPerson, 
         confirmationLink, reviewLink, specialTerms, airline, departureDate, bookingNumber,
-        productPrice
+        productPrice, feeItems, isManualBalance, manualBalanceValue
     ]);
 
     async function fetchCustomers() {
@@ -253,6 +286,32 @@ export default function MessageTemplateCreator() {
         const totalDeposit = depositPP * travelersNum;
         const totalDepositStr = totalDeposit > 0 ? `${formatPrice(totalDeposit)}원` : '';
         const depositDisplay = deposit;
+
+        // 다중 추가금 및 할인금 동적 계산
+        let totalAdd = 0;
+        let totalDiscount = 0;
+        let addDetails = '';
+        let discountDetails = '';
+
+        feeItems.forEach((item) => {
+            const amt = parseInt(item.amount.replace(/[^0-9]/g, ''), 10) || 0;
+            if (amt <= 0) return;
+
+            const itemTotal = item.applyType === 'per_person' ? amt * travelersNum : amt;
+            if (item.type === 'add') {
+                totalAdd += itemTotal;
+                addDetails += `- ${item.label}: +${formatPrice(itemTotal)}원${item.applyType === 'per_person' ? ` (1인 ${formatPrice(amt)}원)` : ''}\n`;
+            } else {
+                totalDiscount += itemTotal;
+                discountDetails += `- ${item.label}: -${formatPrice(itemTotal)}원${item.applyType === 'per_person' ? ` (1인 ${formatPrice(amt)}원)` : ''}\n`;
+            }
+        });
+
+        // 최종 잔금 계산
+        const finalBalance = totalPrice - totalDeposit + totalAdd - totalDiscount;
+        const remainingBalanceStr = isManualBalance 
+            ? (manualBalanceValue || '0원') 
+            : (finalBalance > 0 ? `${formatPrice(finalBalance)}원` : '0원');
 
         let text = '';
 
@@ -340,7 +399,12 @@ ${bookingPriceCalc}
 - 상기 상품은 항공, 현지 호텔이 완료되면 확정됩니다.
 
 - 계  약  금: ${deposit}${depositDeadline ? ` (${depositDeadline}까지)` : ''}
-- 잔       금: 출발 3주전 다시 안내드립니다.
+${(() => {
+                        let extraLines = '';
+                        if (addDetails) extraLines += `[추가 비용]\n${addDetails}`;
+                        if (discountDetails) extraLines += `[할인 내역]\n${discountDetails}`;
+                        return extraLines ? `${extraLines.trim()}\n` : '';
+                    })()}- 최종 잔금: ${remainingBalanceStr} (출발 3주전 다시 안내드립니다.)
 
 ──────────────────
 
@@ -472,11 +536,9 @@ ${dest} 여행 출발이 어느덧 한 달 앞으로 다가왔습니다.
                 break;
 
             case 'balance': {
-                const depositPP = parseInt(depositPerPerson.replace(/[^0-9]/g, ''), 10) || 0;
-                const totalDeposit = depositPP * (travelersNum || 1);
-                const remainingBalance = (priceNum * (travelersNum || 1)) - totalDeposit;
-                const totalDepositStr = formatPrice(totalDeposit);
-                const remainingBalanceStr = formatPrice(remainingBalance);
+                let detailBreakdown = '';
+                if (addDetails) detailBreakdown += `\n[추가 비용]\n${addDetails.trim()}`;
+                if (discountDetails) detailBreakdown += `\n[할인 내역]\n${discountDetails.trim()}`;
 
                 text = `✈️ [모두투어] 여행 상품 잔금 결제 안내 (담당: ${AGENT_NAME})
 
@@ -487,8 +549,10 @@ ${dest} 여행 출발이 어느덧 한 달 앞으로 다가왔습니다.
 ──────────────────
 
 💳 납부 금액
-- 계약금: ${totalDepositStr}원 (납부 완료)
-- 잔    금: ${remainingBalanceStr}원
+- 상품 총액: ${totalPriceStr} (${travelersNum}인)
+- 기납 계약금: -${totalDepositStr}원 (납부 완료)${detailBreakdown ? `\n${detailBreakdown}` : ''}
+──────────────────
+- 최종 결제 잔금: ${remainingBalanceStr}
 
 ──────────────────
 
@@ -900,6 +964,113 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                 />
                             </div>
 
+                            {/* 추가금 / 할인금 동적 다중 입력 폼 */}
+                            <div className="msg-field full" style={{ marginTop: '16px', borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '16px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                    <label className="msg-field-label" style={{ fontSize: '0.95rem', fontWeight: 'bold', marginBottom: 0 }}>💳 추가 비용 / 할인 혜택</label>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => addFeeItem('add')}
+                                            style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+                                        >
+                                            ➕ 추가금 추가
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => addFeeItem('discount')}
+                                            style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+                                        >
+                                            ➖ 할인 추가
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {feeItems.length > 0 && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                                        {feeItems.map((item) => (
+                                            <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: item.type === 'add' ? '1px solid rgba(239,68,68,0.1)' : '1px solid rgba(59,130,246,0.1)' }}>
+                                                <span style={{ fontSize: '0.75rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold', backgroundColor: item.type === 'add' ? 'rgba(239,68,68,0.2)' : 'rgba(59,130,246,0.2)', color: item.type === 'add' ? '#ef4444' : '#3b82f6' }}>
+                                                    {item.type === 'add' ? '추가' : '할인'}
+                                                </span>
+                                                <input
+                                                    className="msg-field-input"
+                                                    placeholder={item.type === 'add' ? '명칭 (예: 비자비)' : '명칭 (예: 단체할인)'}
+                                                    value={item.label}
+                                                    onChange={(e) => updateFeeItem(item.id, { label: e.target.value })}
+                                                    style={{ flex: 2, height: '34px', fontSize: '0.85rem', marginBottom: 0 }}
+                                                />
+                                                <input
+                                                    className="msg-field-input"
+                                                    placeholder="금액 (숫자)"
+                                                    type="number"
+                                                    value={item.amount}
+                                                    onChange={(e) => updateFeeItem(item.id, { amount: e.target.value })}
+                                                    style={{ flex: 1.5, height: '34px', fontSize: '0.85rem', marginBottom: 0 }}
+                                                />
+                                                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>원</span>
+                                                <div style={{ display: 'flex', gap: '6px', fontSize: '0.8rem' }}>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '2px', cursor: 'pointer', marginBottom: 0 }}>
+                                                        <input
+                                                            type="radio"
+                                                            checked={item.applyType === 'per_person'}
+                                                            onChange={() => updateFeeItem(item.id, { applyType: 'per_person' })}
+                                                        />
+                                                        인당
+                                                    </label>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '2px', cursor: 'pointer', marginBottom: 0 }}>
+                                                        <input
+                                                            type="radio"
+                                                            checked={item.applyType === 'total'}
+                                                            onChange={() => updateFeeItem(item.id, { applyType: 'total' })}
+                                                        />
+                                                        전체
+                                                    </label>
+                                                </div>
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => removeFeeItem(item.id)}
+                                                    style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '1rem', cursor: 'pointer', padding: '0 4px' }}
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 🔒 최종 잔금 수동 조정 */}
+                            <div className="msg-field full" style={{ borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '16px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                    <label className="msg-field-label" style={{ marginBottom: 0 }}>🔒 최종 결제 잔금</label>
+                                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: '0.8rem', gap: '6px', color: 'var(--text-muted)', marginBottom: 0 }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={isManualBalance}
+                                            onChange={(e) => setIsManualBalance(e.target.checked)}
+                                        />
+                                        직접 금액 타이핑 (수동 조정)
+                                    </label>
+                                </div>
+                                {isManualBalance ? (
+                                    <input
+                                        className="msg-field-input"
+                                        placeholder="예: 1,354,200원 (원하는 텍스트 자유 입력)"
+                                        value={manualBalanceValue}
+                                        onChange={(e) => setManualBalanceValue(e.target.value)}
+                                        style={{ borderColor: 'var(--accent-primary)', fontWeight: 600, color: 'var(--accent-primary)' }}
+                                    />
+                                ) : (
+                                    <input
+                                        className="msg-field-input"
+                                        readOnly
+                                        value={remainingBalanceStr}
+                                        style={{ color: 'var(--accent-primary)', fontWeight: 600 }}
+                                    />
+                                )}
+                            </div>
+
                         </div>
                     </div>
                 )}
@@ -968,6 +1139,113 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                     value={bankAccount}
                                     onChange={(e) => setBankAccount(e.target.value)}
                                 />
+                            </div>
+
+                            {/* 추가금 / 할인금 동적 다중 입력 폼 */}
+                            <div className="msg-field full" style={{ marginTop: '16px', borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '16px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                    <label className="msg-field-label" style={{ fontSize: '0.95rem', fontWeight: 'bold', marginBottom: 0 }}>💳 추가 비용 / 할인 혜택</label>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => addFeeItem('add')}
+                                            style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+                                        >
+                                            ➕ 추가금 추가
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => addFeeItem('discount')}
+                                            style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+                                        >
+                                            ➖ 할인 추가
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {feeItems.length > 0 && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                                        {feeItems.map((item) => (
+                                            <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: item.type === 'add' ? '1px solid rgba(239,68,68,0.1)' : '1px solid rgba(59,130,246,0.1)' }}>
+                                                <span style={{ fontSize: '0.75rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold', backgroundColor: item.type === 'add' ? 'rgba(239,68,68,0.2)' : 'rgba(59,130,246,0.2)', color: item.type === 'add' ? '#ef4444' : '#3b82f6' }}>
+                                                    {item.type === 'add' ? '추가' : '할인'}
+                                                </span>
+                                                <input
+                                                    className="msg-field-input"
+                                                    placeholder={item.type === 'add' ? '명칭 (예: 비자비)' : '명칭 (예: 단체할인)'}
+                                                    value={item.label}
+                                                    onChange={(e) => updateFeeItem(item.id, { label: e.target.value })}
+                                                    style={{ flex: 2, height: '34px', fontSize: '0.85rem', marginBottom: 0 }}
+                                                />
+                                                <input
+                                                    className="msg-field-input"
+                                                    placeholder="금액 (숫자)"
+                                                    type="number"
+                                                    value={item.amount}
+                                                    onChange={(e) => updateFeeItem(item.id, { amount: e.target.value })}
+                                                    style={{ flex: 1.5, height: '34px', fontSize: '0.85rem', marginBottom: 0 }}
+                                                />
+                                                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>원</span>
+                                                <div style={{ display: 'flex', gap: '6px', fontSize: '0.8rem' }}>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '2px', cursor: 'pointer', marginBottom: 0 }}>
+                                                        <input
+                                                            type="radio"
+                                                            checked={item.applyType === 'per_person'}
+                                                            onChange={() => updateFeeItem(item.id, { applyType: 'per_person' })}
+                                                        />
+                                                        인당
+                                                    </label>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '2px', cursor: 'pointer', marginBottom: 0 }}>
+                                                        <input
+                                                            type="radio"
+                                                            checked={item.applyType === 'total'}
+                                                            onChange={() => updateFeeItem(item.id, { applyType: 'total' })}
+                                                        />
+                                                        전체
+                                                    </label>
+                                                </div>
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => removeFeeItem(item.id)}
+                                                    style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '1rem', cursor: 'pointer', padding: '0 4px' }}
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 🔒 최종 잔금 수동 조정 */}
+                            <div className="msg-field full" style={{ borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '16px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                    <label className="msg-field-label" style={{ marginBottom: 0 }}>🔒 최종 결제 잔금</label>
+                                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: '0.8rem', gap: '6px', color: 'var(--text-muted)', marginBottom: 0 }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={isManualBalance}
+                                            onChange={(e) => setIsManualBalance(e.target.checked)}
+                                        />
+                                        직접 금액 타이핑 (수동 조정)
+                                    </label>
+                                </div>
+                                {isManualBalance ? (
+                                    <input
+                                        className="msg-field-input"
+                                        placeholder="예: 1,354,200원 (원하는 텍스트 자유 입력)"
+                                        value={manualBalanceValue}
+                                        onChange={(e) => setManualBalanceValue(e.target.value)}
+                                        style={{ borderColor: 'var(--accent-primary)', fontWeight: 600, color: 'var(--accent-primary)' }}
+                                    />
+                                ) : (
+                                    <input
+                                        className="msg-field-input"
+                                        readOnly
+                                        value={remainingBalanceStr}
+                                        style={{ color: 'var(--accent-primary)', fontWeight: 600 }}
+                                    />
+                                )}
                             </div>
                         </div>
                     </div>
