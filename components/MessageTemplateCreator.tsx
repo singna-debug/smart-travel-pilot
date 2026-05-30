@@ -95,6 +95,7 @@ export default function MessageTemplateCreator() {
     const [feeItems, setFeeItems] = useState<FeeItem[]>([]);
     const [isManualBalance, setIsManualBalance] = useState(false);
     const [manualBalanceValue, setManualBalanceValue] = useState('');
+    const [remainingBalance, setRemainingBalance] = useState('0원');
 
     // 행 추가/삭제/수정 헬퍼 함수
     const addFeeItem = (type: 'add' | 'discount') => {
@@ -719,6 +720,7 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
         }
 
         setGeneratedText(text);
+        setRemainingBalance(remainingBalanceStr);
     }
 
     function handleCopy() {
@@ -1065,7 +1067,7 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                     <input
                                         className="msg-field-input"
                                         readOnly
-                                        value={remainingBalanceStr}
+                                        value={remainingBalance}
                                         style={{ color: 'var(--accent-primary)', fontWeight: 600 }}
                                     />
                                 )}
@@ -1242,7 +1244,7 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                     <input
                                         className="msg-field-input"
                                         readOnly
-                                        value={remainingBalanceStr}
+                                        value={remainingBalance}
                                         style={{ color: 'var(--accent-primary)', fontWeight: 600 }}
                                     />
                                 )}
