@@ -968,74 +968,82 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
 
                             {/* 추가금 / 할인금 동적 다중 입력 폼 */}
                             <div className="msg-field full" style={{ marginTop: '16px', borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '16px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                                    <label className="msg-field-label" style={{ fontSize: '0.95rem', fontWeight: 'bold', marginBottom: 0 }}>💳 추가 비용 / 할인 혜택</label>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
+                                    <label className="msg-field-label" style={{ fontSize: '0.95rem', fontWeight: 'bold', marginBottom: 0 }}>추가 비용 / 할인 혜택</label>
                                     <div style={{ display: 'flex', gap: '8px' }}>
                                         <button 
                                             type="button" 
                                             onClick={() => addFeeItem('add')}
-                                            style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+                                            style={{ flex: 1, padding: '8px 12px', fontSize: '0.8rem', backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, textAlign: 'center' }}
                                         >
-                                            ➕ 추가금 추가
+                                            + 추가금 추가
                                         </button>
                                         <button 
                                             type="button" 
                                             onClick={() => addFeeItem('discount')}
-                                            style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+                                            style={{ flex: 1, padding: '8px 12px', fontSize: '0.8rem', backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.25)', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, textAlign: 'center' }}
                                         >
-                                            ➖ 할인 추가
+                                            - 할인 추가
                                         </button>
                                     </div>
                                 </div>
 
                                 {feeItems.length > 0 && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
                                         {feeItems.map((item) => (
-                                            <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: item.type === 'add' ? '1px solid rgba(239,68,68,0.1)' : '1px solid rgba(59,130,246,0.1)' }}>
-                                                <span style={{ fontSize: '0.75rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold', backgroundColor: item.type === 'add' ? 'rgba(239,68,68,0.2)' : 'rgba(59,130,246,0.2)', color: item.type === 'add' ? '#ef4444' : '#3b82f6' }}>
-                                                    {item.type === 'add' ? '추가' : '할인'}
-                                                </span>
-                                                <input
-                                                    className="msg-field-input"
-                                                    placeholder={item.type === 'add' ? '명칭 (예: 비자비)' : '명칭 (예: 단체할인)'}
-                                                    value={item.label}
-                                                    onChange={(e) => updateFeeItem(item.id, { label: e.target.value })}
-                                                    style={{ flex: 2, height: '34px', fontSize: '0.85rem', marginBottom: 0 }}
-                                                />
-                                                <input
-                                                    className="msg-field-input"
-                                                    placeholder="금액 (숫자)"
-                                                    type="number"
-                                                    value={item.amount}
-                                                    onChange={(e) => updateFeeItem(item.id, { amount: e.target.value })}
-                                                    style={{ flex: 1.5, height: '34px', fontSize: '0.85rem', marginBottom: 0 }}
-                                                />
-                                                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>원</span>
-                                                <div style={{ display: 'flex', gap: '6px', fontSize: '0.8rem' }}>
-                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '2px', cursor: 'pointer', marginBottom: 0 }}>
+                                            <div key={item.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: item.type === 'add' ? '1px solid rgba(239,68,68,0.1)' : '1px solid rgba(59,130,246,0.1)' }}>
+                                                {/* 1행: 기호 + 입력 필드들 + 삭제 */}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', minWidth: '24px', textAlign: 'center', color: item.type === 'add' ? '#ef4444' : '#3b82f6' }}>
+                                                        {item.type === 'add' ? '+' : '-'}
+                                                    </span>
+                                                    <input
+                                                        className="msg-field-input"
+                                                        placeholder={item.type === 'add' ? '추가 비용 명칭 (예: 비자비)' : '할인 혜택 명칭 (예: 단체할인)'}
+                                                        value={item.label}
+                                                        onChange={(e) => updateFeeItem(item.id, { label: e.target.value })}
+                                                        style={{ flex: 3, height: '36px', fontSize: '0.85rem', marginBottom: 0 }}
+                                                    />
+                                                    <input
+                                                        className="msg-field-input"
+                                                        placeholder="금액"
+                                                        type="number"
+                                                        value={item.amount}
+                                                        onChange={(e) => updateFeeItem(item.id, { amount: e.target.value })}
+                                                        style={{ flex: 2, height: '36px', fontSize: '0.85rem', marginBottom: 0 }}
+                                                    />
+                                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>원</span>
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => removeFeeItem(item.id)}
+                                                        style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '1.2rem', cursor: 'pointer', padding: '0 4px' }}
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                                
+                                                {/* 2행: 적용 단위 선택 영역 */}
+                                                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: '12px', paddingLeft: '32px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                                    <span style={{ fontSize: '0.75rem' }}>적용 단위 :</span>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', marginBottom: 0 }}>
                                                         <input
                                                             type="radio"
+                                                            name={`applyType-${item.id}`}
                                                             checked={item.applyType === 'per_person'}
                                                             onChange={() => updateFeeItem(item.id, { applyType: 'per_person' })}
                                                         />
-                                                        인당
+                                                        1인당 계산
                                                     </label>
-                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '2px', cursor: 'pointer', marginBottom: 0 }}>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', marginBottom: 0 }}>
                                                         <input
                                                             type="radio"
+                                                            name={`applyType-${item.id}`}
                                                             checked={item.applyType === 'total'}
                                                             onChange={() => updateFeeItem(item.id, { applyType: 'total' })}
                                                         />
-                                                        전체
+                                                        전체 1회만 적용
                                                     </label>
                                                 </div>
-                                                <button 
-                                                    type="button" 
-                                                    onClick={() => removeFeeItem(item.id)}
-                                                    style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '1rem', cursor: 'pointer', padding: '0 4px' }}
-                                                >
-                                                    ✕
-                                                </button>
                                             </div>
                                         ))}
                                     </div>
@@ -1145,74 +1153,82 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
 
                             {/* 추가금 / 할인금 동적 다중 입력 폼 */}
                             <div className="msg-field full" style={{ marginTop: '16px', borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '16px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                                    <label className="msg-field-label" style={{ fontSize: '0.95rem', fontWeight: 'bold', marginBottom: 0 }}>💳 추가 비용 / 할인 혜택</label>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
+                                    <label className="msg-field-label" style={{ fontSize: '0.95rem', fontWeight: 'bold', marginBottom: 0 }}>추가 비용 / 할인 혜택</label>
                                     <div style={{ display: 'flex', gap: '8px' }}>
                                         <button 
                                             type="button" 
                                             onClick={() => addFeeItem('add')}
-                                            style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+                                            style={{ flex: 1, padding: '8px 12px', fontSize: '0.8rem', backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, textAlign: 'center' }}
                                         >
-                                            ➕ 추가금 추가
+                                            + 추가금 추가
                                         </button>
                                         <button 
                                             type="button" 
                                             onClick={() => addFeeItem('discount')}
-                                            style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+                                            style={{ flex: 1, padding: '8px 12px', fontSize: '0.8rem', backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.25)', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, textAlign: 'center' }}
                                         >
-                                            ➖ 할인 추가
+                                            - 할인 추가
                                         </button>
                                     </div>
                                 </div>
 
                                 {feeItems.length > 0 && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
                                         {feeItems.map((item) => (
-                                            <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: item.type === 'add' ? '1px solid rgba(239,68,68,0.1)' : '1px solid rgba(59,130,246,0.1)' }}>
-                                                <span style={{ fontSize: '0.75rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold', backgroundColor: item.type === 'add' ? 'rgba(239,68,68,0.2)' : 'rgba(59,130,246,0.2)', color: item.type === 'add' ? '#ef4444' : '#3b82f6' }}>
-                                                    {item.type === 'add' ? '추가' : '할인'}
-                                                </span>
-                                                <input
-                                                    className="msg-field-input"
-                                                    placeholder={item.type === 'add' ? '명칭 (예: 비자비)' : '명칭 (예: 단체할인)'}
-                                                    value={item.label}
-                                                    onChange={(e) => updateFeeItem(item.id, { label: e.target.value })}
-                                                    style={{ flex: 2, height: '34px', fontSize: '0.85rem', marginBottom: 0 }}
-                                                />
-                                                <input
-                                                    className="msg-field-input"
-                                                    placeholder="금액 (숫자)"
-                                                    type="number"
-                                                    value={item.amount}
-                                                    onChange={(e) => updateFeeItem(item.id, { amount: e.target.value })}
-                                                    style={{ flex: 1.5, height: '34px', fontSize: '0.85rem', marginBottom: 0 }}
-                                                />
-                                                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>원</span>
-                                                <div style={{ display: 'flex', gap: '6px', fontSize: '0.8rem' }}>
-                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '2px', cursor: 'pointer', marginBottom: 0 }}>
+                                            <div key={item.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: item.type === 'add' ? '1px solid rgba(239,68,68,0.1)' : '1px solid rgba(59,130,246,0.1)' }}>
+                                                {/* 1행: 기호 + 입력 필드들 + 삭제 */}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', minWidth: '24px', textAlign: 'center', color: item.type === 'add' ? '#ef4444' : '#3b82f6' }}>
+                                                        {item.type === 'add' ? '+' : '-'}
+                                                    </span>
+                                                    <input
+                                                        className="msg-field-input"
+                                                        placeholder={item.type === 'add' ? '추가 비용 명칭 (예: 비자비)' : '할인 혜택 명칭 (예: 단체할인)'}
+                                                        value={item.label}
+                                                        onChange={(e) => updateFeeItem(item.id, { label: e.target.value })}
+                                                        style={{ flex: 3, height: '36px', fontSize: '0.85rem', marginBottom: 0 }}
+                                                    />
+                                                    <input
+                                                        className="msg-field-input"
+                                                        placeholder="금액"
+                                                        type="number"
+                                                        value={item.amount}
+                                                        onChange={(e) => updateFeeItem(item.id, { amount: e.target.value })}
+                                                        style={{ flex: 2, height: '36px', fontSize: '0.85rem', marginBottom: 0 }}
+                                                    />
+                                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>원</span>
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => removeFeeItem(item.id)}
+                                                        style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '1.2rem', cursor: 'pointer', padding: '0 4px' }}
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                                
+                                                {/* 2행: 적용 단위 선택 영역 */}
+                                                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: '12px', paddingLeft: '32px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                                    <span style={{ fontSize: '0.75rem' }}>적용 단위 :</span>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', marginBottom: 0 }}>
                                                         <input
                                                             type="radio"
+                                                            name={`applyType-${item.id}`}
                                                             checked={item.applyType === 'per_person'}
                                                             onChange={() => updateFeeItem(item.id, { applyType: 'per_person' })}
                                                         />
-                                                        인당
+                                                        1인당 계산
                                                     </label>
-                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '2px', cursor: 'pointer', marginBottom: 0 }}>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', marginBottom: 0 }}>
                                                         <input
                                                             type="radio"
+                                                            name={`applyType-${item.id}`}
                                                             checked={item.applyType === 'total'}
                                                             onChange={() => updateFeeItem(item.id, { applyType: 'total' })}
                                                         />
-                                                        전체
+                                                        전체 1회만 적용
                                                     </label>
                                                 </div>
-                                                <button 
-                                                    type="button" 
-                                                    onClick={() => removeFeeItem(item.id)}
-                                                    style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '1rem', cursor: 'pointer', padding: '0 4px' }}
-                                                >
-                                                    ✕
-                                                </button>
                                             </div>
                                         ))}
                                     </div>
