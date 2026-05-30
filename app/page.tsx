@@ -15,14 +15,22 @@ interface DashboardResponse {
   };
   schedule: {
     remindersCount: number;
+    remindersOverdueCount?: number;
     confirmedCount: number;
     prepaidCount: number;
+    prepaidOverdueCount?: number;
     noticeCount: number;
+    noticeOverdueCount?: number;
     balanceCount: number;
+    balanceOverdueCount?: number;
     confirmationSentCount: number;
+    confirmationSentOverdueCount?: number;
     departureNoticeCount: number;
+    departureNoticeOverdueCount?: number;
     phoneNoticeCount: number;
+    phoneNoticeOverdueCount?: number;
     happyCallCount: number;
+    happyCallOverdueCount?: number;
   };
   lists: {
     recentInquiries: ConsultationData[];
@@ -49,14 +57,15 @@ export default function DashboardPage() {
   const pendingCount = data?.lists.recentInquiries.filter(c => c.automation.status === '확인필요').length || 0;
 
   useEffect(() => {
-    fetchDashboardData();
-    const interval = setInterval(fetchDashboardData, 60000);
+    fetchDashboardData(false);
+    const interval = setInterval(() => fetchDashboardData(false), 60000);
     return () => clearInterval(interval);
   }, []);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (forceRefresh = false) => {
     try {
-      const response = await fetch('/api/stats');
+      const url = forceRefresh ? '/api/stats?refresh=true' : '/api/stats';
+      const response = await fetch(url);
       const result = await response.json();
       if (result.success) {
         setData(result.data);
@@ -128,7 +137,7 @@ export default function DashboardPage() {
           onClick={(e) => {
             e.preventDefault();
             setLoading(true);
-            fetchDashboardData();
+            fetchDashboardData(true);
           }}
           className="refresh-button"
           disabled={loading}
@@ -163,42 +172,42 @@ export default function DashboardPage() {
         <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
           
           <div onClick={() => handleCardClick('reminders', '리마인드 필요')} style={{ cursor: 'pointer' }}>
-            <StatsCard value={data?.schedule.remindersCount || 0} label="리마인드" isActive={activeFilter === 'reminders'} isUrgent={true} />
+            <StatsCard value={data?.schedule.remindersCount || 0} label="리마인드 (상담 후 2일 후)" isActive={activeFilter === 'reminders'} isUrgent={true} overdueValue={data?.schedule.remindersOverdueCount} />
           </div>
 
-          <div onClick={() => handleCardClick('prepaidRequest', '선금 요청 (7일 내)')} style={{ cursor: 'pointer' }}>
-            <StatsCard value={data?.schedule.prepaidCount || 0} label="선금 요청" isActive={activeFilter === 'prepaidRequest'} />
+          <div onClick={() => handleCardClick('prepaidRequest', '선금 요청')} style={{ cursor: 'pointer' }}>
+            <StatsCard value={data?.schedule.prepaidCount || 0} label="선금 요청 (예약 확정 후)" isActive={activeFilter === 'prepaidRequest'} overdueValue={data?.schedule.prepaidOverdueCount} />
           </div>
 
-          <div onClick={() => handleCardClick('noticeRequest', '출발전 안내 (7일 내)')} style={{ cursor: 'pointer' }}>
-            <StatsCard value={data?.schedule.noticeCount || 0} label="출발전 안내" isActive={activeFilter === 'noticeRequest'} />
+          <div onClick={() => handleCardClick('balanceRequest', '잔금 요청')} style={{ cursor: 'pointer' }}>
+            <StatsCard value={data?.schedule.balanceCount || 0} label="잔금 요청 (출발 3주 전)" isActive={activeFilter === 'balanceRequest'} overdueValue={data?.schedule.balanceOverdueCount} />
           </div>
 
-          <div onClick={() => handleCardClick('balanceRequest', '잔금 요청 (7일 내)')} style={{ cursor: 'pointer' }}>
-            <StatsCard value={data?.schedule.balanceCount || 0} label="잔금 요청" isActive={activeFilter === 'balanceRequest'} />
+          <div onClick={() => handleCardClick('confirmationSent', '가이드북 발송')} style={{ cursor: 'pointer' }}>
+            <StatsCard value={data?.schedule.confirmationSentCount || 0} label="가이드북 발송 (출발 10일 전)" isActive={activeFilter === 'confirmationSent'} overdueValue={data?.schedule.confirmationSentOverdueCount} />
           </div>
 
-          <div onClick={() => handleCardClick('confirmationSent', '확정서 발송 (7일 내)')} style={{ cursor: 'pointer' }}>
-            <StatsCard value={data?.schedule.confirmationSentCount || 0} label="확정서 발송" isActive={activeFilter === 'confirmationSent'} />
+          <div onClick={() => handleCardClick('noticeRequest', '출발전 체크사항')} style={{ cursor: 'pointer' }}>
+            <StatsCard value={data?.schedule.noticeCount || 0} label="출발전 체크사항 (출발 1주일 전)" isActive={activeFilter === 'noticeRequest'} overdueValue={data?.schedule.noticeOverdueCount} />
           </div>
 
-          <div onClick={() => handleCardClick('departureNotice', '출발안내 (당일)')} style={{ cursor: 'pointer' }}>
-            <StatsCard value={data?.schedule.departureNoticeCount || 0} label="출발안내" isActive={activeFilter === 'departureNotice'} />
+          <div onClick={() => handleCardClick('departureNotice', '출발 안내')} style={{ cursor: 'pointer' }}>
+            <StatsCard value={data?.schedule.departureNoticeCount || 0} label="출발 안내 (출발 3일 전)" isActive={activeFilter === 'departureNotice'} overdueValue={data?.schedule.departureNoticeOverdueCount} />
           </div>
 
-          <div onClick={() => handleCardClick('phoneNotice', '전화안내 (당일)')} style={{ cursor: 'pointer' }}>
-            <StatsCard value={data?.schedule.phoneNoticeCount || 0} label="전화안내" isActive={activeFilter === 'phoneNotice'} />
+          <div onClick={() => handleCardClick('phoneNotice', '전화 안내')} style={{ cursor: 'pointer' }}>
+            <StatsCard value={data?.schedule.phoneNoticeCount || 0} label="전화 안내 (출발 1일 전)" isActive={activeFilter === 'phoneNotice'} overdueValue={data?.schedule.phoneNoticeOverdueCount} />
           </div>
 
-          <div onClick={() => handleCardClick('happyCall', '해피콜 (귀국일-1 ~)')} style={{ cursor: 'pointer' }}>
-            <StatsCard value={data?.schedule.happyCallCount || 0} label="해피콜" isActive={activeFilter === 'happyCall'} />
+          <div onClick={() => handleCardClick('happyCall', '해피콜')} style={{ cursor: 'pointer' }}>
+            <StatsCard value={data?.schedule.happyCallCount || 0} label="해피콜 (도착 후 2일 후)" isActive={activeFilter === 'happyCall'} overdueValue={data?.schedule.happyCallOverdueCount} />
           </div>
 
         </div>
       </section>
 
       {/* 3. 상세 리스트 */}
-      <ConsultationList title={activeTitle} data={currentList} onUpdate={fetchDashboardData} />
+      <ConsultationList title={activeTitle} data={currentList} onUpdate={() => fetchDashboardData(true)} />
     </div>
   );
 }

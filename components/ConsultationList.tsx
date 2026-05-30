@@ -160,11 +160,30 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
         try { return new Date(dateStr) < new Date(today); } catch { return false; }
     };
 
+    const overdueCount = localData.filter(item => item.isOverdue).length;
+
     return (
         <div className="dashboard-list-section">
             <div className="dashboard-list-header">
                 <h3 className="dashboard-list-title">
                     {title} <span className="list-count">{localData.length}건</span>
+                    {overdueCount > 0 && (
+                        <span style={{
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            color: '#f87171',
+                            fontSize: '0.75rem',
+                            padding: '3px 8px',
+                            borderRadius: '20px',
+                            fontWeight: '700',
+                            marginLeft: '8px',
+                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                        }}>
+                            ⏳ 기한초과 {overdueCount}
+                        </span>
+                    )}
                 </h3>
                 <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>클릭하여 상세보기</span>
             </div>
@@ -191,8 +210,13 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                 <React.Fragment key={`row-${index}`}>
                                     <tr
                                         onClick={() => toggleExpand(index)}
-                                        className={`expandable-row ${isExpanded ? 'expanded' : ''} ${item.automation.status === '확인필요' ? 'pending-confirm-row' : ''}`}
-                                        style={{ cursor: 'pointer' }}
+                                        className={`expandable-row ${isExpanded ? 'expanded' : ''} ${item.automation.status === '확인필요' ? 'pending-confirm-row' : ''} ${item.isOverdue ? 'overdue-row' : ''}`}
+                                        style={{ 
+                                            cursor: 'pointer',
+                                            opacity: item.isOverdue ? 0.6 : 1,
+                                            transition: 'opacity 0.2s ease, background-color 0.2s ease',
+                                            backgroundColor: item.isOverdue ? 'rgba(31, 41, 55, 0.4)' : undefined
+                                        }}
                                     >
                                         <td style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-muted)' }}>
                                             <span className={`expand-arrow ${isExpanded ? 'open' : ''}`}>▶</span>
@@ -200,6 +224,18 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                         <td>
                                             <div className="cell-primary" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                                                 {item.customer.name === '미정' && item.source === '카카오톡' ? '[K]미정' : item.customer.name}
+                                                {item.isOverdue && (
+                                                    <span style={{
+                                                        backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                                                        color: '#f87171',
+                                                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                                                        fontSize: '0.65rem',
+                                                        padding: '2px 6px',
+                                                        borderRadius: '4px',
+                                                        fontWeight: '700',
+                                                        marginLeft: '2px'
+                                                    }}>기한초과</span>
+                                                )}
                                                 {item.source === '카카오톡' && (
                                                     <span style={{
                                                         backgroundColor: '#FEE500', color: '#000000',
@@ -264,7 +300,7 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                                         )}
                                                         {item.automation.notice_date && (
                                                             <div style={isDateToday(item.automation.notice_date) ? { color: '#10b981', fontWeight: 'bold' } : {}}>
-                                                                안내(4주): {item.automation.notice_date}
+                                                                체크(1주): {item.automation.notice_date}
                                                             </div>
                                                         )}
                                                         {item.specific_reminder_date && (
@@ -564,9 +600,9 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                                             <TimelineCell label="팔로업일" date={item.automation.next_followup || ''} today={today} field="nextFollowup" chatId={strIndex} onCheck={handleFieldUpdate} />
                                                             <TimelineCell label="예약확정일" date={item.automation.confirmed_date || ''} today={today} field="confirmedDate" chatId={strIndex} />
                                                             <TimelineCell label="선금일" date={item.automation.prepaid_date || ''} today={today} field="prepaidDate" chatId={strIndex} onCheck={handleFieldUpdate} />
-                                                            <TimelineCell label="출발전안내" date={item.automation.notice_date || ''} today={today} field="noticeDate" chatId={strIndex} onCheck={handleFieldUpdate} />
                                                             <TimelineCell label="잔금일" date={item.automation.balance_date || ''} today={today} field="balanceDate" chatId={strIndex} onCheck={handleFieldUpdate} />
-                                                            <TimelineCell label="확정서발송" date={item.automation.confirmation_sent || ''} today={today} field="confirmationSent" chatId={strIndex} onCheck={handleFieldUpdate} />
+                                                            <TimelineCell label="가이드북발송" date={item.automation.confirmation_sent || ''} today={today} field="confirmationSent" chatId={strIndex} onCheck={handleFieldUpdate} />
+                                                            <TimelineCell label="출발전 체크사항" date={item.automation.notice_date || ''} today={today} field="noticeDate" chatId={strIndex} onCheck={handleFieldUpdate} />
                                                             <TimelineCell label="출발안내" date={item.automation.departure_notice || ''} today={today} field="departureNotice" chatId={strIndex} onCheck={handleFieldUpdate} />
                                                             <TimelineCell label="전화안내" date={item.automation.phone_notice || ''} today={today} field="phoneNotice" chatId={strIndex} onCheck={handleFieldUpdate} />
                                                             <TimelineCell label="해피콜" date={item.automation.happy_call || ''} today={today} field="happyCall" chatId={strIndex} onCheck={handleFieldUpdate} />

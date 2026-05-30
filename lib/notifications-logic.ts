@@ -1,15 +1,22 @@
 import { getAllConsultations } from './google-sheets';
-import { format } from 'date-fns';
+import { format, differenceInDays, startOfDay, addDays } from 'date-fns';
 import { ConsultationData } from '@/types';
+
+
+/**
+ * 한국 시간(KST) 기준으로 오늘 날짜를 Date 객체로 반환
+ */
+function getTodayKSTDate(): Date {
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    return new Date(utc + 9 * 60 * 60000);
+}
 
 /**
  * 한국 시간(KST) 기준으로 오늘 날짜를 YYYY-MM-DD 형식으로 반환
  */
 function getTodayKST(): string {
-    const now = new Date();
-    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-    const kst = new Date(utc + 9 * 60 * 60000);
-    return format(kst, 'yyyy-MM-dd');
+    return format(getTodayKSTDate(), 'yyyy-MM-dd');
 }
 
 /**
@@ -19,16 +26,41 @@ export async function getTodayNotificationMessage(): Promise<string | null> {
     try {
         const consultations = await getAllConsultations(true); // 강제 리프레시
         const today = getTodayKST();
+        const todayObj = startOfDay(getTodayKSTDate());
+
+        const parseD = (dStr?: string | null) => {
+            if (!dStr) return null;
+            const cleanStr = dStr.replace('(완료)', '').trim().replace(' ', 'T');
+            const d = new Date(cleanStr);
+            if (isNaN(d.getTime())) return null;
+            return startOfDay(d);
+        };
+
+        const isTargetActive = (dStr: string | undefined, maxDaysAfter: number = 2) => {
+            if (!dStr) return false;
+            const d = parseD(dStr);
+            if (!d) return false;
+            const diff = differenceInDays(todayObj, d);
+            return diff >= 0 && diff <= maxDaysAfter;
+        };
+
+        const isTargetPastOrToday = (dStr: string | undefined) => {
+            if (!dStr) return false;
+            const d = parseD(dStr);
+            if (!d) return false;
+            const diff = differenceInDays(todayObj, d);
+            return diff >= 0;
+        };
 
         const categories = {
-            reminders: { label: '리마인드', emoji: '🔔', list: [] as ConsultationData[] },
-            prepaid: { label: '선금 요청', emoji: '💰', list: [] as ConsultationData[] },
-            preDeparture: { label: '출발전 안내', emoji: '✉️', list: [] as ConsultationData[] },
-            balance: { label: '잔금 요청', emoji: '💵', list: [] as ConsultationData[] },
-            confirmation: { label: '확정서 발송', emoji: '📄', list: [] as ConsultationData[] },
-            departure: { label: '출발안내', emoji: '✈️', list: [] as ConsultationData[] },
-            phone: { label: '전화안내', emoji: '📞', list: [] as ConsultationData[] },
-            happyCall: { label: '해피콜', emoji: '🎉', list: [] as ConsultationData[] },
+            reminders: { label: '리마인드 (상담 후 2일 후)', emoji: '🔔', list: [] as ConsultationData[] },
+            prepaid: { label: '선금 요청 (예약 확정 후)', emoji: '💰', list: [] as ConsultationData[] },
+            balance: { label: '잔금 요청 (출발 3주 전)', emoji: '💵', list: [] as ConsultationData[] },
+            confirmation: { label: '가이드북 발송 (출발 10일 전)', emoji: '📄', list: [] as ConsultationData[] },
+            preDeparture: { label: '출발전 체크사항 (출발 1주일 전)', emoji: '✉️', list: [] as ConsultationData[] },
+            departure: { label: '출발 안내 (출발 3일 전)', emoji: '✈️', list: [] as ConsultationData[] },
+            phone: { label: '전화 안내 (출발 1일 전)', emoji: '📞', list: [] as ConsultationData[] },
+            happyCall: { label: '해피콜 (도착 후 2일 후)', emoji: '🎉', list: [] as ConsultationData[] },
         };
 
         const isCanceled = (status?: string) => {
@@ -51,27 +83,84 @@ export async function getTodayNotificationMessage(): Promise<string | null> {
             if (!existing) {
                 map.set(key, c);
             } else {
-                const curDate = new Date(c.timestamp || 0);
-                const extDate = new Date(existing.timestamp || 0);
-                if (curDate > extDate) map.set(key, c);
+                const curDate = parseD(c.timestamp);
+                const extDate = parseD(existing.timestamp);
+                if (curDate && extDate && curDate > extDate) {
+                    map.set(key, c);
+                } else if (curDate && !extDate) {
+                    map.set(key, c);
+                }
             }
         });
 
         const latestConsultations = Array.from(map.values());
 
         latestConsultations.forEach((item) => {
-            if (isCanceled(item.automation?.status)) return;
+            const status = (item.automation?.status || '').trim();
+            if (isCanceled(status)) return;
 
-            const { next_followup, prepaid_date, notice_date, balance_date, confirmation_sent, departure_notice, phone_notice, happy_call, balance_due_date } = item.automation || {};
+            const { next_followup, prepaid_date, notice_date, balance_date, confirmation_sent, departure_notice, phone_notice, happy_call } = item.automation || {};
 
-            if (next_followup === today && isNotDone(next_followup)) categories.reminders.list.push(item);
-            if (prepaid_date === today && isNotDone(prepaid_date)) categories.prepaid.list.push(item);
-            if (notice_date === today && isNotDone(notice_date)) categories.preDeparture.list.push(item);
-            if ((balance_date === today || balance_due_date === today) && isNotDone(balance_date)) categories.balance.list.push(item);
-            if (confirmation_sent === today && isNotDone(confirmation_sent)) categories.confirmation.list.push(item);
-            if (departure_notice === today && isNotDone(departure_notice)) categories.departure.list.push(item);
-            if (phone_notice === today && isNotDone(phone_notice)) categories.phone.list.push(item);
-            if (happy_call === today && isNotDone(happy_call)) categories.happyCall.list.push(item);
+            // 1. 리마인드
+            const isReminderResolved = ['상담완료', '예약확정', '선금완료', '잔금완료', '여행완료', '결제완료', '확정', '전액결제', '완료', '취소', '취소/보류'].includes(status);
+            let targetFollowupDate: string | undefined = undefined;
+            
+            if (next_followup && next_followup.trim() !== '') {
+                if (isNotDone(next_followup)) {
+                    targetFollowupDate = next_followup;
+                }
+            } else {
+                const tsDate = parseD(item.timestamp);
+                if (tsDate) {
+                    const fallbackDate = addDays(tsDate, 2);
+                    targetFollowupDate = format(fallbackDate, 'yyyy-MM-dd');
+                }
+            }
+
+            if (!isReminderResolved && targetFollowupDate && isTargetActive(targetFollowupDate)) {
+                categories.reminders.list.push(item);
+            }
+
+            // 2. 선금 요청
+            const isPrepaidResolved = ['선금완료', '잔금완료', '결제완료', '전액결제', '완료', '여행완료', '상담완료'].includes(status);
+            if (!isPrepaidResolved && isNotDone(prepaid_date) && isTargetPastOrToday(prepaid_date)) {
+                categories.prepaid.list.push(item);
+            }
+
+            // 3. 잔금 요청
+            const isBalanceResolved = ['잔금완료', '결제완료', '전액결제', '완료', '여행완료', '상담완료'].includes(status);
+            if (!isBalanceResolved && isNotDone(balance_date) && isTargetActive(balance_date)) {
+                categories.balance.list.push(item);
+            }
+
+            // 4. 가이드북 발송
+            const isConfirmationResolved = ['상담완료'].includes(status);
+            if (!isConfirmationResolved && isNotDone(confirmation_sent) && isTargetActive(confirmation_sent)) {
+                categories.confirmation.list.push(item);
+            }
+
+            // 5. 출발전 체크사항
+            const isNoticeResolved = ['상담완료'].includes(status);
+            if (!isNoticeResolved && isNotDone(notice_date) && isTargetActive(notice_date)) {
+                categories.preDeparture.list.push(item);
+            }
+
+            // 6. 출발 안내
+            const isDepartureResolved = ['상담완료'].includes(status);
+            if (!isDepartureResolved && isNotDone(departure_notice) && isTargetActive(departure_notice)) {
+                categories.departure.list.push(item);
+            }
+
+            // 7. 전화 안내
+            const isPhoneResolved = ['상담완료'].includes(status);
+            if (!isPhoneResolved && isNotDone(phone_notice) && isTargetActive(phone_notice)) {
+                categories.phone.list.push(item);
+            }
+
+            // 8. 해피콜
+            if (isNotDone(happy_call) && isTargetActive(happy_call)) {
+                categories.happyCall.list.push(item);
+            }
         });
 
         const totalCount = Object.values(categories).reduce((acc, cat) => acc + cat.list.length, 0);

@@ -40,16 +40,16 @@ interface ProductInfo {
     specialTerms?: string;
 }
 
-type TemplateType = 'remind' | 'booking' | 'dotcom' | 'pre_4w' | 'balance' | 'ticket' | 'confirmation' | 'departure' | 'happy_call' | 'china_barcode';
+type TemplateType = 'remind' | 'booking' | 'dotcom' | 'balance' | 'ticket' | 'confirmation' | 'pre_4w' | 'departure' | 'happy_call' | 'china_barcode';
 
 const TEMPLATE_LABELS: Record<TemplateType, { label: string; icon: string }> = {
     remind: { label: '리마인드', icon: '⏰' },
     booking: { label: '예약 및 결제', icon: '✅' },
     dotcom: { label: '닷컴안내', icon: '🌐' },
-    pre_4w: { label: '출발 4주 전', icon: '📅' },
     balance: { label: '잔금 안내', icon: '💰' },
     ticket: { label: '항공권 발권', icon: '🎫' },
     confirmation: { label: '확정서 안내', icon: '📖' },
+    pre_4w: { label: '출발전 체크사항', icon: '📅' },
     departure: { label: '출발 안내', icon: '✈️' },
     happy_call: { label: '해피콜', icon: '📞' },
     china_barcode: { label: '중국 바코드', icon: '📱' },
@@ -81,6 +81,7 @@ export default function MessageTemplateCreator() {
     const [loadingProduct, setLoadingProduct] = useState(false);
 
     const [templateType, setTemplateType] = useState<TemplateType>('remind');
+    const [productPrice, setProductPrice] = useState('');
 
     // 추가 입력 필드
     const [bookingNumber, setBookingNumber] = useState('');
@@ -154,6 +155,9 @@ export default function MessageTemplateCreator() {
         if (product?.airline) {
             setAirline(product.airline);
         }
+        if (product?.price) {
+            setProductPrice(product.price);
+        }
     }, [product]);
 
     // 멘트 자동 생성 (실시간 반영)
@@ -163,7 +167,8 @@ export default function MessageTemplateCreator() {
         selectedCustomer, product, templateType, url, 
         bookingNumber, travelers, deposit, depositDeadline, 
         bankAccount, bankHolder, excludedCosts, depositPerPerson, 
-        confirmationLink, reviewLink, specialTerms, airline, departureDate, bookingNumber
+        confirmationLink, reviewLink, specialTerms, airline, departureDate, bookingNumber,
+        productPrice
     ]);
 
     async function fetchCustomers() {
@@ -200,6 +205,7 @@ export default function MessageTemplateCreator() {
             if (data.success && data.data?.raw) {
                 const p = data.data.raw;
                 setProduct(p);
+                setProductPrice(p.price || '');
                 // 상세정보 필드 자동 채우기 (데이터가 없을 경우 기본값 제공)
                 setSpecialTerms(p.specialTerms || '현지 가이드 안내 및 상품 페이지 내 약관 규정 내용에 따름');
 
@@ -227,7 +233,7 @@ export default function MessageTemplateCreator() {
         const phone = customer?.phone || '';
         const dest = p?.destination || customer?.destination || '';
         const title = p?.title || customer?.productName || '';
-        const price = p?.price || '';
+        const price = productPrice || p?.price || '';
         const airlineDisplay = airline || p?.airline || '';
         const departureDateDisplay = departureDate || p?.departureDate || customer?.departureDate || '';
         const duration = p?.duration || customer?.duration || '';
@@ -730,7 +736,7 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                             value={url}
                             onChange={(e) => setUrl(e.target.value)}
                         />
-                        {templateType === 'booking' && (
+                        {(templateType === 'booking' || templateType === 'balance') && (
                             <button
                                 className="msg-fetch-btn"
                                 onClick={fetchProductInfo}
@@ -791,22 +797,31 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                 />
                             </div>
                             <div className="msg-field">
+                                <label className="msg-field-label">1인 상품가 (숫자)</label>
+                                <input
+                                    className="msg-field-input"
+                                    placeholder="1290000"
+                                    value={productPrice}
+                                    onChange={(e) => setProductPrice(e.target.value)}
+                                />
+                            </div>
+                            <div className="msg-field">
                                 <label className="msg-field-label">
                                     총 잔금
-                                    {travelers && product?.price ? ' (자동계산)' : ''}
+                                    {travelers && productPrice ? ' (자동계산)' : ''}
                                 </label>
                                 <input
                                     className="msg-field-input"
                                     readOnly
                                     value={
                                         (() => {
-                                            const pNum = extractPriceNumber(product?.price || '');
+                                            const pNum = extractPriceNumber(productPrice);
                                             const tNum = parseInt(travelers, 10) || 0;
                                             if (pNum > 0 && tNum > 0) return `${formatPrice(pNum * tNum)}원`;
                                             return '인원 입력 시 자동 계산';
                                         })()
                                     }
-                                    style={{ color: travelers && product?.price ? 'var(--accent-primary)' : 'var(--text-muted)', fontWeight: travelers && product?.price ? 600 : 400 }}
+                                    style={{ color: travelers && productPrice ? 'var(--accent-primary)' : 'var(--text-muted)', fontWeight: travelers && productPrice ? 600 : 400 }}
                                 />
                             </div>
                             <div className="msg-field">
@@ -895,6 +910,15 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                         <div className="msg-section-title">📝 잔금 정보</div>
                         <div className="msg-fields-grid">
                             <div className="msg-field">
+                                <label className="msg-field-label">1인 상품가 (숫자)</label>
+                                <input
+                                    className="msg-field-input"
+                                    placeholder="1290000"
+                                    value={productPrice}
+                                    onChange={(e) => setProductPrice(e.target.value)}
+                                />
+                            </div>
+                            <div className="msg-field">
                                 <label className="msg-field-label">일행 수 (인원)</label>
                                 <input
                                     className="msg-field-input"
@@ -923,7 +947,7 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                     readOnly
                                     value={
                                         (() => {
-                                            const pNum = extractPriceNumber(product?.price || '');
+                                            const pNum = extractPriceNumber(productPrice);
                                             const tNum = parseInt(travelers, 10) || 1;
                                             const dPP = parseInt(depositPerPerson.replace(/[^0-9]/g, ''), 10) || 0;
                                             const total = pNum * tNum;
@@ -931,7 +955,7 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                             const remaining = total - paid;
                                             if (pNum > 0 && dPP > 0) return `${formatPrice(total)}원 - ${formatPrice(paid)}원 = ${formatPrice(remaining)}원`;
                                             if (pNum > 0) return `총 ${formatPrice(total)}원 (기납금 입력 시 잔금 계산)`;
-                                            return '상품 추출 후 자동 계산';
+                                            return '1인 상품가 입력 시 자동 계산';
                                         })()
                                     }
                                     style={{ color: 'var(--accent-primary)', fontWeight: 600 }}

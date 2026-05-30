@@ -23,13 +23,13 @@ export function calculateAutomationDates(params: {
 
     const isConsultingPhase = status === '상담중' || status === '견적제공' || status === '취소/보류';
 
-    const prepaid_date = (!isConsultingPhase && confirmedDate) ? format(addDays(confirmedDate, 2), 'yyyy-MM-dd') : '';
-    const notice_date = (!isConsultingPhase && departureDate) ? format(addDays(departureDate, -28), 'yyyy-MM-dd') : '';
+    const prepaid_date = (!isConsultingPhase && confirmedDate) ? format(addDays(confirmedDate, 1), 'yyyy-MM-dd') : '';
+    const notice_date = (!isConsultingPhase && departureDate) ? format(addDays(departureDate, -7), 'yyyy-MM-dd') : '';
     const balance_date = (!isConsultingPhase && departureDate) ? format(addDays(departureDate, -21), 'yyyy-MM-dd') : '';
-    const confirmation_sent = (!isConsultingPhase && departureDate) ? format(addDays(departureDate, -14), 'yyyy-MM-dd') : '';
+    const confirmation_sent = (!isConsultingPhase && departureDate) ? format(addDays(departureDate, -10), 'yyyy-MM-dd') : '';
     const departure_notice = (!isConsultingPhase && departureDate) ? format(addDays(departureDate, -3), 'yyyy-MM-dd') : '';
     const phone_notice = (!isConsultingPhase && departureDate) ? format(addDays(departureDate, -1), 'yyyy-MM-dd') : '';
-    const happy_call = (!isConsultingPhase && returnDate && isValid(returnDate)) ? format(addDays(returnDate, 1), 'yyyy-MM-dd') : '';
+    const happy_call = (!isConsultingPhase && returnDate && isValid(returnDate)) ? format(addDays(returnDate, 2), 'yyyy-MM-dd') : '';
     const next_followup = format(addDays(new Date(), 2), 'yyyy-MM-dd');
 
     return {
