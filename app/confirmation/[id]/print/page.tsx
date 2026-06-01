@@ -685,7 +685,10 @@ export default function PrintConfirmationPage() {
                             {/* 1. 입국 규정 및 비자/세관 */}
                             {secondaryResearch.customs && (
                                 <div className="pc-guide-block">
-                                    <h4>🛂 국가별 입국 & 비자/세관 가이드</h4>
+                                    <h4 className="pc-block-title">
+                                        <div className="pc-block-icon pc-icon-blue">🛂</div>
+                                        국가별 입국 & 비자/세관 가이드
+                                    </h4>
                                     {secondaryResearch.customs.majorAlert?.title && (
                                         <div style={{ background: '#fef2f2', border: '1px solid #fee2e2', padding: '10px', borderRadius: '8px', marginBottom: '10px', fontSize: '0.72rem' }}>
                                             <div style={{ color: '#dc2626', fontWeight: 800 }}>🚨 {secondaryResearch.customs.majorAlert.title}</div>
@@ -720,7 +723,10 @@ export default function PrintConfirmationPage() {
                             {/* 2. 날씨 & 복장 및 일별 기온 예보 */}
                             {secondaryResearch.weather && (
                                 <div className="pc-guide-block">
-                                    <h4>☀️ 현지 기후 및 복장 가이드</h4>
+                                    <h4 className="pc-block-title">
+                                        <div className="pc-block-icon pc-icon-orange">☀️</div>
+                                        현지 기후 및 복장 가이드
+                                    </h4>
                                     <p className="pc-guide-text">{secondaryResearch.weather.summary || '출발 전 일기예보를 최종 참조해 주세요.'}</p>
                                     {secondaryResearch.weather.clothingTips && secondaryResearch.weather.clothingTips.length > 0 && (
                                         <ul className="pc-guide-list" style={{ marginBottom: '10px' }}>
@@ -740,39 +746,46 @@ export default function PrintConfirmationPage() {
                                     )}
                                     
                                     {secondaryResearch.weather.forecast && secondaryResearch.weather.forecast.length > 0 && (
-                                        <div style={{ marginTop: '8px', borderTop: '1px dashed #e2e8f0', paddingTop: '8px' }}>
+                                        <div style={{ marginTop: '16px', borderTop: '1px dashed #e2e8f0', paddingTop: '16px' }}>
                                             <h5 style={{ margin: '0 0 6px 0', fontSize: '0.74rem' }}>📅 현지 주간 일별 기온 예보</h5>
-                                            <table className="pc-forecast-table">
-                                                <thead>
-                                                    <tr>
-                                                        {secondaryResearch.weather.forecast.map((day: any, i: number) => {
-                                                            let displayDate = day.date;
-                                                            try {
-                                                                if (trip.departureDate) {
-                                                                    const d = new Date(trip.departureDate);
-                                                                    d.setDate(d.getDate() + i);
-                                                                    const month = d.getMonth() + 1;
-                                                                    const date = d.getDate();
-                                                                    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-                                                                    displayDate = `${month}/${date}(${dayNames[d.getDay()]})`;
-                                                                }
-                                                            } catch {}
-                                                            return <th key={i}>{displayDate}</th>;
-                                                        })}
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        {secondaryResearch.weather.forecast.map((day: any, i: number) => (
-                                                            <td key={i} style={{ textAlign: 'center' }}>
-                                                                <div style={{ fontWeight: 700, color: '#dc2626', fontSize: '0.7rem' }}>{day.tempMax || day.temp_max || '-'}°</div>
-                                                                <div style={{ color: '#2563eb', fontSize: '0.7rem' }}>{day.tempMin || day.temp_min || '-'}°</div>
-                                                                <div style={{ fontSize: '0.6rem', color: '#64748b', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{day.description || '-'}</div>
-                                                            </td>
-                                                        ))}
-                                                    </tr>
-                                                </tbody>
-                                            </table>
+                                            <div className="pc-forecast-grid">
+                                                {secondaryResearch.weather.forecast.map((day: any, i: number) => {
+                                                    let displayDate = day.date;
+                                                    try {
+                                                        if (trip.departureDate) {
+                                                            const d = new Date(trip.departureDate);
+                                                            d.setDate(d.getDate() + i);
+                                                            const month = d.getMonth() + 1;
+                                                            const date = d.getDate();
+                                                            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                                                            displayDate = `${month}/${date}(${dayNames[d.getDay()]})`;
+                                                        }
+                                                    } catch {}
+                                                    
+                                                    // 날씨 설명에서 "정보 없음" 또는 불필요한 텍스트 필터링
+                                                    const desc = day.description && day.description !== '정보 없음' ? day.description : '-';
+                                                    const maxT = (day.tempMax || day.temp_max || '').replace(/[^0-9.-]/g, '');
+                                                    const minT = (day.tempMin || day.temp_min || '').replace(/[^0-9.-]/g, '');
+
+                                                    return (
+                                                        <div key={i} className="pc-forecast-card">
+                                                            <div className="pc-forecast-date">{displayDate}</div>
+                                                            <div className="pc-forecast-icon">
+                                                                {desc.includes('비') || desc.includes('rain') ? '🌧️' : 
+                                                                 desc.includes('구름') || desc.includes('흐림') || desc.includes('cloud') ? '☁️' : 
+                                                                 desc.includes('눈') || desc.includes('snow') ? '❄️' : 
+                                                                 desc === '-' ? '🌤️' : '☀️'}
+                                                            </div>
+                                                            <div className="pc-forecast-temp">
+                                                                <span className="pc-temp-max">{maxT || '-'}°</span>
+                                                                <span style={{color: '#94a3b8', fontWeight: 400}}>/</span>
+                                                                <span className="pc-temp-min">{minT || '-'}°</span>
+                                                            </div>
+                                                            <div className="pc-forecast-desc">{desc}</div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -781,7 +794,10 @@ export default function PrintConfirmationPage() {
                             {/* 3. 주요 관광지 명소 */}
                             {secondaryResearch.landmarks && secondaryResearch.landmarks.length > 0 && (
                                 <div className="pc-guide-block" style={{ gridColumn: 'span 2' }}>
-                                    <h4>🗺️ 주요 관광 명소 가이드</h4>
+                                    <h4 className="pc-block-title">
+                                        <div className="pc-block-icon pc-icon-green">🗺️</div>
+                                        주요 관광 명소 가이드
+                                    </h4>
                                     <div className="pc-landmarks-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
                                         {secondaryResearch.landmarks.map((lm: any, idx: number) => (
                                             <div key={idx} className="pc-landmark-item" style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
@@ -796,7 +812,10 @@ export default function PrintConfirmationPage() {
                             {/* 4. 항공 수하물 기준 */}
                             {secondaryResearch.baggage && (
                                 <div className="pc-guide-block">
-                                    <h4>🧳 항공 수하물 규격 기준</h4>
+                                    <h4 className="pc-block-title">
+                                        <div className="pc-block-icon pc-icon-purple">🧳</div>
+                                        항공 수하물 규격 기준
+                                    </h4>
                                     <ul className="pc-guide-list">
                                         <li><strong>무료 위탁 수하물:</strong> {secondaryResearch.baggage.checkedWeight || '항공사 표준 규격'}</li>
                                         {secondaryResearch.baggage.checkedNote && <li style={{ color: '#64748b', fontSize: '0.7rem' }}>{secondaryResearch.baggage.checkedNote}</li>}
@@ -809,7 +828,10 @@ export default function PrintConfirmationPage() {
                             {/* 5. 환전 및 통화 팁 */}
                             {secondaryResearch.currency && (
                                 <div className="pc-guide-block">
-                                    <h4>💰 현지 통화 및 환전/칩 팁</h4>
+                                    <h4 className="pc-block-title">
+                                        <div className="pc-block-icon pc-icon-red">💰</div>
+                                        현지 통화 및 환전/칩 팁
+                                    </h4>
                                     <p className="pc-guide-text"><strong>현지 통화 단위:</strong> {secondaryResearch.currency.localCurrency || '달러/현지통화'}</p>
                                     {secondaryResearch.currency.exchangeRateTips && secondaryResearch.currency.exchangeRateTips.length > 0 && (
                                         <ul className="pc-guide-list">
@@ -830,10 +852,13 @@ export default function PrintConfirmationPage() {
                                 </div>
                             )}
 
-                            {/* 6. 로밍 및 현지 통신 */}
+                            {/* 6. 로밍 및 인터넷 */}
                             {secondaryResearch.roaming && (
                                 <div className="pc-guide-block" style={{ gridColumn: 'span 2' }}>
-                                    <h4>📞 로밍 및 인터넷 이용 가이드</h4>
+                                    <h4 className="pc-block-title">
+                                        <div className="pc-block-icon pc-icon-blue">📞</div>
+                                        로밍 및 인터넷 이용 가이드
+                                    </h4>
                                     <p className="pc-guide-text" style={{ marginBottom: '8px' }}>
                                         {secondaryResearch.roaming.description || '주요 관광지와 호텔 내에서 데이터 통신 사용이 원활합니다.'}
                                     </p>
