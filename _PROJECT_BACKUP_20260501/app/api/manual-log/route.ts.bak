@@ -1,0 +1,60 @@
+
+import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
+import { appendConsultationToSheet } from '@/lib/google-sheets';
+import { calculateReturnDate, calculateAutomationDates } from '@/lib/date-calculator';
+
+export async function POST(request: NextRequest) {
+    try {
+        const body = await request.json();
+        const { name, phone, destination, departureDate, duration, productName, productUrl, status, summary } = body;
+
+        // 1. 데이터 가공
+        const returnDate = calculateReturnDate(departureDate, duration);
+        const automationDates = calculateAutomationDates(departureDate);
+
+        const consultationData = {
+            customer: { name, phone },
+            trip: {
+                destination,
+                departure_date: departureDate,
+                return_date: returnDate,
+                duration,
+                product_name: productName,
+                url: productUrl || '', // 상품 URL 추가
+            },
+            automation: {
+                status: status || '상담중',
+                ...automationDates,
+            },
+            summary,
+        };
+
+        // 2. Supabase 저장 (선택사항이나 이력 관리를 위해 권장)
+        if (supabase) {
+            await supabase.from('consultations').insert({
+                visitor_id: 'manual_' + Date.now(),
+                customer_name: name,
+                customer_phone: phone,
+                destination,
+                product_name: productName,
+                departure_date: departureDate,
+                status,
+                summary,
+            });
+        }
+
+        // 3. 구글 시트 저장
+        const sheetResult = await appendConsultationToSheet(consultationData as any);
+
+        if (!sheetResult) {
+            return NextResponse.json({ success: false, error: '구글 시트 저장 실패' }, { status: 500 });
+        }
+
+        return NextResponse.json({ success: true });
+
+    } catch (error: any) {
+        console.error('Manual Log API Error:', error);
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+}

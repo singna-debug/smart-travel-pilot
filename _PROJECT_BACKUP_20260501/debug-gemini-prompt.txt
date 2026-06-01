@@ -1,0 +1,48 @@
+다음 여행 상품 페이지에서 정보를 추출하여 JSON으로 반환하세요.
+URL: https://www.modetour.com/package/106239880
+
+
+반환 형식:
+{
+  "isProduct": true,
+  "title": "METADATA 섹션의 TARGET_TITLE 또는 PAGE_TITLE 중 더 구체적인 것을 그대로 추출 (상품명 전체)",
+  "destination": "목적지 (국가+도시)",
+  "price": "METADATA 섹션의 TARGET_PRICE 값을 최우선적으로 사용하세요 (숫자만 추출). 없으면 텍스트에서 성인 1인 가격을 찾으세요.",
+  "departureDate": "출발일 (YYYY-MM-DD)",
+  "returnDate": "귀국일 (YYYY-MM-DD)",
+  "departureAirport": "METADATA 섹션의 TARGET_DEPARTURE_AIRPORT를 최우선으로 사용하세요. 없으면 텍스트에서 '인천', '부산' 등 출발지 추출.",
+  "airline": "METADATA 섹션의 TARGET_AIRLINE을 최우선으로 사용하세요. 없으면 항공사 추출.",
+  "flightCode": "편명",
+  "duration": "METADATA 섹션의 TARGET_DURATION 값을 최우선으로 사용하세요. 없으면 'X박 Y일' 패턴을 찾으세요.",
+  "departureTime": "가는편 출발 시각 (HH:MM)",
+  "arrivalTime": "가는편 도착 시각 (HH:MM)",
+  "returnDepartureTime": "오는편 출발 시각 (HH:MM)",
+  "returnArrivalTime": "오는편 도착 시각 (HH:MM)",
+  "specialTerms": "특별약관(취소규정) 요약",
+  "keyPoints": ["상품의 핵심 혜택 1", "핵심 혜택 2", "핵심 혜택 3", "현지 특식 등 4", "호텔 업그레이드 등 5"],
+  "features": ["노옵션", "자유일정", "온천포함", "관광중심" 등 특징 키워드]
+}
+
+[중요 지침]
+1. METADATA 섹션의 값들을 최우선적으로 반영하세요.
+2. 상품 포인트(keyPoints)는 고객이 혹할 만한 핵심 장점 4~5개를 구체적 문장으로 적으세요.
+3. 항공 시간(4개 시각)을 정확히 찾아내세요. HH:MM 형식을 유지하세요.
+
+입력 텍스트:
+==== TARGET METADATA START ====
+PAGE_TITLE: "[저녁출발]괌 닛코 오션프론트룸 3박5일<아일랜드관광/레이트체크아웃>"
+OG_TITLE: ""
+BODY_TITLE: ""
+CLASS_TITLE: ""
+TARGET_TITLE: "[저녁출발]괌 닛코 오션프론트룸 3박5일<아일랜드관광/레이트체크아웃>"
+TARGET_PRICE: ""
+TARGET_DURATION: "3박5일"
+TARGET_AIRLINE: ""
+TARGET_DEPARTURE_AIRPORT: ""
+TARGET_DEPARTURE_DATE: "2026-03-30"
+TARGET_DESCRIPTION: ""
+==== TARGET METADATA END ====
+
+[CONTENT BODY]
+패키지>상품상세>PGE417LJNB>[저녁출발]괌 닛코 오션프론트룸 3박5일<아일랜드관광/레이트체크아웃> 
+ 알림 웰컴쿠폰 로그인 예약내역 기획전 이벤트/혜택 고객센터

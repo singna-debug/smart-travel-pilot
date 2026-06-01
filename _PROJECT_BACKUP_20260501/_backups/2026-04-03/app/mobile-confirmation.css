@@ -1,0 +1,2054 @@
+/* Force Vercel Rebuild - Timestamp: 2026-02-22T23:38:00 */
+/* ================================
+   모바일 확정서 뷰어 - 고객용 (밝은 테마)
+   ================================ */
+
+.mobile-confirm {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #f8fafc;
+    min-height: 100vh;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #1e293b;
+    padding-bottom: 80px;
+    /* 하단 버튼 공간 */
+}
+
+/* 상단 공지 배너 */
+.mc-top-notice {
+    background: #fffbeb;
+    border-bottom: 1px solid #fde68a;
+    padding: 12px 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.mc-top-notice .nt-icon {
+    font-size: 1.2rem;
+}
+
+.mc-top-notice .nt-text {
+    font-size: 0.82rem;
+    color: #92400e;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+/* 헤더 배너 */
+.mc-header {
+    background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+    color: #fff;
+    padding: 28px 20px;
+    text-align: center;
+}
+
+.mc-header .mc-brand {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.mc-header h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.mc-header .mc-subtitle {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+/* 상태 배지 */
+.mc-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 12px;
+    backdrop-filter: blur(4px);
+}
+
+.mc-status-badge .badge-dot {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+}
+
+/* 섹션 공통 */
+.mc-section {
+    background: #fff;
+    margin: 12px 12px;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.mc-section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.mc-section-title .sec-icon {
+    font-size: 1.1rem;
+}
+
+/* 정보 그리드 */
+.mc-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+    padding: 4px 0;
+    justify-items: start;
+    /* 추가: 그리드 아이템 자체가 왼쪽 시작점에 붙도록 */
+}
+
+.mc-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start !important;
+    /* 강제 왼쪽 정렬 */
+    text-align: left !important;
+    width: 100%;
+    /* 너비 확보 */
+}
+
+.mc-info-item.full {
+    grid-column: 1 / -1;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 12px;
+    margin-top: 4px;
+}
+
+.mc-info-item .info-label {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left !important;
+}
+
+.mc-info-item .info-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e293b;
+    text-align: left !important;
+}
+
+.mc-info-item .info-value.highlight {
+    color: #0ea5e9;
+}
+
+/* D-Day 배지 */
+.dday-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 6px;
+}
+
+/* 항공 정보 카드 */
+.mc-flight-card {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+.mc-flight-row {
+    display: grid;
+    grid-template-columns: 1fr 90px 1fr;
+    align-items: center;
+    padding: 12px 0;
+    gap: 8px;
+}
+
+.mc-flight-row+.mc-flight-row {
+    border-top: 1px dashed #e2e8f0;
+}
+
+.flight-time:first-child {
+    text-align: left;
+}
+
+.flight-time .ft-time {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.flight-time .ft-airport {
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+.flight-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: #94a3b8;
+    font-size: 0.7rem;
+}
+
+.flight-arrow .arrow-line {
+    width: 60px;
+    height: 1px;
+    background: #cbd5e1;
+    position: relative;
+}
+
+.flight-arrow .arrow-line::after {
+    content: '✈️';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.9rem;
+}
+
+/* 일정표 - 모두투어 스타일 타임라인 전환 */
+.mc-itinerary {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-top: 10px;
+}
+
+.mc-day-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 0; /* 내부 패딩 제거하고 헤더/바디 분리 */
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.mc-day-card .day-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #fff;
+    border-bottom: 1px solid #f8fafc;
+    cursor: pointer;
+}
+
+.mc-day-card .day-number {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mc-day-card .day-date {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+    padding-left: 10px;
+    border-left: 1px solid #e2e8f0;
+}
+
+.mc-day-card .day-title {
+    font-size: 0.9rem;
+    color: #475569;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+.day-body {
+    padding: 20px;
+    position: relative;
+}
+
+/* 타임라인 수직선 */
+.activity-list {
+    position: relative;
+    padding-left: 30px; /* 여유 공간 확보 */
+}
+
+.activity-list::before {
+    content: '';
+    position: absolute;
+    left: 9px; /* (dot width 18 - line width 1.5) / 2 = 8.25? No, dot center is 9. */
+    top: 10px;
+    bottom: 10px;
+    width: 1.5px;
+    background: #e2e8f0;
+}
+
+.day-activity-item {
+    position: relative;
+    margin-bottom: 28px;
+}
+
+.day-activity-item:last-child {
+    margin-bottom: 0;
+}
+
+/* 타임라인 점 (Dot) */
+.timeline-dot {
+    position: absolute;
+    left: -25px; /* padding-left 30 - 5 (dot offset) */
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+/* 위치 아이콘 점 스타일 */
+.timeline-dot.location {
+    left: -30px;
+    top: 2px;
+    width: 20px;
+    height: 20px;
+    background: #10b981;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.activity-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.activity-header {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.activity-desc {
+    font-size: 0.82rem;
+    color: #64748b;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+}
+
+.activity-desc.collapsed {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.see-more-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 0;
+    margin-top: 2px;
+    cursor: pointer;
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
+.see-more-btn:hover {
+    color: #64748b;
+    opacity: 1;
+}
+
+/* 교통 정보 카드 개선 */
+.day-transport-card {
+    margin-bottom: 20px;
+}
+
+.mc-flight-card.compact {
+    background: #fff;
+    border: 1.5px solid #f1f5f9;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.day-summary-box {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.summary-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #fff;
+    border: 1.2px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 14px 16px;
+    transition: all 0.2s ease;
+}
+
+.summary-row:active {
+    background: #f8fafc;
+    transform: scale(0.98);
+}
+
+.summary-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #f8fafc;
+    border-radius: 8px;
+    color: #64748b;
+}
+
+.summary-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.summary-label {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.summary-value {
+    font-size: 0.88rem;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.summary-chevron {
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+}
+
+/* 파일 다운로드 */
+.mc-file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mc-file-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: inherit;
+}
+
+.mc-file-btn:hover,
+.mc-file-btn:active {
+    background: #f1f5f9;
+    border-color: #0ea5e9;
+}
+
+.mc-file-btn .file-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.mc-file-btn .file-info {
+    flex: 1;
+}
+
+.mc-file-btn .file-info .file-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.mc-file-btn .file-info .file-desc {
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+.mc-file-btn .file-download {
+    color: #0ea5e9;
+    font-size: 1rem;
+}
+
+/* 체크리스트 */
+.mc-checklist {
+    list-style: none;
+    padding: 0;
+}
+
+.mc-checklist li {
+    padding: 8px 0;
+    font-size: 0.85rem;
+    color: #475569;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.mc-checklist li:last-child {
+    border-bottom: none;
+}
+
+.mc-checklist li .check-icon {
+    color: #0ea5e9;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* 포함/불포함 */
+.mc-include-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mc-include-item {
+    font-size: 0.83rem;
+    color: #475569;
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mc-include-item.included .inc-icon {
+    color: #22c55e;
+}
+
+.mc-include-item.excluded .inc-icon {
+    color: #ef4444;
+}
+
+/* 호텔 상세 모달 */
+.mc-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    display: flex;
+    align-items: flex-start;
+    /* 상단 정렬 */
+    justify-content: center;
+    padding: 20px;
+    padding-top: 80px;
+    /* 유저 요청 빨간선 부근 */
+    animation: fadeInOverlay 0.2s ease-out;
+}
+
+.mc-modal {
+    background: #fff;
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+    border-radius: 20px;
+    /* 전체 둥글게 */
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    animation: fadeInScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.mc-modal-header {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    background: #fff;
+}
+
+.mc-modal-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.mc-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: #94a3b8;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.mc-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    background: #fff;
+}
+
+/* 하단 고정 액션 바 */
+.mc-bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 480px;
+    margin: 0 auto;
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+    padding: 10px 12px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.mc-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.mc-action-btn.phone {
+    background: #22c55e;
+    color: #fff;
+}
+
+.mc-action-btn.kakao {
+    background: #FEE500;
+    color: #000;
+}
+
+.mc-action-btn.share {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.mc-action-btn:hover {
+    opacity: 0.85;
+}
+
+/* 빈 상태 안내 */
+.mc-empty-notice {
+    text-align: center;
+    color: #94a3b8;
+    padding: 40px 20px;
+    font-size: 0.85rem;
+}
+
+/* 취소 규정 */
+.mc-policy-text {
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    background: #f8fafc;
+    padding: 14px;
+    border-radius: 8px;
+}
+
+/* 호텔 정보 */
+.mc-hotel-card {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 14px;
+}
+
+.mc-hotel-card .hotel-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.mc-hotel-card .hotel-detail {
+    font-size: 0.8rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+/* 서류 뷰어 모달 */
+.mc-viewer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+}
+
+.mc-viewer-header {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+}
+
+.mcv-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.mcv-close {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.mc-viewer-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    padding: 10px;
+}
+
+.mc-viewer-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.mc-viewer-footer {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+}
+
+.mcv-download-btn {
+    padding: 12px 24px;
+    background: #fff;
+    color: #000;
+    border: none;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* 탭 네비게이션 */
+.mc-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    width: 100%;
+}
+
+.mc-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* 탭 아이콘 & 배지 */
+.mc-tab {
+    flex: 0 0 auto;
+    min-width: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #94a3b8;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mc-tab.active {
+    color: #0f172a;
+    font-weight: 800;
+    border-bottom: 3px solid #1e293b;
+    background: #fff;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 10;
+}
+
+.mch-amenities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.mc-chip {
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 15px;
+    /* 둥근 박스 */
+    border: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.mc-chip:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.tab-badge {
+    background: #0ea5e9;
+    color: #fff;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 8px;
+}
+
+.right-align {
+    text-align: right;
+    align-items: flex-end;
+}
+
+/* 호텔 요약 카드 (일정표 탭 상단) */
+.mc-hotel-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: #f8fafc;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.mc-hotel-summary:active {
+    background: #f1f5f9;
+}
+
+.hotel-summary-img {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.hotel-summary-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.hotel-summary-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hotel-summary-addr {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hotel-summary-meta {
+    font-size: 0.7rem;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+.hotel-summary-arrow {
+    color: #cbd5e1;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+/* 아코디언 일정 카드 */
+.mc-day-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 3px solid #6366f1;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.mc-day-card.closed {
+    background: #fff;
+    border: 1px solid #f1f5f9;
+    border-left: 3px solid #6366f1;
+}
+
+.day-header {
+    display: flex;
+    align-items: center;
+    padding: 14px;
+    cursor: pointer;
+    gap: 8px;
+    user-select: none;
+}
+
+.day-number {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6366f1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.day-date {
+    margin-left: 6px;
+    color: #94a3b8;
+    font-weight: 400;
+    font-size: 0.7rem;
+}
+
+.day-title {
+    flex: 1;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.day-chevron {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.day-chevron.open {
+    transform: rotate(0deg);
+}
+
+.day-chevron:not(.open) {
+    transform: rotate(-90deg);
+}
+
+.day-body {
+    padding: 0 14px 14px;
+    animation: fadeIn 0.2s ease;
+}
+
+.day-content {
+    font-size: 0.85rem;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.day-activity {
+    padding: 2px 0;
+}
+
+/* 식사 칩 */
+.day-meals {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.meal-chip {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.meal-chip.included {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.meal-chip.excluded {
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+}
+
+/* 해당일 호텔 */
+.day-hotel {
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #f1f5f9;
+}
+
+/* 서류 빈 상태 */
+.mc-file-empty {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.file-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.file-empty-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 6px;
+}
+
+.file-empty-sub {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    line-height: 1.5;
+}
+
+/* 인터랙티브 체크리스트 */
+.checklist-progress {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: #0ea5e9;
+    font-weight: 600;
+}
+
+.checklist-progress-bar {
+    height: 4px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.checklist-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0ea5e9, #6366f1);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.mc-checklist-interactive {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    border-radius: 8px;
+}
+
+.checklist-item:active {
+    background: #f8fafc;
+}
+
+.checklist-item:last-child {
+    border-bottom: none;
+}
+
+.checklist-item.checked .check-text {
+    text-decoration: line-through;
+    color: #94a3b8;
+}
+
+.check-box {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+}
+
+.checklist-item:active .check-box {
+    transform: scale(1.2);
+}
+
+.check-text {
+    font-size: 0.88rem;
+    color: #334155;
+    transition: color 0.15s;
+}
+
+/* 모달 체크인/아웃 시간 */
+.mcm-times {
+    font-size: 0.8rem;
+    color: #475569;
+    margin-bottom: 16px;
+    background: #f8fafc;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInOverlay {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* 반응형: 이미 모바일 우선이므로 큰 화면에서 조정 */
+@media (min-width: 481px) {
+    .mobile-confirm {
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        min-height: auto;
+        overflow: hidden;
+        position: relative;
+        /* 모바일 틀 내부 기준 고정 */
+    }
+
+    .mc-bottom-bar {
+        position: absolute;
+    }
+
+    .mc-modal-overlay {
+        position: absolute;
+    }
+}
+
+/* ================================
+   2차 조사 - 프리미엄 가이드북 스타일
+   ================================ */
+
+/* 가이드 헤더 배너 */
+.guide-header-banner {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: #fff;
+    padding: 20px;
+    border-radius: 14px;
+    margin-bottom: 16px;
+}
+
+.guide-header-banner.customs-banner {
+    background: linear-gradient(135deg, #475569, #1e293b);
+}
+
+.guide-header-banner.custom-banner {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+}
+
+.guide-header-label {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 4px;
+}
+
+.guide-header-banner h2 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+/* ── 랜드마크 ── */
+.landmark-hero {
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 12px;
+}
+
+.landmark-hero-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.landmark-hero-info {
+    padding: 16px;
+}
+
+.landmark-hero-info h4 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin: 0 0 2px;
+    color: #1e293b;
+}
+
+.landmark-local,
+.landmark-local-sm {
+    font-size: 0.75rem;
+    color: #64748b;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.landmark-hero-info p {
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.landmark-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.landmark-card {
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+}
+
+.landmark-card-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.landmark-card-body {
+    padding: 10px 12px;
+}
+
+.landmark-card-body h4 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin: 0 0 2px;
+    color: #1e293b;
+}
+
+.landmark-card-body p {
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.4;
+    margin: 4px 0 0;
+}
+
+/* ── 세관 ── */
+.customs-warning-card {
+    background: #fef2f2;
+    border: 2px solid #fca5a5;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.cw-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.customs-warning-card h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #dc2626;
+    margin: 0 0 8px;
+}
+
+.customs-warning-card p {
+    font-size: 0.82rem;
+    color: #7f1d1d;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.customs-info-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.ci-header {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.customs-info-card p {
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.customs-dual-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.customs-mini-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.cm-header {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.customs-mini-card p {
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* ── 수하물 ── */
+.baggage-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.baggage-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 18px 14px;
+    text-align: center;
+}
+
+.baggage-card.checked {
+    border-top: 3px solid #3b82f6;
+}
+
+.baggage-card.carryon {
+    border-top: 3px solid #10b981;
+}
+
+.bag-icon {
+    font-size: 1.8rem;
+    margin-bottom: 6px;
+}
+
+.bag-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.baggage-card .bag-weight {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.baggage-card .bag-weight-desc {
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1.4;
+    color: #1e293b;
+    margin: 8px 0;
+    word-break: keep-all;
+}
+
+.baggage-card p {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.baggage-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.baggage-note-item {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.78rem;
+    color: #475569;
+}
+
+/* ── 환전 ── */
+.currency-tip-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.currency-tip-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.currency-tip-card.highlight {
+    background: linear-gradient(135deg, #dbeafe, #eff6ff);
+    border-color: #93c5fd;
+}
+
+.ct-emoji {
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+}
+
+.ct-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 6px;
+}
+
+.currency-tip-card p {
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* ── 환전 계산기 ── */
+.mc-calc-widget {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 20px;
+    color: #fff;
+}
+
+.mc-calc-title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    opacity: 0.95;
+    text-align: center;
+}
+
+.mc-calc-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mc-calc-row label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    width: 65px;
+    opacity: 0.85;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.mc-calc-input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    outline: none;
+    text-align: right;
+}
+
+.mc-calc-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.mc-calc-arrow {
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 6px 0;
+    opacity: 0.7;
+}
+
+.mc-calc-result {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    font-size: 1.3rem;
+    font-weight: 800;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.mc-calc-rate {
+    text-align: center;
+    font-size: 0.72rem;
+    opacity: 0.6;
+    margin-top: 14px;
+    font-size: 0.7rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 10px;
+}
+
+.mc-calc-arrow-float {
+    align-self: flex-start;
+    margin-left: 75px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: -6px;
+    margin-bottom: -6px;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.mc-calc-arrow-float:active {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0.95);
+}
+
+.mc-calc-sublabel {
+    font-size: 0.65rem;
+    opacity: 0.7;
+    margin-left: 2px;
+    font-weight: 400;
+}
+
+/* ── 가이드 카드 (범용) ── */
+.mc-guide-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mc-guide-item {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.mc-guide-item strong {
+    display: block;
+    font-size: 0.85rem;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.mc-guide-item p {
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* ── 미팅 및 수속 안내 ── */
+.meeting-cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.meeting-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.meeting-card-img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.meeting-card-body {
+    padding: 16px;
+    position: relative;
+}
+
+.meeting-type-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 12px;
+
+}
+
+.meeting-type-badge.meeting {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.meeting-type-badge.counter {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.meeting-time-loc {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.meeting-time {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0ea5e9;
+    background: #f0f9ff;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.meeting-loc {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.meeting-desc {
+    font-size: 0.85rem;
+    color: #475569;
+    line-height: 1.5;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* ── 로밍·통신 ── */
+.mc-roaming-grid {
+    display: flex;
+    flex-direction: column;
+}
+
+.mc-roaming-header-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #1e3a8a;
+    background: #eff6ff;
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+}
+
+.roaming-option-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.roaming-opt-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.r-opt-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: #3b82f6;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.r-opt-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.r-opt-body strong {
+    font-size: 0.9rem;
+    color: #1e293b;
+}
+
+.r-opt-body span {
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+/* ── 커스텀 가이드 서브섹션 ── */
+.custom-sub-section {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.css-title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #0369a1;
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e0f2fe;
+}
+
+/* Steps */
+.css-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.css-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.css-step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
+}
+
+.css-step-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.css-step-detail {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+/* Table */
+.css-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.css-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+}
+
+.css-table th {
+    background: #f0f9ff;
+    color: #0369a1;
+    font-weight: 700;
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 2px solid #bae6fd;
+    white-space: nowrap;
+}
+
+.css-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #475569;
+    vertical-align: top;
+}
+
+.css-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* List */
+.css-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.css-list li {
+    font-size: 0.82rem;
+    color: #475569;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 3px solid #3b82f6;
+}
+
+/* Text */
+.css-text {
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.6;
+    padding: 10px 12px;
+    background: #fffbeb;
+    border-radius: 8px;
+    border-left: 3px solid #f59e0b;
+    white-space: pre-wrap;
+}
+
+/* Route */
+.css-route {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 6px;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.css-route-badge {
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.css-route-arrow {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin: 0 2px;
+}
+
+/* 빈 가이드 */
+.mc-empty-guide {
+    text-align: center;
+    padding: 50px 20px;
+    color: #64748b;
+}
+
+.mc-empty-guide p {
+    margin: 6px 0;
+}
+
+/* 탭 스크롤 */
+
+.mc-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── 가이드 아코디언 컴포넌트 ── */
+.guide-accordion {
+    padding: 0 !important;
+    overflow: hidden;
+    margin-bottom: 14px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.guide-accordion.open {
+    padding-bottom: 8px !important;
+}
+
+.ga-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 14px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.guide-accordion.open .ga-header {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.ga-title {
+    display: flex;
+    align-items: center;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #1e293b;
+    gap: 8px;
+}
+
+.sec-icon-svg {
+    color: #3b82f6;
+    flex-shrink: 0;
+}
+
+.ga-chevron {
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+}
+
+.ga-content {
+    padding: 16px 20px;
+    background: #fff;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* ── 컨테이너 ── */
+.mc-guide-container {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 20px;
+}

@@ -73,10 +73,13 @@ export function refineConfirmationData(info: DetailedProductInfo, originalText: 
         }
     }
 
-    // 3. CITY_CODE_MAP 기반 키워드 매칭 (제목에서 직접 찾기)
+    // 3. CITY_CODE_MAP 기반 키워드 매칭 (제목에서 직접 찾기 - 국내 출발 공항/도시는 목적지 자동 추출 대상에서 배제)
     if (!refined.destination || refined.destination.length < 2) {
         // 긴 도시명부터 순차적으로 검색하여 매칭률 향상
-        const cities = Object.keys(CITY_CODE_MAP).sort((a, b) => b.length - a.length);
+        const domesticCities = ['인천', '김포', '서울', '김해', '부산', '대구', '청주', '제주', '무안', '양양', '광주'];
+        const cities = Object.keys(CITY_CODE_MAP)
+            .filter(city => !domesticCities.includes(city))
+            .sort((a, b) => b.length - a.length);
         for (const city of cities) {
             if (refined.title.includes(city)) {
                 refined.destination = city;

@@ -1,0 +1,31 @@
+
+import { NextRequest, NextResponse } from 'next/server';
+import { crawlTravelProduct } from '@/lib/url-crawler';
+
+export async function POST(request: NextRequest) {
+    try {
+        const { url } = await request.json();
+
+        if (!url) {
+            return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+        }
+
+        const productInfo = await crawlTravelProduct(url);
+
+        if (!productInfo) {
+            return NextResponse.json({ error: 'Failed to crawl product' }, { status: 500 });
+        }
+
+        return NextResponse.json({
+            title: productInfo.title,
+            description: `[포함사항]\n${productInfo.inclusions.join(', ')}\n\n[불포함사항]\n${productInfo.exclusions.join(', ')}\n\n[일정]\n${productInfo.itinerary.join('\n')}`,
+            price: productInfo.price,
+            url: url,
+            keywords: [], // 키워드는 자동 추출이 어려우므로 빈 배열
+        });
+
+    } catch (error: any) {
+        console.error('Crawl API Error:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}

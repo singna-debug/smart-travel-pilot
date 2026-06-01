@@ -1,0 +1,1098 @@
+/* ================================
+   인쇄용 확정서 - A4 최적화 프리미엄 스타일
+   모바일 확정서 (mobile-confirmation.css) 수준의 디자인 품질
+   ================================ */
+
+/* ─── 메인 컨테이너 ─── */
+.print-confirm {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #f1f5f9;
+    min-height: 100vh;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #0f172a;
+    padding: 24px 16px 60px;
+}
+
+/* ─── 로딩 / 에러 ─── */
+.pc-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 20px;
+}
+
+.pc-loading-spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid #e2e8f0;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: pc-spin 0.8s linear infinite;
+}
+
+@keyframes pc-spin {
+    to { transform: rotate(360deg); }
+}
+
+.pc-loading p {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.pc-error {
+    max-width: 400px;
+    margin: 80px auto;
+    background: #fff;
+    border-radius: 20px;
+    padding: 48px 32px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+}
+
+.pc-error-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 16px;
+}
+
+.pc-error h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+.pc-error p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 24px;
+}
+
+.pc-error-btn {
+    display: inline-block;
+    padding: 10px 24px;
+    background: #6366f1;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.pc-error-btn:hover {
+    background: #4f46e5;
+}
+
+
+/* ─── 액션 바 (인쇄 시 숨김) ─── */
+.pc-action-bar {
+    max-width: 800px;
+    margin: 0 auto 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    padding: 14px 24px;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.pc-back-btn {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.pc-back-btn:hover {
+    color: #0f172a;
+    background: #f1f5f9;
+}
+
+.pc-print-btn {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    font-family: inherit;
+}
+
+.pc-print-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+
+/* ─── A4 용지 영역 ─── */
+.pc-paper {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 48px;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+}
+
+
+/* ─── 헤더 ─── */
+.pc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+    border-bottom: 3px solid;
+    border-image: linear-gradient(135deg, #0ea5e9, #6366f1) 1;
+}
+
+.pc-header-left {
+    flex: 1;
+}
+
+.pc-brand {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #6366f1;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.pc-doc-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    margin: 0 0 4px;
+}
+
+.pc-doc-subtitle {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-weight: 500;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+.pc-header-right {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.pc-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.pc-badge-dot {
+    width: 7px;
+    height: 7px;
+    background: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.pc-print-date {
+    font-size: 0.65rem;
+    color: #94a3b8;
+    margin-top: 10px;
+}
+
+
+/* ─── 섹션 공통 ─── */
+.pc-section {
+    margin-bottom: 28px;
+}
+
+.pc-section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-left: 12px;
+    border-left: 4px solid #6366f1;
+}
+
+.pc-section-icon {
+    font-size: 1rem;
+}
+
+
+/* ─── 예약 정보 테이블 ─── */
+.pc-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.pc-info-table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+    text-align: left;
+    padding: 11px 16px;
+    border: 1px solid #e2e8f0;
+    width: 25%;
+    white-space: nowrap;
+}
+
+.pc-info-table td {
+    padding: 11px 16px;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.pc-highlight {
+    color: #4f46e5 !important;
+    font-weight: 700 !important;
+}
+
+.pc-highlight-green {
+    color: #15803d !important;
+    font-weight: 700 !important;
+}
+
+
+/* ─── 항공 스케줄 테이블 ─── */
+.pc-flight-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.pc-flight-table thead tr {
+    background: #f8fafc;
+}
+
+.pc-flight-table th {
+    font-weight: 700;
+    color: #475569;
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.75rem;
+}
+
+.pc-flight-table td {
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+    font-size: 0.78rem;
+}
+
+.pc-departure-label {
+    text-align: center !important;
+    font-weight: 700 !important;
+    color: #0284c7 !important;
+    background: rgba(14, 165, 233, 0.06);
+}
+
+.pc-return-label {
+    text-align: center !important;
+    font-weight: 700 !important;
+    color: #4f46e5 !important;
+    background: rgba(99, 102, 241, 0.06);
+}
+
+.pc-flight-note {
+    margin-top: 10px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.72rem;
+    color: #475569;
+    line-height: 1.6;
+}
+
+
+/* ─── 숙박 정보 테이블 ─── */
+.pc-hotel-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.pc-hotel-table thead tr {
+    background: #f8fafc;
+}
+
+.pc-hotel-table th {
+    font-weight: 700;
+    color: #475569;
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.75rem;
+}
+
+.pc-hotel-table td {
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+}
+
+.pc-hotel-name {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: #0f172a;
+}
+
+.pc-hotel-sub {
+    font-size: 0.68rem;
+    color: #94a3b8;
+    margin-top: 3px;
+}
+
+
+/* ─── 미팅 정보 카드 ─── */
+.pc-meeting-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 10px;
+    background: #fafbfc;
+}
+
+.pc-meeting-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.pc-meeting-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pc-meeting-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: #eef2ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+    border-radius: 6px;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.pc-meeting-location {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.pc-meeting-time {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #4f46e5;
+}
+
+.pc-meeting-desc {
+    font-size: 0.75rem;
+    color: #475569;
+    line-height: 1.7;
+    white-space: pre-line;
+    margin: 0;
+}
+
+
+/* ─── 상세 여정표 ─── */
+.pc-itinerary {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.pc-day-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.pc-day-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pc-day-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pc-day-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.pc-day-date {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #334155;
+}
+
+.pc-day-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.pc-day-body {
+    padding: 18px 20px;
+}
+
+
+/* ─── 타임라인 ─── */
+.pc-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.pc-timeline-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.pc-timeline-item:last-child {
+    border-bottom: none;
+}
+
+.pc-timeline-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pc-timeline-marker {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.pc-timeline-subtitle {
+    font-size: 0.68rem;
+    color: #94a3b8;
+    font-weight: 500;
+    margin-left: 2px;
+}
+
+.pc-timeline-desc {
+    font-size: 0.72rem;
+    color: #64748b;
+    margin: 4px 0 0 20px;
+    line-height: 1.6;
+}
+
+.pc-empty-day {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.78rem;
+    padding: 16px 0;
+    margin: 0;
+}
+
+
+/* ─── 식사 및 호텔 푸터 ─── */
+.pc-day-footer {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.pc-meal-group {
+    display: flex;
+    gap: 20px;
+}
+
+.pc-meal {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.pc-meal-label {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.pc-meal-value {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.pc-hotel-info {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+
+/* ─── 포함/불포함 사항 ─── */
+.pc-dual-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.pc-inc-card,
+.pc-exc-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.pc-inc-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #15803d;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #dcfce7;
+    margin-top: 0;
+}
+
+.pc-exc-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #be123c;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #fecdd3;
+    margin-top: 0;
+}
+
+.pc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pc-list li {
+    font-size: 0.72rem;
+    color: #475569;
+    line-height: 1.6;
+    padding-left: 14px;
+    position: relative;
+}
+
+.pc-list li::before {
+    content: "•";
+    position: absolute;
+    left: 2px;
+    font-weight: bold;
+}
+
+.pc-list-green li::before {
+    color: #22c55e;
+}
+
+.pc-list-red li::before {
+    color: #ef4444;
+}
+
+.pc-empty-text {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+
+/* ─── 여행지 가이드 박스 ─── */
+.pc-guide-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 24px;
+}
+
+.pc-guide-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.pc-guide-item h4 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px;
+}
+
+.pc-guide-item p {
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.pc-guide-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pc-guide-list li {
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.6;
+    padding-left: 12px;
+    position: relative;
+    margin-bottom: 2px;
+}
+
+.pc-guide-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #94a3b8;
+}
+
+
+/* ─── 푸터 ─── */
+.pc-footer {
+    border-top: 2px solid #e2e8f0;
+    padding-top: 28px;
+    margin-top: 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.pc-footer-left {
+    flex: 1;
+}
+
+.pc-footer-brand {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #334155;
+    margin: 0 0 4px;
+}
+
+.pc-footer-info {
+    font-size: 0.7rem;
+    color: #64748b;
+    margin: 0 0 8px;
+}
+
+.pc-footer-disclaimer {
+    font-size: 0.62rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.pc-footer-right {
+    text-align: right;
+}
+
+.pc-footer-logo {
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: #0f172a;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin: 0 0 4px;
+}
+
+.pc-footer-tagline {
+    font-size: 0.62rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+
+/* ─── 페이지 브레이크 ─── */
+.pc-page-break {
+    height: 0;
+    margin: 0;
+}
+
+
+/* ─── 식사/호텔/교통 (일별 요약) ─── */
+.pc-day-footer-box {
+    margin-top: 16px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pc-summary-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.pc-summary-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #475569;
+    min-width: 70px;
+}
+
+.pc-summary-val {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.4;
+}
+
+.pc-meal-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.pc-meal-div {
+    color: #cbd5e1;
+    font-weight: 400;
+}
+
+/* ─── 체크리스트 ─── */
+.pc-checklist-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.pc-check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: #334155;
+    font-weight: 500;
+}
+
+.pc-check-box {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+    background: #fff;
+    flex-shrink: 0;
+}
+
+/* ─── 일별 유의사항 ─── */
+.pc-day-notices {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.pc-day-notice-item {
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin-bottom: 4px;
+}
+.pc-day-notice-item strong {
+    color: #ea580c;
+    background: #fff7ed;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    margin-right: 6px;
+}
+
+/* ─── 인쇄 미디어 쿼리 ─── */
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 12mm 15mm;
+    }
+
+    body {
+        background: #fff !important;
+        color: #000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .print-confirm {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+    }
+
+    .pc-action-bar {
+        display: none !important;
+    }
+
+    .pc-paper {
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 20px 24px !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+    }
+
+    .pc-header {
+        border-bottom-color: #333 !important;
+    }
+
+    .pc-page-break {
+        display: none !important;
+        page-break-before: auto !important;
+    }
+
+    .pc-day-card {
+        page-break-inside: auto !important;
+        margin-bottom: 20px !important;
+        border: 1px solid #e2e8f0 !important;
+        background: #fff !important;
+    }
+
+    .pc-day-header {
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .pc-day-footer-box {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .pc-meeting-card {
+        page-break-inside: avoid !important;
+    }
+
+    .pc-info-table tr {
+        page-break-inside: avoid !important;
+    }
+
+    .pc-timeline-item {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .pc-dual-grid {
+        page-break-inside: avoid !important;
+    }
+
+    .pc-guide-box {
+        page-break-inside: avoid !important;
+    }
+
+    /* ─── 가이드 격자 스타일 ─── */
+    .pc-guide-blocks {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin-top: 12px;
+    }
+    .pc-guide-block {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    .pc-guide-block h4 {
+        margin: 0 0 10px 0;
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #0f172a;
+        border-bottom: 1.5px solid #005a96;
+        padding-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .pc-guide-block h5 {
+        margin: 10px 0 6px 0;
+        font-size: 0.74rem;
+        font-weight: 700;
+        color: #334155;
+    }
+    .pc-guide-text {
+        font-size: 0.76rem;
+        color: #334155;
+        line-height: 1.45;
+        margin: 0 0 8px 0;
+    }
+    .pc-guide-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .pc-guide-list li {
+        font-size: 0.73rem;
+        color: #334155;
+        line-height: 1.4;
+        position: relative;
+        padding-left: 12px;
+    }
+    .pc-guide-list li::before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #94a3b8;
+    }
+    .pc-landmarks-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .pc-landmark-item {
+        font-size: 0.72rem;
+        line-height: 1.45;
+    }
+    .pc-landmark-name {
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .pc-landmark-desc {
+        color: #64748b;
+        margin: 2px 0 0 12px;
+    }
+    .pc-forecast-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 6px;
+        border: 1px solid #e2e8f0;
+    }
+    .pc-forecast-table th {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 4px;
+        font-weight: 700;
+        font-size: 0.68rem;
+    }
+    .pc-forecast-table td {
+        border: 1px solid #e2e8f0;
+        padding: 4px;
+        vertical-align: top;
+    }
+
+    .pc-footer {
+        page-break-inside: avoid !important;
+    }
+
+    /* 인쇄 시 배경색 유지 */
+    .pc-day-num {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .pc-info-table th {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .pc-flight-table thead tr {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .pc-hotel-table thead tr {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .pc-day-header {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .pc-status-badge {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .pc-departure-label,
+    .pc-return-label {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}

@@ -1,0 +1,121 @@
+﻿[dotenv@17.3.1] injecting env (16) from .env.local -- tip: ?숋툘  suppress all logs with { quiet: true }
+
+=== Starting API Route Diagnostic ===
+Target URL: https://www.modetour.com/package/100634999?MLoc=99&Pnum=100634999&ANO=81440&sno=C117876&thru=
+ScrapingBee Key exists: true
+Gemini Key exists: true
+
+--- Calling scrapeWithScrapingBee ---
+[ScrapingBee] SSR?먯꽌 __NEXT_DATA__ 蹂댁“ 異붿텧 ?쒕룄
+[ScrapingBee] SSR __NEXT_DATA__ ?뺣낫: 8068??[ScrapingBee] JS ?뚮뜑留??쒕룄 (硫붿씤 ?꾨왂)
+[ScrapingBee] JS ?뚮뜑留??깃났: 310076??[Crawler] 媛???띿뒪?몄뿉????났??異붿텧: ?쒖＜??났
+[Crawler] 媛???띿뒪?몄뿉??異쒕컻怨듯빆 異붿텧: ?몄쿇
+scrapeWithScrapingBee: 24.787s
+[Gemini] AI 遺꾩꽍 ?쒖옉... (紐⑤뜽: gemini-2.0-flash)
+[Gemini] ?낅젰 ?띿뒪???먮낯 湲몄씠: 4568
+[Gemini] 理쒖쥌 ?꾨＼?꾪듃 湲몄씠: 5348
+node.exe : [Gemini] ?묐
+떟 ?뺤떇???щ컮瑜댁? ?딄굅??寃곌낵
+媛 ?놁뒿?덈떎: {"error":{"
+code":429,"message":"Y
+ou exceeded your curre
+nt quota, please check
+ your plan and billing
+ details. For more inf
+ormation on this error
+, head to: https://ai.
+google.dev/gemini-api/
+docs/rate-limits. To m
+onitor your current us
+age, head to: https://
+ai.dev/rate-limit. \n*
+ Quota exceeded for me
+tric: generativelangua
+ge.googleapis.com/gene
+rate_content_free_tier
+_requests, limit: 0, m
+odel: gemini-2.0-flash
+\n* Quota exceeded for
+ metric: generativelan
+guage.googleapis.com/g
+enerate_content_free_t
+ier_requests, limit: 0
+, model: gemini-2.0-fl
+ash\n* Quota exceeded 
+for metric: generative
+language.googleapis.co
+m/generate_content_fre
+e_tier_input_token_cou
+nt, limit: 0, model: g
+emini-2.0-flash\nPleas
+e retry in 10.51765437
+8s.","status":"RESOURC
+E_EXHAUSTED","details"
+:[{"@type":"type.googl
+eapis.com/google.rpc.H
+elp","links":[{"descri
+ption":"Learn more abo
+ut Gemini API quotas",
+"url":"https://ai.goog
+le.dev/gemini-api/docs
+/rate-limits"}]},{"@ty
+pe":"type.googleapis.c
+om/google.rpc.QuotaFai
+lure","violations":[{"
+quotaMetric":"generati
+velanguage.googleapis.
+com/generate_content_f
+ree_tier_requests","qu
+otaId":"GenerateReques
+tsPerDayPerProjectPerM
+odel-FreeTier","quotaD
+imensions":{"location"
+:"global","model":"gem
+ini-2.0-flash"}},{"quo
+taMetric":"generativel
+anguage.googleapis.com
+/generate_content_free
+_tier_requests","quota
+Id":"GenerateRequestsP
+erMinutePerProjectPerM
+odel-FreeTier","quotaD
+imensions":{"location"
+:"global","model":"gem
+ini-2.0-flash"}},{"quo
+taMetric":"generativel
+anguage.googleapis.com
+/generate_content_free
+_tier_input_token_coun
+t","quotaId":"Generate
+ContentInputTokensPerM
+odelPerMinute-FreeTier
+","quotaDimensions":{"
+location":"global","mo
+del":"gemini-2.0-flash
+"}}]},{"@type":"type.g
+oogleapis.com/google.r
+pc.RetryInfo","retryDe
+lay":"10s"}]}}
+위치 줄:1 문자:1
++ & "C:\Program Files\
+nodejs/node.exe" "C:\P
+rogram Files\nodejs/no
+de_mo ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: ([Gemini] ?   
+ 묐떟 ?뺤...elay":"10    
+s"}]}}:String) []    ,
+ RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+analyzeWithGemini: 362.45ms
+API Diagnostic failed:
+ analyzeWithGemini fai
+led

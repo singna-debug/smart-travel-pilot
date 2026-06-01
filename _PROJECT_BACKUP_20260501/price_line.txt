@@ -1,0 +1,2 @@
+﻿PATH: pageProps.initialState.api.queries.getPackageGetProductAllInfoById({"productId":97890872}).data.content.productPrice_Adult_TotalAmount VALUE: 719000
+PATH: pageProps.initialState.api.queries.getPackageGetProductAllInfoById({"productId":97890872}).data.content.productPrice_Adult VALUE: 0

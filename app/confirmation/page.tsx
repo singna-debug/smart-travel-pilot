@@ -996,6 +996,27 @@ export default function ConfirmationPage() {
         alert('링크가 복사되었습니다!');
     };
 
+    const copyMentShareLink = () => {
+        const ment = `안녕하세요! ${customerName || '고객'} 고객님
+이번 여행의 모바일 가이드북을 보내드립니다. ✈️
+
+1. 세부 일정은 모두투어 일정표를 기준으로 보면 됩니다. 
+
+2. 아래 가이드북은 모두투어 일정을 바탕으로 고객님의 여행 날짜에 맞게 저희 여행사에서 별도로 만들었습니다. 
+
+📍 날씨
+🧳 준비물 
+💰 환전
+📞 로밍 
+🗺️ 여행지 가이드 등을 담았습니다.
+
+출발 전 아래 링크에서 확인하셔서 
+즐거운 여행을 만드세요! 🌟
+${shareUrl}`;
+        navigator.clipboard.writeText(ment);
+        alert('안내 멘트와 링크가 클립보드에 복사되었습니다!');
+    };
+
     return (
         <div className="confirm-admin">
             <h1>📄 모바일 확정서 제작</h1>
@@ -2362,11 +2383,40 @@ export default function ConfirmationPage() {
                     <div className="share-modal" onClick={e => e.stopPropagation()}>
                         <h3>✅ 확정서가 생성되었습니다!</h3>
                         <p>아래 링크를 고객에게 전달하세요.</p>
-                        <div className="share-link-box">
-                            <input value={shareUrl} readOnly />
-                            <button onClick={copyShareLink}>복사</button>
+                        <div className="share-link-box" style={{ flexDirection: 'column', gap: '10px' }}>
+                            <input value={shareUrl} readOnly style={{ width: '100%' }} />
+                            <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                                <button onClick={copyShareLink} style={{ flex: 1 }}>🔗 링크 복사</button>
+                                <button onClick={copyMentShareLink} style={{ flex: 1, background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>💬 멘트형 복사</button>
+                            </div>
+                            <div style={{ width: '100%', marginTop: '4px' }}>
+                                <a 
+                                    href={shareUrl.includes('(저장 시 자동생성)') ? '#' : `${shareUrl}/print`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '6px',
+                                        width: '100%',
+                                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                                        color: '#fff',
+                                        fontWeight: 700,
+                                        fontSize: '0.8rem',
+                                        padding: '10px 16px',
+                                        borderRadius: '8px',
+                                        textDecoration: 'none',
+                                        boxShadow: '0 2px 4px rgba(99, 102, 241, 0.2)',
+                                        textAlign: 'center',
+                                        boxSizing: 'border-box'
+                                    }}
+                                >
+                                    🖨️ 인쇄용/PDF 바로보기
+                                </a>
+                            </div>
                         </div>
-                        <button className="btn-close-modal" onClick={() => setShowShareModal(false)}>닫기</button>
+                        <button className="btn-close-modal" onClick={() => setShowShareModal(false)} style={{ marginTop: '8px' }}>닫기</button>
                     </div>
                 </div>
             )}

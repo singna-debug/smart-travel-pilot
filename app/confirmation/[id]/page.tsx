@@ -1239,11 +1239,66 @@ export default function ConfirmationViewerPage() {
         );
     }
 
-    const totalTravelers = doc.trip.adultCount + doc.trip.childCount + doc.trip.infantCount;
-    const dDay = calcDDay(doc.trip.departureDate);
-    const checklistItems = doc.checklist ? doc.checklist.split('\n') : [];
-    const realChecklistItems = checklistItems.filter(item => item.trim() !== '');
-    const checkedCount = checklistItems.filter((item, i) => item.trim() !== '' && checkedItems[`cl-${i}`]).length;
+    // Ensure all optional nested objects/arrays exist with default empty fallbacks to prevent runtime client crashes
+    if (doc) {
+        doc.trip = doc.trip || {};
+        doc.trip.adultCount = doc.trip.adultCount || 0;
+        doc.trip.childCount = doc.trip.childCount || 0;
+        doc.trip.infantCount = doc.trip.infantCount || 0;
+        doc.trip.travelers = Array.isArray(doc.trip.travelers) ? doc.trip.travelers : [];
+        
+        doc.flight = doc.flight || {};
+        doc.flight.airline = doc.flight.airline || '';
+        doc.flight.departureTime = doc.flight.departureTime || '';
+        doc.flight.departureFlightNumber = doc.flight.departureFlightNumber || '';
+        doc.flight.departureAirport = doc.flight.departureAirport || '';
+        doc.flight.arrivalTime = doc.flight.arrivalTime || '';
+        doc.flight.departureSegments = Array.isArray(doc.flight.departureSegments) ? doc.flight.departureSegments : [];
+        doc.flight.returnDepartureTime = doc.flight.returnDepartureTime || '';
+        doc.flight.returnFlightNumber = doc.flight.returnFlightNumber || '';
+        doc.flight.returnArrivalTime = doc.flight.returnArrivalTime || '';
+        doc.flight.returnSegments = Array.isArray(doc.flight.returnSegments) ? doc.flight.returnSegments : [];
+        
+        doc.customer = doc.customer || {};
+        doc.customer.name = doc.customer.name || '';
+        
+        doc.itinerary = Array.isArray(doc.itinerary) ? doc.itinerary : [];
+        // Ensure day objects are safe
+        doc.itinerary.forEach((day: any) => {
+            if (day) {
+                day.timeline = Array.isArray(day.timeline) ? day.timeline : [];
+                day.activities = Array.isArray(day.activities) ? day.activities : [];
+                day.dailyNotices = Array.isArray(day.dailyNotices) ? day.dailyNotices : [];
+                day.meals = day.meals || {};
+            }
+        });
+        
+        doc.hotels = Array.isArray(doc.hotels) ? doc.hotels : [];
+        doc.meetingInfo = Array.isArray(doc.meetingInfo) ? doc.meetingInfo : [];
+        doc.inclusions = Array.isArray(doc.inclusions) ? doc.inclusions : [];
+        doc.exclusions = Array.isArray(doc.exclusions) ? doc.exclusions : [];
+        doc.files = Array.isArray(doc.files) ? doc.files : [];
+        
+        doc.secondaryResearch = doc.secondaryResearch || {};
+        const sr = doc.secondaryResearch;
+        sr.baggage = sr.baggage || {};
+        sr.baggage.additionalNotes = Array.isArray(sr.baggage.additionalNotes) ? sr.baggage.additionalNotes : [];
+        sr.weather = sr.weather || {};
+        sr.weather.forecast = Array.isArray(sr.weather.forecast) ? sr.weather.forecast : [];
+        sr.weather.clothingTips = Array.isArray(sr.weather.clothingTips) ? sr.weather.clothingTips : [];
+        sr.currency = sr.currency || {};
+        sr.currency.exchangeRateTips = Array.isArray(sr.currency.exchangeRateTips) ? sr.currency.exchangeRateTips : [];
+        sr.roaming = sr.roaming || {};
+        sr.roaming.tips = Array.isArray(sr.roaming.tips) ? sr.roaming.tips : [];
+        sr.landmarks = Array.isArray(sr.landmarks) ? sr.landmarks : [];
+        sr.customGuides = Array.isArray(sr.customGuides) ? sr.customGuides : [];
+    }
+
+    const totalTravelers = (doc.trip?.adultCount || 0) + (doc.trip?.childCount || 0) + (doc.trip?.infantCount || 0);
+    const dDay = calcDDay(doc.trip?.departureDate);
+    const checklistItems = typeof doc.checklist === 'string' ? doc.checklist.split('\n') : (Array.isArray(doc.checklist) ? doc.checklist : []);
+    const realChecklistItems = checklistItems.filter((item: any) => typeof item === 'string' && item.trim() !== '');
+    const checkedCount = checklistItems.filter((item: any, i: number) => typeof item === 'string' && item.trim() !== '' && checkedItems[`cl-${i}`]).length;
 
     return (
         <div className="mobile-confirm">
@@ -1252,9 +1307,33 @@ export default function ConfirmationViewerPage() {
                 <div className="mc-brand">CLUBMODE TRAVEL</div>
                 <h1>{doc.trip.productName || '여행 확정서'}</h1>
                 <div className="mc-subtitle">{doc.trip.destination}</div>
-                <div className="mc-status-badge">
-                    <span className="badge-dot"></span>
-                    {doc.status}
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '14px', alignItems: 'center' }}>
+                    <div className="mc-status-badge" style={{ marginTop: 0 }}>
+                        <span className="badge-dot"></span>
+                        {doc.status}
+                    </div>
+                    <a 
+                        href={`/confirmation/${id}/print`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            padding: '6px 14px',
+                            borderRadius: '20px',
+                            color: '#fff',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            textDecoration: 'none',
+                            transition: 'all 0.2s',
+                            backdropFilter: 'blur(4px)'
+                        }}
+                    >
+                        🖨️ 인쇄용/PDF 보기
+                    </a>
                 </div>
             </div>
 

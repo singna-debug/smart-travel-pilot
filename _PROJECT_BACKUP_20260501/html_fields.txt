@@ -1,0 +1,1 @@
+﻿PATH: pageProps.initialState.api.queries.getPackageGetProductAllInfoById({"productId":97890872}).data.content.precautionsPackage.precautionsBooking.productPriceRemarksHtml VALUE: 

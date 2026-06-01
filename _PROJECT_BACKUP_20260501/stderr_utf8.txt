@@ -1,0 +1,87 @@
+﻿node.exe : C:\Users\vbxn6\
+AppData\Local\npm-cache\_n
+px\1bf7c3c15bf47d04\node_m
+odules\ts-node\src\index.t
+s:859
+위치 줄:1 문자:1
++ & "C:\Program Files\node
+js/node.exe" "C:\Program F
+iles\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: (C  
+  :\Users\vbxn6\...rc\i   
+ ndex.ts:859:String) [    
+], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+    return new TSError(dia
+gnosticText, diagnosticCod
+es, diagnostics);
+           ^
+TSError: 殊?Unable to compi
+le TypeScript:
+verify-free-strategy.ts(1,
+37): error TS5097: An impo
+rt path can only end with 
+a '.ts' extension when 'al
+lowImportingTsExtensions' 
+is enabled.
+verify-free-strategy.ts(2,
+39): error TS5097: An impo
+rt path can only end with 
+a '.ts' extension when 'al
+lowImportingTsExtensions' 
+is enabled.
+
+    at createTSError (C:\U
+sers\vbxn6\AppData\Local\n
+pm-cache\_npx\1bf7c3c15bf4
+7d04\node_modules\ts-node\
+src\index.ts:859:12)
+    at reportTSError (C:\U
+sers\vbxn6\AppData\Local\n
+pm-cache\_npx\1bf7c3c15bf4
+7d04\node_modules\ts-node\
+src\index.ts:863:19)
+    at getOutput (C:\Users
+\vbxn6\AppData\Local\npm-c
+ache\_npx\1bf7c3c15bf47d04
+\node_modules\ts-node\src\
+index.ts:1077:36)
+    at Object.compile (C:\
+Users\vbxn6\AppData\Local\
+npm-cache\_npx\1bf7c3c15bf
+47d04\node_modules\ts-node
+\src\index.ts:1433:41)
+    at Module.m._compile (
+C:\Users\vbxn6\AppData\Loc
+al\npm-cache\_npx\1bf7c3c1
+5bf47d04\node_modules\ts-n
+ode\src\index.ts:1617:30)
+    at node:internal/modul
+es/cjs/loader:1893:10
+    at Object.require.exte
+nsions.<computed> [as .ts]
+ (C:\Users\vbxn6\AppData\L
+ocal\npm-cache\_npx\1bf7c3
+c15bf47d04\node_modules\ts
+-node\src\index.ts:1621:12
+)
+    at Module.load (node:i
+nternal/modules/cjs/loader
+:1481:32)
+    at Module._load (node:
+internal/modules/cjs/loade
+r:1300:12)
+    at TracingChannel.trac
+eSync (node:diagnostics_ch
+annel:328:14) {
+  diagnosticCodes: [ 5097,
+ 5097 ]
+}
+

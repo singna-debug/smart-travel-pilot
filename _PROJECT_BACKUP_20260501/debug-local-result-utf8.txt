@@ -1,0 +1,95 @@
+﻿[dotenv@17.3.1] injecting env (16) from .env.local -- tip: ?숋툘  load multiple .env files with { path: ['.env.local', '.env'] }
+[Crawler] 遺꾩꽍 ?쒖옉: https://www.modetour.com/package/100634999?MLoc=99&Pnum=100634999&ANO=81440&sno=C117876&thru=
+[Crawler] 濡쒖뺄 ?섍꼍: Browser ?щ·留?Puppeteer) ?쒕룄
+[Browser] ?곗뒪?ы깙 紐⑤뱶 ?쒖옉: https://www.modetour.com/package/100634999?MLoc=99&Pnum=100634999&ANO=81440&sno=C117876&thru=
+[Browser] ?섏씠吏 ?대룞 (Timeout 60s, domcontentloaded)...
+[36m[Page][0m [array Arguments]
+[36m[Page][0m ModetourAuth : not signed in : signinSilent start
+[36m[Page][0m ModetourAuth : signinSilent start
+[36m[Page][0m ModetourAuth : signinSilent : samesite start true true
+[36m[Page][0m Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+[36m[Page][0m /!\ You are using legacy implementation. Please update your code: use createWrapper() and wrapper.useWrappedStore().
+[36m[Page][0m Refused to display 'https://auth.modetour.com/' in a frame because it set 'X-Frame-Options' to 'sameorigin'.
+[Browser] ?ㅽ겕濡??ㅼ슫 (Optimized - 8000px)...
+[36m[Page][0m [Meta Pixel] - Duplicate Pixel ID: 136990849264557.
+[36m[Page][0m [Meta Pixel] - You are sending a non-standard event 'view_item'. The preferred way to send these events is using trackCustom. See 'https://developers.facebook.com/docs/ads-for-websites/pixel-events/#events' for more information.
+[36m[Page][0m Removed existing live mini preview.
+[Browser] ?④꺼吏??뺣낫(?붾낫湲? ?명뀛?뺣낫 ?? 濡쒕뵫???꾪븳 ?대┃ 泥섎━...
+[36m[Page][0m [Browser In-Page] ?대┃??踰꾪듉 ?? 5
+[Browser] ?띿뒪??諛??띿꽦 異붿텧...
+[Browser] 異붿텧 ?꾨즺: 5296??[Crawler] AI 遺꾩꽍 ?쒖옉... (?곗씠??湲몄씠: 5210)
+[Gemini] AI 遺꾩꽍 ?쒖옉... (紐⑤뜽: gemini-2.0-flash)
+[Gemini] ?낅젰 ?띿뒪???먮낯 湲몄씠: 5210
+[Gemini] 理쒖쥌 ?꾨＼?꾪듃 湲몄씠: 5990
+node.exe : [Gemini] AI
+ ?묐떟?먯꽌 ?띿뒪?몃? 李얠쓣 ???
+녾굅???먮윭媛 諛쒖깮?덉뒿?덈떎: {
+"error":{"code":429,"m
+essage":"You exceeded 
+your current quota, pl
+ease check your plan a
+nd billing details. Fo
+r more information on 
+this error, head to: h
+ttps://ai.google.dev/g
+emini-api/docs/rate-li
+mits. To monitor your 
+current usage, head to
+: https://ai.dev/rate-
+limit. \n* Quota excee
+ded for metric: genera
+tivelanguage.googleapi
+s.com/generate_content
+_free_tier_input_token
+_count, limit: 0, mode
+l: gemini-2.0-flash\n*
+ Quota exceeded for me
+tric: generativelangua
+ge.googleapis.com/gene
+rate_content_fr
+위치 줄:1 문자:1
++ & "C:\Program Files\
+nodejs/node.exe" "C:\P
+rogram Files\nodejs/no
+de_mo ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: ([Gemini] A   
+ I ?묐떟...rate_cont    
+ent_fr:String) []    ,
+ RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+[Fallback] AI ?좊떦??珥덇낵 ?먮뒗 ?먮윭濡??명빐 ?뺢퇋??遺꾩꽍 紐⑤뱶濡??꾪솚?⑸땲??
+[Fallback] ?뺢퇋??異붿텧 寃곌낵: {"isProduct":true,"title":"","destination":"","price":"","departureDate":"","duration":"","airline":"","departureAirport":"","hotel":"","features":[],"courses":[],"specialOffers":[],"inclusions":[],"exclusions":[],"itinerary":[],"keyPoints":[],"hashtags":"","hasNoOption":false,"hasFreeSchedule":false,"url":"https://www.modetour.com/package/100634999?MLoc=99&Pnum=100634999&ANO=81440&sno=C117876&thru="}
+[Crawler] AI 遺꾩꽍 寃곌낵 ?섏떊 ?깃났: 
+[Crawler Refine] AI Duration: 誘몄젙 -> Final Duration:  -> Formatted: 誘몄젙
+Local Crawl: 11.590s
+{
+  "isProduct": true,
+  "title": "",
+  "destination": "",
+  "price": "",
+  "departureDate": "",
+  "duration": "誘몄젙",
+  "airline": "",
+  "departureAirport": "",
+  "hotel": "",
+  "features": [],
+  "courses": [],
+  "specialOffers": [],
+  "inclusions": [],
+  "exclusions": [],
+  "itinerary": [],
+  "keyPoints": [],
+  "hashtags": "",
+  "hasNoOption": false,
+  "hasFreeSchedule": false,
+  "url": "https://www.modetour.com/package/100634999?MLoc=99&Pnum=100634999&ANO=81440&sno=C117876&thru="
+}

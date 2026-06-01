@@ -1,0 +1,89 @@
+departureDate: 2026-04-18
+productCode2: JKP6017CJ3
+productName: [출발확정][자연품은큐슈] 후쿠오카/구마모토/유후인/벳부/아소 3일 (전일정온천호텔+호텔석식2회+술음료무제한)
+host: www.modetour.com
+url: /package/100634999?MLoc=99&Pnum=100634999&ANO=81440&sno=C117876&thru=
+typeTrip: roundTrip
+selectedRegionType: overseas
+time: 2026-03-04T09:11:06.561Z
+positionLogo: all
+tabMainSearchMO: 해외여행
+version: v.1.02.7
+nickName: 홍길동
+type: commonSearch
+type: overseaTravelSearch
+type: domesticTravelSearch
+type: flightSearch
+type: hotelSearch
+type: localTourSearch
+type: discountFlightSearch
+layoutKey: 
+nameParent: 일본
+valueParent: 1
+name: 일본
+value: JP
+name: 오사카
+value: 4EE3F602-7C8A-4E81-B6AD-039B03B377DE
+endLocation: 오사카
+typeSearchHotel: domestic
+searchFrom: 2026-03-19
+searchTo: 2026-03-20
+domain: hotel
+type: overseas
+areaName: 
+regionName: 
+label: 추천순
+value: RecommendOrder
+type: REVIEW_COMMENT
+type: 
+urlIframe: https://nguyenthanhhoai-se.github.io/events_exhibition/events-desktop/main/main.html
+dateFuture: 2026-03-03T09:11:06.562Z
+tokenNotLogin: Web7384559660580:bef06529
+idTourPass: 
+keywordSelected: 
+productMasterCode: 
+status: fulfilled
+endpointName: getPackageGetSimpleProductInfo
+requestId: znZ2AKC2VN0dv9c-OKHri
+productName: [출발확정][자연품은큐슈] 후쿠오카/구마모토/유후인/벳부/아소 3일 (전일정온천호텔+호텔석식2회+술음료무제한)
+productCode: JKP601
+productCode2: JKP6017CJ3
+departureDate: 2026-04-18
+cancel: N
+reducerPath: api
+reducerPath: tripHubApi
+reducerPath: activityApi
+reducerPath: xcrsFlightApi
+reducerPath: b2cFlightApi
+reducerPath: authApi
+key: 
+deviceType: DVTPC
+apiKey: jm9i5RUzKPMPdklHzDKqNzwZYy0IGV5hTyKkCcpxO0IGIgVS+8Z7NnbzbARv5w7Bn90KT13Gq79XZMow6TYvwQ==
+domain: WWW.MODETOUR.COM
+webSiteTypeCodeKey: WS9001
+webSiteSubTypeCodeKey: WS8001
+webSiteOfferTypeCodeKey: WS700A
+webSiteName: (주) 모두투어네트워크
+pcDomain: https://www.modetour.com/
+mobileDomain: https://m.modetour.com/
+pcDomainDev: https://www.modetour.dev/
+mobileDomainDev: https://m.modetour.dev/
+pcDomainStg: https://www.modetour.dev/
+mobileDomainStg: https://m.modetour.dev/
+callCenterNumber: -1544-5252
+cryptoKey: jm9i5RUzKPMPdklHzDKqN+RjdCwONGc5xonqAmFY3ozmBQJ/CxkAc40uMi0gzmxTsX6ed3i3m8i9xclrghICqw==
+apiKey: jm9i5RUzKPMPdklHzDKqNzwZYy0IGV5hTyKkCcpxO0IGIgVS+8Z7NnbzbARv5w7Bn90KT13Gq79XZMow6TYvwQ==
+asisPcApiKey: 0AEA55A9-01A9-4EAE-8A24-CABB8025CE2F
+decryptKey: 0xE4FB57B571CC011A073D62C1C109BB
+requestGuid: 00000000-0000-0000-0000-000000000000
+page: /package/[id]
+MLoc: 99
+Pnum: 100634999
+ANO: 81440
+sno: C117876
+thru: 
+id: 100634999
+buildId: xoAa8Nq-mRKhYThM-w2sg
+locale: ko
+0: ko
+defaultLocale: ko

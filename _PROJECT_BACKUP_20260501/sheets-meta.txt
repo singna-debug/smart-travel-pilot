@@ -1,0 +1,5 @@
+Checking Google Sheets Metadata...
+--- Found Sheets ---
+Title: "시트1", ID (GID): 0, Index: 0
+Title: "시트2", ID (GID): 731615545, Index: 1
+--------------------

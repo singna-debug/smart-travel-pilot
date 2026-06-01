@@ -1,0 +1,10 @@
+[METADATA]
+PAGE_TITLE: 패키지&gt;상품상세&gt;undefined&gt;undefined
+OG_TITLE: 
+BODY_TITLE: 
+CLASS_TITLE: 
+TARGET_TITLE: 
+TARGET_PRICE: 1199900
+TARGET_DURATION: 1박2일
+[CONTENT]
+패키지>상품상세>undefined>undefined

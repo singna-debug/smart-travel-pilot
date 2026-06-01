@@ -146,19 +146,20 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                 else if (air.flightTypeName === "ARRIVAL" && !returnAir.departureFlight) returnAir = merged;
             }
 
-            // 도시 정보 추출
+            // 도시 정보 추출 (한국 출발지 공항/도시 및 기내/경유 단어 제외)
+            const koreanExclusions = ['인천', '김포', '서울', '김해', '부산', '대구', '청주', '제주', '무안', '양양', '광주', '기내', '경유', '경유지'];
             if (Array.isArray(s.placeHeader)) {
                 s.placeHeader.forEach((p: string) => {
                     const clean = p.trim();
-                    if (clean && !['인천', '기내', '경유', '경유지'].includes(clean)) citySet.add(clean);
+                    if (clean && !koreanExclusions.includes(clean)) citySet.add(clean);
                 });
             }
             if (s.cityName) {
                 const cName = s.cityName.trim();
-                if (cName && !['인천', '기내'].includes(cName)) citySet.add(cName);
+                if (cName && !koreanExclusions.includes(cName)) citySet.add(cName);
             }
             (s.ortherActions || []).forEach((t: any) => {
-                if (t.cityName && !['인천', '기내'].includes(t.cityName)) citySet.add(t.cityName);
+                if (t.cityName && !koreanExclusions.includes(t.cityName)) citySet.add(t.cityName);
             });
         }
         const aggregatedDest = Array.from(citySet).join(', ');

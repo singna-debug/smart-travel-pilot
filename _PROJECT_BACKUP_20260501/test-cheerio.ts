@@ -1,0 +1,1 @@
+import { scrapeForConfirmation } from './lib/crawlers/confirmation/crawler.js'; process.env.VERCEL='1'; scrapeForConfirmation('https://www.modetour.com/package/105792840?MLoc=99&Pnum=105792840&ANO=81440&sno=C117876&thru=crs').then(res => { const fs = require('fs'); fs.writeFileSync('tmp/cheerio-out.txt', res); console.log('Done, length:', res ? res.length : 0); });
