@@ -83,8 +83,25 @@ const ENTRY_REQUIREMENTS: Record<string, {
         ]
     },
     '대만': {
+        majorAlert: { 
+            title: '대만 온라인입국신고서(TWAC) 필수 작성 안내 (2025.10.1부터 시행)', 
+            content: '2025.10.01부터 \'종이입국신고서\'를 폐지하고 \'온라인입국신고서(TWAC)\'로 전면 대체합니다. 현지 입국일을 포함하여 입국 전 3일(72시간) 이내에 작성 및 제출되어야 합니다. 단체일 경우 대표자가 동행 인원 16명까지 대신 등록 가능합니다.', 
+            penalty: '미작성 시 대만 입국 수속이 지연되거나 불이익을 받을 수 있습니다.'
+        },
+        arrivalProcedure: {
+            title: '대만 온라인입국신고서(TWAC) 단계별 작성 방법',
+            timing: '입국 전 3일(72시간) 이내',
+            steps: [
+                { step: '1. TWAC 홈페이지 접속', description: 'TWAC(https://twac.immigration.gov.tw/) 홈페이지 접속 후 우측 상단에서 [한국어]로 언어를 변경합니다. 작성 시 별도 비용은 없습니다.' },
+                { step: '2. 개인/항공/숙소 정보 입력', description: '이메일 인증 후 성명, 국적, 여권정보, 항공편, 목적 등을 입력합니다. 대만 내 체류주소는 확정된 호텔 주소를 기입합니다.' },
+                { step: '3. 제출 및 확인 메일 수신', description: '입력 사항 확인 후 제출하면 약 10분 이내에 심사가 완료되고, 이메일로 "입국신고서카드(첨부파일)"를 수신합니다.' },
+                { step: '4. 대만 입국 심사', description: '대만 입국 시 심사관에게 여권만 제시하면 입국 가능합니다. 일정이나 정보가 변경되면 수정해야 하며, 수정 불가 항목은 재작성해야 합니다.' }
+            ]
+        },
         links: [
-            { label: '대만 온라인 입국신고서', url: 'https://oa1.immigration.gov.tw/nia_acard/acardAddAction.action', type: 'arrival_card', description: '대만 입국 전 온라인으로 입국신고서를 미리 작성하면 공항에서 종이 신고서를 쓸 필요가 없습니다.', howTo: '공식 사이트에 접속하여 여권 정보, 대만 내 숙소 주소를 입력합니다. 제출 후 생성된 승인 정보를 확인합니다.' },
+            { label: '대만입국신고서(TWAC) 제출 링크', url: 'https://twac.immigration.gov.tw/', type: 'arrival_card', description: '대만 온라인 입국신고서(TWAC) 작성 공식 웹사이트입니다.', howTo: '입국일 포함 3일 전부터 작성 가능 (예: 10/1 입국 시 9/29~10/1 작성)' },
+            { label: 'TWAC 작성방법 가이드(PDF)', url: 'https://drive.google.com/file/d/1HV1JyICbH9EUgNQHk3HtwzeLob6z1cGG/view?usp=sharing', type: 'other', description: '대만 온라인입국신고서 단계별 작성 매뉴얼(PDF)입니다.', howTo: '작성 전 미리 읽어보시기 바랍니다.' },
+            { label: 'TWAC 작성방법 가이드(영상)', url: 'https://www.youtube.com/watch?v=UXbBfMLJekk', type: 'other', description: '대만 온라인입국신고서 작성 방법을 안내하는 유튜브 영상입니다.', howTo: '영상을 시청하며 천천히 따라 하실 수 있습니다.' }
         ]
     },
     '베트남': {
