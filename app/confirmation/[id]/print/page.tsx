@@ -514,7 +514,7 @@ export default function PrintConfirmationPage() {
                                         {/* 일차별 헤더 */}
                                         <div className="pc-day-header">
                                             <div className="pc-day-header-left">
-                                                <span className="pc-day-num">{day.day}</span>
+                                                <span className="pc-day-num">{String(day.day).includes('일') ? day.day : `${day.day}일차`}</span>
                                                 {day.date && <span className="pc-day-date">{formatPrintDate(day.date)}</span>}
                                             </div>
                                             {day.title && <div className="pc-day-title">{day.title}</div>}

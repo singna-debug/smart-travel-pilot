@@ -473,9 +473,10 @@
 }
 
 .pc-day-num {
-    width: 32px;
+    min-width: 52px;
     height: 32px;
-    border-radius: 50%;
+    padding: 0 10px;
+    border-radius: 16px;
     background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
     color: #fff;
     display: flex;
