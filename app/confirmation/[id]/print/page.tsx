@@ -469,21 +469,25 @@ export default function PrintConfirmationPage() {
                             공항 미팅 및 카운터 안내
                         </h3>
                         {meetingInfo.map((m, i) => (
-                            <div key={i} className="pc-meeting-card" style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                            <div key={i} className="pc-meeting-card" style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
                                 {m.imageUrl && (
                                     <img 
                                         src={m.imageUrl} 
                                         alt={m.type || '미팅안내'} 
-                                        style={{ width: '150px', height: '100px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} 
+                                        style={{ width: '260px', height: '160px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} 
                                     />
                                 )}
                                 <div style={{ flex: 1 }}>
-                                    <div className="pc-meeting-header" style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '8px', marginBottom: '8px' }}>
-                                        <div className="pc-meeting-left">
-                                            <span className="pc-meeting-badge">{m.type || '미팅장소'}</span>
-                                            <span className="pc-meeting-location">{m.location || '-'}</span>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px', marginBottom: '8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span className="pc-meeting-badge" style={{ margin: 0 }}>{m.type || '미팅장소'}</span>
+                                            <span className="pc-meeting-location" style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>{m.location || '-'}</span>
                                         </div>
-                                        {m.time && <div className="pc-meeting-time">🕐 {m.time}</div>}
+                                        {m.time && (
+                                            <div style={{ fontSize: '0.74rem', color: '#4f46e5', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                🕐 {m.time}
+                                            </div>
+                                        )}
                                     </div>
                                     {m.description && (
                                         <p className="pc-meeting-desc" style={{ margin: 0 }} dangerouslySetInnerHTML={{ __html: cleanupHtml(m.description) }} />
