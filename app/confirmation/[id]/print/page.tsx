@@ -852,60 +852,61 @@ export default function PrintConfirmationPage() {
                                 <div className="pc-guide-block">
                                     <h4 className="pc-block-title">
                                         <div className="pc-block-icon pc-icon-red">💰</div>
-                                        현지 통화 및 환전/칩 팁
+                                        현지 통화 및 환전/팁 정보
                                     </h4>
-                                    <p className="pc-guide-text"><strong>현지 통화 단위:</strong> {secondaryResearch.currency.localCurrency || '달러/현지통화'}</p>
-                                    {secondaryResearch.currency.exchangeRateTips && secondaryResearch.currency.exchangeRateTips.length > 0 && (
-                                        <ul className="pc-guide-list">
-                                            {secondaryResearch.currency.exchangeRateTips.map((tip: any, idx) => (
-                                                <li key={idx}>
-                                                    {typeof tip === 'object' && tip !== null ? (
-                                                        <>
-                                                            {tip.title && <strong>[{tip.title}] </strong>}
-                                                            {tip.content}
-                                                        </>
-                                                    ) : (
-                                                        tip
-                                                    )}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
+                                    <p className="pc-guide-text" style={{ marginBottom: '12px' }}>
+                                        <strong>현지 통화 단위:</strong> {secondaryResearch.currency.localCurrency || '현지통화'}{secondaryResearch.currency.currencySymbol ? ` (${secondaryResearch.currency.currencySymbol})` : ''}
+                                    </p>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {secondaryResearch.currency.calculationTip && (
+                                            <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '10px', padding: '10px 12px' }}>
+                                                <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0369a1', marginBottom: '4px' }}>🔢 간편 계산법</div>
+                                                <div style={{ fontSize: '0.7rem', color: '#075985', lineHeight: 1.45 }}>{secondaryResearch.currency.calculationTip}</div>
+                                            </div>
+                                        )}
+                                        {secondaryResearch.currency.exchangeTip && (
+                                            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 12px' }}>
+                                                <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>💵 환전 팁</div>
+                                                <div style={{ fontSize: '0.7rem', color: '#475569', lineHeight: 1.45, whiteSpace: 'pre-line' }}>{secondaryResearch.currency.exchangeTip}</div>
+                                            </div>
+                                        )}
+                                        {secondaryResearch.currency.tipCulture && (
+                                            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 12px' }}>
+                                                <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>🛎️ 현지 팁 문화</div>
+                                                <div style={{ fontSize: '0.7rem', color: '#475569', lineHeight: 1.45, whiteSpace: 'pre-line' }}>{secondaryResearch.currency.tipCulture}</div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
                             {/* 6. 로밍 및 인터넷 */}
                             {secondaryResearch.roaming && (
-                                <div className="pc-guide-block" style={{ gridColumn: 'span 2' }}>
+                                <div className="pc-guide-block">
                                     <h4 className="pc-block-title">
                                         <div className="pc-block-icon pc-icon-blue">📞</div>
                                         로밍 및 인터넷 이용 가이드
                                     </h4>
-                                    <p className="pc-guide-text" style={{ marginBottom: '8px' }}>
+                                    <p className="pc-guide-text" style={{ marginBottom: '12px' }}>
                                         {secondaryResearch.roaming.description || '주요 관광지와 호텔 내에서 데이터 통신 사용이 원활합니다.'}
                                     </p>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                                        <div>
-                                            <h5 style={{ margin: '0 0 4px 0', fontSize: '0.72rem' }}>💡 추천 이용 방법</h5>
-                                            <p className="pc-guide-text" style={{ fontSize: '0.7rem', color: '#475569', margin: 0 }}>{secondaryResearch.roaming.simEsim || '출국 전 유심(SIM) 또는 e-SIM을 사전 구매하시거나 데이터 로밍 부가서비스 가입을 적극 추천드립니다.'}</p>
-                                        </div>
-                                        {secondaryResearch.roaming.tips && secondaryResearch.roaming.tips.length > 0 && (
-                                            <div>
-                                                <h5 style={{ margin: '0 0 4px 0', fontSize: '0.72rem' }}>✨ 로밍 이용 꿀팁</h5>
-                                                <ul className="pc-guide-list">
-                                                    {secondaryResearch.roaming.tips.map((tip: any, idx) => (
-                                                        <li key={idx} style={{ fontSize: '0.7rem' }}>
-                                                            {typeof tip === 'object' && tip !== null ? (
-                                                                <>
-                                                                    {tip.title && <strong>[{tip.title}] </strong>}
-                                                                    {tip.content}
-                                                                </>
-                                                            ) : (
-                                                                tip
-                                                            )}
-                                                        </li>
-                                                    ))}
-                                                </ul>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {secondaryResearch.roaming.simEsim && (
+                                            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '10px 12px' }}>
+                                                <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#166534', marginBottom: '4px' }}>💡 추천 이용 방법 (유심/eSIM)</div>
+                                                <div style={{ fontSize: '0.7rem', color: '#166534', lineHeight: 1.45 }}>{secondaryResearch.roaming.simEsim}</div>
+                                            </div>
+                                        )}
+                                        {secondaryResearch.roaming.carriers && (
+                                            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 12px' }}>
+                                                <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>📶 현지 통신사 파트너</div>
+                                                <div style={{ fontSize: '0.7rem', color: '#475569', lineHeight: 1.45 }}>{secondaryResearch.roaming.carriers}</div>
+                                            </div>
+                                        )}
+                                        {secondaryResearch.roaming.roamingTip && (
+                                            <div style={{ background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '10px', padding: '10px 12px' }}>
+                                                <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#92400e', marginBottom: '4px' }}>✨ 로밍 이용 꿀팁</div>
+                                                <div style={{ fontSize: '0.7rem', color: '#92400e', lineHeight: 1.45, whiteSpace: 'pre-line' }}>{secondaryResearch.roaming.roamingTip}</div>
                                             </div>
                                         )}
                                     </div>
