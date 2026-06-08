@@ -477,21 +477,33 @@ export default function PrintConfirmationPage() {
                                         style={{ width: '260px', height: '160px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} 
                                     />
                                 )}
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px', marginBottom: '8px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <span className="pc-meeting-badge" style={{ margin: 0 }}>{m.type || '미팅장소'}</span>
-                                            <span className="pc-meeting-location" style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>{m.location || '-'}</span>
-                                        </div>
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                        {m.type && (
+                                            <div style={{ fontSize: '0.74rem', lineHeight: 1.4, display: 'flex', alignItems: 'center' }}>
+                                                <strong style={{ color: '#475569', display: 'inline-block', width: '70px', flexShrink: 0 }}>• 미팅구분:</strong>
+                                                <span style={{ fontWeight: 700, color: '#0f172a' }}>{m.type}</span>
+                                            </div>
+                                        )}
+                                        {m.location && (
+                                            <div style={{ fontSize: '0.74rem', lineHeight: 1.45, display: 'flex', alignItems: 'flex-start' }}>
+                                                <strong style={{ color: '#475569', display: 'inline-block', width: '70px', flexShrink: 0 }}>• 미팅장소:</strong>
+                                                <span style={{ fontWeight: 700, color: '#0f172a', flex: 1, wordBreak: 'keep-all' }}>{m.location}</span>
+                                            </div>
+                                        )}
                                         {m.time && (
-                                            <div style={{ fontSize: '0.74rem', color: '#4f46e5', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                🕐 {m.time}
+                                            <div style={{ fontSize: '0.74rem', lineHeight: 1.4, display: 'flex', alignItems: 'center' }}>
+                                                <strong style={{ color: '#475569', display: 'inline-block', width: '70px', flexShrink: 0 }}>• 미팅시간:</strong>
+                                                <span style={{ fontWeight: 700, color: '#4f46e5' }}>{m.time}</span>
+                                            </div>
+                                        )}
+                                        {m.description && (
+                                            <div style={{ fontSize: '0.72rem', lineHeight: 1.45, display: 'flex', alignItems: 'flex-start', marginTop: '4px', borderTop: '1px dashed #e2e8f0', paddingTop: '6px' }}>
+                                                <strong style={{ color: '#475569', display: 'inline-block', width: '70px', flexShrink: 0 }}>• 상세설명:</strong>
+                                                <span style={{ color: '#64748b', flex: 1, wordBreak: 'keep-all' }} dangerouslySetInnerHTML={{ __html: cleanupHtml(m.description) }} />
                                             </div>
                                         )}
                                     </div>
-                                    {m.description && (
-                                        <p className="pc-meeting-desc" style={{ margin: 0 }} dangerouslySetInnerHTML={{ __html: cleanupHtml(m.description) }} />
-                                    )}
                                 </div>
                             </div>
                         ))}
