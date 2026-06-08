@@ -479,22 +479,16 @@ export default function PrintConfirmationPage() {
                                 )}
                                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                        {m.type && (
+                                        {m.time && (
                                             <div style={{ fontSize: '0.74rem', lineHeight: 1.4, display: 'flex', alignItems: 'center' }}>
-                                                <strong style={{ color: '#475569', display: 'inline-block', width: '70px', flexShrink: 0 }}>• 미팅구분:</strong>
-                                                <span style={{ fontWeight: 700, color: '#0f172a' }}>{m.type}</span>
+                                                <strong style={{ color: '#475569', display: 'inline-block', width: '70px', flexShrink: 0 }}>• 미팅시간:</strong>
+                                                <span style={{ fontWeight: 700, color: '#4f46e5' }}>{m.time}</span>
                                             </div>
                                         )}
                                         {m.location && (
                                             <div style={{ fontSize: '0.74rem', lineHeight: 1.45, display: 'flex', alignItems: 'flex-start' }}>
                                                 <strong style={{ color: '#475569', display: 'inline-block', width: '70px', flexShrink: 0 }}>• 미팅장소:</strong>
                                                 <span style={{ fontWeight: 700, color: '#0f172a', flex: 1, wordBreak: 'keep-all' }}>{m.location}</span>
-                                            </div>
-                                        )}
-                                        {m.time && (
-                                            <div style={{ fontSize: '0.74rem', lineHeight: 1.4, display: 'flex', alignItems: 'center' }}>
-                                                <strong style={{ color: '#475569', display: 'inline-block', width: '70px', flexShrink: 0 }}>• 미팅시간:</strong>
-                                                <span style={{ fontWeight: 700, color: '#4f46e5' }}>{m.time}</span>
                                             </div>
                                         )}
                                         {m.description && (
