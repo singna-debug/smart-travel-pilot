@@ -111,7 +111,7 @@ const ENTRY_REQUIREMENTS: Record<string, {
     },
     '태국': {
         links: [
-            { label: '태국 입국 신고서 (TM6)', url: 'https://tdapp.immigration.go.th/', type: 'arrival_card', description: '태국 입국 시 전자 입국신고서(TM6)를 미리 작성하면 수속이 빨라집니다. 현재 일부 기내 작성이 병행될 수 있습니다.', howTo: '이민국 웹사이트에서 여권 정보와 체류지 정보를 입력한 후 제출합니다.' },
+            { label: '태국 온라인 입국신고서 (TDAC)', url: 'https://tdac.immigration.go.th', type: 'arrival_card', description: '태국 입국 시 필수적으로 작성해야 하는 온라인 디지털 입국신고서(TDAC)입니다. 기존 종이 신고서(TM6)를 대체합니다.', howTo: '입국일 포함 3일 전부터 작성 가능합니다. 작성 완료 후 이메일로 전송된 확인 메일(또는 QR코드)을 캡처하여 여권과 함께 제시하세요.' },
         ]
     },
     '필리핀': {
