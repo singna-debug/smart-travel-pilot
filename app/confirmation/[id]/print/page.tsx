@@ -698,25 +698,47 @@ export default function PrintConfirmationPage() {
                                             )}
                                         </div>
                                     )}
+                                    {secondaryResearch.customs.links && secondaryResearch.customs.links.length > 0 && (
+                                        <div style={{ marginTop: '12px', borderTop: '1px dashed #e2e8f0', paddingTop: '10px' }}>
+                                            <h5 style={{ margin: '0 0 8px 0', fontSize: '0.74rem', fontWeight: 800, color: '#334155' }}>🔗 입국/비자 온라인 사이트 (모바일 QR 스캔)</h5>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                {secondaryResearch.customs.links.map((link: any, idx: number) => {
+                                                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link.url)}`;
+                                                    return (
+                                                        <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 12px', gap: '12px' }}>
+                                                            <div style={{ flex: 1 }}>
+                                                                <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
+                                                                    {link.label}
+                                                                </div>
+                                                                <div style={{ fontSize: '0.68rem', color: '#475569', lineHeight: 1.4, marginBottom: link.howTo ? '4px' : 0 }}>
+                                                                    {link.description}
+                                                                </div>
+                                                                {link.howTo && (
+                                                                    <div style={{ fontSize: '0.65rem', color: '#0284c7', fontWeight: 600 }}>
+                                                                        💡 {link.howTo}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '6px' }}>
+                                                                <img 
+                                                                    src={qrUrl} 
+                                                                    alt={`${link.label} QR`} 
+                                                                    style={{ width: '64px', height: '64px', display: 'block' }} 
+                                                                />
+                                                                <span style={{ fontSize: '0.55rem', color: '#94a3b8', marginTop: '4px', fontWeight: 700 }}>스캔하기</span>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
                                     <ul className="pc-guide-list" style={{ marginBottom: '10px' }}>
                                         {secondaryResearch.customs.dutyFree && <li><strong>면세 한도:</strong> {secondaryResearch.customs.dutyFree}</li>}
                                         {secondaryResearch.customs.passportNote && <li><strong>여권 유의사항:</strong> {secondaryResearch.customs.passportNote}</li>}
                                         {secondaryResearch.customs.minorEntry && <li><strong>미성년 자녀 입국 규정:</strong> {secondaryResearch.customs.minorEntry}</li>}
                                     </ul>
-                                    
-                                    {secondaryResearch.customs.links && secondaryResearch.customs.links.length > 0 && (
-                                        <div style={{ marginTop: '8px', borderTop: '1px dashed #e2e8f0', paddingTop: '8px' }}>
-                                            <h5 style={{ margin: '0 0 6px 0', fontSize: '0.74rem' }}>🔗 입국/비자 온라인 사이트</h5>
-                                            <ul className="pc-guide-list">
-                                                {secondaryResearch.customs.links.map((link: any, idx: number) => (
-                                                    <li key={idx} style={{ fontSize: '0.7rem' }}>
-                                                        <strong>{link.label}:</strong> {link.description} <br />
-                                                        <span style={{ color: '#0ea5e9', fontSize: '0.65rem' }}>{link.url}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
+
                                 </div>
                             )}
 
