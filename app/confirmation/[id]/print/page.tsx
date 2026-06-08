@@ -91,7 +91,7 @@ interface ConfirmationDocument {
             carryonWeight?: string;
             carryonNote?: string;
         };
-        landmarks?: Array<{ name: string; description: string }>;
+        landmarks?: Array<{ name: string; nameLocal?: string; description: string; imageUrl?: string }>;
         customs?: {
             rules?: string[];
         };
@@ -469,17 +469,26 @@ export default function PrintConfirmationPage() {
                             공항 미팅 및 카운터 안내
                         </h3>
                         {meetingInfo.map((m, i) => (
-                            <div key={i} className="pc-meeting-card">
-                                <div className="pc-meeting-header">
-                                    <div className="pc-meeting-left">
-                                        <span className="pc-meeting-badge">{m.type || '미팅장소'}</span>
-                                        <span className="pc-meeting-location">{m.location || '-'}</span>
-                                    </div>
-                                    {m.time && <div className="pc-meeting-time">🕐 {m.time}</div>}
-                                </div>
-                                {m.description && (
-                                    <p className="pc-meeting-desc" dangerouslySetInnerHTML={{ __html: cleanupHtml(m.description) }} />
+                            <div key={i} className="pc-meeting-card" style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                                {m.imageUrl && (
+                                    <img 
+                                        src={m.imageUrl} 
+                                        alt={m.type || '미팅안내'} 
+                                        style={{ width: '150px', height: '100px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} 
+                                    />
                                 )}
+                                <div style={{ flex: 1 }}>
+                                    <div className="pc-meeting-header" style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '8px', marginBottom: '8px' }}>
+                                        <div className="pc-meeting-left">
+                                            <span className="pc-meeting-badge">{m.type || '미팅장소'}</span>
+                                            <span className="pc-meeting-location">{m.location || '-'}</span>
+                                        </div>
+                                        {m.time && <div className="pc-meeting-time">🕐 {m.time}</div>}
+                                    </div>
+                                    {m.description && (
+                                        <p className="pc-meeting-desc" style={{ margin: 0 }} dangerouslySetInnerHTML={{ __html: cleanupHtml(m.description) }} />
+                                    )}
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -820,11 +829,20 @@ export default function PrintConfirmationPage() {
                                         <div className="pc-block-icon pc-icon-green">🗺️</div>
                                         주요 관광 명소 가이드
                                     </h4>
-                                    <div className="pc-landmarks-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+                                    <div className="pc-landmarks-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                         {secondaryResearch.landmarks.map((lm: any, idx: number) => (
-                                            <div key={idx} className="pc-landmark-item" style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-                                                <span className="pc-landmark-name">📍 {lm.name} {lm.nameLocal && `(${lm.nameLocal})`}</span>
-                                                <p className="pc-landmark-desc" style={{ fontSize: '0.7rem', color: '#475569', margin: '4px 0 0 0', lineHeight: 1.4 }}>{lm.description}</p>
+                                            <div key={idx} className="pc-landmark-item" style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #f1f5f9', display: 'flex', gap: '12px', alignItems: 'flex-start', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                                                {lm.imageUrl && (
+                                                    <img 
+                                                        src={lm.imageUrl} 
+                                                        alt={lm.name} 
+                                                        style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} 
+                                                    />
+                                                )}
+                                                <div style={{ flex: 1 }}>
+                                                    <span className="pc-landmark-name" style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '4px' }}>📍 {lm.name} {lm.nameLocal && <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 500 }}>({lm.nameLocal})</span>}</span>
+                                                    <p className="pc-landmark-desc" style={{ fontSize: '0.7rem', color: '#475569', margin: 0, lineHeight: 1.4, wordBreak: 'keep-all' }}>{lm.description}</p>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
