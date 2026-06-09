@@ -947,8 +947,8 @@ export default function PrintConfirmationPage() {
                 {/* ─── 10. 푸터 ─── */}
                 <div className="pc-footer">
                     <div className="pc-footer-left">
-                        <p className="pc-footer-brand">CLUBMODE TRAVEL (클럽모드 투어)</p>
-                        <p className="pc-footer-info">고객센터: 1544-XXXX / 담당: 모두투어 대리점</p>
+                        <p className="pc-footer-brand">(주)클럽모두</p>
+                        <p className="pc-footer-info">전화: 02-951-9004 / 휴대폰: 010-9307-9004</p>
                         <p className="pc-footer-disclaimer">※ 본 확정서는 항공 좌석 및 호텔 예약 상태에 따라 최종 변동될 수 있습니다.</p>
                     </div>
                     <div className="pc-footer-right">
