@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import * as XLSX from 'xlsx';
 
-// Supabase 클라이언트 초기화
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Supabase 클라이언트 초기화 (환경 변수 누락 시의 Crash 방지)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://dummy-url.supabase.co';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'dummy-key';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface Product {
     id: string;
@@ -21,6 +21,9 @@ interface Product {
 }
 
 export default function ProductsPage() {
+    const pathname = usePathname();
+    const isDummy = pathname?.startsWith('/dummy');
+
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'manual' | 'url' | 'excel'>('url'); // 기본 URL 탭
@@ -45,6 +48,40 @@ export default function ProductsPage() {
 
     const fetchProducts = async () => {
         setLoading(true);
+        if (isDummy) {
+            if (typeof window !== 'undefined') {
+                const localDataStr = localStorage.getItem('dummy-products');
+                if (localDataStr) {
+                    setProducts(JSON.parse(localDataStr));
+                } else {
+                    const defaultProducts = [
+                        {
+                            id: 'dummy-1',
+                            title: '[품격] 후쿠오카/온천 2박3일 실속 패키지 (힐튼호텔 2박)',
+                            description: '[포함사항]\n왕복 항공료 및 공항 이용료, 전용 관광버스 및 기사 경비, 한국인 가이드 가이딩 비용, 힐튼 호텔 2박\n\n[불포함사항]\n가이드/기사 경비 (인당 3,000엔)\n\n[일정]\n1일차: 인천 -> 후쿠오카 -> 다자이후\n2일차: 유후인 -> 벳부 온천 투어\n3일차: 쇼핑 -> 캐널시티 -> 귀국',
+                            price: '899,000원',
+                            url: 'https://www.modetour.com/product/fukuoka-3d',
+                            keywords: ['후쿠오카', '온천여행', '힐튼호텔'],
+                            created_at: new Date().toISOString()
+                        },
+                        {
+                            id: 'dummy-2',
+                            title: '[초특가] 다낭/호이안 3박4일 패키지 (5성급 리조트)',
+                            description: '[포함사항]\n왕복항공료, 유류할증료, 호텔 3박, 5대 특식, 바나힐 투어 포함\n\n[불포함사항]\n가이드 경비 (인당 $40)\n\n[일정]\n1일차: 인천 -> 다낭 공항 도착\n2일차: 바나힐 국립공원 투어\n3일차: 호이안 올드타운 투어\n4일차: 다낭 시내 관광 후 귀국',
+                            price: '499,000원',
+                            url: 'https://www.modetour.com/product/danang-4d',
+                            keywords: ['다낭', '호이안', '초특가'],
+                            created_at: new Date(Date.now() - 3600000).toISOString()
+                        }
+                    ];
+                    localStorage.setItem('dummy-products', JSON.stringify(defaultProducts));
+                    setProducts(defaultProducts);
+                }
+            }
+            setLoading(false);
+            return;
+        }
+
         const { data, error } = await supabase
             .from('products')
             .select('*')
@@ -76,6 +113,30 @@ export default function ProductsPage() {
 
         const keywordsArray = data.keywords.split(',').map(k => k.trim()).filter(k => k);
 
+        if (isDummy) {
+            const newProduct = {
+                id: 'dummy-' + Date.now(),
+                title: data.title,
+                description: data.description,
+                price: data.price,
+                url: data.url,
+                keywords: keywordsArray,
+                created_at: new Date().toISOString()
+            };
+
+            if (typeof window !== 'undefined') {
+                const localDataStr = localStorage.getItem('dummy-products');
+                const currentProducts = localDataStr ? JSON.parse(localDataStr) : [];
+                const updatedProducts = [newProduct, ...currentProducts];
+                localStorage.setItem('dummy-products', JSON.stringify(updatedProducts));
+            }
+            
+            alert('상품이 추가되었습니다! AI가 이제 이 상품을 알게 됩니다. 🧠');
+            setFormData({ title: '', description: '', price: '', url: '', keywords: '' });
+            fetchProducts();
+            return;
+        }
+
         const { error } = await supabase
             .from('products')
             .insert({
@@ -99,6 +160,17 @@ export default function ProductsPage() {
     const handleDelete = async (id: string) => {
         if (!confirm('정말 삭제하시겠습니까?')) return;
 
+        if (isDummy) {
+            if (typeof window !== 'undefined') {
+                const localDataStr = localStorage.getItem('dummy-products');
+                const currentProducts = localDataStr ? JSON.parse(localDataStr) : [];
+                const updatedProducts = currentProducts.filter((p: any) => p.id !== id);
+                localStorage.setItem('dummy-products', JSON.stringify(updatedProducts));
+            }
+            fetchProducts();
+            return;
+        }
+
         const { error } = await supabase
             .from('products')
             .delete()
@@ -117,7 +189,7 @@ export default function ProductsPage() {
         setIsCrawling(true);
         setCrawlResult(null);
         try {
-            const res = await fetch('/api/crawl', {
+            const res = await fetch(isDummy ? '/api/dummy/crawl' : '/api/crawl', {
                 method: 'POST',
                 body: JSON.stringify({ url: crawlUrl }),
             });

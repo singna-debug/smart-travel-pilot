@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import {
     PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
     BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -193,6 +194,9 @@ function generateInsights(data: AnalyticsData) {
 }
 
 export default function AnalyticsDashboard() {
+    const pathname = usePathname();
+    const isDummy = pathname?.startsWith('/dummy');
+
     const [data, setData] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
     const [period, setPeriod] = useState(30);
@@ -203,7 +207,7 @@ export default function AnalyticsDashboard() {
     const fetchAnalytics = useCallback(async (p: number) => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/analytics?period=${p}`);
+            const res = await fetch(isDummy ? `/api/dummy/analytics?period=${p}` : `/api/analytics?period=${p}`);
             const json = await res.json();
             if (json.success) setData(json.data);
         } catch (e) {

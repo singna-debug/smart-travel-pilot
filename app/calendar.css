@@ -1,0 +1,436 @@
+/* Calendar container */
+.cal-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+/* Header with month nav */
+.cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.cal-month-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Nav buttons */
+.cal-nav-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.cal-nav-btn:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    background: rgba(0, 212, 170, 0.05);
+}
+
+/* Today button */
+.cal-today-btn {
+    padding: 6px 14px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    color: var(--accent-primary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.cal-today-btn:hover {
+    background: rgba(0, 212, 170, 0.1);
+    border-color: var(--accent-primary);
+}
+
+/* Day of week header */
+.cal-dow-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 12px 16px 8px;
+}
+.cal-dow-cell {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+.cal-dow-cell.cal-sunday { color: #ef4444; }
+.cal-dow-cell.cal-saturday { color: #3b82f6; }
+
+/* Calendar grid */
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 0 16px 16px;
+    gap: 4px;
+}
+
+/* Date cell */
+.cal-cell {
+    min-height: 86px;
+    padding: 6px 6px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    border: 1px solid transparent;
+}
+.cal-cell:hover {
+    background: var(--bg-tertiary);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+.cal-cell.cal-other-month {
+    opacity: 0.25;
+}
+.cal-cell.cal-today {
+    background: rgba(0, 212, 170, 0.08);
+    border: 1px solid rgba(0, 212, 170, 0.4);
+}
+.cal-cell.cal-selected {
+    background: rgba(0, 119, 255, 0.14);
+    border: 1px solid rgba(0, 119, 255, 0.5);
+    box-shadow: 0 0 15px rgba(0, 119, 255, 0.15);
+}
+.cal-cell.cal-today.cal-selected {
+    background: rgba(0, 212, 170, 0.14);
+    border: 1px solid var(--accent-primary);
+    box-shadow: 0 0 20px rgba(0, 212, 170, 0.2);
+}
+
+.cal-day-num {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+.cal-cell.cal-sunday .cal-day-num { color: #ef4444; }
+.cal-cell.cal-saturday .cal-day-num { color: #3b82f6; }
+
+/* 텍스트 뱃지 (Pill) 스타일 */
+.cal-badges-container {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.cal-badge-pill {
+    display: flex;
+    align-items: center;
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.15s ease;
+}
+
+.cal-badge-pill:hover {
+    filter: brightness(1.2);
+    transform: scale(1.02);
+}
+
+.cal-badge-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cal-badge-more {
+    font-size: 9px;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding-left: 2px;
+    margin-top: 1px;
+}
+
+/* Legend 뱃지 샘플 */
+.cal-legend {
+    display: flex;
+    gap: 12px;
+    padding: 12px 24px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.15);
+}
+.cal-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+.cal-badge-pill-sample {
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+/* 배지 상단 태그 */
+.cal-real-badge {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.cal-demo-badge {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Detail panel */
+.cal-detail {
+    border-top: 1px solid var(--border-color);
+    padding: 20px 24px;
+    background: var(--bg-tertiary);
+    animation: cal-fade-in 0.2s ease;
+}
+@keyframes cal-fade-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.cal-detail-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.cal-detail-header {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cal-detail-count {
+    background: rgba(0, 212, 170, 0.15);
+    color: var(--accent-primary);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* 필터 드롭다운 Select */
+.cal-filter-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cal-filter-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.cal-filter-select {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cal-filter-select:hover {
+    border-color: var(--accent-primary);
+}
+
+/* 아코디언 드롭다운 그룹 */
+.cal-detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cal-accordion-group {
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+}
+
+.cal-accordion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    cursor: pointer;
+    user-select: none;
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.cal-accordion-header:hover {
+    filter: brightness(1.15);
+}
+
+.cal-accordion-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cal-group-count-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.cal-group-count-text strong {
+    color: var(--text-primary);
+}
+
+.cal-accordion-arrow {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+/* 아코디언 내부 상세 항목들 */
+.cal-accordion-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.cal-event-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    transition: all 0.15s ease;
+}
+
+.cal-event-item:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px);
+}
+
+.cal-event-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    min-width: 68px;
+    text-align: center;
+}
+
+.cal-event-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.cal-event-title {
+    font-size: 14px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.cal-event-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* 우측 담당자 표시 태그 */
+.cal-manager-tag {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: rgba(0, 212, 170, 0.08);
+    border: 1px solid rgba(0, 212, 170, 0.25);
+    border-radius: 8px;
+    font-size: 12px;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.cal-manager-icon {
+    font-size: 12px;
+}
+
+.cal-manager-label {
+    color: var(--text-muted);
+}
+
+.cal-manager-name {
+    color: var(--accent-primary);
+    font-weight: 600;
+}
+
+.cal-empty {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .cal-cell { min-height: 64px; padding: 4px; }
+    .cal-day-num { font-size: 11px; }
+    .cal-legend { gap: 8px; padding: 8px 16px; }
+    .cal-badge-pill { font-size: 9px; padding: 1px 3px; }
+    .cal-event-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .cal-manager-tag { margin-left: 0; }
+}
+
+

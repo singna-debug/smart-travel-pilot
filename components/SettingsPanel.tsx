@@ -1,0 +1,371 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { Eye, EyeOff, Copy, Info, Check, X, Loader2 } from 'lucide-react';
+
+interface TenantSettings {
+  companyName: string;
+  companyEnglishName: string;
+  managerName: string;
+  phone: string;
+  workStartTime: string;
+  workEndTime: string;
+  googleSpreadsheetId: string;
+  googleSheetName: string;
+  googleClientEmail: string;
+  googlePrivateKey: string;
+  geminiApiKey: string;
+  kakaoChannelId: string;
+  kakaoTalkId: string;
+}
+
+const defaultSettings: TenantSettings = {
+  companyName: '',
+  companyEnglishName: '',
+  managerName: '',
+  phone: '',
+  workStartTime: '09:00',
+  workEndTime: '18:00',
+  googleSpreadsheetId: '',
+  googleSheetName: '',
+  googleClientEmail: '',
+  googlePrivateKey: '',
+  geminiApiKey: '',
+  kakaoChannelId: '',
+  kakaoTalkId: '',
+};
+
+export default function SettingsPanel() {
+  const [activeTab, setActiveTab] = useState<'company' | 'google' | 'api'>('company');
+  const [settings, setSettings] = useState<TenantSettings>(defaultSettings);
+  const [isMounted, setIsMounted] = useState(false);
+  
+  const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [toast, setToast] = useState<{show: boolean, message: string}>({ show: false, message: '' });
+  
+  const [testState, setTestState] = useState<{
+    google: 'idle' | 'testing' | 'success' | 'fail';
+    api: 'idle' | 'testing' | 'success' | 'fail';
+  }>({ google: 'idle', api: 'idle' });
+
+  useEffect(() => {
+    setIsMounted(true);
+    const saved = localStorage.getItem('tenant_settings');
+    if (saved) {
+      try {
+        setSettings(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse settings');
+      }
+    }
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setSettings(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = () => {
+    localStorage.setItem('tenant_settings', JSON.stringify(settings));
+    showToast('설정이 저장되었습니다.');
+  };
+
+  const showToast = (message: string) => {
+    setToast({ show: true, message });
+    setTimeout(() => {
+      setToast({ show: false, message: '' });
+    }, 3000);
+  };
+
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText('travel-pilot@smart-travel.iam.gserviceaccount.com');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleTestGoogle = () => {
+    setTestState(prev => ({ ...prev, google: 'testing' }));
+    setTimeout(() => {
+      setTestState(prev => ({ ...prev, google: 'success' }));
+    }, 1500);
+  };
+
+  const handleTestApi = () => {
+    setTestState(prev => ({ ...prev, api: 'testing' }));
+    setTimeout(() => {
+      setTestState(prev => ({ ...prev, api: 'success' }));
+    }, 1500);
+  };
+
+  if (!isMounted) return null;
+
+  return (
+    <div className="settings-container">
+      <div className="settings-tabs">
+        <button 
+          className={`settings-tab ${activeTab === 'company' ? 'active' : ''}`}
+          onClick={() => setActiveTab('company')}
+        >
+          🏢 회사 정보
+        </button>
+        <button 
+          className={`settings-tab ${activeTab === 'google' ? 'active' : ''}`}
+          onClick={() => setActiveTab('google')}
+        >
+          📊 구글 시트 연동
+        </button>
+        <button 
+          className={`settings-tab ${activeTab === 'api' ? 'active' : ''}`}
+          onClick={() => setActiveTab('api')}
+        >
+          🤖 AI & 카카오 API
+        </button>
+      </div>
+
+      <div className="settings-content">
+        {activeTab === 'company' && (
+          <div className="settings-card fade-in">
+            <h2 className="settings-section-title">기본 정보</h2>
+            <div className="settings-form-grid">
+              <div className="settings-form-group">
+                <label className="settings-label">회사 국문명</label>
+                <input 
+                  type="text" 
+                  name="companyName"
+                  className="settings-input" 
+                  value={settings.companyName}
+                  onChange={handleChange}
+                  placeholder="예: (주)스마트트래블"
+                />
+              </div>
+              <div className="settings-form-group">
+                <label className="settings-label">회사 영문명</label>
+                <input 
+                  type="text" 
+                  name="companyEnglishName"
+                  className="settings-input" 
+                  value={settings.companyEnglishName}
+                  onChange={handleChange}
+                  placeholder="예: Smart Travel Inc."
+                />
+              </div>
+              <div className="settings-form-group">
+                <label className="settings-label">담당자명</label>
+                <input 
+                  type="text" 
+                  name="managerName"
+                  className="settings-input" 
+                  value={settings.managerName}
+                  onChange={handleChange}
+                  placeholder="담당자 이름 입력"
+                />
+              </div>
+              <div className="settings-form-group">
+                <label className="settings-label">연락처(전화번호)</label>
+                <input 
+                  type="text" 
+                  name="phone"
+                  className="settings-input" 
+                  value={settings.phone}
+                  onChange={handleChange}
+                  placeholder="010-0000-0000"
+                />
+              </div>
+              <div className="settings-form-group">
+                <label className="settings-label">출근 시간</label>
+                <input 
+                  type="time" 
+                  name="workStartTime"
+                  className="settings-input" 
+                  value={settings.workStartTime}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="settings-form-group">
+                <label className="settings-label">퇴근 시간</label>
+                <input 
+                  type="time" 
+                  name="workEndTime"
+                  className="settings-input" 
+                  value={settings.workEndTime}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'google' && (
+          <div className="settings-card fade-in">
+            <h2 className="settings-section-title">구글 스프레드시트 설정</h2>
+            
+            <div className="settings-info-banner">
+              <Info className="settings-info-icon" size={24} />
+              <div className="settings-info-content">
+                <p className="settings-info-title">서비스 계정 권한 부여 안내</p>
+                <p className="settings-info-desc">
+                  아래 이메일 주소를 복사하여 연동할 구글 스프레드시트의 <strong>편집자</strong>로 추가해주세요.
+                </p>
+                <div className="settings-copy-box">
+                  <code>travel-pilot@smart-travel.iam.gserviceaccount.com</code>
+                  <button className="settings-copy-btn" onClick={handleCopyEmail} title="복사하기">
+                    {copied ? <Check size={16} className="text-green" /> : <Copy size={16} />}
+                  </button>
+                  {copied && <span className="settings-copied-tooltip">Copied!</span>}
+                </div>
+              </div>
+            </div>
+
+            <div className="settings-form-grid">
+              <div className="settings-form-group">
+                <label className="settings-label">스프레드시트 ID</label>
+                <input 
+                  type="text" 
+                  name="googleSpreadsheetId"
+                  className="settings-input" 
+                  value={settings.googleSpreadsheetId}
+                  onChange={handleChange}
+                  placeholder="URL의 /d/ 와 /edit 사이의 문자열"
+                />
+              </div>
+              <div className="settings-form-group">
+                <label className="settings-label">워크시트 이름</label>
+                <input 
+                  type="text" 
+                  name="googleSheetName"
+                  className="settings-input" 
+                  value={settings.googleSheetName}
+                  onChange={handleChange}
+                  placeholder="예: 시트1"
+                />
+              </div>
+              <div className="settings-form-group settings-full-width">
+                <label className="settings-label">서비스 계정 이메일 (Client Email)</label>
+                <input 
+                  type="email" 
+                  name="googleClientEmail"
+                  className="settings-input" 
+                  value={settings.googleClientEmail}
+                  onChange={handleChange}
+                  placeholder="service-account@project.iam.gserviceaccount.com"
+                />
+              </div>
+              <div className="settings-form-group settings-full-width">
+                <label className="settings-label">Private Key</label>
+                <textarea 
+                  name="googlePrivateKey"
+                  className="settings-textarea" 
+                  value={settings.googlePrivateKey}
+                  onChange={handleChange}
+                  placeholder="-----BEGIN PRIVATE KEY-----\n..."
+                />
+              </div>
+            </div>
+
+            <div className="settings-actions-row">
+              <button className="settings-btn-secondary" onClick={handleTestGoogle} disabled={testState.google === 'testing'}>
+                {testState.google === 'testing' ? <><Loader2 size={18} className="settings-spin" /> 테스트 중...</> : '연동 테스트'}
+              </button>
+            </div>
+
+            {testState.google === 'success' && (
+              <div className="settings-test-result success fade-in">
+                <Check size={20} /> 구글 시트 연동에 성공했습니다.
+              </div>
+            )}
+            {testState.google === 'fail' && (
+              <div className="settings-test-result fail fade-in">
+                <X size={20} /> 연동 실패: ID 또는 키를 확인해주세요.
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'api' && (
+          <div className="settings-card fade-in">
+            <h2 className="settings-section-title">API 키 설정</h2>
+            
+            <div className="settings-form-group">
+              <label className="settings-label">Gemini API Key</label>
+              <div className="settings-input-wrapper">
+                <input 
+                  type={showPassword ? "text" : "password"}
+                  name="geminiApiKey"
+                  className="settings-input" 
+                  value={settings.geminiApiKey}
+                  onChange={handleChange}
+                  placeholder="AI-..."
+                />
+                <button 
+                  type="button" 
+                  className="settings-password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="settings-form-group">
+              <label className="settings-label">카카오 채널 ID</label>
+              <input 
+                type="text" 
+                name="kakaoChannelId"
+                className="settings-input" 
+                value={settings.kakaoChannelId}
+                onChange={handleChange}
+                placeholder="@yourchannel"
+              />
+            </div>
+
+            <div className="settings-form-group">
+              <label className="settings-label">담당자 카카오톡 ID / 전화번호 (원클릭 카톡 전송 연결용)</label>
+              <input 
+                type="text" 
+                name="kakaoTalkId"
+                className="settings-input" 
+                value={settings.kakaoTalkId}
+                onChange={handleChange}
+                placeholder="예: kakao_id_123 또는 010-1234-5678"
+              />
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                💡 대시보드나 멘트제작에서 [💬 카톡 바로 전송] 클릭 시 연결에 활용됩니다.
+              </span>
+            </div>
+
+            <div className="settings-actions-row">
+              <button className="settings-btn-secondary" onClick={handleTestApi} disabled={testState.api === 'testing'}>
+                {testState.api === 'testing' ? <><Loader2 size={18} className="settings-spin" /> 테스트 중...</> : 'API 테스트'}
+              </button>
+            </div>
+
+            {testState.api === 'success' && (
+              <div className="settings-test-result success fade-in">
+                <Check size={20} /> API 연결이 정상입니다.
+              </div>
+            )}
+            {testState.api === 'fail' && (
+              <div className="settings-test-result fail fade-in">
+                <X size={20} /> API 테스트 실패: 키를 확인해주세요.
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="settings-global-actions">
+          <button className="settings-btn-primary" onClick={handleSave}>
+            저장하기
+          </button>
+        </div>
+      </div>
+
+      {toast.show && (
+        <div className="settings-toast slide-in">
+          <Check size={18} className="text-green" />
+          {toast.message}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -54,10 +54,14 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
     '상담완료': { bg: '#6b7280', text: '#fff' },
 };
 
-export default function ChatsPage() {
+export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
     const [chats, setChats] = useState<ChatItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+
+    const getApiUrl = (path: string) => {
+        return isDummy ? `/api/dummy${path}` : `/api${path}`;
+    };
     const [statusFilter, setStatusFilter] = useState('');
     const [selectedMonth, setSelectedMonth] = useState<string | null>(null); // 추가된 상태
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -80,7 +84,7 @@ export default function ChatsPage() {
         if (!phone || phone === '미정' || customerHistoryByPhone[phone]) return;
         setHistoryLoading(chatId);
         try {
-            const res = await fetch(`/api/consultations/history?phone=${encodeURIComponent(phone)}`);
+            const res = await fetch(getApiUrl(`/consultations/history?phone=${encodeURIComponent(phone)}`));
             const data = await res.json();
             if (data.success) {
                 setCustomerHistoryByPhone(prev => ({ ...prev, [phone]: data.data }));
@@ -124,7 +128,7 @@ export default function ChatsPage() {
         }
 
         try {
-            const res = await fetch('/api/consultations', {
+            const res = await fetch(getApiUrl('/consultations'), {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -172,7 +176,7 @@ export default function ChatsPage() {
 
     const fetchChats = async (forceRefresh = false) => {
         try {
-            let url = '/api/chats?limit=100';
+            let url = getApiUrl('/chats?limit=100');
             if (forceRefresh) {
                 url += '&refresh=true';
                 setLoading(true); // 수동 새로고침 시 로딩 표시
@@ -200,7 +204,7 @@ export default function ChatsPage() {
         }
 
         try {
-            const response = await fetch(`/api/chats?search=${encodeURIComponent(searchQuery)}`);
+            const response = await fetch(getApiUrl(`/chats?search=${encodeURIComponent(searchQuery)}`));
             const data = await response.json();
             if (data.success) {
                 setChats(data.data);
@@ -226,7 +230,7 @@ export default function ChatsPage() {
 
         setUpdating(chat.id);
         try {
-            const response = await fetch('/api/consultations', {
+            const response = await fetch(getApiUrl('/consultations'), {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -278,7 +282,7 @@ export default function ChatsPage() {
         setConfirming(true);
 
         try {
-            const response = await fetch('/api/consultations/confirm', {
+            const response = await fetch(getApiUrl('/consultations/confirm'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -401,7 +405,7 @@ export default function ChatsPage() {
 
         for (const chat of sortedSheetItems) {
             try {
-                const url = `/api/consultations?rowIndex=${chat.sheetRowIndex}${chat.sheetName ? `&sheetName=${encodeURIComponent(chat.sheetName)}` : ''}`;
+                const url = getApiUrl(`/consultations?rowIndex=${chat.sheetRowIndex}${chat.sheetName ? `&sheetName=${encodeURIComponent(chat.sheetName)}` : ''}`);
                 const response = await fetch(url, { method: 'DELETE' });
                 const data = await response.json();
                 if (data.success) {
@@ -419,7 +423,7 @@ export default function ChatsPage() {
         // 2. 시트에 없는 항목들 정리
         if (orphanedItems.length > 0) {
             try {
-                const response = await fetch('/api/chats/cleanup', {
+                const response = await fetch(getApiUrl('/chats/cleanup'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -888,7 +892,7 @@ export default function ChatsPage() {
                                                                 <EditableField label="연락처" value={chat.visitorPhone} field="visitorPhone" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingCustomerChatId === chat.id} />
                                                                 <EditableField label="총인원" value={chat.travelersCount} field="travelersCount" chatId={chat.id} onSave={handleFieldUpdate} forceEditMode={editingCustomerChatId === chat.id} />
                                                                 <EditableField label="재방문여부" value={chat.recurringCustomer} field="recurringCustomer" chatId={chat.id} onSave={handleFieldUpdate} options={['신규고객', '재방문', '장기미방문', '정보없음']} forceEditMode={editingCustomerChatId === chat.id} />
-                                                                <EditableField label="유입경로" value={chat.inquirySource} field="inquirySource" chatId={chat.id} onSave={handleFieldUpdate} options={['네이버 블로그', '카카오톡 채널', '인스타그램 및 페이스북', '당근마켓', '닷컴', '지인소개', '기존고객', '전화문의', '매장방문', '기타']} forceEditMode={editingCustomerChatId === chat.id} />
+                                                                <EditableField label="유입경로" value={chat.inquirySource} field="inquirySource" chatId={chat.id} onSave={handleFieldUpdate} options={['네이버 블로그', '카카오톡 채널', '카톡문의', '인스타그램 및 페이스북', '당근마켓', '닷컴', '지인소개', '기존고객', '전화문의', '매장방문', '기타']} forceEditMode={editingCustomerChatId === chat.id} />
                                                                 <InfoCell label="등록방식" value={chat.source || '-'} highlight={chat.source === '카카오톡' ? '#fbbf24' : '#a78bfa'} />
                                                                 <EditableField 
                                                                     label="특정날 리마인드" 

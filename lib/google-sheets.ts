@@ -353,6 +353,7 @@ export async function applyDropdownValidation(sheets: any, spreadsheetId: string
                                     values: [
                                         { userEnteredValue: '네이버 블로그' },
                                         { userEnteredValue: '카카오톡 채널' },
+                                        { userEnteredValue: '카톡문의' },
                                         { userEnteredValue: '인스타그램 및 페이스북' },
                                         { userEnteredValue: '당근마켓' },
                                         { userEnteredValue: '닷컴' },
@@ -769,6 +770,7 @@ export async function initializeSheetHeaders(): Promise<boolean> {
                             values: [
                                 { userEnteredValue: '네이버 블로그' },
                                 { userEnteredValue: '카카오톡 채널' },
+                                { userEnteredValue: '카톡문의' },
                                 { userEnteredValue: '인스타그램 및 페이스북' },
                                 { userEnteredValue: '당근마켓' },
                                 { userEnteredValue: '닷컴' },

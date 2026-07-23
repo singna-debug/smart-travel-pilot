@@ -22,7 +22,12 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
 
     // ===== 1단계: Native API로 구조화된 데이터 확보 =====
     try {
-        nativeData = await fetchModeTourNative(url, false).catch(() => null);
+        if (url.includes('modetour.com') || url.includes('modetour.co.kr')) {
+            nativeData = await fetchModeTourNative(url, false).catch(() => null);
+        } else if (url.includes('hanatour.com')) {
+            const { fetchHanaTourNative } = await import('../hanatour-utils');
+            nativeData = await fetchHanaTourNative(url, false).catch(() => null);
+        }
         console.log(`[Confirmation/Index] Native API result: ${nativeData ? 'SUCCESS' : 'FAILED'}`);
     } catch (e) {
         console.error('[Confirmation/Index] Native API error:', e);

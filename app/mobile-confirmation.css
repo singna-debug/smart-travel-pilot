@@ -1100,11 +1100,10 @@
     flex-shrink: 0;
 }
 
-/* 아코디언 일정 카드 */
 .mc-day-card {
     background: #f8fafc;
     border-radius: 12px;
-    border-left: 3px solid #6366f1;
+    border: 1px solid #e2e8f0;
     overflow: hidden;
     transition: all 0.2s;
 }
@@ -1112,7 +1111,6 @@
 .mc-day-card.closed {
     background: #fff;
     border: 1px solid #f1f5f9;
-    border-left: 3px solid #6366f1;
 }
 
 .day-header {

@@ -460,7 +460,8 @@
 .pc-day-header {
     background: #f8fafc;
     border-bottom: 1px solid #e2e8f0;
-    padding: 14px 20px;
+    border-left: 5px solid #6366f1; /* Indigo Left Accent Line */
+    padding: 14px 20px 14px 15px; /* Adjust padding to match the border width */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -494,9 +495,9 @@
 }
 
 .pc-day-title {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #64748b;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #4f46e5; /* Highlighted Day Title */
 }
 
 .pc-day-body {
@@ -512,7 +513,7 @@
 }
 
 .pc-timeline-item {
-    padding: 10px 0;
+    padding: 12px 0;
     border-bottom: 1px solid #f1f5f9;
 }
 
@@ -521,12 +522,13 @@
 }
 
 .pc-timeline-title {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #0f172a;
+    font-size: 0.95rem; /* Larger, bolder timeline titles */
+    font-weight: 800;
+    color: #1e293b;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    margin-bottom: 6px;
 }
 
 .pc-timeline-marker {
@@ -1092,8 +1094,8 @@
     }
 
     .pc-timeline-item {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
+        page-break-inside: auto !important;
+        break-inside: auto !important;
     }
 
     .pc-dual-grid {

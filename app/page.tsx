@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import StatsCard from '@/components/StatsCard';
 import ConsultationList from '@/components/ConsultationList';
+import DashboardCalendar from '@/components/DashboardCalendar';
 import { ConsultationData } from '@/types';
 import { RefreshCw, X } from 'lucide-react';
 
@@ -47,7 +48,7 @@ interface DashboardResponse {
   };
 }
 
-export default function DashboardPage() {
+export default function DashboardPage({ isDummy = false }: { isDummy?: boolean }) {
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<string>('recentInquiries'); // Default view
@@ -64,7 +65,8 @@ export default function DashboardPage() {
 
   const fetchDashboardData = async (forceRefresh = false) => {
     try {
-      const url = forceRefresh ? '/api/stats?refresh=true' : '/api/stats';
+      const baseUrl = isDummy ? '/api/dummy/stats' : '/api/stats';
+      const url = forceRefresh ? `${baseUrl}?refresh=true` : baseUrl;
       const response = await fetch(url);
       const result = await response.json();
       if (result.success) {
@@ -130,8 +132,8 @@ export default function DashboardPage() {
 
       <header className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <h1 className="page-title">여행 상담 대시보드</h1>
-          <p className="page-subtitle">실시간 상담 현황과 챙겨야 할 스케줄을 한눈에 확인하세요.</p>
+          <h1 className="page-title">{isDummy ? '여행 상담 대시보드 [더미]' : '여행 상담 대시보드'}</h1>
+          <p className="page-subtitle">{isDummy ? '실시간 상담 현황(더미)과 챙겨야 할 스케줄을 한눈에 확인하세요.' : '실시간 상담 현황과 챙겨야 할 스케줄을 한눈에 확인하세요.'}</p>
         </div>
         <button 
           onClick={(e) => {
@@ -166,10 +168,15 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* 2. 스케줄링 */}
+      {/* 2. 통합 캘린더 */}
+      <section className="dashboard-section" style={{ marginTop: '32px' }}>
+        <DashboardCalendar lists={data?.lists} isLoading={loading} />
+      </section>
+
+      {/* 3. 스케줄링 */}
       <section className="dashboard-section" style={{ marginTop: '32px' }}>
         <div className="section-label">챙겨야할 스케줄</div>
-        <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+        <div className="stats-grid">
           
           <div onClick={() => handleCardClick('reminders', '리마인드 필요')} style={{ cursor: 'pointer' }}>
             <StatsCard value={data?.schedule.remindersCount || 0} label="리마인드 (상담 후 2일 후)" isActive={activeFilter === 'reminders'} isUrgent={true} overdueValue={data?.schedule.remindersOverdueCount} />
@@ -207,7 +214,7 @@ export default function DashboardPage() {
       </section>
 
       {/* 3. 상세 리스트 */}
-      <ConsultationList title={activeTitle} data={currentList} onUpdate={() => fetchDashboardData(true)} />
+      <ConsultationList title={activeTitle} data={currentList} onUpdate={() => fetchDashboardData(true)} isDummy={isDummy} />
     </div>
   );
 }

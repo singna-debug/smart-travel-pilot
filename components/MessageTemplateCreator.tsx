@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
+import { sendDirectKakaoMessage } from '@/lib/kakao-share';
 
 interface Customer {
     name: string;
@@ -63,7 +65,7 @@ const TEMPLATE_LABELS: Record<TemplateType, { label: string; icon: string }> = {
     china_barcode: { label: '중국 바코드', icon: '📱' },
 };
 
-const AGENT_NAME = '김호기';
+const DEFAULT_AGENT_NAME = '김호기';
 
 // 가격 문자열에서 숫자 추출
 function extractPriceNumber(priceStr: string): number {
@@ -77,6 +79,30 @@ function formatPrice(num: number): string {
 }
 
 export default function MessageTemplateCreator() {
+    const pathname = usePathname();
+    const isDummy = pathname?.startsWith('/dummy');
+
+    // Tenant Settings (동적 설정)
+    const [agentName, setAgentName] = useState(DEFAULT_AGENT_NAME);
+    const [companyName, setCompanyName] = useState('(주)클럽모두투어');
+    const [kakaoTalkId, setKakaoTalkId] = useState('');
+
+    useEffect(() => {
+        const saved = localStorage.getItem('tenant_settings');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.managerName) setAgentName(parsed.managerName);
+                if (parsed.companyName) setCompanyName(parsed.companyName);
+                if (parsed.kakaoTalkId) setKakaoTalkId(parsed.kakaoTalkId);
+            } catch (e) {
+                console.error('Failed to parse tenant settings');
+            }
+        }
+    }, []);
+
+    const AGENT_NAME = agentName;
+
     // State
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -120,10 +146,11 @@ export default function MessageTemplateCreator() {
     // 추가 입력 필드
     const [bookingNumber, setBookingNumber] = useState('');
     const [travelers, setTravelers] = useState('');
-    const [deposit, setDeposit] = useState('1인 80만원');
+    const [deposit, setDeposit] = useState('1인 50만원');
     const [depositDeadline, setDepositDeadline] = useState('');
     const [bankAccount, setBankAccount] = useState('');
-    const [bankHolder, setBankHolder] = useState('모두투어네트워크');
+    const [bankHolder, setBankHolder] = useState('');
+    const [fuelSurcharge, setFuelSurcharge] = useState('');
     const [excludedCosts, setExcludedCosts] = useState('가이드 팁, 매너 팁, 개인 경비');
     const [depositPerPerson, setDepositPerPerson] = useState('');
     const [confirmationLink, setConfirmationLink] = useState('');
@@ -133,6 +160,7 @@ export default function MessageTemplateCreator() {
     const [departureDate, setDepartureDate] = useState('');
 
     const [generatedText, setGeneratedText] = useState('');
+    const [isManuallyEdited, setIsManuallyEdited] = useState(false);
     const [copied, setCopied] = useState(false);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -141,6 +169,11 @@ export default function MessageTemplateCreator() {
     useEffect(() => {
         fetchCustomers();
     }, []);
+
+    // 템플릿 변경 시 수동 수정 상태 해제
+    useEffect(() => {
+        setIsManuallyEdited(false);
+    }, [templateType, selectedCustomer, product]);
 
     // 드롭다운 외부 클릭 닫기
     useEffect(() => {
@@ -194,21 +227,23 @@ export default function MessageTemplateCreator() {
         }
     }, [product]);
 
-    // 멘트 자동 생성 (실시간 반영)
+    // 멘트 자동 생성 (실시간 반영 - 사용자가 우측 미디어를 수동 편집하지 않았을 때만)
     useEffect(() => {
-        generateMessage();
+        if (!isManuallyEdited) {
+            generateMessage();
+        }
     }, [
         selectedCustomer, product, templateType, url, 
         bookingNumber, travelers, deposit, depositDeadline, 
-        bankAccount, bankHolder, excludedCosts, depositPerPerson, 
+        bankAccount, bankHolder, fuelSurcharge, excludedCosts, depositPerPerson, 
         confirmationLink, reviewLink, specialTerms, airline, departureDate, bookingNumber,
-        productPrice, feeItems, isManualBalance, manualBalanceValue
+        productPrice, feeItems, isManualBalance, manualBalanceValue, isManuallyEdited
     ]);
 
     async function fetchCustomers() {
         setLoadingCustomers(true);
         try {
-            const res = await fetch('/api/messages');
+            const res = await fetch(isDummy ? '/api/dummy/messages' : '/api/messages');
             const data = await res.json();
             if (data.success) {
                 setCustomers(data.customers);
@@ -230,7 +265,7 @@ export default function MessageTemplateCreator() {
         setAirline('');
 
         try {
-            const res = await fetch('/api/analyze-url', {
+            const res = await fetch(isDummy ? '/api/dummy/analyze-url' : '/api/analyze-url', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url, mode: 'reservation_guide' }),
@@ -277,16 +312,29 @@ export default function MessageTemplateCreator() {
 
         const travelersNum = extractPriceNumber(travelers) || 1; // 최소 1명으로 가정
         const priceNum = extractPriceNumber(price);
+        const fuelNum = extractPriceNumber(fuelSurcharge);
+        const pricePerPersonNum = priceNum + fuelNum;
 
         // 상품가 및 잔금 총액 계산
-        const totalPrice = priceNum * travelersNum;
+        const totalPrice = pricePerPersonNum * travelersNum;
         const totalPriceStr = totalPrice > 0 ? `${formatPrice(totalPrice)}원` : '';
 
         // 계약금 총액 계산
         const depositPP = parseInt(depositPerPerson.replace(/[^0-9]/g, ''), 10) || 0;
         const totalDeposit = depositPP * travelersNum;
         const totalDepositStr = totalDeposit > 0 ? `${formatPrice(totalDeposit)}원` : '';
-        const depositDisplay = deposit;
+
+        // 계약금 문구 자동 형성 (depositPerPerson과 travelersNum이 지정되고 deposit이 기본값일 때)
+        let depositDisplay = deposit;
+        if (depositPP > 0 && (deposit === '1인 50만원' || deposit === '1인 80만원' || !deposit)) {
+            const depPPFormatted = depositPP >= 10000 && depositPP % 10000 === 0 
+                ? `${depositPP / 10000}만` 
+                : `${formatPrice(depositPP)}원`;
+            const totalDepFormatted = totalDeposit >= 10000 && totalDeposit % 10000 === 0 
+                ? `${totalDeposit / 10000}만` 
+                : `${formatPrice(totalDeposit)}원`;
+            depositDisplay = `1인 ${depPPFormatted} *${travelersNum}분 = ${totalDepFormatted}`;
+        }
 
         // 다중 추가금 및 할인금 동적 계산
         let totalAdd = 0;
@@ -350,10 +398,14 @@ export default function MessageTemplateCreator() {
                 break;
 
             case 'booking':
-                const bookingPriceCalc = `성인 ${price}
+                const basePriceStr = priceNum > 0 ? `${formatPrice(priceNum)}원` : (price || '');
+                const perPersonTotalStr = pricePerPersonNum > 0 ? `${formatPrice(pricePerPersonNum)}원` : basePriceStr;
+                const fuelStr = fuelNum > 0 ? `${formatPrice(fuelNum)}` : '0';
+
+                let bookingPriceCalc = `성인 ${basePriceStr}
 (계약금 입금 시 요금으로 확정됩니다.)
-+ 0(유류 할증료 매월 변동되며 잔금 시 최종 확정 적용됩니다.) 
-${travelersNum > 0 && priceNum > 0 ? ` = ${price} * ${travelersNum}명 = ${totalPriceStr}` : ''}`;
++ ${fuelStr}(유류 할증료 매월 변동되며 잔금 시 최종 확정 적용됩니다.) 
+${travelersNum > 0 && pricePerPersonNum > 0 ? ` = ${perPersonTotalStr} * ${travelersNum}명 = ${totalPriceStr}` : ''}`;
 
                 text = `✈️ [모두투어] 여행 예약 안내
 
@@ -399,7 +451,7 @@ ${bookingPriceCalc}
 - 불 포 함 : ${excludedCosts || '가이드팁, 매너 팁, 개인 경비'}
 - 상기 상품은 항공, 현지 호텔이 완료되면 확정됩니다.
 
-- 계  약  금: ${deposit}${depositDeadline ? ` (${depositDeadline}까지)` : ''}
+- 계  약  금: ${depositDisplay}${depositDeadline ? ` (${depositDeadline}까지)` : ''}
 ${(() => {
                         let extraLines = '';
                         if (addDetails) extraLines += `[추가 비용]\n${addDetails}`;
@@ -857,25 +909,34 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                 <label className="msg-field-label">일행 수 (인원)</label>
                                 <input
                                     className="msg-field-input"
-                                    placeholder="7"
+                                    placeholder="8"
                                     type="number"
                                     value={travelers}
                                     onChange={(e) => setTravelers(e.target.value)}
                                 />
                             </div>
                             <div className="msg-field">
-                                <label className="msg-field-label">1인 상품가 (숫자)</label>
+                                <label className="msg-field-label">1인 기본 상품가 (숫자)</label>
                                 <input
                                     className="msg-field-input"
-                                    placeholder="1290000"
+                                    placeholder="2372900"
                                     value={productPrice}
                                     onChange={(e) => setProductPrice(e.target.value)}
                                 />
                             </div>
                             <div className="msg-field">
+                                <label className="msg-field-label">1인 유류 할증료 (숫자)</label>
+                                <input
+                                    className="msg-field-input"
+                                    placeholder="117000"
+                                    value={fuelSurcharge}
+                                    onChange={(e) => setFuelSurcharge(e.target.value)}
+                                />
+                            </div>
+                            <div className="msg-field">
                                 <label className="msg-field-label">
-                                    총 잔금
-                                    {travelers && productPrice ? ' (자동계산)' : ''}
+                                    총 상품가
+                                    {travelers && (productPrice || fuelSurcharge) ? ' (자동계산)' : ''}
                                 </label>
                                 <input
                                     className="msg-field-input"
@@ -883,16 +944,17 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                     value={
                                         (() => {
                                             const pNum = extractPriceNumber(productPrice);
+                                            const fNum = extractPriceNumber(fuelSurcharge);
                                             const tNum = parseInt(travelers, 10) || 0;
-                                            if (pNum > 0 && tNum > 0) return `${formatPrice(pNum * tNum)}원`;
+                                            if ((pNum > 0 || fNum > 0) && tNum > 0) return `${formatPrice((pNum + fNum) * tNum)}원`;
                                             return '인원 입력 시 자동 계산';
                                         })()
                                     }
-                                    style={{ color: travelers && productPrice ? 'var(--accent-primary)' : 'var(--text-muted)', fontWeight: travelers && productPrice ? 600 : 400 }}
+                                    style={{ color: travelers && (productPrice || fuelSurcharge) ? 'var(--accent-primary)' : 'var(--text-muted)', fontWeight: travelers && (productPrice || fuelSurcharge) ? 600 : 400 }}
                                 />
                             </div>
                             <div className="msg-field">
-                                <label className="msg-field-label">계약금</label>
+                                <label className="msg-field-label">계약금 문구</label>
                                 <input
                                     className="msg-field-input"
                                     value={deposit}
@@ -900,10 +962,10 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                 />
                             </div>
                             <div className="msg-field">
-                                <label className="msg-field-label">1인 기납금 (숫자)</label>
+                                <label className="msg-field-label">1인 기납금/계약금 (숫자)</label>
                                 <input
                                     className="msg-field-input"
-                                    placeholder="800000"
+                                    placeholder="500000"
                                     type="number"
                                     value={depositPerPerson}
                                     onChange={(e) => setDepositPerPerson(e.target.value)}
@@ -936,12 +998,22 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                     onChange={(e) => setAirline(e.target.value)}
                                 />
                             </div>
-                            <div className="msg-field full">
+                            <div className="msg-field">
                                 <label className="msg-field-label">가상계좌</label>
                                 <input
                                     className="msg-field-input"
+                                    placeholder="국민은행 : 476501-04-095837"
                                     value={bankAccount}
                                     onChange={(e) => setBankAccount(e.target.value)}
+                                />
+                            </div>
+                            <div className="msg-field">
+                                <label className="msg-field-label">예금주</label>
+                                <input
+                                    className="msg-field-input"
+                                    placeholder="(주)클럽모두"
+                                    value={bankHolder}
+                                    onChange={(e) => setBankHolder(e.target.value)}
                                 />
                             </div>
                             <div className="msg-field full">
@@ -1092,19 +1164,28 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                         <div className="msg-section-title">📝 잔금 정보</div>
                         <div className="msg-fields-grid">
                             <div className="msg-field">
-                                <label className="msg-field-label">1인 상품가 (숫자)</label>
+                                <label className="msg-field-label">1인 기본 상품가 (숫자)</label>
                                 <input
                                     className="msg-field-input"
-                                    placeholder="1290000"
+                                    placeholder="2372900"
                                     value={productPrice}
                                     onChange={(e) => setProductPrice(e.target.value)}
+                                />
+                            </div>
+                            <div className="msg-field">
+                                <label className="msg-field-label">1인 유류 할증료 (숫자)</label>
+                                <input
+                                    className="msg-field-input"
+                                    placeholder="117000"
+                                    value={fuelSurcharge}
+                                    onChange={(e) => setFuelSurcharge(e.target.value)}
                                 />
                             </div>
                             <div className="msg-field">
                                 <label className="msg-field-label">일행 수 (인원)</label>
                                 <input
                                     className="msg-field-input"
-                                    placeholder="7"
+                                    placeholder="8"
                                     type="number"
                                     value={travelers}
                                     onChange={(e) => setTravelers(e.target.value)}
@@ -1114,7 +1195,7 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                 <label className="msg-field-label">1인 기납금 (숫자)</label>
                                 <input
                                     className="msg-field-input"
-                                    placeholder="800000"
+                                    placeholder="500000"
                                     type="number"
                                     value={depositPerPerson}
                                     onChange={(e) => setDepositPerPerson(e.target.value)}
@@ -1130,25 +1211,36 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                                     value={
                                         (() => {
                                             const pNum = extractPriceNumber(productPrice);
+                                            const fNum = extractPriceNumber(fuelSurcharge);
                                             const tNum = parseInt(travelers, 10) || 1;
                                             const dPP = parseInt(depositPerPerson.replace(/[^0-9]/g, ''), 10) || 0;
-                                            const total = pNum * tNum;
+                                            const total = (pNum + fNum) * tNum;
                                             const paid = dPP * tNum;
                                             const remaining = total - paid;
-                                            if (pNum > 0 && dPP > 0) return `${formatPrice(total)}원 - ${formatPrice(paid)}원 = ${formatPrice(remaining)}원`;
-                                            if (pNum > 0) return `총 ${formatPrice(total)}원 (기납금 입력 시 잔금 계산)`;
+                                            if ((pNum > 0 || fNum > 0) && dPP > 0) return `${formatPrice(total)}원 - ${formatPrice(paid)}원 = ${formatPrice(remaining)}원`;
+                                            if (pNum > 0 || fNum > 0) return `총 ${formatPrice(total)}원 (기납금 입력 시 잔금 계산)`;
                                             return '1인 상품가 입력 시 자동 계산';
                                         })()
                                     }
                                     style={{ color: 'var(--accent-primary)', fontWeight: 600 }}
                                 />
                             </div>
-                            <div className="msg-field full">
+                            <div className="msg-field">
                                 <label className="msg-field-label">가상계좌</label>
                                 <input
                                     className="msg-field-input"
+                                    placeholder="국민은행 : 476501-04-095837"
                                     value={bankAccount}
                                     onChange={(e) => setBankAccount(e.target.value)}
+                                />
+                            </div>
+                            <div className="msg-field">
+                                <label className="msg-field-label">예금주</label>
+                                <input
+                                    className="msg-field-input"
+                                    placeholder="(주)클럽모두"
+                                    value={bankHolder}
+                                    onChange={(e) => setBankHolder(e.target.value)}
                                 />
                             </div>
 
@@ -1307,7 +1399,10 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                 {/* 생성 버튼 */}
                 <button
                     className="msg-generate-btn"
-                    onClick={generateMessage}
+                    onClick={() => {
+                        setIsManuallyEdited(false);
+                        generateMessage();
+                    }}
                 >
                     ✨ 멘트 생성
                 </button>
@@ -1320,12 +1415,27 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                         {TEMPLATE_LABELS[templateType].icon} {TEMPLATE_LABELS[templateType].label} 미리보기
                     </div>
                     {generatedText && (
-                        <button
-                            className={`msg-copy-btn ${copied ? 'copied' : ''}`}
-                            onClick={handleCopy}
-                        >
-                            {copied ? '✅ 복사됨' : '📋 복사'}
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                                className={`msg-copy-btn ${copied ? 'copied' : ''}`}
+                                onClick={handleCopy}
+                            >
+                                {copied ? '✅ 복사됨' : '📋 복사'}
+                            </button>
+                            <button
+                                className="msg-copy-btn"
+                                style={{ background: '#fee500', color: '#191919', fontWeight: 600, border: 'none' }}
+                                onClick={async () => {
+                                    await sendDirectKakaoMessage({
+                                        text: generatedText,
+                                        customerPhone: selectedCustomer?.phone,
+                                        customerName: selectedCustomer?.name
+                                    });
+                                }}
+                            >
+                                💬 카톡 바로 전송
+                            </button>
+                        </div>
                     )}
                 </div>
                 <div className="msg-preview-body">
@@ -1333,7 +1443,10 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                         <textarea
                             className="msg-preview-textarea"
                             value={generatedText}
-                            onChange={(e) => setGeneratedText(e.target.value)}
+                            onChange={(e) => {
+                                setGeneratedText(e.target.value);
+                                setIsManuallyEdited(true);
+                            }}
                         />
                     ) : (
                         <div className="msg-preview-empty">

@@ -1,339 +1,312 @@
 {
-  "timestamp": "2026-05-18T03:55:38.645Z",
-  "url": "https://www.modetour.com/package/104702163?MLoc=99&Pnum=104702163&ANO=81440&sno=C117876&thru=crs",
+  "timestamp": "2026-07-23T07:57:12.225Z",
+  "url": "https://na.modetour.co.kr/package/105175602",
   "strategy": "NATIVE_DIRECT (no Gemini)",
   "hasNativeData": true,
   "nativeDataSummary": {
-    "title": "★선착순특가★[$290상당특전/노옵션/노팁] 나트랑/달랏 5일 (준특급호텔)",
-    "airline": "비엣젯항공",
-    "departureFlightNumber": "VJ919",
-    "itineraryDays": 5,
-    "hotelsCount": 24,
-    "inclusionsCount": 3
+    "title": "[출발확정/비즈니스탑승] 아프리카 6개국 13일(케냐/탄자니아/짐바브웨/보츠와나/잠비아/남아공) <헬기투어포함/사파리/빅토리아폭포>",
+    "airline": "에미레이트 항공 (경유)",
+    "departureFlightNumber": "EK323 / EK719",
+    "itineraryDays": 13,
+    "hotelsCount": 7,
+    "inclusionsCount": 7
   },
   "finalResult": {
     "isProduct": true,
-    "title": "★선착순특가★[$290상당특전/노옵션/노팁] 나트랑/달랏 5일 (준특급호텔)",
-    "destination": "부산, 나트랑, 달랏",
-    "price": "599,900원",
-    "departureDate": "2026-06-24",
-    "returnDate": "2026-06-28",
-    "duration": "4박 5일",
-    "airline": "비엣젯항공",
-    "departureFlightNumber": "VJ919",
-    "returnFlightNumber": "VJ918",
-    "departureAirport": "부산",
-    "arrivalAirport": "나트랑",
-    "departureTime": "10:55",
-    "arrivalTime": "13:35",
-    "departureDuration": "04:40",
-    "returnDepartureAirport": "나트랑",
-    "returnDepartureTime": "03:10",
-    "returnArrivalTime": "09:50",
-    "returnDuration": "04:40",
-    "departureSegments": [],
-    "returnSegments": [],
-    "url": "https://www.modetour.com/package/104702163?MLoc=99&Pnum=104702163&ANO=81440&sno=C117876&thru=crs",
+    "title": "[출발확정/비즈니스탑승] 아프리카 6개국 13일(케냐/탄자니아/짐바브웨/보츠와나/잠비아/남아공) <헬기투어포함/사파리/빅토리아폭포>",
+    "destination": "선시티, 나이로비, 응고롱고로 자연보호구, 아루샤, 킬리만자로, 빅토리 폴스, 초베 국립공원, 케이프타운",
+    "price": "18,900,000원",
+    "departureDate": "2026-08-13",
+    "returnDate": "2026-08-25",
+    "duration": "12박 13일",
+    "airline": "에미레이트 항공 (경유)",
+    "departureFlightNumber": "EK323 / EK719",
+    "returnFlightNumber": "EK773 / EK322",
+    "departureAirport": "인천",
+    "arrivalAirport": "나이로비",
+    "departureTime": "23:55",
+    "arrivalTime": "14:30",
+    "departureDuration": "",
+    "returnDepartureAirport": "케이프타운",
+    "returnDepartureTime": "13:15",
+    "returnArrivalTime": "17:00",
+    "returnDuration": "",
+    "departureSegments": [
+      {
+        "airline": "에미레이트 항공",
+        "flightNo": "EK323",
+        "departureCity": "인천",
+        "departureTime": "23:55",
+        "arrivalCity": "두바이",
+        "arrivalTime": "04:25",
+        "duration": "09:30",
+        "layoverDuration": "6시간 5분"
+      },
+      {
+        "airline": "에미레이트 항공",
+        "flightNo": "EK719",
+        "departureCity": "두바이",
+        "departureTime": "10:30",
+        "arrivalCity": "나이로비",
+        "arrivalTime": "14:30",
+        "duration": "05:00",
+        "layoverDuration": ""
+      }
+    ],
+    "returnSegments": [
+      {
+        "airline": "에미레이트 항공",
+        "flightNo": "EK773",
+        "departureCity": "케이프타운",
+        "departureTime": "13:15",
+        "arrivalCity": "두바이",
+        "arrivalTime": "00:35",
+        "duration": "09:30",
+        "layoverDuration": "3시간 5분"
+      },
+      {
+        "airline": "에미레이트 항공",
+        "flightNo": "EK322",
+        "departureCity": "두바이",
+        "departureTime": "03:40",
+        "arrivalCity": "인천",
+        "arrivalTime": "17:00",
+        "duration": "08:20",
+        "layoverDuration": ""
+      }
+    ],
+    "url": "https://na.modetour.co.kr/package/105175602",
     "itinerary": [
       {
         "day": 1,
         "date": "",
-        "title": "부산",
-        "transport": "대형버스",
+        "title": "인천",
+        "transport": "항공",
         "flight": {
-          "flightNo": "VJ919",
-          "airline": "비엣젯항공",
-          "departureCity": "부산",
-          "departureTime": "10:55",
-          "arrivalCity": "나트랑",
-          "arrivalTime": "13:35",
-          "duration": "04:40",
-          "segments": []
+          "flightNo": "EK323 / EK719",
+          "airline": "에미레이트 항공 (경유)",
+          "departureCity": "인천",
+          "departureTime": "23:55",
+          "arrivalCity": "나이로비",
+          "arrivalTime": "14:30",
+          "duration": "",
+          "segments": [
+            {
+              "airline": "에미레이트 항공",
+              "flightNo": "EK323",
+              "departureCity": "인천",
+              "departureTime": "23:55",
+              "arrivalCity": "두바이",
+              "arrivalTime": "04:25",
+              "duration": "09:30",
+              "layoverDuration": "6시간 5분"
+            },
+            {
+              "airline": "에미레이트 항공",
+              "flightNo": "EK719",
+              "departureCity": "두바이",
+              "departureTime": "10:30",
+              "arrivalCity": "나이로비",
+              "arrivalTime": "14:30",
+              "duration": "05:00",
+              "layoverDuration": ""
+            }
+          ]
         },
         "timeline": [
           {
             "type": "default",
-            "title": "김해국제공항",
-            "subtitle": "이동수단(교통)",
-            "description": "부산 김해국제공항 출발"
-          },
-          {
-            "type": "default",
-            "title": "나트랑 깜란 국제공항",
-            "subtitle": "현지공항미팅",
-            "description": "나트랑 캄란 공항 도착"
-          },
-          {
-            "type": "default",
-            "title": "일정 안내",
-            "subtitle": "",
-            "description": "※ 베트남 현지 공안 한국인 가이드 대상 단속강화로 인하여 한국인 가이드의 공항주변 출입이 불가합니다. 공항 청사 외부에서 한국인 가이드를 만나게 됩니다. 공항에서 출발할때도 한국인 가이드가 보딩을 도와드리지 못하오니 손님들께서 개별보딩을 받으셔야합니다. <BR>\r\n※ 본 상품은 모두투어의 동일항공 또는 타항공의 다른상품과 현지 조인(합류) 되어 진행될 수 있으며 행사 진행시 대기시간이 발생될 수 있사오니 이 점 양해부탁드립니다.<BR>\r\n※ 여행일정은 계약 체결시 예상하지 못한 부득이한 사정이 발생할 경우 여행자의 사전 동의절차를 거쳐 변경될 수 있습니다."
-          },
-          {
-            "type": "default",
-            "title": "일정 안내",
-            "subtitle": "",
-            "description": "※ 해당 상품은 현지 사정에 의해 일정의 순서가 변경 될 수 있습니다. 이 점 양해 부탁드립니다."
-          },
-          {
-            "type": "default",
-            "title": "※ 개인짐 보관 및 음료 1잔 서비스 제공",
+            "title": "인천국제공항 출발",
             "subtitle": "",
             "description": ""
           },
           {
             "type": "default",
-            "title": "호텔로 이동/체크인",
+            "title": "황열병 필수 예방접종 안내",
+            "subtitle": "",
+            "description": "☞황열병 예방주사 접종 안내\r\n\r\n*<a href=\"https://nqs.kdca.go.kr/nqs/vaccination.do?gubun=yellowFever&subGubun=2\">질병관리청 예방접종 안내 바로가기</A> ←클릭\r\n\r\n*아프리카 여행시 황열병 예방접종 증명서 지참이 필수입니다.\r\n*예방접종은 출국 최소 10일 전에 완료 되어야합니다.\r\n*이미 접종을 받으신 분은 재접종 없이 증명서만 준비하시면 됩니다.\r\n\r\n*<a href=\"https://nqs.kdca.go.kr/nqs/html/vaccination/vaccinationOrgList.html\">예방접종 가능 병원 리스트 바로가기</A> ←클릭\r\n\r\n1. 접종 희망 병원에 전화예약 (필수)\r\n2. 여권 원본 또는 사본 지참 (필수)\r\n3. 필요시 복용 중인 약 정보\r\n4. 전자수입 인지 지불 및 발급 (37,440원-금액변동가능) (<a href=\"https://www.e-revenuestamp.or.kr\">홈페이지</a> / 또는 병원 인근 은행이나 우체국)\r\n5. 병원 방문 접종 및 접종 증명서 발급, 수입인지 제출 및 접종료 지불 (19,610원)\r\n6. 여행시 황열병 예방 접종 증명서를 항시 지참해야 합니다. (필수)"
+          },
+          {
+            "type": "default",
+            "title": "아프리카 여행 준비사항",
+            "subtitle": "",
+            "description": "아프리카 여행시 준비사항 안내"
+          },
+          {
+            "type": "default",
+            "title": "프라이빗 공항 이동 서비스 EK",
+            "subtitle": "",
+            "description": "프라이빗 공항 이동 서비스 : 쇼퍼 드라이브(Chauffeur-drive)"
+          },
+          {
+            "type": "default",
+            "title": "※현지 특성에 의해 일정의 순서가 사전 또는 현지 진행 중 변경 될 수 있습니다.",
             "subtitle": "",
             "description": ""
-          },
-          {
-            "type": "default",
-            "title": "전자 담배 금지 및 호텔 체크인 시 유의사항",
-            "subtitle": "",
-            "description": "<전자담배 베트남 내 반입 및 전자담배 흡연 금지>\r\n- 베트남 정부의 전자담배 금지 조치로 인해 현지 구입은 물론 해외에서의 반입이 금지 되며, 적발 시 현지법률에 의해 처벌 될 수 있습니다.\r\n\r\n<호텔 체크인 시 유의사항>\r\n1. 일반적으로 호텔 체크인은 오후 3시 이후부터 가능합니다. 상이한 호텔이 있을 수 있으니 체크인 시간을 미리 확인해주세요.\r\n2. 호텔 프론트에서 여권으로 체크인하시면 됩니다. 체크인 시 여권을 호텔측에서 보관하였다가 체크 아웃시 돌려주는 호텔이 있을 수 있습니다. 이 점 참고해주세요. \r\n3. 체크인 시 보증금(Deposit) 을 위한 신용카드 또는 현금을 요구하는 경우가 있습니다. 호텔 숙박시 파손 및 개인 사용 경비에 대한 보증 개념으로 체크아웃 시 사용 내역이 없으면 자동취소 및 환불됩니다. \r\n4. 객실의 층수, 베드타입은 체크인 시 확정됩니다. 출발전 여행사에 요청을 하셨더라도 확정되는 부분이 아니오니 체크인시 호텔에 한번 더 요청 및 확인해주세요. \r\n5. 일반적인 체크아웃 시간은 12시입니다. 체크아웃 시간 이후에 체크아웃을 할 경우에 추가비용이 발생될 수 있습니다."
-          },
-          {
-            "type": "default",
-            "title": "유의 ㅣ 안내사항",
-            "subtitle": "",
-            "description": "노옵션 상품 안내사항\n\r※노옵션표기 상품은 '선택관광'이 없는 상품입니다.\r\n<B><FONT COLOR=BLUE>※원칙적으로 선택관광은 진행되지 않으며 가이드가 선택관광을 권유 할 수 없습니다.</B></FONT COLOR=BLUE>\r\n※예외적으로 고객께서 원하여 선택관광이 진행될시에는 <B><FONT COLOR=BLUE>선택관광에 대한 동의서(자필서명)를 반드시 작성</B></FONT COLOR=BLUE>하셔야합니다.\r\n※고객사정으로 일정 미진행시 특전은 환불되지 않습니다."
           }
         ],
         "items": [
           {
             "type": "default",
-            "title": "김해국제공항",
-            "subtitle": "이동수단(교통)",
-            "description": "부산 김해국제공항 출발"
-          },
-          {
-            "type": "default",
-            "title": "나트랑 깜란 국제공항",
-            "subtitle": "현지공항미팅",
-            "description": "나트랑 캄란 공항 도착"
-          },
-          {
-            "type": "default",
-            "title": "일정 안내",
-            "subtitle": "",
-            "description": "※ 베트남 현지 공안 한국인 가이드 대상 단속강화로 인하여 한국인 가이드의 공항주변 출입이 불가합니다. 공항 청사 외부에서 한국인 가이드를 만나게 됩니다. 공항에서 출발할때도 한국인 가이드가 보딩을 도와드리지 못하오니 손님들께서 개별보딩을 받으셔야합니다. <BR>\r\n※ 본 상품은 모두투어의 동일항공 또는 타항공의 다른상품과 현지 조인(합류) 되어 진행될 수 있으며 행사 진행시 대기시간이 발생될 수 있사오니 이 점 양해부탁드립니다.<BR>\r\n※ 여행일정은 계약 체결시 예상하지 못한 부득이한 사정이 발생할 경우 여행자의 사전 동의절차를 거쳐 변경될 수 있습니다."
-          },
-          {
-            "type": "default",
-            "title": "일정 안내",
-            "subtitle": "",
-            "description": "※ 해당 상품은 현지 사정에 의해 일정의 순서가 변경 될 수 있습니다. 이 점 양해 부탁드립니다."
-          },
-          {
-            "type": "default",
-            "title": "※ 개인짐 보관 및 음료 1잔 서비스 제공",
+            "title": "인천국제공항 출발",
             "subtitle": "",
             "description": ""
           },
           {
             "type": "default",
-            "title": "호텔로 이동/체크인",
+            "title": "황열병 필수 예방접종 안내",
+            "subtitle": "",
+            "description": "☞황열병 예방주사 접종 안내\r\n\r\n*<a href=\"https://nqs.kdca.go.kr/nqs/vaccination.do?gubun=yellowFever&subGubun=2\">질병관리청 예방접종 안내 바로가기</A> ←클릭\r\n\r\n*아프리카 여행시 황열병 예방접종 증명서 지참이 필수입니다.\r\n*예방접종은 출국 최소 10일 전에 완료 되어야합니다.\r\n*이미 접종을 받으신 분은 재접종 없이 증명서만 준비하시면 됩니다.\r\n\r\n*<a href=\"https://nqs.kdca.go.kr/nqs/html/vaccination/vaccinationOrgList.html\">예방접종 가능 병원 리스트 바로가기</A> ←클릭\r\n\r\n1. 접종 희망 병원에 전화예약 (필수)\r\n2. 여권 원본 또는 사본 지참 (필수)\r\n3. 필요시 복용 중인 약 정보\r\n4. 전자수입 인지 지불 및 발급 (37,440원-금액변동가능) (<a href=\"https://www.e-revenuestamp.or.kr\">홈페이지</a> / 또는 병원 인근 은행이나 우체국)\r\n5. 병원 방문 접종 및 접종 증명서 발급, 수입인지 제출 및 접종료 지불 (19,610원)\r\n6. 여행시 황열병 예방 접종 증명서를 항시 지참해야 합니다. (필수)"
+          },
+          {
+            "type": "default",
+            "title": "아프리카 여행 준비사항",
+            "subtitle": "",
+            "description": "아프리카 여행시 준비사항 안내"
+          },
+          {
+            "type": "default",
+            "title": "프라이빗 공항 이동 서비스 EK",
+            "subtitle": "",
+            "description": "프라이빗 공항 이동 서비스 : 쇼퍼 드라이브(Chauffeur-drive)"
+          },
+          {
+            "type": "default",
+            "title": "※현지 특성에 의해 일정의 순서가 사전 또는 현지 진행 중 변경 될 수 있습니다.",
             "subtitle": "",
             "description": ""
-          },
-          {
-            "type": "default",
-            "title": "전자 담배 금지 및 호텔 체크인 시 유의사항",
-            "subtitle": "",
-            "description": "<전자담배 베트남 내 반입 및 전자담배 흡연 금지>\r\n- 베트남 정부의 전자담배 금지 조치로 인해 현지 구입은 물론 해외에서의 반입이 금지 되며, 적발 시 현지법률에 의해 처벌 될 수 있습니다.\r\n\r\n<호텔 체크인 시 유의사항>\r\n1. 일반적으로 호텔 체크인은 오후 3시 이후부터 가능합니다. 상이한 호텔이 있을 수 있으니 체크인 시간을 미리 확인해주세요.\r\n2. 호텔 프론트에서 여권으로 체크인하시면 됩니다. 체크인 시 여권을 호텔측에서 보관하였다가 체크 아웃시 돌려주는 호텔이 있을 수 있습니다. 이 점 참고해주세요. \r\n3. 체크인 시 보증금(Deposit) 을 위한 신용카드 또는 현금을 요구하는 경우가 있습니다. 호텔 숙박시 파손 및 개인 사용 경비에 대한 보증 개념으로 체크아웃 시 사용 내역이 없으면 자동취소 및 환불됩니다. \r\n4. 객실의 층수, 베드타입은 체크인 시 확정됩니다. 출발전 여행사에 요청을 하셨더라도 확정되는 부분이 아니오니 체크인시 호텔에 한번 더 요청 및 확인해주세요. \r\n5. 일반적인 체크아웃 시간은 12시입니다. 체크아웃 시간 이후에 체크아웃을 할 경우에 추가비용이 발생될 수 있습니다."
-          },
-          {
-            "type": "default",
-            "title": "유의 ㅣ 안내사항",
-            "subtitle": "",
-            "description": "노옵션 상품 안내사항\n\r※노옵션표기 상품은 '선택관광'이 없는 상품입니다.\r\n<B><FONT COLOR=BLUE>※원칙적으로 선택관광은 진행되지 않으며 가이드가 선택관광을 권유 할 수 없습니다.</B></FONT COLOR=BLUE>\r\n※예외적으로 고객께서 원하여 선택관광이 진행될시에는 <B><FONT COLOR=BLUE>선택관광에 대한 동의서(자필서명)를 반드시 작성</B></FONT COLOR=BLUE>하셔야합니다.\r\n※고객사정으로 일정 미진행시 특전은 환불되지 않습니다."
           }
         ],
-        "hotel": "포세이돈 나트랑 호텔",
+        "hotel": "호텔 확정 예정",
         "meals": {
-          "breakfast": "기내식(불포함)",
-          "lunch": "쌀국수정식",
-          "dinner": "한식"
+          "breakfast": "-",
+          "lunch": "-",
+          "dinner": "기내식"
         }
       },
       {
         "day": 2,
         "date": "",
-        "title": "달랏",
-        "transport": "대형버스",
+        "title": "나이로비",
+        "transport": "-",
         "flight": null,
         "timeline": [
           {
             "type": "default",
-            "title": "호텔 조식 후 체크아웃 / 가이드 미팅",
+            "title": "두바이 환승 후 나이로비 조모 케냐타 국제공항 도착",
             "subtitle": "",
             "description": ""
           },
           {
             "type": "default",
-            "title": "차량이동 약 4시간 30분 소요",
-            "subtitle": "",
-            "description": "차량이동 약 4시간 30분 소요\r\n※나트랑<->달랏 왕복 이동코스는 산을 둘러가는 '굴곡이 많은 포장도로'입니다. \r\n<B><FONT COLOR=RED>※차량 탑승시 안전벨트를 반드시 착용해주세요.</B></FONT COLOR=RED>"
-          },
-          {
-            "type": "location",
-            "title": "반세오 정식",
-            "subtitle": "",
-            "description": "베트남 전통 음식인 반세오는 한국의 빈대떡과 비슷한 음식으로 숙주와 새우, 돼지고기 등의 속재료를 노란 반죽으로 감싼 것으로 라이스페이퍼 싸먹기 때문에 맛과 재미를 한번에 느낄 수 있습니다."
-          },
-          {
-            "type": "location",
-            "title": "랑비앙(전망대 투어 포함)",
-            "subtitle": "",
-            "description": "해발 2,167m 산으로, 달랏의 탁 트인 전망을 한눈에 조망할 수 있는 장소!(정산 전망대투어 포함)"
-          },
-          {
-            "type": "location",
-            "title": "쓰언흐엉호수",
-            "subtitle": "",
-            "description": "호수에서 자유시간 (달랏식 아이스크림 1인1개 제공)"
-          },
-          {
-            "type": "location",
-            "title": "닭볶음탕",
-            "subtitle": "",
-            "description": "달랏 지역의 닭은 살이 쫄깃하고 통통하기로 유명합니다. 신선한 닭고기로 조리한 매콤달콤한 닭볶음탕은 누구나 좋아하는 음식입니다."
-          },
-          {
-            "type": "location",
-            "title": "달랏 천국의 계단(음료 1잔 포함)",
-            "subtitle": "",
-            "description": "달랏 필수 포토스팟 천국의 계단 + 음료 1잔 제공"
-          },
-          {
-            "type": "default",
-            "title": "호텔로 이동/휴식",
+            "title": "시내로 이동하여 카렌브릭슨 박물관 관람",
             "subtitle": "",
             "description": ""
           },
           {
-            "type": "default",
-            "title": "※ 아동 마사지는 요청하시는 분에 한해 가능하며 성인판매가가 적용됩니다.(부모 동의 필수)",
+            "type": "location",
+            "title": "카렌브릭슨 박물관",
             "subtitle": "",
-            "description": "※ 아동 마사지는 요청하시는 분에 한해 가능하며 성인판매가가 적용됩니다.(부모 동의 필수)\r\n※ 마사지 후 권장 매너팁 안내\r\n· 권장 팁 금액: $4 ~ 최대 $7\r\n· 지역 및 마사지 시간에 따라 상이합니다."
+            "description": "'아웃 오브 아프리카'의 촬영지 및 작가 생가"
+          },
+          {
+            "type": "location",
+            "title": "사파리 캣츠 쇼",
+            "subtitle": "",
+            "description": "사파리파크 호텔의 명물, 아프리카 원주민들의 현란한 몸동작의 '사파리 캣츠 쇼'관람"
+          },
+          {
+            "type": "default",
+            "title": "일정 안내",
+            "subtitle": "",
+            "description": "<iframe width=\"656\" height=\"369\" src=\"https://www.youtube.com/embed/b2_c9pGZVrI\" title=\"Safari Cats Dancers &amp; Acrobats\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>"
+          },
+          {
+            "type": "default",
+            "title": "석식 후 호텔로 이동하여 휴식",
+            "subtitle": "",
+            "description": ""
           }
         ],
         "items": [
           {
             "type": "default",
-            "title": "호텔 조식 후 체크아웃 / 가이드 미팅",
+            "title": "두바이 환승 후 나이로비 조모 케냐타 국제공항 도착",
             "subtitle": "",
             "description": ""
           },
           {
             "type": "default",
-            "title": "차량이동 약 4시간 30분 소요",
-            "subtitle": "",
-            "description": "차량이동 약 4시간 30분 소요\r\n※나트랑<->달랏 왕복 이동코스는 산을 둘러가는 '굴곡이 많은 포장도로'입니다. \r\n<B><FONT COLOR=RED>※차량 탑승시 안전벨트를 반드시 착용해주세요.</B></FONT COLOR=RED>"
-          },
-          {
-            "type": "location",
-            "title": "반세오 정식",
-            "subtitle": "",
-            "description": "베트남 전통 음식인 반세오는 한국의 빈대떡과 비슷한 음식으로 숙주와 새우, 돼지고기 등의 속재료를 노란 반죽으로 감싼 것으로 라이스페이퍼 싸먹기 때문에 맛과 재미를 한번에 느낄 수 있습니다."
-          },
-          {
-            "type": "location",
-            "title": "랑비앙(전망대 투어 포함)",
-            "subtitle": "",
-            "description": "해발 2,167m 산으로, 달랏의 탁 트인 전망을 한눈에 조망할 수 있는 장소!(정산 전망대투어 포함)"
-          },
-          {
-            "type": "location",
-            "title": "쓰언흐엉호수",
-            "subtitle": "",
-            "description": "호수에서 자유시간 (달랏식 아이스크림 1인1개 제공)"
-          },
-          {
-            "type": "location",
-            "title": "닭볶음탕",
-            "subtitle": "",
-            "description": "달랏 지역의 닭은 살이 쫄깃하고 통통하기로 유명합니다. 신선한 닭고기로 조리한 매콤달콤한 닭볶음탕은 누구나 좋아하는 음식입니다."
-          },
-          {
-            "type": "location",
-            "title": "달랏 천국의 계단(음료 1잔 포함)",
-            "subtitle": "",
-            "description": "달랏 필수 포토스팟 천국의 계단 + 음료 1잔 제공"
-          },
-          {
-            "type": "default",
-            "title": "호텔로 이동/휴식",
+            "title": "시내로 이동하여 카렌브릭슨 박물관 관람",
             "subtitle": "",
             "description": ""
           },
           {
-            "type": "default",
-            "title": "※ 아동 마사지는 요청하시는 분에 한해 가능하며 성인판매가가 적용됩니다.(부모 동의 필수)",
+            "type": "location",
+            "title": "카렌브릭슨 박물관",
             "subtitle": "",
-            "description": "※ 아동 마사지는 요청하시는 분에 한해 가능하며 성인판매가가 적용됩니다.(부모 동의 필수)\r\n※ 마사지 후 권장 매너팁 안내\r\n· 권장 팁 금액: $4 ~ 최대 $7\r\n· 지역 및 마사지 시간에 따라 상이합니다."
+            "description": "'아웃 오브 아프리카'의 촬영지 및 작가 생가"
+          },
+          {
+            "type": "location",
+            "title": "사파리 캣츠 쇼",
+            "subtitle": "",
+            "description": "사파리파크 호텔의 명물, 아프리카 원주민들의 현란한 몸동작의 '사파리 캣츠 쇼'관람"
+          },
+          {
+            "type": "default",
+            "title": "일정 안내",
+            "subtitle": "",
+            "description": "<iframe width=\"656\" height=\"369\" src=\"https://www.youtube.com/embed/b2_c9pGZVrI\" title=\"Safari Cats Dancers &amp; Acrobats\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>"
+          },
+          {
+            "type": "default",
+            "title": "석식 후 호텔로 이동하여 휴식",
+            "subtitle": "",
+            "description": ""
           }
         ],
-        "hotel": "라사피네트 달랏",
+        "hotel": "Safari Park Hotel (★★★★★)",
         "meals": {
-          "breakfast": "호텔식",
-          "lunch": "반세오+분짜정식",
-          "dinner": "닭볶음탕"
+          "breakfast": "기내식",
+          "lunch": "기내식",
+          "dinner": "-"
         }
       },
       {
         "day": 3,
         "date": "",
-        "title": "달랏",
-        "transport": "대형버스",
+        "title": "응고롱고로 자연보호구",
+        "transport": "-",
         "flight": null,
         "timeline": [
           {
             "type": "default",
-            "title": "호텔 조식 후 가이드 미팅",
+            "title": "호텔 조식 후",
             "subtitle": "",
             "description": ""
           },
           {
             "type": "default",
-            "title": "죽림사(케이블카 편도 포함)",
+            "title": "케냐와 탄자니아 국경인 나망가를 통과",
             "subtitle": "",
-            "description": "호수와 숲이 내려다보는 달랏 대표 불교 수행 사찰"
-          },
-          {
-            "type": "location",
-            "title": "다딴라폭포(레일바이크 포함)",
-            "subtitle": "",
-            "description": "울창한 숲속 계곡에 위치한 달랏의 대표 자연 폭포 명소"
-          },
-          {
-            "type": "location",
-            "title": "베트남식 샤브샤브",
-            "subtitle": "",
-            "description": "담백한 육수에 신선한 채소와 고기 등이 어우러진 베트남식 샤브샤브"
-          },
-          {
-            "type": "location",
-            "title": "크레이지하우스",
-            "subtitle": "",
-            "description": "달랏의 자연에서 영감을 받은 독특한 곡선형 구조의 예술적 건축물"
-          },
-          {
-            "type": "location",
-            "title": "달랏 야시장",
-            "subtitle": "",
-            "description": "현지 분위기 체험 및 1인 1꼬치+음료 1잔 제공"
-          },
-          {
-            "type": "location",
-            "title": "[석식] 무제한삼겹살",
-            "subtitle": "",
-            "description": "두툼한 삼겹살을 쌈채소, 김치, 마늘 등과 함께 무제한으로 즐길 수 있습니다"
+            "description": ""
           },
           {
             "type": "default",
-            "title": "호텔로 이동/휴식",
+            "title": "아루샤 도착 후, 중식",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "세계에서 가장 큰 분화구인 응고롱고로 자연보호구로 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "롯지로 이동하여 석식 후 휴식",
             "subtitle": "",
             "description": ""
           }
@@ -341,130 +314,88 @@
         "items": [
           {
             "type": "default",
-            "title": "호텔 조식 후 가이드 미팅",
+            "title": "호텔 조식 후",
             "subtitle": "",
             "description": ""
           },
           {
             "type": "default",
-            "title": "죽림사(케이블카 편도 포함)",
+            "title": "케냐와 탄자니아 국경인 나망가를 통과",
             "subtitle": "",
-            "description": "호수와 숲이 내려다보는 달랏 대표 불교 수행 사찰"
-          },
-          {
-            "type": "location",
-            "title": "다딴라폭포(레일바이크 포함)",
-            "subtitle": "",
-            "description": "울창한 숲속 계곡에 위치한 달랏의 대표 자연 폭포 명소"
-          },
-          {
-            "type": "location",
-            "title": "베트남식 샤브샤브",
-            "subtitle": "",
-            "description": "담백한 육수에 신선한 채소와 고기 등이 어우러진 베트남식 샤브샤브"
-          },
-          {
-            "type": "location",
-            "title": "크레이지하우스",
-            "subtitle": "",
-            "description": "달랏의 자연에서 영감을 받은 독특한 곡선형 구조의 예술적 건축물"
-          },
-          {
-            "type": "location",
-            "title": "달랏 야시장",
-            "subtitle": "",
-            "description": "현지 분위기 체험 및 1인 1꼬치+음료 1잔 제공"
-          },
-          {
-            "type": "location",
-            "title": "[석식] 무제한삼겹살",
-            "subtitle": "",
-            "description": "두툼한 삼겹살을 쌈채소, 김치, 마늘 등과 함께 무제한으로 즐길 수 있습니다"
+            "description": ""
           },
           {
             "type": "default",
-            "title": "호텔로 이동/휴식",
+            "title": "아루샤 도착 후, 중식",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "세계에서 가장 큰 분화구인 응고롱고로 자연보호구로 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "롯지로 이동하여 석식 후 휴식",
             "subtitle": "",
             "description": ""
           }
         ],
-        "hotel": "호텔은 2일차와 동일합니다",
+        "hotel": "Ngorongoro Serena Lodge",
         "meals": {
-          "breakfast": "호텔식 ",
-          "lunch": "샤브샤브",
-          "dinner": "무제한삼겹살"
+          "breakfast": "호텔식",
+          "lunch": "현지식",
+          "dinner": "롯지식"
         }
       },
       {
         "day": 4,
         "date": "",
-        "title": "달랏 → 나트랑",
-        "transport": "대형버스",
+        "title": "응고롱고로 자연보호구",
+        "transport": "-",
         "flight": null,
         "timeline": [
           {
             "type": "default",
-            "title": "호텔 조식/체크아웃 후 가이드 미팅",
+            "title": "롯지 조식 후",
             "subtitle": "",
             "description": ""
           },
           {
             "type": "location",
-            "title": "달랏기차역",
+            "title": "응고롱고로 분화구 사파리 게임드라이브",
             "subtitle": "",
-            "description": "달랏의 옛 정취가 남아있는 프랑스풍 감성 기차역에서 아름다운 꽃과 함께 감성사진 찰칵!"
-          },
-          {
-            "type": "location",
-            "title": "베트남 가정식",
-            "subtitle": "",
-            "description": "베트남의 가정식을 체험해볼 수 있는 음식점"
+            "description": "응고롱고로 국림공원에서 게임드라이브 사파리 진행\n\r▶Big Five 관광: 사자, 코끼리, 버팔로, 표범, 코뿔소"
           },
           {
             "type": "default",
-            "title": "차량이동 약 4시간 30분 소요",
+            "title": "롯지 귀환 후 중식",
             "subtitle": "",
-            "description": "차량이동 약 4시간 30분 소요\r\n※나트랑<->달랏 왕복 이동코스는 산을 둘러가는 '굴곡이 많은 포장도로'입니다. \r\n<B><FONT COLOR=RED>※차량 탑승시 안전벨트를 반드시 착용해주세요.</B></FONT COLOR=RED>"
+            "description": ""
           },
           {
             "type": "location",
-            "title": "롱선사",
+            "title": "마사이 부족마을",
             "subtitle": "",
-            "description": "나트랑을 대표하는 불교 사원으로, 언덕 위 거대한 백색 좌불상이 있는 사찰"
-          },
-          {
-            "type": "location",
-            "title": "포나가 참 사원",
-            "subtitle": "",
-            "description": "붉은 벽돌로 지어진 아름답고 웅장한 고대 참파왕국의 흰두교 사원"
-          },
-          {
-            "type": "location",
-            "title": "나트랑 대성당 (차창관광)",
-            "subtitle": "",
-            "description": "현지인들의 웨딩장소로 인기만점! 아름답고 웅장함을 자랑하는 성당!"
-          },
-          {
-            "type": "location",
-            "title": "머드온천",
-            "subtitle": "",
-            "description": "※나트랑의 명물 갈리나 머드온천\r\n※수건을 별도로 챙겨주시길 바라며 온천에서 반바지,반팔티 무료 대여 가능합니다."
-          },
-          {
-            "type": "location",
-            "title": "제육쌈밥",
-            "subtitle": "",
-            "description": "달랏지역은 채소와 과일 재배로 유명한 곳으로 달랏에서 공수한 신선한 쌈야채와 매콤달콤한 제육볶음이 정갈한 반찬과 제공됩니다."
-          },
-          {
-            "type": "location",
-            "title": "나트랑야시장",
-            "subtitle": "",
-            "description": "나트랑 야시장체험+콩카페 또는 CCCP카페 (커피 또는 음료1잔)"
+            "description": "아프리카 마사이 부족 전통마을 방문"
           },
           {
             "type": "default",
-            "title": "공항으로 이동",
+            "title": "세렝게티 국립공원으로 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "location",
+            "title": "세렝게티 국립공원",
+            "subtitle": "",
+            "description": "숙소로 이동하면서 세렝게티 국립공원 사파리 게임 드라이브 관광"
+          },
+          {
+            "type": "default",
+            "title": "롯지로 이동하여 석식 후 휴식",
             "subtitle": "",
             "description": ""
           }
@@ -472,67 +403,707 @@
         "items": [
           {
             "type": "default",
-            "title": "호텔 조식/체크아웃 후 가이드 미팅",
+            "title": "롯지 조식 후",
             "subtitle": "",
             "description": ""
           },
           {
             "type": "location",
-            "title": "달랏기차역",
+            "title": "응고롱고로 분화구 사파리 게임드라이브",
             "subtitle": "",
-            "description": "달랏의 옛 정취가 남아있는 프랑스풍 감성 기차역에서 아름다운 꽃과 함께 감성사진 찰칵!"
-          },
-          {
-            "type": "location",
-            "title": "베트남 가정식",
-            "subtitle": "",
-            "description": "베트남의 가정식을 체험해볼 수 있는 음식점"
+            "description": "응고롱고로 국림공원에서 게임드라이브 사파리 진행\n\r▶Big Five 관광: 사자, 코끼리, 버팔로, 표범, 코뿔소"
           },
           {
             "type": "default",
-            "title": "차량이동 약 4시간 30분 소요",
+            "title": "롯지 귀환 후 중식",
             "subtitle": "",
-            "description": "차량이동 약 4시간 30분 소요\r\n※나트랑<->달랏 왕복 이동코스는 산을 둘러가는 '굴곡이 많은 포장도로'입니다. \r\n<B><FONT COLOR=RED>※차량 탑승시 안전벨트를 반드시 착용해주세요.</B></FONT COLOR=RED>"
+            "description": ""
           },
           {
             "type": "location",
-            "title": "롱선사",
+            "title": "마사이 부족마을",
             "subtitle": "",
-            "description": "나트랑을 대표하는 불교 사원으로, 언덕 위 거대한 백색 좌불상이 있는 사찰"
-          },
-          {
-            "type": "location",
-            "title": "포나가 참 사원",
-            "subtitle": "",
-            "description": "붉은 벽돌로 지어진 아름답고 웅장한 고대 참파왕국의 흰두교 사원"
-          },
-          {
-            "type": "location",
-            "title": "나트랑 대성당 (차창관광)",
-            "subtitle": "",
-            "description": "현지인들의 웨딩장소로 인기만점! 아름답고 웅장함을 자랑하는 성당!"
-          },
-          {
-            "type": "location",
-            "title": "머드온천",
-            "subtitle": "",
-            "description": "※나트랑의 명물 갈리나 머드온천\r\n※수건을 별도로 챙겨주시길 바라며 온천에서 반바지,반팔티 무료 대여 가능합니다."
-          },
-          {
-            "type": "location",
-            "title": "제육쌈밥",
-            "subtitle": "",
-            "description": "달랏지역은 채소와 과일 재배로 유명한 곳으로 달랏에서 공수한 신선한 쌈야채와 매콤달콤한 제육볶음이 정갈한 반찬과 제공됩니다."
-          },
-          {
-            "type": "location",
-            "title": "나트랑야시장",
-            "subtitle": "",
-            "description": "나트랑 야시장체험+콩카페 또는 CCCP카페 (커피 또는 음료1잔)"
+            "description": "아프리카 마사이 부족 전통마을 방문"
           },
           {
             "type": "default",
-            "title": "공항으로 이동",
+            "title": "세렝게티 국립공원으로 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "location",
+            "title": "세렝게티 국립공원",
+            "subtitle": "",
+            "description": "숙소로 이동하면서 세렝게티 국립공원 사파리 게임 드라이브 관광"
+          },
+          {
+            "type": "default",
+            "title": "롯지로 이동하여 석식 후 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "hotel": "Serengeti Serena Lodge",
+        "meals": {
+          "breakfast": "롯지식",
+          "lunch": "롯지식",
+          "dinner": "롯지식"
+        }
+      },
+      {
+        "day": 5,
+        "date": "",
+        "title": "아루샤",
+        "transport": "-",
+        "flight": null,
+        "timeline": [
+          {
+            "type": "default",
+            "title": "롯지 조식 후",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "location",
+            "title": "세렝게티 국립공원",
+            "subtitle": "",
+            "description": "아프리카의 상징 세렝게티에서 게임드라이브 사파리 진행"
+          },
+          {
+            "type": "default",
+            "title": "세렝게티 초원에서 도시락으로 중식",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "경비행기 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "아루샤 도착이후 호텔로 이동, 석식 후 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "items": [
+          {
+            "type": "default",
+            "title": "롯지 조식 후",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "location",
+            "title": "세렝게티 국립공원",
+            "subtitle": "",
+            "description": "아프리카의 상징 세렝게티에서 게임드라이브 사파리 진행"
+          },
+          {
+            "type": "default",
+            "title": "세렝게티 초원에서 도시락으로 중식",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "경비행기 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "아루샤 도착이후 호텔로 이동, 석식 후 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "hotel": "Mount Meru Hotel",
+        "meals": {
+          "breakfast": "롯지식",
+          "lunch": "도시락",
+          "dinner": "호텔식"
+        }
+      },
+      {
+        "day": 6,
+        "date": "",
+        "title": "킬리만자로 → 나이로비",
+        "transport": "-",
+        "flight": null,
+        "timeline": [
+          {
+            "type": "default",
+            "title": "호텔 조식 후",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "만년설의 전설을 간직한 킬리만자로 국립공원 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "location",
+            "title": "킬리만자로",
+            "subtitle": "",
+            "description": "킬리만자로 국립공원 가벼운 트래킹 및 주변 경관 감상, 산책 (*약 2시간)"
+          },
+          {
+            "type": "default",
+            "title": "아루샤로 이동, 중식",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "케냐와 탄자니아 국경인 나망가를 지나 나이로비로 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "나이로비 도착, 석식 후 호텔로 이동하여 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "items": [
+          {
+            "type": "default",
+            "title": "호텔 조식 후",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "만년설의 전설을 간직한 킬리만자로 국립공원 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "location",
+            "title": "킬리만자로",
+            "subtitle": "",
+            "description": "킬리만자로 국립공원 가벼운 트래킹 및 주변 경관 감상, 산책 (*약 2시간)"
+          },
+          {
+            "type": "default",
+            "title": "아루샤로 이동, 중식",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "케냐와 탄자니아 국경인 나망가를 지나 나이로비로 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "나이로비 도착, 석식 후 호텔로 이동하여 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "hotel": "Sarova Stanley Hotel (★★★★★)",
+        "meals": {
+          "breakfast": "호텔식",
+          "lunch": "현지식",
+          "dinner": "한   식"
+        }
+      },
+      {
+        "day": 7,
+        "date": "",
+        "title": "빅토리 폴스",
+        "transport": "-",
+        "flight": null,
+        "timeline": [
+          {
+            "type": "default",
+            "title": "호텔에서 도시락 챙겨서 공항이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "KQ 792편 이용",
+            "subtitle": "",
+            "description": "KQ 792편 이용\r\n7:25 나이로비 출발\r\n9:40 빅토리아폴스 도착"
+          },
+          {
+            "type": "location",
+            "title": "빅토리아폭포",
+            "subtitle": "",
+            "description": "짐바브웨 방면 빅토리아 폭포 도보 관광"
+          },
+          {
+            "type": "location",
+            "title": "노천목각시장",
+            "subtitle": "",
+            "description": "다양한 동물들의 목각을 판매하는 시장 방문\n\r자유시간 부여"
+          },
+          {
+            "type": "location",
+            "title": "잠베지강 선셋 크루즈",
+            "subtitle": "",
+            "description": "노을이 지는 아름다운 잠베지 강 상류에서 선셋 선상크루즈\n\r※ 음료 무제한 제공 (맥주, 와인, 환타, 콜라 등)"
+          },
+          {
+            "type": "default",
+            "title": "석식 후 호텔로 이동하여 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "items": [
+          {
+            "type": "default",
+            "title": "호텔에서 도시락 챙겨서 공항이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "KQ 792편 이용",
+            "subtitle": "",
+            "description": "KQ 792편 이용\r\n7:25 나이로비 출발\r\n9:40 빅토리아폴스 도착"
+          },
+          {
+            "type": "location",
+            "title": "빅토리아폭포",
+            "subtitle": "",
+            "description": "짐바브웨 방면 빅토리아 폭포 도보 관광"
+          },
+          {
+            "type": "location",
+            "title": "노천목각시장",
+            "subtitle": "",
+            "description": "다양한 동물들의 목각을 판매하는 시장 방문\n\r자유시간 부여"
+          },
+          {
+            "type": "location",
+            "title": "잠베지강 선셋 크루즈",
+            "subtitle": "",
+            "description": "노을이 지는 아름다운 잠베지 강 상류에서 선셋 선상크루즈\n\r※ 음료 무제한 제공 (맥주, 와인, 환타, 콜라 등)"
+          },
+          {
+            "type": "default",
+            "title": "석식 후 호텔로 이동하여 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "hotel": "Elephant Hills Hotel",
+        "meals": {
+          "breakfast": "도시락",
+          "lunch": "현지식",
+          "dinner": "현지식"
+        }
+      },
+      {
+        "day": 8,
+        "date": "",
+        "title": "초베 국립공원 → 빅토리 폴스",
+        "transport": "-",
+        "flight": null,
+        "timeline": [
+          {
+            "type": "default",
+            "title": "호텔 조식 후 보츠와나 국경 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "location",
+            "title": "초베 국립공원 보트 사파리",
+            "subtitle": "",
+            "description": "코끼리의 천국, 쵸베강의 다양한 야생동물들을 관찰하는 보트 사파리\n\r- 하마, 악어, 각종 물새 등"
+          },
+          {
+            "type": "default",
+            "title": "Lodge 중식 후, 국경을 넘어 잠비아로 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "location",
+            "title": "빅토리아 폭포",
+            "subtitle": "",
+            "description": "잠비아 방면 빅토리아 폭포 도보 관광"
+          },
+          {
+            "type": "location",
+            "title": "빅토리아폭포 헬기투어",
+            "subtitle": "",
+            "description": "[스페셜포함-헬기투어]"
+          },
+          {
+            "type": "default",
+            "title": "석식 후 호텔로 이동하여 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "items": [
+          {
+            "type": "default",
+            "title": "호텔 조식 후 보츠와나 국경 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "location",
+            "title": "초베 국립공원 보트 사파리",
+            "subtitle": "",
+            "description": "코끼리의 천국, 쵸베강의 다양한 야생동물들을 관찰하는 보트 사파리\n\r- 하마, 악어, 각종 물새 등"
+          },
+          {
+            "type": "default",
+            "title": "Lodge 중식 후, 국경을 넘어 잠비아로 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "location",
+            "title": "빅토리아 폭포",
+            "subtitle": "",
+            "description": "잠비아 방면 빅토리아 폭포 도보 관광"
+          },
+          {
+            "type": "location",
+            "title": "빅토리아폭포 헬기투어",
+            "subtitle": "",
+            "description": "[스페셜포함-헬기투어]"
+          },
+          {
+            "type": "default",
+            "title": "석식 후 호텔로 이동하여 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "hotel": "Elephant Hills Hotel",
+        "meals": {
+          "breakfast": "호텔식",
+          "lunch": "롯지식",
+          "dinner": "정글정션뷔페"
+        }
+      },
+      {
+        "day": 9,
+        "date": "",
+        "title": "케이프타운",
+        "transport": "-",
+        "flight": null,
+        "timeline": [
+          {
+            "type": "default",
+            "title": "호텔 조식 후 국경을 통과하여 빅토리아폴스공항으로 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "KQ792 10:25 빅토리아폴스 출발",
+            "subtitle": "",
+            "description": "KQ792 10:25 빅토리아폴스 출발\r\n13:35 케이프타운 도착"
+          },
+          {
+            "type": "default",
+            "title": "케이프타운 도착하여 관광",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "케이블카",
+            "subtitle": "",
+            "description": "1080m의 테이블 산을 오르는 360도 회전 케이블카"
+          },
+          {
+            "type": "location",
+            "title": "테이블 마운틴",
+            "subtitle": "",
+            "description": "케이프타운 시내를 한눈에 내려다 볼 수 있는 산\n\r※ 날씨로 인해 케이블카 운항이 되지 않을 경우 시그널힐 투어로 일정 대체됩니다."
+          },
+          {
+            "type": "location",
+            "title": "보캅지구",
+            "subtitle": "",
+            "description": "형형 색색의 집들과 말레이인들이 최초 정착한 마을"
+          },
+          {
+            "type": "default",
+            "title": "석식 후 호텔로 이동하여 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "items": [
+          {
+            "type": "default",
+            "title": "호텔 조식 후 국경을 통과하여 빅토리아폴스공항으로 이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "KQ792 10:25 빅토리아폴스 출발",
+            "subtitle": "",
+            "description": "KQ792 10:25 빅토리아폴스 출발\r\n13:35 케이프타운 도착"
+          },
+          {
+            "type": "default",
+            "title": "케이프타운 도착하여 관광",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "케이블카",
+            "subtitle": "",
+            "description": "1080m의 테이블 산을 오르는 360도 회전 케이블카"
+          },
+          {
+            "type": "location",
+            "title": "테이블 마운틴",
+            "subtitle": "",
+            "description": "케이프타운 시내를 한눈에 내려다 볼 수 있는 산\n\r※ 날씨로 인해 케이블카 운항이 되지 않을 경우 시그널힐 투어로 일정 대체됩니다."
+          },
+          {
+            "type": "location",
+            "title": "보캅지구",
+            "subtitle": "",
+            "description": "형형 색색의 집들과 말레이인들이 최초 정착한 마을"
+          },
+          {
+            "type": "default",
+            "title": "석식 후 호텔로 이동하여 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "hotel": "The Westin Cape Town Hotel (★★★★★)",
+        "meals": {
+          "breakfast": "호텔식",
+          "lunch": "기내식",
+          "dinner": "현지식"
+        }
+      },
+      {
+        "day": 10,
+        "date": "",
+        "title": "케이프타운",
+        "transport": "-",
+        "flight": null,
+        "timeline": [
+          {
+            "type": "default",
+            "title": "호텔 조식 후 케이프타운 관광",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "location",
+            "title": "캠스베이",
+            "subtitle": "",
+            "description": "12사도 봉우리와 아름다운 해안 캠스베이에서 잠시 정차하여 포토 타임"
+          },
+          {
+            "type": "location",
+            "title": "커스텐보쉬 국립식물원",
+            "subtitle": "",
+            "description": "남아공 최초의 식물원인 커스텐 보쉬 식물원 관람"
+          },
+          {
+            "type": "location",
+            "title": "와인 테이스팅",
+            "subtitle": "",
+            "description": "Groot Constancia 와인 농장에서 세계적으로 유명한 남아공 와인 테이스팅"
+          },
+          {
+            "type": "location",
+            "title": "워터프론트",
+            "subtitle": "",
+            "description": "아름다운 항구에 위치한 복합쇼핑몰 자유시간"
+          },
+          {
+            "type": "default",
+            "title": "석식 후 호텔로 이동하여 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "items": [
+          {
+            "type": "default",
+            "title": "호텔 조식 후 케이프타운 관광",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "location",
+            "title": "캠스베이",
+            "subtitle": "",
+            "description": "12사도 봉우리와 아름다운 해안 캠스베이에서 잠시 정차하여 포토 타임"
+          },
+          {
+            "type": "location",
+            "title": "커스텐보쉬 국립식물원",
+            "subtitle": "",
+            "description": "남아공 최초의 식물원인 커스텐 보쉬 식물원 관람"
+          },
+          {
+            "type": "location",
+            "title": "와인 테이스팅",
+            "subtitle": "",
+            "description": "Groot Constancia 와인 농장에서 세계적으로 유명한 남아공 와인 테이스팅"
+          },
+          {
+            "type": "location",
+            "title": "워터프론트",
+            "subtitle": "",
+            "description": "아름다운 항구에 위치한 복합쇼핑몰 자유시간"
+          },
+          {
+            "type": "default",
+            "title": "석식 후 호텔로 이동하여 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "hotel": "The Westin Cape Town Hotel (★★★★★)",
+        "meals": {
+          "breakfast": "호텔식",
+          "lunch": "현지식",
+          "dinner": "현지식"
+        }
+      },
+      {
+        "day": 11,
+        "date": "",
+        "title": "케이프타운",
+        "transport": "-",
+        "flight": null,
+        "timeline": [
+          {
+            "type": "default",
+            "title": "호텔 조식 후 케이프타운 관광",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "location",
+            "title": "물개섬",
+            "subtitle": "",
+            "description": "보트를 타고 케이프 해안선을 따라 물개섬 관광"
+          },
+          {
+            "type": "location",
+            "title": "볼더스 비치",
+            "subtitle": "",
+            "description": "아프리카에 사는 자카스 펭귄이 자연 서식하는 해변"
+          },
+          {
+            "type": "location",
+            "title": "케이프 포인트",
+            "subtitle": "",
+            "description": "아프리카의 최남단"
+          },
+          {
+            "type": "location",
+            "title": "희망봉",
+            "subtitle": "",
+            "description": "남아프리카공화국 희망봉 자연보호구. 해발 248m의 지점에 있으며, 안개 때문에 보이지 않을 때가 많아 지"
+          },
+          {
+            "type": "default",
+            "title": "석식 후 호텔로 이동하여 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "items": [
+          {
+            "type": "default",
+            "title": "호텔 조식 후 케이프타운 관광",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "location",
+            "title": "물개섬",
+            "subtitle": "",
+            "description": "보트를 타고 케이프 해안선을 따라 물개섬 관광"
+          },
+          {
+            "type": "location",
+            "title": "볼더스 비치",
+            "subtitle": "",
+            "description": "아프리카에 사는 자카스 펭귄이 자연 서식하는 해변"
+          },
+          {
+            "type": "location",
+            "title": "케이프 포인트",
+            "subtitle": "",
+            "description": "아프리카의 최남단"
+          },
+          {
+            "type": "location",
+            "title": "희망봉",
+            "subtitle": "",
+            "description": "남아프리카공화국 희망봉 자연보호구. 해발 248m의 지점에 있으며, 안개 때문에 보이지 않을 때가 많아 지"
+          },
+          {
+            "type": "default",
+            "title": "석식 후 호텔로 이동하여 휴식",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "hotel": "The Westin Cape Town Hotel (★★★★★)",
+        "meals": {
+          "breakfast": "호텔식",
+          "lunch": "-",
+          "dinner": "한   식"
+        }
+      },
+      {
+        "day": 12,
+        "date": "",
+        "title": "",
+        "transport": "-",
+        "flight": null,
+        "timeline": [
+          {
+            "type": "default",
+            "title": "조식 후 공항이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "케이프타운 국제공항 출발",
+            "subtitle": "",
+            "description": ""
+          }
+        ],
+        "items": [
+          {
+            "type": "default",
+            "title": "조식 후 공항이동",
+            "subtitle": "",
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "케이프타운 국제공항 출발",
             "subtitle": "",
             "description": ""
           }
@@ -540,225 +1111,139 @@
         "hotel": "호텔 확정 예정",
         "meals": {
           "breakfast": "호텔식",
-          "lunch": "베트남가정식",
-          "dinner": "제육쌈밥"
+          "lunch": "기내식",
+          "dinner": "기내식"
         }
       },
       {
-        "day": 5,
+        "day": 13,
         "date": "",
-        "title": "부산",
-        "transport": "대형버스",
+        "title": "인천",
+        "transport": "항공",
         "flight": {
-          "flightNo": "VJ918",
-          "airline": "비엣젯항공",
-          "departureCity": "나트랑",
-          "departureTime": "03:10",
-          "arrivalCity": "부산",
-          "arrivalTime": "09:50",
-          "duration": "04:40",
-          "segments": []
+          "flightNo": "EK773 / EK322",
+          "airline": "에미레이트 항공 (경유)",
+          "departureCity": "케이프타운",
+          "departureTime": "13:15",
+          "arrivalCity": "인천",
+          "arrivalTime": "17:00",
+          "duration": "",
+          "segments": [
+            {
+              "airline": "에미레이트 항공",
+              "flightNo": "EK773",
+              "departureCity": "케이프타운",
+              "departureTime": "13:15",
+              "arrivalCity": "두바이",
+              "arrivalTime": "00:35",
+              "duration": "09:30",
+              "layoverDuration": "3시간 5분"
+            },
+            {
+              "airline": "에미레이트 항공",
+              "flightNo": "EK322",
+              "departureCity": "두바이",
+              "departureTime": "03:40",
+              "arrivalCity": "인천",
+              "arrivalTime": "17:00",
+              "duration": "08:20",
+              "layoverDuration": ""
+            }
+          ]
         },
         "timeline": [
           {
             "type": "default",
-            "title": "나트랑 출발",
+            "title": "두바이 국제공항 환승 후",
             "subtitle": "",
             "description": ""
           },
           {
             "type": "default",
-            "title": "일정 안내",
+            "title": "인천국제공항 도착",
             "subtitle": "",
-            "description": "항상 모두투어를 사랑해주시고 다음 여행도 저희 모두투어와 함께 즐거운 여행이 되시길 바랍니다."
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "♥♥ 모두투어를 이용해 주셔서 감사 합니다. ♥♥",
+            "subtitle": "",
+            "description": ""
           }
         ],
         "items": [
           {
             "type": "default",
-            "title": "나트랑 출발",
+            "title": "두바이 국제공항 환승 후",
             "subtitle": "",
             "description": ""
           },
           {
             "type": "default",
-            "title": "일정 안내",
+            "title": "인천국제공항 도착",
             "subtitle": "",
-            "description": "항상 모두투어를 사랑해주시고 다음 여행도 저희 모두투어와 함께 즐거운 여행이 되시길 바랍니다."
+            "description": ""
+          },
+          {
+            "type": "default",
+            "title": "♥♥ 모두투어를 이용해 주셔서 감사 합니다. ♥♥",
+            "subtitle": "",
+            "description": ""
           }
         ],
         "hotel": "",
         "meals": {
-          "breakfast": "기내식없음",
-          "lunch": "-",
+          "breakfast": "기내식",
+          "lunch": "기내식",
           "dinner": "-"
         }
       }
     ],
     "hotels": [
       {
-        "name": "포세이돈 나트랑 호텔",
-        "address": "30 Tran Quang Khai Loc Tho Nha Trang",
+        "name": "Safari Park Hotel (★★★★★)",
+        "address": "Nairobi City",
         "images": [],
         "checkIn": "",
         "checkOut": ""
       },
       {
-        "name": "리버티 나트랑 호텔",
-        "address": "9 Bi?t Th?, L?c Th?, Thanh ph? Nha Trang, Khanh Hoa 650000 베트남",
+        "name": "Ngorongoro Serena Lodge",
+        "address": "Ngorongoro Crater Conservancy, Arusha, Ngorongoro Crater Conservancy, 탄자니아",
         "images": [],
         "checkIn": "",
         "checkOut": ""
       },
       {
-        "name": "리브라 나트랑 호텔",
-        "address": "04 Hung V??ng, L?c Th?, Thanh ph? Nha Trang, Khanh Hoa 650000 베트남\n",
+        "name": "Serengeti Serena Lodge",
+        "address": "Serengeti National Park, Mara Region, 탄자니아",
         "images": [],
         "checkIn": "",
         "checkOut": ""
       },
       {
-        "name": "덴드로 골드 호텔",
-        "address": "86/4 Tr?n Phu, St, Thanh ph? Nha Trang, Khanh Hoa 650000 베트남",
+        "name": "Mount Meru Hotel",
+        "address": "Kanisa Rd, Arusha, 탄자니아",
         "images": [],
         "checkIn": "",
         "checkOut": ""
       },
       {
-        "name": "르 모어 호텔",
-        "address": "33A To Hi?n Thanh, Tan L?p, Thanh ph? Nha Trang, Khanh Hoa 650000 베트남",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "미라클 럭셔리 나트랑 호텔",
-        "address": "23 Hoang Di?u, V?nh Hoa, Nha Trang, Khanh Hoa 650000 베트남",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "그랜드 고시아 나트랑 호텔",
-        "address": "12 Tr?n Phu, V?nh Nguyen, Nha Trang, Khanh Hoa",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "플로리다 나트랑 호텔",
-        "address": "66 Quang Trung, V?n Th?ng, Nha Trang, Khanh Hoa 650000",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "씨싱호텔",
-        "address": "s? 01 C? Chi, V?nh H?i, Thanh ph? Nha Trang, Khanh Hoa 650000 베트남",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "사비아 호텔",
-        "address": "9 Hoang Dieu Street, Vinh Nguyen Ward, Nha Trang City, Khanh Hoa Province, Vietnam",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "세니아 나트랑 호텔",
-        "address": "10 đ. C? Chi, V?nh H?i, Nha Trang, Khanh Hoa 650000 베트남",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "라사피네트 달랏",
+        "name": "Sarova Stanley Hotel (★★★★★)",
         "address": "",
         "images": [],
         "checkIn": "",
         "checkOut": ""
       },
       {
-        "name": "삼미 호텔 달랏",
-        "address": " 01 Le H?ng Phong, Ph??ng 4, Tp.đa L?t ",
+        "name": "Elephant Hills Hotel",
+        "address": "328 Park Way, Victoria Falls, Zimbabwe",
         "images": [],
         "checkIn": "",
         "checkOut": ""
       },
       {
-        "name": "테라코타 호텔 달랏",
-        "address": "Phan khu ch?c n?ng 7.9, KDL H? Tuy?n Lam, Ph??ng 3, đa L?t, Lam đ?ng",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "더 웨스턴 힐 호텔 달랏",
-        "address": "135-145 Phan đinh Phung, Street, đa L?t, Lam đ?ng",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "티 리조트달랏(구/모네트가든빌라)",
-        "address": "03 Nguy?n Du, Street, Thanh ph? đa L?t, Lam đ?ng, 베트남",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "달랏 세레자 호텔",
-        "address": "Hoa Ph??ng Tim, Ph??ng 4, Thanh ph? đa L?t, Lam đ?ng",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "달랏 메리골드 호텔",
-        "address": "83 đ. Bui Th? Xuan, Ph??ng 2, Thanh ph? đa L?t, Lam đ?ng 67000",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "달랏 비소페트로 호텔",
-        "address": "7 đ. Hung V??ng, Ph??ng 10, Thanh ph? đa L?t, Lam đ?ng",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "달랏 프린스 호텔",
-        "address": "23 Quang Trung, Ph??ng 9, Thanh ph? đa L?t, Lam đ?ng",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "달랏 비엣소브페트로",
-        "address": "7 đ. Hung V??ng, Ph??ng 10, Thanh ph? đa L?t, Lam đ?ng",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "TTC 호텔 녹란",
-        "address": "42 đ. Nguy?n Chi Thanh, Ph??ng 1, Thanh ph? đa L?t, Lam đ?ng 02633",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "무엉탄 홀리데이 달랏",
-        "address": "42 Phan B?i Chau, Ph??ng 2, Thanh ph? đa L?t, Lam đ?ng",
-        "images": [],
-        "checkIn": "",
-        "checkOut": ""
-      },
-      {
-        "name": "호텔은 2일차와 동일합니다",
+        "name": "The Westin Cape Town Hotel (★★★★★)",
         "address": "",
         "images": [],
         "checkIn": "",
@@ -768,48 +1253,72 @@
     "meetingInfo": [
       {
         "type": "미팅안내",
-        "location": "<b>공항 도착 후 별도 미팅 없이 바로 출국 수속을 진행할 수 있습니다.</b><br><br><b>김해국제공항 개별수속 (출발 최소 3시간전까지)</b>",
+        "location": "인천국제공항 1터미널 3층 출국장 14번 출구 앞(N카운터 옆 창측) 여행사카운터  9~10번 테이블 \"모두투어\"",
         "description": "",
-        "time": "08:00",
-        "imageUrl": null
+        "time": "19:55",
+        "imageUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=1000&auto=format&fit=crop"
       }
     ],
     "inclusions": [
-      "왕복 항공료, 숙박비,&nbsp;관광지 입장료, 전용 차량비",
-      "국내공항세, 현지공항세, 전쟁보험료,&nbsp;관광진흥개발기금, 유류할증료, 해외여행자보험,",
-      "가이드/기사 경비"
+      "☞ 전문 인솔 가이드 동행",
+      "☞ 국제선 왕복 항공료",
+      "☞ 일정상의 항공료,호텔(2인 1실 기준),식사,관광입장료 포함",
+      "☞ 공동경비(가이드&amp;기사경비) 포함",
+      "☞ 여행자 보험료,인천공항세,출국납부금,제세금 포함.",
+      "☞ 유류할증료 포함",
+      "☞ 호텔은 출발 1일 전에 확정이 되며 홈페이지를 통해 알려드리겠습니다."
     ],
     "exclusions": [
-      "■ 상기상품은 항공 및 호텔예약이 실시간으로 이루어지므로 예약 후 컴펌여부를 꼭 확인하셔야 합니다. 또한, 그룹항공권 요금을 적용하여 구성된 상품이니 출발일기준 동일항공/동일패턴으로 그룹인원이 충족되지 않았을 경우 추가요금이 발생될수 있으니 이것도 꼭 예약담당자에게 확인해주세요.",
-      "■&nbsp;TIP에 관한 에티켓",
-      "호텔 체크인 할 때 우리의 짐을 옮겨주는 포터에게 1$ 정도, 우리가 투숙했던 객실을 청소하시는 분에게 1$(박당) 정도, 개운한 마사지/안마를 도와준 마사지사에게 30분-3$, 60분-4$, 90분-5$, 120분-6$ 정도 주시는 것이 센스있는 여행객의 매너입니다.",
-      "※TIP의 원칙은 서비스에 대한 만족감에서 이루어지는 자발적인 문화입니다.",
-      "■ 기타 개인경비 및 매너팁",
-      "*매너팁은 소비자의 자율적 선택사항으로 지불여부에 따른 불이익은 없습니다.",
-      "(매너팁 : 식당, 객실 청소원 등 서비스에 대한 단순 감사의 표시로, 소비자(여행자)의 의사에 따라 자율적으로 지불하는 비용)"
+      "☞ 개인경비 (물값, 개인경비 등), 각종 매너팁 (테이블팁, 객실팁, 포터비용 등)",
+      "** 매너팁은 서비스에 대한 자율적 선택으로 지불여부에 따른 불이익은 없습니다.",
+      "☞전 지역 비자비용 불포함",
+      "케냐 전자비자 60,000원 (최소 15일전 사전접수, 대행비용 포함)",
+      "*유효기간 6개월 이상 \"필수\"(입국일 기준)",
+      "*여권의 빈 사증란이 최소 6면이 남아 있어야합니다. (필수)",
+      "*6개월 이내 촬영된 여권용사진&nbsp;(현재 여권사진과 동일하지 않은 사진)",
+      "탄자니아 도착비자 50$",
+      "짐바브웨 + 잠비아 유니(통합)비자 50$",
+      "*단 일정순서에 따라 공항이 변경될 경우, 비용은 다소 변경 될 수 있습니다.",
+      "*비자 비용과 방식은 국가 정책에 의해 변경될 수 있습니다.",
+      "*관용여권일경우 비자비용이 인상됩니다.",
+      "*국가별 정책에 따라 비자비용이 변경될 수 있습니다. (한국이외 국적일경우 개별문의요망)",
+      "☞황열병 예방주사 접종 안내",
+      "질병관리청 예방접종 안내 바로가기",
+      "&nbsp;←클릭",
+      "*아프리카 여행시 황열병 예방접종 증명서 지참이 필수입니다.",
+      "*예방접종은 출국 최소 10일 전에 완료 되어야합니다.",
+      "*이미 접종을 받으신 분은 재접종 없이 증명서만 준비하시면 됩니다.",
+      "예방접종 가능 병원 리스트 바로가기",
+      "←클릭",
+      "1. 접종 희망 병원에 전화예약 (필수)",
+      "2. 여권 원본 또는 사본 지참 (필수)",
+      "3. 필요시 복용 중인 약 정보",
+      "4. 전자수입 인지 지불 및 발급 (37,400원)",
+      "홈페이지",
+      "/ 또는 병원 인근 은행이나 우체국)",
+      "5. 병원 방문 접종 및 접종 증명서 발급, 수입인지 제출 및 접종료 지불 (19,610원)",
+      "6. 여행시 황열병 예방 접종 증명서를 항시 지참해야 합니다. (필수)"
     ],
     "keyPoints": [
-      "전망대 투어 포함",
-      "정산 전망대투어 포함",
-      "음료 1잔 포함",
-      "케이블카 편도 포함",
-      "290상당특전",
-      "고객사정으로 일정 미진행시 특전",
-      "호텔 숙박",
-      "현지 분위기 체험",
-      "베트남의 가정식을 체험",
-      "나트랑 야시장체험",
-      "김해국제공",
-      "부산 김해국제공",
-      "나트랑 깜란 국제공",
-      "개인짐 보관 및 음료 1잔 서비스 제공",
-      "본 상품은 모두투어",
-      "전망대 투어",
-      "정산 전망대투어",
-      "항상 모두투어를 사랑해주시고 다음 여행도 저희 모두투어",
-      "선착순특가",
-      "&nbsp",
-      "기타 개인경비 및 매너팁"
+      "출발확정/비즈니스탑승",
+      "헬기투어포함",
+      "스페셜포함",
+      "관광입장료 포함",
+      "제세금 포함",
+      "유류할증료 포함",
+      "전 지역 비자비용 불포함",
+      "병원 방문",
+      "아프리카 마사이 부족 전통마을 방문",
+      "다양한 동물들의 목각을 판매하는 시장 방문",
+      "인천국제공",
+      "두바이 환승 후 나이로비 조모 케냐타 국제공",
+      "음료 무제한 제공",
+      "케이프타운 국제공",
+      "헬기투어",
+      "빅토리아폭포 헬기투어",
+      "날씨로 인해 케이블카 운항이 되지 않을 경우 시그널힐 투어",
+      "모두투어",
+      "모두투어를 이용해 주셔서 감사 합니다"
     ]
   },
   "geminiResult": "SKIPPED (native sufficient)"

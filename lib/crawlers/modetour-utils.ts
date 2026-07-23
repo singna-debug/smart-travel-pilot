@@ -1,6 +1,93 @@
 /** Modetour Utils - Updated with improved itinerary parsing and icon logic */
 import type { DetailedProductInfo } from '../../types';
 
+function buildModetourSegments(rawItems: any[]) {
+    // 1. Normalize items
+    const normalized = rawItems.map(item => {
+        const departureCity = item.departureCity || item.departureCityName || item.d_ThroughCity || item.a_DepartureCity || '';
+        const departureCityName = item.departureCityName || item.d_ThroughCityName || item.a_ThroughCityName || '';
+        const departureTime = item.departureTime || item.d_T_DepartureTime || '';
+        
+        const arrivalCity = item.arrivalCity || item.arrivalCityName || item.d_ThroughCity || item.a_DepartureCity || '';
+        const arrivalCityName = item.arrivalCityName || item.d_ThroughCityName || item.a_ThroughCityName || '';
+        const arrivalTime = item.arrivalTime || item.d_T_ArrivalTime || '';
+        
+        const flightNo = item.departureFlight || item.arrivalFlight || item.d_T_AirFlight || '';
+        const airline = item.transportName || '';
+        const duration = item.departureFlightDuration || item.d_T_DepartureFlightDuration || item.departureFlightTime || '';
+        
+        return {
+            departureCity,
+            departureCityName,
+            departureTime,
+            arrivalCity,
+            arrivalCityName,
+            arrivalTime,
+            flightNo,
+            airline,
+            duration
+        };
+    });
+
+    // 2. Group into segments
+    const segments: any[] = [];
+    let currentDept: any = null;
+
+    for (const item of normalized) {
+        if (item.departureTime && !item.flightNo) {
+            // Start of a segment
+            currentDept = {
+                departureCity: item.departureCityName || item.departureCity,
+                departureTime: item.departureTime
+            };
+        } else if (item.flightNo && currentDept) {
+            // End of a segment
+            segments.push({
+                airline: item.airline,
+                flightNo: item.flightNo,
+                departureCity: currentDept.departureCity,
+                departureTime: currentDept.departureTime,
+                arrivalCity: item.arrivalCityName || item.arrivalCity,
+                arrivalTime: item.arrivalTime,
+                duration: item.duration,
+                layoverDuration: ''
+            });
+            currentDept = null;
+        } else if (item.flightNo && !currentDept) {
+            // Direct flight or fallback
+            segments.push({
+                airline: item.airline,
+                flightNo: item.flightNo,
+                departureCity: item.departureCityName || item.departureCity || '출발지',
+                departureTime: item.departureTime || '00:00',
+                arrivalCity: item.arrivalCityName || item.arrivalCity,
+                arrivalTime: item.arrivalTime,
+                duration: item.duration,
+                layoverDuration: ''
+            });
+        }
+    }
+
+    // Calculate layover durations
+    for (let i = 0; i < segments.length - 1; i++) {
+        const arrTime = segments[i].arrivalTime;
+        const nextDepTime = segments[i+1].departureTime;
+        if (arrTime && nextDepTime) {
+            try {
+                const [h1, m1] = arrTime.split(':').map(Number);
+                const [h2, m2] = nextDepTime.split(':').map(Number);
+                let mins = (h2 * 60 + m2) - (h1 * 60 + m1);
+                if (mins <= 0) mins += 1440;
+                const lh = Math.floor(mins / 60);
+                const lm = mins % 60;
+                segments[i].layoverDuration = lm > 0 ? `${lh}시간 ${lm}분` : `${lh}시간`;
+            } catch (e) {}
+        }
+    }
+
+    return segments;
+}
+
 export async function fetchModeTourNative(url: string, isSummaryOnly = false, html?: string): Promise<DetailedProductInfo | null> {
     let productNo = '';
 
@@ -52,98 +139,20 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
     if (dataDetail?.result || dataDetail?.productName) {
         const d = dataDetail.result || dataDetail;
         const scheduleRaw = dataSchedule?.result?.scheduleItemList || [];
-
         let deptAir: any = {}, returnAir: any = {};
+        const deptRawItems: any[] = [];
+        const returnRawItems: any[] = [];
 
         // 목적지 도시 집계 및 항공 데이터 전수 조사
         const citySet = new Set<string>();
         for (const s of scheduleRaw) {
-            // 항공 정보 추출 (가는 편 / 오는 편)
             const air = s.listAirRouteInfo;
-            if ((air?.flightTypeName === "DEPARTURE" || air?.flightTypeName === "ARRIVAL") && air.item?.length) {
-                const isLayover = air.item.length > 1;
-                const first = air.item[0];
-                const last = air.item[air.item.length - 1];
-                
-                const flightNos = air.item.map((i: any) => i.departureFlight || i.arrivalFlight).filter(Boolean).join(' / ');
-                const airlines = Array.from(new Set(air.item.map((i: any) => i.transportName).filter(Boolean))).join(' / ');
-                
-                const rawItems = air.item;
-                const mergedRawItems = [];
-                for (let i = 0; i < rawItems.length; i++) {
-                    const current = rawItems[i];
-                    if (i < rawItems.length - 1 && 
-                        (current.departureCityName || current.arrivalCityName || current.departureTime || current.arrivalTime) && 
-                        !(current.departureFlight || current.arrivalFlight || current.transportName) &&
-                        (rawItems[i+1].departureFlight || rawItems[i+1].arrivalFlight || rawItems[i+1].transportName)) {
-                        // Merge current and next, but preserve schedule info from current (the City info item)
-                        const next = rawItems[i+1];
-                        const merged = { ...current, ...next }; // Start with next's flight info
-                        
-                        // BUT, if current had better schedule info, take it back
-                        if (current.departureCityName) merged.departureCityName = current.departureCityName;
-                        if (current.arrivalCityName) merged.arrivalCityName = current.arrivalCityName;
-                        if (current.departureTime && current.departureTime !== '00:00') merged.departureTime = current.departureTime;
-                        if (current.arrivalTime && current.arrivalTime !== '00:00') merged.arrivalTime = current.arrivalTime;
-                        if (current.startCityName) merged.startCityName = current.startCityName;
-                        if (current.endCityName) merged.endCityName = current.endCityName;
-                        if (current.departureFlightDuration) merged.departureFlightDuration = current.departureFlightDuration;
-
-                        mergedRawItems.push(merged);
-                        i++;
-                    } else {
-                        mergedRawItems.push(current);
-                    }
+            if (air?.item?.length) {
+                if (air.flightTypeName === "DEPARTURE") {
+                    deptRawItems.push(...air.item);
+                } else if (air.flightTypeName === "ARRIVAL") {
+                    returnRawItems.push(...air.item);
                 }
-
-                const segments = mergedRawItems
-                    .filter((i: any) => i.transportName || i.departureFlight || i.arrivalFlight || i.departureCityName || i.arrivalCityName)
-                    .map((i: any, index: number, arr: any[]) => {
-                        let layoverDuration = '';
-                        if (index < arr.length - 1) {
-                            const arrTime = i.arrivalTime;
-                            const nextDepTime = arr[index + 1].departureTime;
-                            if (arrTime && nextDepTime) {
-                                try {
-                                    const [h1, m1] = arrTime.split(':').map(Number);
-                                    const [h2, m2] = nextDepTime.split(':').map(Number);
-                                    let mins = (h2 * 60 + m2) - (h1 * 60 + m1);
-                                    if (mins <= 0) mins += 1440;
-                                    const lh = Math.floor(mins / 60);
-                                    const lm = mins % 60;
-                                    layoverDuration = lm > 0 ? `${lh}시간 ${lm}분` : `${lh}시간`;
-                                } catch (e) {}
-                            }
-                        }
-                        return {
-                            airline: i.transportName || '',
-                            flightNo: i.departureFlight || i.arrivalFlight || '',
-                            departureCity: i.departureCityName || i.startCityName || '',
-                            departureTime: i.departureTime || '',
-                            arrivalCity: i.arrivalCityName || i.endCityName || '',
-                            arrivalTime: i.arrivalTime || '',
-                            duration: i.departureFlightDuration || '',
-                            layoverDuration,
-                        };
-                    });
-                
-                const hasRealLayover = segments.length > 1;
-                const fSeg = segments[0] || {};
-                const lSeg = segments[segments.length - 1] || {};
-
-                const merged = {
-                    transportName: hasRealLayover ? `${airlines} (경유)` : fSeg.airline,
-                    departureFlight: hasRealLayover ? flightNos : fSeg.flightNo,
-                    departureCityName: fSeg.departureCity,
-                    departureTime: fSeg.departureTime,
-                    arrivalCityName: lSeg.arrivalCity,
-                    arrivalTime: lSeg.arrivalTime,
-                    departureFlightDuration: hasRealLayover ? segments.reduce((acc, s) => acc + (s.duration || ''), '') : fSeg.duration,
-                    segments: hasRealLayover ? segments : [],
-                };
-                
-                if (air.flightTypeName === "DEPARTURE" && !deptAir.departureFlight) deptAir = merged;
-                else if (air.flightTypeName === "ARRIVAL" && !returnAir.departureFlight) returnAir = merged;
             }
 
             // 도시 정보 추출 (한국 출발지 공항/도시 및 기내/경유 단어 제외)
@@ -162,6 +171,51 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                 if (t.cityName && !koreanExclusions.includes(t.cityName)) citySet.add(t.cityName);
             });
         }
+
+        // Build segments globally
+        const departureSegments = buildModetourSegments(deptRawItems);
+        const returnSegments = buildModetourSegments(returnRawItems);
+
+        // Construct deptAir
+        if (departureSegments.length > 0) {
+            const fSeg = departureSegments[0];
+            const lSeg = departureSegments[departureSegments.length - 1];
+            const airlines = Array.from(new Set(departureSegments.map(s => s.airline).filter(Boolean))).join(' / ');
+            const flightNos = departureSegments.map(s => s.flightNo).filter(Boolean).join(' / ');
+            const hasRealLayover = departureSegments.length > 1;
+
+            deptAir = {
+                transportName: hasRealLayover ? `${airlines} (경유)` : fSeg.airline,
+                departureFlight: hasRealLayover ? flightNos : fSeg.flightNo,
+                departureCityName: fSeg.departureCity,
+                departureTime: fSeg.departureTime,
+                arrivalCityName: lSeg.arrivalCity,
+                arrivalTime: lSeg.arrivalTime,
+                departureFlightDuration: hasRealLayover ? '' : fSeg.duration,
+                segments: hasRealLayover ? departureSegments : [],
+            };
+        }
+
+        // Construct returnAir
+        if (returnSegments.length > 0) {
+            const fSeg = returnSegments[0];
+            const lSeg = returnSegments[returnSegments.length - 1];
+            const airlines = Array.from(new Set(returnSegments.map(s => s.airline).filter(Boolean))).join(' / ');
+            const flightNos = returnSegments.map(s => s.flightNo).filter(Boolean).join(' / ');
+            const hasRealLayover = returnSegments.length > 1;
+
+            returnAir = {
+                transportName: hasRealLayover ? `${airlines} (경유)` : fSeg.airline,
+                departureFlight: hasRealLayover ? flightNos : fSeg.flightNo,
+                departureCityName: fSeg.departureCity,
+                departureTime: fSeg.departureTime,
+                arrivalCityName: lSeg.arrivalCity,
+                arrivalTime: lSeg.arrivalTime,
+                departureFlightDuration: hasRealLayover ? '' : fSeg.duration,
+                segments: hasRealLayover ? returnSegments : [],
+            };
+        }
+
         const aggregatedDest = Array.from(citySet).join(', ');
 
         const itinerary = scheduleRaw.map((day: any, idx: number) => {
@@ -273,7 +327,7 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                 day: idx + 1,
                 date: day.itiDate || '',
                 title: Array.isArray(day.placeHeader) ? day.placeHeader.join(' → ') : '',
-                transport: trItems.length > 0 ? trItems.join(', ') : (idx === 0 ? '항공, 대형버스' : '대형버스'),
+                transport: trItems.length > 0 ? trItems.join(', ') : ((idx === 0 || idx === scheduleRaw.length - 1) ? '항공' : '-'),
                 flight: flightInfo, // 일차별 항공 정보 직접 삽입
                 timeline: timeline,
                 items: timeline,
@@ -286,19 +340,38 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             };
         });
 
-        // 미팅 정보 추출
+        // 미팅 정보 및 이미지 자동 추출
         const meetingInfo: any[] = [];
+        let meetingImgUrl = d.meetingPlaceImg || d.meetingPlaceImage || d.meetingMap || d.meetingFileUrl || d.meetingImg || d.meetingMapUrl || d.meetingImgUrl || d.meetingFile || null;
+
         if (d.meetingPlace2 || d.meetingPlace || d.meetingTime) {
             let rawLoc = d.meetingPlace2 || d.meetingPlace || '공항 미팅 장소';
-            // '일정표참조/' 와 같은 불필요한 접두사 정규식 제거 (추가 공백 포함)
             rawLoc = rawLoc.replace(/^일정표\s*참조\s*\/\s*/i, '').trim();
+
+            if (meetingImgUrl && typeof meetingImgUrl === 'string') {
+                if (meetingImgUrl.startsWith('//')) {
+                    meetingImgUrl = `https:${meetingImgUrl}`;
+                } else if (meetingImgUrl.startsWith('/')) {
+                    meetingImgUrl = `https://img.modetour.com${meetingImgUrl}`;
+                }
+            }
+
+            if (!meetingImgUrl) {
+                const locText = (rawLoc || '').toLowerCase();
+                if (locText.includes('제2여객터미널') || locText.includes('t2') || locText.includes('2터미널')) {
+                    meetingImgUrl = 'https://images.unsplash.com/photo-1530521954074-e64f6810b32d?q=80&w=1000&auto=format&fit=crop';
+                } else {
+                    // 모두투어 인천공항 1터미널 3층 14번 출구 (N카운터 옆) 약도
+                    meetingImgUrl = 'https://img.modetour.com/tourinfo/meeting/icn_t1_mode.jpg';
+                }
+            }
 
             meetingInfo.push({
                 type: '미팅안내',
                 location: rawLoc,
-                description: '',
+                description: d.meetingDetail || '',
                 time: d.meetingTime || '일정표 참조',
-                imageUrl: null
+                imageUrl: meetingImgUrl
             });
         } else if (scheduleRaw.length > 0) {
             // Fallback: 첫날 일정에서 파싱
@@ -310,12 +383,24 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             );
 
             if (meetingItem) {
+                let itemImg = meetingItem.imageUrl || meetingItem.imgUrl || meetingItem.fileUrl || meetingItem.photoUrl || null;
+                const locStr = (meetingItem.itiPlaceName || '공항 미팅 장소').replace('[미팅안내]', '').trim();
+
+                if (!itemImg) {
+                    const locText = locStr.toLowerCase();
+                    if (locText.includes('제2여객터미널') || locText.includes('t2') || locText.includes('2터미널')) {
+                        itemImg = 'https://images.unsplash.com/photo-1530521954074-e64f6810b32d?q=80&w=1000&auto=format&fit=crop';
+                    } else if (locText.includes('인천') || locText.includes('공항') || locText.includes('터미널')) {
+                        itemImg = 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=1000&auto=format&fit=crop';
+                    }
+                }
+
                 meetingInfo.push({
                     type: '미팅안내',
-                    location: (meetingItem.itiPlaceName || '공항 미팅 장소').replace('[미팅안내]', '').trim(),
+                    location: locStr,
                     description: meetingItem.detailDes || meetingItem.itiSummaryDes || '',
                     time: '상세 일정 참고',
-                    imageUrl: null
+                    imageUrl: itemImg
                 });
             }
         }

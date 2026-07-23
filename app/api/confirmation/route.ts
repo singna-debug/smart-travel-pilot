@@ -31,9 +31,10 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ success: true, data: filtered });
         }
 
-        // 확정서 목록
+        // 확정서 목록 (더미 제외)
         const list = await confirmationStore.list();
-        const sortedList = [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        const nonDummyList = list.filter(doc => !doc.id.startsWith('dummy_'));
+        const sortedList = [...nonDummyList].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
         return NextResponse.json({ success: true, data: sortedList });
     } catch (error: any) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { SecondaryResearch } from '@/types'; // 불필요한 타입 임포트 제거 (에러 방지)
+import type { SecondaryResearch } from '@/types';
+import { mockSecondaryResearch } from '@/lib/dummy-data';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -221,6 +222,12 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { destination, travelMonth, airline, baggageNote, customGuides, itinerary, targets } = body;
+
+        // Fallback to dummy data if isDummy is true or if GEMINI_API_KEY is not configured
+        if (body.isDummy || !apiKey) {
+            console.log('[SecondaryResearch] Returning mock data (isDummy is true or apiKey is not configured)');
+            return NextResponse.json({ success: true, data: mockSecondaryResearch });
+        }
 
         if (!destination) {
             return NextResponse.json({ success: false, error: '여행지 정보가 필요합니다.' }, { status: 400 });

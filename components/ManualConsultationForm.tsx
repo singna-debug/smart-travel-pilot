@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import GoogleContactsPicker from './GoogleContactsPicker';
 import CustomerSearchBox from './CustomerSearchBox';
 import { ConsultationData } from '@/types';
@@ -53,6 +54,9 @@ interface ConsultationForm {
 }
 
 export default function ManualConsultationForm() {
+    const pathname = usePathname();
+    const isDummy = pathname?.startsWith('/dummy');
+
     const [form, setForm] = useState<ConsultationForm>({
         customerName: '',
         customerPhone: '',
@@ -152,7 +156,7 @@ export default function ManualConsultationForm() {
                 // 주요 정보가 비어있거나 '미정'인 경우 자동 분석 시도
                 if (!form.destination || form.destination === '미정' || !form.departureDate) {
                     try {
-                        const res = await fetch('/api/analyze-url', {
+                        const res = await fetch(isDummy ? '/api/dummy/analyze-url' : '/api/analyze-url', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ url, mode: 'booking' })
@@ -193,7 +197,7 @@ export default function ManualConsultationForm() {
         setSuccess(false);
 
         try {
-            const response = await fetch('/api/save-consultation', {
+            const response = await fetch(isDummy ? '/api/dummy/save-consultation' : '/api/save-consultation', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -300,7 +304,7 @@ export default function ManualConsultationForm() {
                         type="button"
                         onClick={async () => {
                             try {
-                                const resp = await fetch('/api/sheet-info');
+                                const resp = await fetch(isDummy ? '/api/dummy/sheet-info' : '/api/sheet-info');
                                 const data = await resp.json();
                                 if (data.success && data.url) {
                                     window.open(data.url, '_blank');
@@ -409,6 +413,7 @@ export default function ManualConsultationForm() {
                             <option value="">-- 선택 --</option>
                             <option value="네이버 블로그">네이버 블로그</option>
                             <option value="카카오톡 채널">카카오톡 채널</option>
+                            <option value="카톡문의">카톡문의</option>
                             <option value="인스타그램 및 페이스북">인스타그램 및 페이스북</option>
                             <option value="당근마켓">당근마켓</option>
                             <option value="닷컴">닷컴</option>

@@ -25,6 +25,7 @@ const TIMEZONE_OFFSETS: Record<string, number> = {
     'JFK': 13, 'LAX': 16, 'SFO': 16, 'YVR': 16, 'YYZ': 13, 'HNL': 19, // 북미 (표준시 기준)
     'SYD': -1, 'MEL': -1, 'BNE': -1, 'AKL': -3, 'CHC': -3, // 대양주
     'ICN': 0, 'PUS': 0, 'GMP': 0, 'CJU': 0, // 한국
+    'NBO': 6, 'CPT': 7, 'JNB': 7, 'VFA': 7, 'ADD': 6, // 아프리카
 };
 
 const getKSTOffset = (cityName?: string) => {
@@ -363,12 +364,42 @@ const TimelineItem = ({ item }: { item: any }) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const [needsCollapse, setNeedsCollapse] = useState(false);
 
+    // Extract img tags from description to render them outside clamped container
+    let cleanDesc = item.description || '';
+    
+    // 1. Safeguard: Remove Swiper navigation controls and "이전다음" text
+    cleanDesc = cleanDesc
+        .replace(/<a[^>]+href="#none"[^>]*>([\s\S]*?)<\/a>/gi, '')
+        .replace(/<span[^>]+class="blind"[^>]*>([\s\S]*?)<\/span>/gi, '')
+        .replace(/<div[^>]+class="controller"[^>]*>([\s\S]*?)<\/div>/gi, '')
+        .replace(/이전다음/gi, '')
+        .trim();
+
+    // 2. Extract images
+    const imgMatches = cleanDesc.match(/<img[^>]+src="([^">]+)"[^>]*>/gi) || [];
+    const imageUrls: string[] = [];
+
+    if (imgMatches.length > 0) {
+        imgMatches.forEach((m: string) => {
+            const srcMatch = m.match(/src="([^">]+)"/i);
+            if (srcMatch) imageUrls.push(srcMatch[1]);
+        });
+        cleanDesc = cleanDesc.replace(/<img[^>]+>/gi, '');
+    }
+
+    // 3. Format and collapse duplicate spacing/newlines for ALL descriptions
+    cleanDesc = cleanDesc
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/\n\s*\n+/g, '\n\n') // Collapse 3+ newlines (with optional spaces) to exactly 2 newlines (a clean paragraph break)
+        .replace(/^\s*\n+/g, '')       // Remove leading newlines
+        .replace(/\n+\s*$/g, '')       // Remove trailing newlines
+        .trim();
+
     useEffect(() => {
         if (contentRef.current) {
-            // 대략 3줄(60px) 이상이면 더보기 버튼 노출
             setNeedsCollapse(contentRef.current.scrollHeight > 64);
         }
-    }, [item.description]);
+    }, [cleanDesc]);
 
     const isLocation = item.type === 'location';
 
@@ -423,7 +454,35 @@ const TimelineItem = ({ item }: { item: any }) => {
                     </div>
                 )}
 
-                {item.description && (
+                {imageUrls.length > 0 && (
+                    <div style={{ 
+                        display: imageUrls.length === 1 ? 'block' : 'grid', 
+                        gridTemplateColumns: imageUrls.length > 1 ? `repeat(${Math.min(imageUrls.length, 3)}, 1fr)` : 'none',
+                        gap: '8px', 
+                        marginTop: '8px', 
+                        marginBottom: '8px',
+                        width: '100%' 
+                    }}>
+                        {imageUrls.map((url, uidx) => (
+                            <img 
+                                key={uidx} 
+                                src={url} 
+                                style={{ 
+                                    width: imageUrls.length === 1 ? 'auto' : '100%', 
+                                    height: imageUrls.length === 1 ? 'auto' : '180px', 
+                                    maxWidth: '100%',
+                                    maxHeight: imageUrls.length === 1 ? '220px' : 'none',
+                                    objectFit: imageUrls.length === 1 ? 'contain' : 'cover', 
+                                    borderRadius: '8px', 
+                                    display: 'block' 
+                                }} 
+                                alt="일정 이미지" 
+                            />
+                        ))}
+                    </div>
+                )}
+
+                {cleanDesc && (
                     <div style={{ marginTop: '6px', position: 'relative' }}>
                         <div 
                             ref={contentRef}
@@ -438,7 +497,7 @@ const TimelineItem = ({ item }: { item: any }) => {
                                 transition: 'max-height 0.3s ease-in-out',
                                 whiteSpace: 'pre-line'
                             }}
-                            dangerouslySetInnerHTML={{ __html: cleanupHtml(item.description) }}
+                            dangerouslySetInnerHTML={{ __html: cleanupHtml(cleanDesc) }}
                         />
                         {needsCollapse && (
                             <div 
@@ -645,18 +704,31 @@ const PinchZoomModal = ({ src, onClose, footer, isPdf }: { src: string, onClose:
     );
 };
 
-const getKoreaTimeText = (localTime: string, cityCode?: string) => {
+const getKoreaTimeText = (localTime: string, cityCode?: string, dayOffset = 0) => {
     if (!localTime || !cityCode) return null;
     const offset = getKSTOffset(cityCode);
     if (offset === 0) return null;
     try {
         const [h, m] = localTime.split(':').map(Number);
         let kH = h + offset;
-        let dayNote = "";
-        if (kH >= 24) { kH -= 24; dayNote = " +1일"; }
-        else if (kH < 0) { kH += 24; dayNote = " -1일"; }
+        let finalOffset = dayOffset;
+        if (kH >= 24) {
+            kH -= 24;
+            finalOffset += 1;
+        } else if (kH < 0) {
+            kH += 24;
+            finalOffset -= 1;
+        }
+        const dayNote = finalOffset > 0 ? ` +${finalOffset}일` : (finalOffset < 0 ? ` ${finalOffset}일` : '');
         return `(한국 ${String(kH).padStart(2, '0')}:${String(m).padStart(2, '0')}${dayNote})`;
     } catch { return null; }
+};
+
+const formatDestination = (destStr?: string | null) => {
+    if (!destStr) return '-';
+    const list = destStr.split(/[,/]/).map(s => s.trim()).filter(Boolean);
+    if (list.length <= 1) return destStr;
+    return `${list[0]} 외 ${list.length - 1}곳`;
 };
 
 const simplifyDestination = (dest: any) => {
@@ -747,11 +819,25 @@ const getExtraTransportation = (day: any) => {
 const getAirlineInfo = (codeOrName: string) => {
     if (!codeOrName) return { name: '항공편', logoUrl: null, color: '#3b82f6' };
     
-    const code2 = codeOrName.slice(0, 2).toUpperCase();
+    const cleanInput = codeOrName.replace(/\s+/g, '').toUpperCase();
+    
+    // 1. Check if first 2 characters match airline code (e.g. EK, SK, KE)
+    const code2 = cleanInput.slice(0, 2);
     if (AIRLINE_MAP[code2]) return AIRLINE_MAP[code2];
     
-    const byName = Object.values(AIRLINE_MAP).find(v => codeOrName.includes(v.name));
+    // 2. Check if name matches (ignoring spaces)
+    const byName = Object.values(AIRLINE_MAP).find(v => {
+        const cleanName = v.name.replace(/\s+/g, '').toUpperCase();
+        return cleanInput.includes(cleanName) || cleanName.includes(cleanInput);
+    });
     if (byName) return byName;
+    
+    // 3. Fallback to extracting airline code from flight number (e.g. SK988 -> SK)
+    const flightCodeMatch = codeOrName.match(/([A-Z0-9]{2})[0-9]+/i);
+    if (flightCodeMatch) {
+        const code = flightCodeMatch[1].toUpperCase();
+        if (AIRLINE_MAP[code]) return AIRLINE_MAP[code];
+    }
     
     return { name: codeOrName, logoUrl: null, color: '#3b82f6' };
 };
@@ -837,23 +923,62 @@ const getDepartureKST = (arrTimeKST: string, durationStr: string) => {
 };
 
 const LayoverConnector = ({ duration }: { duration: string }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '4px 0' }}>
-        <div style={{ width: '2px', height: '16px', background: 'repeating-linear-gradient(to bottom, #cbd5e1 0, #cbd5e1 4px, transparent 4px, transparent 8px)' }}></div>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '2px 0' }}>
+        <div style={{ width: '2px', height: '14px', background: 'repeating-linear-gradient(to bottom, #cbd5e1 0, #cbd5e1 3px, transparent 3px, transparent 6px)' }}></div>
         <div style={{ 
-            background: '#10b981', 
-            color: 'white', 
-            fontSize: '0.75rem', 
-            fontWeight: 800, 
-            padding: '4px 12px', 
-            borderRadius: '20px',
-            margin: '4px 0',
-            boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)'
+            background: '#f1f5f9', 
+            color: '#475569', 
+            border: '1px solid #e2e8f0',
+            fontSize: '0.72rem', 
+            fontWeight: 600, 
+            padding: '3px 10px', 
+            borderRadius: '12px',
+            margin: '2px 0',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px'
         }}>
-            경유 ({duration})
+            경유 대기 {duration}
         </div>
-        <div style={{ width: '2px', height: '16px', background: 'repeating-linear-gradient(to bottom, #cbd5e1 0, #cbd5e1 4px, transparent 4px, transparent 8px)' }}></div>
+        <div style={{ width: '2px', height: '14px', background: 'repeating-linear-gradient(to bottom, #cbd5e1 0, #cbd5e1 3px, transparent 3px, transparent 6px)' }}></div>
     </div>
 );
+
+const getDayOffsets = (
+    deptTime: string,
+    deptCity: string | undefined,
+    arrTime: string,
+    arrCity: string | undefined,
+    durationText: string
+) => {
+    try {
+        const [dHour, dMin] = deptTime.split(':').map(Number);
+        const [aHour, aMin] = arrTime.split(':').map(Number);
+        if (isNaN(dHour) || isNaN(dMin) || isNaN(aHour) || isNaN(aMin)) return { local: 0, kst: 0 };
+
+        const dOffset = getKSTOffset(deptCity);
+        const aOffset = getKSTOffset(arrCity);
+
+        let durMins = parseDurationToMins(durationText);
+        if (durMins === 0) {
+            let diff = (aHour * 60 + aMin + aOffset * 60) - (dHour * 60 + dMin + dOffset * 60);
+            if (diff <= 0) diff += 1440;
+            durMins = diff;
+        }
+
+        const dLocalMins = dHour * 60 + dMin;
+        const aLocalMins = dLocalMins + durMins - (aOffset - dOffset) * 60;
+        const localOffset = Math.floor(aLocalMins / 1440) - Math.floor(dLocalMins / 1440);
+
+        const dKstMins = dHour * 60 + dMin + dOffset * 60;
+        const aKstMins = dKstMins + durMins;
+        const kstOffset = Math.floor(aKstMins / 1440) - Math.floor(dKstMins / 1440);
+
+        return { local: localOffset, kst: kstOffset };
+    } catch {
+        return { local: 0, kst: 0 };
+    }
+};
 
 const FlightSegmentCard = ({ segment, dateStr, isLastSegment }: { segment: any, dateStr?: string, isLastSegment?: boolean }) => {
     const planeSrc = segment.airline || segment.flightNo;
@@ -872,63 +997,102 @@ const FlightSegmentCard = ({ segment, dateStr, isLastSegment }: { segment: any, 
         }
     }
 
-    const ktDept = getKoreaTimeText(segment.departureTime, deptCode);
-    const ktArr = getKoreaTimeText(segment.arrivalTime, arrCode);
+    const dayOffsets = getDayOffsets(
+        segment.departureTime,
+        deptCity,
+        segment.arrivalTime,
+        arrCity,
+        durationText
+    );
+
+    const ktDept = getKoreaTimeText(segment.departureTime, deptCode, 0);
+    const ktArr = getKoreaTimeText(segment.arrivalTime, arrCode, dayOffsets.local);
 
     return (
         <div style={{
             background: '#fff',
             border: '1px solid #e2e8f0',
-            borderRadius: '20px',
-            padding: '24px 20px 20px',
-            position: 'relative',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
+            borderRadius: '16px',
+            padding: '16px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px'
         }}>
+            {/* Times & Cities Row with Centralized Flight Info */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ textAlign: 'left', width: '32%', minWidth: '95px' }}>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '4px', wordBreak: 'keep-all' }}>{deptCity}{deptCode}</div>
-                    {dateStr && <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px' }}>{formatDateStr(dateStr)}</div>}
-                    <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>{segment.departureTime}</div>
+                {/* Left: Departure */}
+                <div style={{ textAlign: 'left', width: '32%' }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b', wordBreak: 'keep-all' }}>
+                        {deptCity}{deptCode}
+                    </div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', marginTop: '2px', letterSpacing: '-0.02em' }}>
+                        {segment.departureTime}
+                    </div>
                     {ktDept && (
-                        <div style={{ fontSize: '0.65rem', color: '#3b82f6', fontWeight: 700, marginTop: '6px', background: '#eff6ff', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center' }}>
+                        <div style={{ fontSize: '0.62rem', color: '#2563eb', fontWeight: 700, marginTop: '4px', background: '#eff6ff', padding: '1px 5px', borderRadius: '3px', display: 'inline-block' }}>
                             {ktDept}
                         </div>
                     )}
                 </div>
 
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 8px' }}>
-                    {segment.flightNo && (
-                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#2563eb', marginBottom: '4px' }}>
-                            {segment.flightNo}
+                {/* Middle: Line & Flight info / Duration */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 6px' }}>
+                    {/* 상단 2줄: 1줄(로고+항공사명), 2줄(편명 EK323) */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px', marginBottom: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            {info.logoUrl ? (
+                                <img src={info.logoUrl} alt={info.name} style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                            ) : (
+                                <div style={{ width: '14px', height: '14px', background: info.color, color: 'white', fontSize: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '2px' }}>
+                                    {info.name.slice(0, 1)}
+                                </div>
+                            )}
+                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155', whiteSpace: 'nowrap' }}>
+                                {info.name}
+                            </span>
                         </div>
-                    )}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                        {info.logoUrl ? (
-                            <img src={info.logoUrl} alt={info.name} style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
-                        ) : (
-                            <div style={{ width: '16px', height: '16px', background: info.color, color: 'white', fontSize: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '3px' }}>
-                                {info.name.slice(0, 1)}
-                            </div>
+                        {segment.flightNo && (
+                            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#2563eb', whiteSpace: 'nowrap' }}>
+                                {segment.flightNo}
+                            </span>
                         )}
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569' }}>{info.name}</span>
                     </div>
-                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0' }}>
-                        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#cbd5e1' }}></div>
-                        <div style={{ flex: 1, height: '1.5px', background: 'linear-gradient(90deg, #cbd5e1 0%, #e2e8f0 50%, #cbd5e1 100%)' }}></div>
-                        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#cbd5e1' }}></div>
+
+                    {/* 비행선 라인 */}
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '2px 0' }}>
+                        <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#cbd5e1' }}></div>
+                        <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, #cbd5e1 0%, #3b82f6 50%, #cbd5e1 100%)' }}></div>
+                        <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#cbd5e1' }}></div>
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 700, marginTop: '8px', background: '#f0fdf4', padding: '2px 8px', borderRadius: '10px' }}>
+
+                    {/* 하단: 소요시간 (동그라미/테두리 박스 없이 텍스트로 배치) */}
+                    <div style={{ fontSize: '0.68rem', color: '#059669', fontWeight: 700, marginTop: '4px', whiteSpace: 'nowrap' }}>
                         {durationText} 소요
                     </div>
                 </div>
 
-                <div style={{ textAlign: 'right', width: '32%', minWidth: '95px' }}>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '4px', wordBreak: 'keep-all' }}>{arrCity}{arrCode}</div>
-                    {/* 첫 출발일자가 아니라 마지막 도착일자면 dateStr을 보여주지 않아도 되지만, 일단 동일하게 표시 */}
-                    {dateStr && <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px', visibility: 'hidden' }}>-</div>}
-                    <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>{segment.arrivalTime}</div>
+                {/* Right: Arrival */}
+                <div style={{ textAlign: 'right', width: '35%' }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b', wordBreak: 'keep-all' }}>
+                        {arrCity}{arrCode}
+                    </div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', marginTop: '2px', letterSpacing: '-0.02em', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', gap: '2px' }}>
+                        <span>{segment.arrivalTime}</span>
+                        {dayOffsets.local > 0 && (
+                            <span style={{ 
+                                fontSize: '0.72rem', 
+                                color: '#ef4444', 
+                                fontWeight: 800, 
+                                verticalAlign: 'super',
+                                marginTop: '-2px'
+                            }}>
+                                +{dayOffsets.local}
+                            </span>
+                        )}
+                    </div>
                     {ktArr && (
-                        <div style={{ fontSize: '0.65rem', color: '#3b82f6', fontWeight: 700, marginTop: '6px', background: '#eff6ff', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center' }}>
+                        <div style={{ fontSize: '0.62rem', color: '#2563eb', fontWeight: 700, marginTop: '4px', background: '#eff6ff', padding: '1px 5px', borderRadius: '3px', display: 'inline-block' }}>
                             {ktArr}
                         </div>
                     )}
@@ -940,49 +1104,67 @@ const FlightSegmentCard = ({ segment, dateStr, isLastSegment }: { segment: any, 
 
 const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, dateStr?: string, title?: string }) => {
     const segments = flightInfo.segments && flightInfo.segments.length > 0 ? flightInfo.segments : [flightInfo];
+    const isOutbound = title === '가는 편';
+    
+    // 강렬하고 선명한 헤더 스타일
+    const headerBg = isOutbound ? 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)' : 'linear-gradient(135deg, #581c87 0%, #7c3aed 100%)';
 
     return (
-        <div style={{ marginBottom: '24px', marginTop: title ? '16px' : '0', position: 'relative' }}>
+        <div style={{ marginBottom: '32px' }}>
             {title && (
                 <div style={{ 
-                    position: 'absolute', 
-                    top: '-12px', 
-                    left: '16px', 
-                    background: title === '가는 편' ? '#e0f2fe' : '#eef2ff',
-                    border: `1px solid ${title === '가는 편' ? '#bae6fd' : '#c7d2fe'}`,
-                    borderRadius: '6px',
-                    padding: '3px 10px',
-                    fontSize: '0.68rem',
-                    fontWeight: 800,
-                    color: title === '가는 편' ? '#0369a1' : '#4338ca',
-                    zIndex: 2,
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
-                    letterSpacing: '-0.02em'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justify: 'space-between',
+                    background: headerBg,
+                    color: '#ffffff',
+                    padding: '10px 16px',
+                    borderRadius: '12px',
+                    marginBottom: '12px',
+                    boxShadow: isOutbound ? '0 4px 12px rgba(37, 99, 235, 0.25)' : '0 4px 12px rgba(124, 58, 237, 0.25)'
                 }}>
-                    {title}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '1.05rem', fontWeight: 900, letterSpacing: '-0.02em' }}>
+                            {title}
+                        </span>
+                        {dateStr && (
+                            <span style={{ 
+                                fontSize: '0.9rem', 
+                                fontWeight: 600, 
+                                color: 'rgba(255, 255, 255, 0.95)'
+                            }}>
+                                {formatDateStr(dateStr)}
+                            </span>
+                        )}
+                    </div>
                 </div>
             )}
             
-            {segments.map((seg: any, idx: number) => (
-                <Fragment key={idx}>
-                    <FlightSegmentCard 
-                        segment={seg} 
-                        dateStr={idx === 0 ? dateStr : undefined} 
-                        isLastSegment={idx === segments.length - 1} 
-                    />
-                    {idx < segments.length - 1 && (
-                        <LayoverConnector duration={seg.layoverDuration || '정보 없음'} />
-                    )}
-                </Fragment>
-            ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {segments.map((seg: any, idx: number) => (
+                    <Fragment key={idx}>
+                        <FlightSegmentCard 
+                            segment={seg} 
+                            dateStr={undefined} 
+                            isLastSegment={idx === segments.length - 1} 
+                        />
+                        {idx < segments.length - 1 && (
+                            <LayoverConnector duration={seg.layoverDuration || '정보 없음'} />
+                        )}
+                    </Fragment>
+                ))}
+            </div>
         </div>
     );
 };
 
 
-export default function ConfirmationViewerPage() {
+export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: boolean }) {
     const params = useParams();
     const id = params.id as string;
+    const getApiUrl = (path: string) => {
+        return isDummy ? `/api/dummy${path}` : `/api${path}`;
+    };
     const [doc, setDoc] = useState<ConfirmationDocument | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -1043,7 +1225,7 @@ export default function ConfirmationViewerPage() {
     useEffect(() => {
         const loadDoc = async () => {
             try {
-                const res = await fetch(`/api/confirmation/${id}`);
+                const res = await fetch(getApiUrl(`/confirmation/${id}`));
                 const json = await res.json();
                 if (json.success) {
                     setDoc(json.data);
@@ -1306,14 +1488,14 @@ export default function ConfirmationViewerPage() {
             <div className="mc-header">
                 <div className="mc-brand">CLUBMODE TRAVEL</div>
                 <h1>{doc.trip.productName || '여행 확정서'}</h1>
-                <div className="mc-subtitle">{doc.trip.destination}</div>
+                <div className="mc-subtitle" title={doc.trip.destination}>{formatDestination(doc.trip.destination)}</div>
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '14px', alignItems: 'center' }}>
                     <div className="mc-status-badge" style={{ marginTop: 0 }}>
                         <span className="badge-dot"></span>
                         {doc.status}
                     </div>
                     <a 
-                        href={`/confirmation/${id}/print`} 
+                        href={isDummy ? `/dummy/confirmation/${id}/print` : `/confirmation/${id}/print`} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         style={{
@@ -1629,15 +1811,34 @@ export default function ConfirmationViewerPage() {
                                 <div className="mc-itinerary">
                                     {doc.itinerary.map((day: any, i: number) => {
                                         const isOpen = expandedDays[i] !== false; // 기본: 열림
+                                        
+                                        const formatDateShort = (dateStr: string) => {
+                                            if (!dateStr) return '';
+                                            try {
+                                                const date = new Date(dateStr);
+                                                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                                                const dd = String(date.getDate()).padStart(2, '0');
+                                                const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                                                return `${mm}/${dd}(${dayNames[date.getDay()]})`;
+                                            } catch (e) {
+                                                return dateStr;
+                                            }
+                                        };
+
                                         return (
                                             <div key={i} className={`mc-day-card ${isOpen ? 'open' : 'closed'}`}>
-                                                <div className="day-header" onClick={() => toggleDay(i)}>
-                                                    <div className="day-number">
-                                                        {typeof day === 'string' ? `${i + 1}일차` : (day.day ? `${day.day}일차` : `${i + 1}일차`)}
-                                                        {day.date && <span className="day-date">{formatDateStr(day.date)}</span>}
+                                                <div className="day-header" onClick={() => toggleDay(i)} style={{ padding: 0, display: 'flex', alignItems: 'stretch', minHeight: '64px', borderBottom: '1px solid #f1f5f9' }}>
+                                                    <div className="day-number" style={{ background: '#475569', color: '#fff', padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '2px', minWidth: '76px', flexShrink: 0, textAlign: 'center' }}>
+                                                        <span style={{ fontSize: '0.85rem', fontWeight: 800 }}>{day.day || (i + 1)}일차</span>
+                                                        {day.date && <span style={{ fontSize: '0.68rem', color: '#cbd5e1', fontWeight: 500 }}>{formatDateShort(day.date)}</span>}
                                                     </div>
-                                                    {day.title && <div className="day-title">{day.title}</div>}
-                                                    <div className={`day-chevron ${isOpen ? 'open' : ''}`}>›</div>
+                                                    <div style={{ flex: 1, padding: '10px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2px', minWidth: 0 }}>
+                                                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>{day.title || '보라카이'}</div>
+                                                        <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                            {((day.timeline || []).filter((item: any) => item.title && !item.title.includes('조식') && !item.title.includes('중식') && !item.title.includes('석식')).map((item: any) => item.title).join(', ')) || '상세내용을 확인해보세요'}
+                                                        </div>
+                                                    </div>
+                                                    <div className={`day-chevron ${isOpen ? 'open' : ''}`} style={{ alignSelf: 'center', marginRight: '16px' }}>›</div>
                                                 </div>
 
                                                 {isOpen && (
@@ -1711,9 +1912,9 @@ export default function ConfirmationViewerPage() {
                                                                     <div className="summary-content" style={{ flex: 1 }}>
                                                                         <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '2px' }}>식사</div>
                                                                         <div style={{ fontSize: '0.85rem', color: '#1e293b', fontWeight: 500, lineHeight: 1.4, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                                                            {day.meals.breakfast && day.meals.breakfast !== '불포함' && <div>조식: {day.meals.breakfast}</div>}
-                                                                            {day.meals.lunch && day.meals.lunch !== '불포함' && <div>중식: {day.meals.lunch}</div>}
-                                                                            {day.meals.dinner && day.meals.dinner !== '불포함' && <div>석식: {day.meals.dinner}</div>}
+                                                                            {day.meals.breakfast && <div>조식: {day.meals.breakfast}</div>}
+                                                                            {day.meals.lunch && <div>중식: {day.meals.lunch}</div>}
+                                                                            {day.meals.dinner && <div>석식: {day.meals.dinner}</div>}
                                                                             {(!day.meals.breakfast || day.meals.breakfast === '불포함') && (!day.meals.lunch || day.meals.lunch === '불포함') && (!day.meals.dinner || day.meals.dinner === '불포함') && <div>현지 자유식</div>}
                                                                         </div>
                                                                     </div>

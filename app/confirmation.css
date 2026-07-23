@@ -56,6 +56,22 @@
     grid-template-columns: 1fr 1fr 1fr;
 }
 
+.timeline-edit-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.timeline-edit-fields {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
 .confirm-field {
     display: flex;
     flex-direction: column;
@@ -522,9 +538,30 @@
 }
 
 /* 모바일 반응형 (관리자 화면) */
+.confirm-segment-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.grid-3-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr;
+    gap: 8px;
+}
+
+.itinerary-day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 @media (max-width: 768px) {
     .confirm-admin {
         padding: 0 !important;
+        min-width: 0;
+        max-width: 100%;
+        overflow-x: hidden;
     }
 
     .confirm-section {
@@ -550,15 +587,54 @@
         grid-template-columns: 1fr !important;
     }
 
+    .confirm-field input,
+    .confirm-field textarea,
+    .confirm-field select {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
     .itinerary-day-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
     }
 
+    .itinerary-day-header button {
+        width: 100% !important;
+        margin-top: 8px;
+        justify-content: center;
+    }
+
     .itinerary-day-title {
         width: 100%;
     }
-}
 
-/* Force Vercel Rebuild - Timestamp: 2026-02-22T23:37:00 */
+    .confirm-segment-grid {
+        grid-template-columns: 1fr !important; /* 1 column on mobile to prevent squeezing and layout break */
+    }
+
+    .grid-3-col {
+        grid-template-columns: 1fr !important;
+    }
+
+    .traveler-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 6px !important;
+        width: 100% !important;
+    }
+
+    .traveler-row select {
+        width: 100% !important;
+    }
+
+    .traveler-row input {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .file-upload-grid {
+        grid-template-columns: 1fr !important;
+    }
+}

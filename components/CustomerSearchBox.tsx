@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import useSWR from 'swr';
 import { Search, User, Phone, X, Loader2 } from 'lucide-react';
 import { ConsultationData } from '@/types';
@@ -11,21 +12,30 @@ interface CustomerSearchBoxProps {
     onSelect: (customer: ConsultationData) => void;
     placeholder?: string;
     label?: string;
+    isDummy?: boolean;
 }
 
 export default function CustomerSearchBox({ 
     onSelect, 
     placeholder = "이름 또는 연락처로 고객 검색...",
-    label = "기존 고객 정보 불러오기"
+    label = "기존 고객 정보 불러오기",
+    isDummy = false
 }: CustomerSearchBoxProps) {
+    const pathname = usePathname();
+    const isDummyMode = isDummy || (pathname ? pathname.startsWith('/dummy') : false);
+
     const [query, setQuery] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
+    const searchUrl = isDummyMode 
+        ? `/api/dummy/customers/search?q=${encodeURIComponent(query)}`
+        : `/api/customers/search?q=${encodeURIComponent(query)}`;
+
     // SWR uses the query as a key for automatic caching and revalidation
     // If query is empty, it fetches the recent 20 customers
     const { data, error, isLoading } = useSWR(
-        `/api/customers/search?q=${encodeURIComponent(query)}`,
+        searchUrl,
         fetcher,
         {
             revalidateOnFocus: false,

@@ -31,7 +31,7 @@ export async function scrapeForConfirmation(url: string): Promise<string | null>
             const resourceType = req.resourceType();
             if (['image', 'font', 'media'].includes(resourceType)) {
                 req.abort();
-            } else if (resourceType === 'stylesheet' && !url.includes('modetour.com')) {
+            } else if (resourceType === 'stylesheet' && !url.includes('modetour.com') && !url.includes('modetour.co.kr')) {
                 // 모드투어는 레이아웃 파싱을 위해 스타일이 필요할 수 있어 제외, 나머지는 차단
                 req.abort();
             } else {
@@ -84,7 +84,7 @@ export async function scrapeForConfirmation(url: string): Promise<string | null>
         await new Promise(r => setTimeout(r, 2000)); 
 
         // --- 3. 특정 섹션 대기 ---
-        if (url.includes('modetour.com')) {
+        if (url.includes('modetour.com') || url.includes('modetour.co.kr')) {
             await page.waitForSelector('.itinerary_wrap, .inclusion_wrap', { timeout: 3000 }).catch(() => null);
         }
 

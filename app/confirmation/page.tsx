@@ -102,7 +102,10 @@ const clean = (s: any) => {
     return cleaned.trim();
 };
 
-export default function ConfirmationPage() {
+export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolean }) {
+    const getApiUrl = (path: string) => {
+        return isDummy ? `/api/dummy${path}` : `/api${path}`;
+    };
     // 고객 검색
     const [customerQuery, setCustomerQuery] = useState('');
     const [customerResults, setCustomerResults] = useState<ConsultationData[]>([]);
@@ -233,7 +236,7 @@ export default function ConfirmationPage() {
 
         try {
             const isLocal = process.env.NODE_ENV === 'development';
-            const apiUrl = '/api/analyze-url';
+            const apiUrl = getApiUrl('/analyze-url');
 
             // [핵심] 초고속 28초 설계를 위한 병렬 트리거: NativeData나 URL에서 목적지가 추출되면 즉시 2차 조사 시작
             // (분석 API를 기다리지 않고 스크래퍼 실행 중 병렬로 보냄)
@@ -410,7 +413,7 @@ export default function ConfirmationPage() {
             const monthMatch = departureDate.match(/-(\d{2})-/);
             const travelMonth = monthMatch ? `${parseInt(monthMatch[1])}월` : '';
 
-            const res = await fetch('/api/confirmation/secondary-research', {
+            const res = await fetch(getApiUrl('/confirmation/secondary-research'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -622,7 +625,7 @@ export default function ConfirmationPage() {
             const monthMatch = departureDate.match(/-(\d{2})-/);
             const travelMonth = monthMatch ? `${parseInt(monthMatch[1])}월` : '';
 
-            const res = await fetch('/api/confirmation/secondary-research', {
+            const res = await fetch(getApiUrl('/confirmation/secondary-research'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -669,7 +672,7 @@ export default function ConfirmationPage() {
             const monthMatch = departureDate.match(/-(\d{2})-/);
             const travelMonth = monthMatch ? `${parseInt(monthMatch[1])}월` : '';
 
-            const res = await fetch('/api/confirmation/secondary-research', {
+            const res = await fetch(getApiUrl('/confirmation/secondary-research'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -680,6 +683,7 @@ export default function ConfirmationPage() {
                     travelMonth,
                     baggageNote: (analysisResult as any)?.baggageNote || '',
                     itinerary, // 일정 정보 추가
+                    isDummy: isDummy,
                 }),
             });
             const json = await res.json();
@@ -966,7 +970,7 @@ export default function ConfirmationPage() {
                 secondaryResearch: secondaryResearch || undefined,
             };
 
-            const res = await fetch('/api/confirmation', {
+            const res = await fetch(getApiUrl('/confirmation'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
@@ -1029,7 +1033,7 @@ ${shareUrl}`;
                 </div>
                 <div className="confirm-grid">
                     <div className="confirm-field full-width">
-                        <CustomerSearchBox onSelect={selectCustomer} />
+                        <CustomerSearchBox onSelect={selectCustomer} isDummy={isDummy} />
                     </div>
                     <div className="confirm-field">
                         <label>고객 성함</label>
@@ -1203,7 +1207,7 @@ ${shareUrl}`;
                                     style={{ padding: '4px 8px', fontSize: '12px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>+ 구간 추가</button>
                         </div>
                         {departureSegments.map((seg, idx) => (
-                            <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '12px', paddingBottom: '12px', borderBottom: idx < departureSegments.length - 1 ? '1px dashed #374151' : 'none' }}>
+                            <div key={idx} className="confirm-segment-grid" style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: idx < departureSegments.length - 1 ? '1px dashed #374151' : 'none' }}>
                                 <div className="confirm-field"><label>항공사</label><input value={seg.airline} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].airline = e.target.value; setDepartureSegments(newSegs); }} /></div>
                                 <div className="confirm-field"><label>편명</label><input value={seg.flightNo} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].flightNo = e.target.value; setDepartureSegments(newSegs); }} /></div>
                                 <div className="confirm-field"><label>출발지</label><input value={seg.departureCity} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].departureCity = e.target.value; setDepartureSegments(newSegs); }} /></div>
@@ -1212,7 +1216,7 @@ ${shareUrl}`;
                                 <div className="confirm-field"><label>도착시간</label><input value={seg.arrivalTime} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].arrivalTime = e.target.value; setDepartureSegments(newSegs); }} /></div>
                                 <div className="confirm-field"><label>소요시간</label><input value={seg.duration} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].duration = e.target.value; setDepartureSegments(newSegs); }} /></div>
                                 <div className="confirm-field"><label>대기시간</label><input value={seg.layoverDuration} onChange={e => { const newSegs = [...departureSegments]; newSegs[idx].layoverDuration = e.target.value; setDepartureSegments(newSegs); }} /></div>
-                                <button onClick={() => setDepartureSegments(departureSegments.filter((_, i) => i !== idx))} style={{ gridColumn: '4', justifySelf: 'end', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>구간 삭제</button>
+                                <button onClick={() => setDepartureSegments(departureSegments.filter((_, i) => i !== idx))} style={{ gridColumn: 'span 2', justifySelf: 'end', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>구간 삭제</button>
                             </div>
                         ))}
                     </div>
@@ -1227,7 +1231,7 @@ ${shareUrl}`;
                                     style={{ padding: '4px 8px', fontSize: '12px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>+ 구간 추가</button>
                         </div>
                         {returnSegments.map((seg, idx) => (
-                            <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '12px', paddingBottom: '12px', borderBottom: idx < returnSegments.length - 1 ? '1px dashed #374151' : 'none' }}>
+                            <div key={idx} className="confirm-segment-grid" style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: idx < returnSegments.length - 1 ? '1px dashed #374151' : 'none' }}>
                                 <div className="confirm-field"><label>항공사</label><input value={seg.airline} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].airline = e.target.value; setReturnSegments(newSegs); }} /></div>
                                 <div className="confirm-field"><label>편명</label><input value={seg.flightNo} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].flightNo = e.target.value; setReturnSegments(newSegs); }} /></div>
                                 <div className="confirm-field"><label>출발지</label><input value={seg.departureCity} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].departureCity = e.target.value; setReturnSegments(newSegs); }} /></div>
@@ -1236,7 +1240,7 @@ ${shareUrl}`;
                                 <div className="confirm-field"><label>도착시간</label><input value={seg.arrivalTime} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].arrivalTime = e.target.value; setReturnSegments(newSegs); }} /></div>
                                 <div className="confirm-field"><label>소요시간</label><input value={seg.duration} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].duration = e.target.value; setReturnSegments(newSegs); }} /></div>
                                 <div className="confirm-field"><label>대기시간</label><input value={seg.layoverDuration} onChange={e => { const newSegs = [...returnSegments]; newSegs[idx].layoverDuration = e.target.value; setReturnSegments(newSegs); }} /></div>
-                                <button onClick={() => setReturnSegments(returnSegments.filter((_, i) => i !== idx))} style={{ gridColumn: '4', justifySelf: 'end', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>구간 삭제</button>
+                                <button onClick={() => setReturnSegments(returnSegments.filter((_, i) => i !== idx))} style={{ gridColumn: 'span 2', justifySelf: 'end', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>구간 삭제</button>
                             </div>
                         ))}
                     </div>
@@ -1564,8 +1568,8 @@ ${shareUrl}`;
                             border: '1px solid var(--border-color)',
                         }}>
                             {/* Day Header */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div className="itinerary-day-header" style={{ marginBottom: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0, width: '100%' }}>
                                     <span style={{
                                         background: 'var(--accent-gradient)',
                                         color: '#fff',
@@ -1573,18 +1577,19 @@ ${shareUrl}`;
                                         borderRadius: '8px',
                                         fontSize: '0.8rem',
                                         fontWeight: 700,
+                                        flexShrink: 0,
                                     }}>{i + 1}일차</span>
                                     <input
                                         value={day.title || ''}
                                         onChange={e => updateDayTitle(i, e.target.value)}
                                         placeholder="이동 경로 (예: 인천 → 다낭)"
-                                        style={{ width: '320px', fontSize: '1rem', fontWeight: 700, background: 'transparent', border: 'none', color: 'var(--text-primary)', outline: 'none', fontFamily: 'inherit' }}
+                                        style={{ flex: 1, minWidth: 0, fontSize: '1rem', fontWeight: 700, background: 'transparent', border: 'none', color: 'var(--text-primary)', outline: 'none', fontFamily: 'inherit' }}
                                     />
                                 </div>
                                 <button
                                     onClick={() => removeItineraryDay(i)}
                                     className="traveler-row"
-                                    style={{ padding: '6px 14px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: '8px', color: '#ef4444', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
+                                    style={{ padding: '6px 14px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: '8px', color: '#ef4444', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600, flexShrink: 0 }}
                                 >
                                     🗑️ 일자 전체 삭제
                                 </button>
@@ -1593,7 +1598,7 @@ ${shareUrl}`;
                             {/* Activity List */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
                                 {(day.timeline || []).map((item: any, idx: number) => (
-                                    <div key={idx} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                                    <div key={idx} className="timeline-edit-row">
                                         {/* Icon Toggle */}
                                         <button
                                             onClick={() => updateTimelineItem(i, idx, 'type', item.type === 'location' ? 'default' : 'location')}
@@ -1617,7 +1622,7 @@ ${shareUrl}`;
                                         </button>
 
                                         {/* Fields */}
-                                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <div className="timeline-edit-fields">
                                             <div className="confirm-field">
                                                 <label>장소/카운터명</label>
                                                 <input
@@ -2176,7 +2181,7 @@ ${shareUrl}`;
                                 </button>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '8px' }}>
+                                <div className="grid-3-col">
                                     <div className="confirm-field" style={{ marginBottom: 0 }}>
                                         <label style={{ color: 'var(--text-secondary)' }}>위탁수하물 무게</label>
                                         <input value={(secondaryResearch as any).baggage?.checkedWeight || ''} onChange={e => updateSRField('baggage', 'checkedWeight', e.target.value)} />
@@ -2190,7 +2195,7 @@ ${shareUrl}`;
                                         <input value={(secondaryResearch as any).baggage?.checkedNote || ''} onChange={e => updateSRField('baggage', 'checkedNote', e.target.value)} />
                                     </div>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '8px' }}>
+                                <div className="grid-3-col">
                                     <div className="confirm-field" style={{ marginBottom: 0 }}>
                                         <label style={{ color: 'var(--text-secondary)' }}>기내수하물 무게</label>
                                         <input value={(secondaryResearch as any).baggage?.carryonWeight || ''} onChange={e => updateSRField('baggage', 'carryonWeight', e.target.value)} />

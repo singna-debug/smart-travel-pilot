@@ -63,6 +63,27 @@ export async function fetchContent(url: string, options: FetchOptions = {}): Pro
         }
     }
 
+    const isHanaTour = url.includes('hanatour.com');
+    if (isHanaTour) {
+        try {
+            const { fetchHanaTourNative } = await import('./hanatour-utils');
+            const nativeData = await fetchHanaTourNative(url, isSummaryOnly).catch(e => {
+                console.error(`[Fetcher] Hanatour Native Fetch Error: ${e.message}`);
+                return null;
+            });
+            if (nativeData) {
+                console.log(`[Fetcher] Hanatour Native Fetch Success! Title: ${nativeData.title}`);
+                return {
+                    text: JSON.stringify(nativeData),
+                    nextData: undefined,
+                    nativeData
+                };
+            }
+        } catch (e: any) {
+            console.error('[Fetcher] Hanatour Native module import/execution failed:', e.message);
+        }
+    }
+
     const { html } = await quickFetch(url);
     const text = htmlToText(html, url);
     const nextDataMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i);

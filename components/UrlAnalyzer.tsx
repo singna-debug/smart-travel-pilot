@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import type { AnalysisResult, SingleResult, ConsultationData } from '@/types';
 import CustomerSearchBox from './CustomerSearchBox';
 
@@ -41,6 +42,9 @@ function formatToHtmlDate(dateStr: string): string {
 }
 
 export default function UrlAnalyzer() {
+    const pathname = usePathname();
+    const isDummy = pathname?.startsWith('/dummy');
+
     const [mode, setMode] = useState<'single' | 'compare'>('single');
     const [singleUrl, setSingleUrl] = useState('');
     const [multiUrls, setMultiUrls] = useState(['', '']);
@@ -161,7 +165,7 @@ export default function UrlAnalyzer() {
                     console.log('[UrlAnalyzer] 예약 상품 자동 분석 시작 (Booking Mode)');
                     setAnalysisStep('예약 정보 추출 중...');
                     try {
-                        const res = await fetch('/api/crawl-analyze', {
+                        const res = await fetch(isDummy ? '/api/dummy/crawl-analyze' : '/api/crawl-analyze', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ url: confirmedProduct, mode: 'booking' })
@@ -341,7 +345,7 @@ export default function UrlAnalyzer() {
         setSingleResult(null);
 
         try {
-            const apiUrl = '/api/analyze-url';
+            const apiUrl = isDummy ? '/api/dummy/analyze-url' : '/api/analyze-url';
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -398,7 +402,7 @@ export default function UrlAnalyzer() {
         setCompareResult(null);
 
         try {
-            const response = await fetch('/api/analyze-url', {
+            const response = await fetch(isDummy ? '/api/dummy/analyze-url' : '/api/analyze-url', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ urls: validUrls }),
@@ -482,7 +486,7 @@ export default function UrlAnalyzer() {
     const saveAutomatically = async (analysisData: any, isComparison: boolean) => {
         setIsSaving(true);
         try {
-            await fetch('/api/save-consultation', {
+            await fetch(isDummy ? '/api/dummy/save-consultation' : '/api/save-consultation', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -576,7 +580,7 @@ export default function UrlAnalyzer() {
                     <button
                         onClick={async () => {
                             try {
-                                const resp = await fetch('/api/sheet-info');
+                                const resp = await fetch(isDummy ? '/api/dummy/sheet-info' : '/api/sheet-info');
                                 const data = await resp.json();
                                 if (data.success && data.url) {
                                     window.open(data.url, '_blank');
@@ -681,6 +685,7 @@ export default function UrlAnalyzer() {
                         <option value="">-- 선택 --</option>
                         <option value="네이버 블로그">네이버 블로그</option>
                         <option value="카카오톡 채널">카카오톡 채널</option>
+                        <option value="카톡문의">카톡문의</option>
                         <option value="인스타그램 및 페이스북">인스타그램 및 페이스북</option>
                         <option value="당근마켓">당근마켓</option>
                         <option value="닷컴">닷컴</option>

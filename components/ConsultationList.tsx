@@ -3,16 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import { ConsultationData } from '@/types';
 import { EditableField, InfoCell, TimelineCell } from './EditableComponents';
-import { Pencil, MapPin, Calendar, Users, Bell, X } from 'lucide-react';
+import { Pencil, MapPin, Calendar, Users, Bell, X, MessageCircle } from 'lucide-react';
+import { sendDirectKakaoMessage } from '@/lib/kakao-share';
 
 interface ConsultationListProps {
     title: string;
     data: ConsultationData[];
     emptyMessage?: string;
     onUpdate?: () => void;
+    isDummy?: boolean;
 }
 
-export default function ConsultationList({ title, data, emptyMessage = "해당하는 내역이 없습니다.", onUpdate }: ConsultationListProps) {
+export default function ConsultationList({ title, data, emptyMessage = "해당하는 내역이 없습니다.", onUpdate, isDummy = false }: ConsultationListProps) {
     const [localData, setLocalData] = useState<ConsultationData[]>(data);
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
@@ -29,8 +31,11 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
     const fetchCustomerHistory = async (chatId: string, phone: string) => {
         if (!phone || phone === '미정' || customerHistoryByPhone[phone]) return;
         setHistoryLoading(chatId);
+        const historyUrl = isDummy 
+            ? `/api/dummy/consultations/history?phone=${encodeURIComponent(phone)}`
+            : `/api/consultations/history?phone=${encodeURIComponent(phone)}`;
         try {
-            const res = await fetch(`/api/consultations/history?phone=${encodeURIComponent(phone)}`);
+            const res = await fetch(historyUrl);
             const d = await res.json();
             if (d.success) {
                 setCustomerHistoryByPhone(prev => ({ ...prev, [phone]: d.data }));
@@ -107,8 +112,9 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
             setLocalData(newData);
         }
 
+        const updateUrl = isDummy ? '/api/dummy/consultations' : '/api/consultations';
         try {
-            const response = await fetch('/api/consultations', {
+            const response = await fetch(updateUrl, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -256,7 +262,50 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                             </div>
                                         </td>
                                         <td>
-                                            <div className="cell-secondary">{item.customer.phone}</div>
+                                             <div className="cell-secondary">{item.customer.phone}</div>
+                                             {item.customer.phone && item.customer.phone !== '미정' && (
+                                                 <button
+                                                     type="button"
+                                                     style={{
+                                                         marginTop: '4px',
+                                                         padding: '2px 8px',
+                                                         fontSize: '0.7rem',
+                                                         backgroundColor: '#FEE500',
+                                                         color: '#000000',
+                                                         border: 'none',
+                                                         borderRadius: '4px',
+                                                         fontWeight: '600',
+                                                         cursor: 'pointer'
+                                                     }}
+                                                     onClick={async (e) => {
+                                                         e.stopPropagation();
+                                                         let managerName = '담당자';
+                                                         let companyName = '(주)클럽모두투어';
+                                                         let kakaoId = '';
+                                                         try {
+                                                             const saved = localStorage.getItem('tenant_settings');
+                                                             if (saved) {
+                                                                 const p = JSON.parse(saved);
+                                                                 if (p.managerName) managerName = p.managerName;
+                                                                 if (p.companyName) companyName = p.companyName;
+                                                                 if (p.kakaoTalkId) kakaoId = p.kakaoTalkId;
+                                                             }
+                                                         } catch (err) {}
+
+                                                         const remindText = `✈️ [${companyName}] 여행 상담 리마인드\n\n안녕하세요, ${item.customer.name}님! ${companyName} ${managerName}입니다.😊\n\n요청하신 [${item.trip.destination || item.trip.product_name || '여행'}] 상품 상담 관련하여 연락드립니다.\n궁금하신 사항이나 보완하실 일정이 필요하시면 언제든 카톡 남겨주세요!\n\n• 담당자: ${managerName}${kakaoId ? ` (카톡ID: ${kakaoId})` : ''}`;
+                                                         
+                                                         await sendDirectKakaoMessage({
+                                                             text: remindText,
+                                                             customerPhone: item.customer.phone,
+                                                             customerName: item.customer.name,
+                                                             kakaoTalkId: kakaoId
+                                                         });
+                                                         alert(res.message);
+                                                     }}
+                                                 >
+                                                     💬 카톡 전송
+                                                 </button>
+                                             )}
                                         </td>
                                         <td>
                                             <div className="cell-primary">{item.trip.destination}</div>
@@ -358,7 +407,7 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
                                                                     field="inquirySource" 
                                                                     chatId={strIndex} 
                                                                     onSave={handleFieldUpdate} 
-                                                                    options={['네이버 블로그', '카카오톡 채널', '인스타그램 및 페이스북', '당근마켓', '닷컴', '지인소개', '기존고객', '전화문의', '매장방문', '기타']} 
+                                                                    options={['네이버 블로그', '카카오톡 채널', '카톡문의', '인스타그램 및 페이스북', '당근마켓', '닷컴', '지인소개', '기존고객', '전화문의', '매장방문', '기타']} 
                                                                     forceEditMode={editingCustomerChatId === strIndex} 
                                                                 />
                                                                 <InfoCell label="등록방식" value={item.source || '-'} highlight={item.source === '카카오톡' ? '#fbbf24' : '#a78bfa'} />

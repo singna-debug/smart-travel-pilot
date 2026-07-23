@@ -103,9 +103,16 @@ interface ConfirmationDocument {
             tips?: string[];
         };
     };
-}
+};
 
-export default function PrintConfirmationPage() {
+const formatDestination = (destStr?: string | null) => {
+    if (!destStr) return '-';
+    const list = destStr.split(/[,/]/).map(s => s.trim()).filter(Boolean);
+    if (list.length <= 1) return destStr;
+    return `${list[0]} 외 ${list.length - 1}곳`;
+};
+
+export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: boolean }) {
     const params = useParams();
     const router = useRouter();
     const id = params.id as string;
@@ -116,7 +123,8 @@ export default function PrintConfirmationPage() {
     useEffect(() => {
         const loadDoc = async () => {
             try {
-                const res = await fetch(`/api/confirmation/${id}`);
+                const url = isDummy ? `/api/dummy/confirmation/${id}` : `/api/confirmation/${id}`;
+                const res = await fetch(url);
                 const json = await res.json();
                 if (json.success) {
                     setDoc(json.data);
@@ -328,7 +336,7 @@ export default function PrintConfirmationPage() {
                             </tr>
                             <tr>
                                 <th>목적지</th>
-                                <td>{trip.destination || '-'}</td>
+                                <td title={trip.destination}>{formatDestination(trip.destination)}</td>
                                 <th>여행 기간</th>
                                 <td>{trip.duration || '-'}</td>
                             </tr>
@@ -516,18 +524,35 @@ export default function PrintConfirmationPage() {
                         <div className="pc-itinerary">
                             {itinerary.map((day, idx) => {
                                 const hasActivities = day.activities && Array.isArray(day.activities) && day.activities.length > 0;
+                                const formatDateShort = (dateStr: string) => {
+                                    if (!dateStr) return '';
+                                    try {
+                                        const date = new Date(dateStr);
+                                        const mm = String(date.getMonth() + 1).padStart(2, '0');
+                                        const dd = String(date.getDate()).padStart(2, '0');
+                                        const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                                        return `${mm}/${dd}(${dayNames[date.getDay()]})`;
+                                    } catch (e) {
+                                        return dateStr;
+                                    }
+                                };
                                 const hasTimeline = day.timeline && Array.isArray(day.timeline) && day.timeline.length > 0;
                                 const extraTransport = getExtraTransportation(day);
 
                                 return (
                                     <div key={idx} className="pc-day-card">
                                         {/* 일차별 헤더 */}
-                                        <div className="pc-day-header">
-                                            <div className="pc-day-header-left">
-                                                <span className="pc-day-num">{String(day.day).includes('일') ? day.day : `${day.day}일차`}</span>
-                                                {day.date && <span className="pc-day-date">{formatPrintDate(day.date)}</span>}
+                                        <div className="pc-day-header" style={{ padding: 0, display: 'flex', alignItems: 'stretch', minHeight: '64px', borderBottom: '1px solid #cbd5e1', background: '#f8fafc' }}>
+                                            <div className="pc-day-header-left" style={{ background: '#475569', color: '#fff', padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '2px', minWidth: '76px', flexShrink: 0, textAlign: 'center', borderRight: '1px solid #cbd5e1', borderRadius: '0' }}>
+                                                <span className="pc-day-num" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#fff', background: 'none', padding: 0, height: 'auto', minWidth: 'auto' }}>{day.day}일차</span>
+                                                {day.date && <span style={{ fontSize: '0.68rem', color: '#cbd5e1', fontWeight: 500 }}>{formatDateShort(day.date)}</span>}
                                             </div>
-                                            {day.title && <div className="pc-day-title">{day.title}</div>}
+                                            <div style={{ flex: 1, padding: '10px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2px', minWidth: 0 }}>
+                                                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a' }}>{day.title || '보라카이'}</div>
+                                                <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {((day.timeline || []).filter((item: any) => item.title && !item.title.includes('조식') && !item.title.includes('중식') && !item.title.includes('석식')).map((item: any) => item.title).join(', ')) || '상세내용을 확인해보세요'}
+                                                </div>
+                                            </div>
                                         </div>
 
                                         {/* 일정 본문 */}
@@ -536,18 +561,86 @@ export default function PrintConfirmationPage() {
                                             {/* HTML 콘텐츠 랜더링 */}
                                             {hasTimeline ? (
                                                 <div className="pc-timeline">
-                                                    {day.timeline!.map((item: any, i: number) => (
-                                                        <div key={i} className="pc-timeline-item">
-                                                            <div className="pc-timeline-title">
-                                                                <span className="pc-timeline-marker">{item.type === 'location' ? '📍' : '•'}</span>
-                                                                <span dangerouslySetInnerHTML={{ __html: cleanupHtml(item.title) }} />
-                                                                {item.subtitle && <span className="pc-timeline-subtitle">(<span dangerouslySetInnerHTML={{ __html: cleanupHtml(item.subtitle) }} />)</span>}
+                                                    {day.timeline!.map((item: any, i: number) => {
+                                                        let cleanDesc = item.description || '';
+
+                                                        // 1. Safeguard: Remove Swiper navigation controls and "이전다음" text
+                                                        cleanDesc = cleanDesc
+                                                            .replace(/<a[^>]+href="#none"[^>]*>([\s\S]*?)<\/a>/gi, '')
+                                                            .replace(/<span[^>]+class="blind"[^>]*>([\s\S]*?)<\/span>/gi, '')
+                                                            .replace(/<div[^>]+class="controller"[^>]*>([\s\S]*?)<\/div>/gi, '')
+                                                            .replace(/이전다음/gi, '')
+                                                            .trim();
+
+                                                        // 2. Extract images
+                                                        const imgMatches = cleanDesc.match(/<img[^>]+src="([^">]+)"[^>]*>/gi) || [];
+                                                        const imageUrls: string[] = [];
+
+                                                        if (imgMatches.length > 0) {
+                                                            imgMatches.forEach((m: string) => {
+                                                                const srcMatch = m.match(/src="([^">]+)"/i);
+                                                                if (srcMatch) imageUrls.push(srcMatch[1]);
+                                                            });
+                                                            cleanDesc = cleanDesc.replace(/<img[^>]+>/gi, '');
+                                                        }
+
+                                                        // 3. Format and collapse duplicate spacing/newlines for ALL descriptions
+                                                        cleanDesc = cleanDesc
+                                                            .replace(/<br\s*\/?>/gi, '\n')
+                                                            .replace(/\n\s*\n+/g, '\n\n') // Collapse 3+ newlines (with optional spaces) to exactly 2 newlines (a clean paragraph break)
+                                                            .replace(/^\s*\n+/g, '')       // Remove leading newlines
+                                                            .replace(/\n+\s*$/g, '')       // Remove trailing newlines
+                                                            .trim();
+
+                                                        return (
+                                                            <div key={i} className="pc-timeline-item">
+                                                                <div className="pc-timeline-title">
+                                                                    <span className="pc-timeline-marker" style={{ color: '#4f46e5', fontWeight: 800, fontSize: '0.85rem', minWidth: '24px', display: 'inline-block' }}>
+                                                                        {item.type === 'location' ? '📍 ' : `${String(i + 1).padStart(2, '0')} | `}
+                                                                    </span>
+                                                                    <span dangerouslySetInnerHTML={{ __html: cleanupHtml(item.title) }} />
+                                                                    {item.subtitle && <span className="pc-timeline-subtitle">(<span dangerouslySetInnerHTML={{ __html: cleanupHtml(item.subtitle) }} />)</span>}
+                                                                </div>
+                                                                
+                                                                {imageUrls.length > 0 && (
+                                                                    <div style={{ 
+                                                                        display: imageUrls.length === 1 ? 'block' : 'grid', 
+                                                                        gridTemplateColumns: imageUrls.length > 1 ? `repeat(${Math.min(imageUrls.length, 3)}, 1fr)` : 'none',
+                                                                        gap: '8px', 
+                                                                        marginTop: '8px', 
+                                                                        marginBottom: '8px',
+                                                                        width: 'calc(100% - 20px)',
+                                                                        marginLeft: '20px'
+                                                                    }}>
+                                                                        {imageUrls.map((url, uidx) => (
+                                                                            <img 
+                                                                                key={uidx} 
+                                                                                src={url} 
+                                                                                style={{ 
+                                                                                    width: imageUrls.length === 1 ? 'auto' : '100%', 
+                                                                                    height: imageUrls.length === 1 ? 'auto' : '180px', 
+                                                                                    maxWidth: '100%',
+                                                                                    maxHeight: imageUrls.length === 1 ? '220px' : 'none',
+                                                                                    objectFit: imageUrls.length === 1 ? 'contain' : 'cover', 
+                                                                                    borderRadius: '8px', 
+                                                                                    display: 'block' 
+                                                                                }} 
+                                                                                alt="일정 이미지" 
+                                                                            />
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+
+                                                                {cleanDesc && (
+                                                                    <div 
+                                                                        className="pc-timeline-desc" 
+                                                                        style={{ whiteSpace: 'pre-line' }} 
+                                                                        dangerouslySetInnerHTML={{ __html: cleanupHtml(cleanDesc) }} 
+                                                                    />
+                                                                )}
                                                             </div>
-                                                            {item.description && (
-                                                                <div className="pc-timeline-desc" dangerouslySetInnerHTML={{ __html: cleanupHtml(item.description) }} />
-                                                            )}
-                                                        </div>
-                                                    ))}
+                                                        );
+                                                    })}
                                                 </div>
                                             ) : hasActivities ? (
                                                 <div className="pc-timeline">
@@ -592,11 +685,11 @@ export default function PrintConfirmationPage() {
                                                     <div className="pc-summary-row">
                                                         <span className="pc-summary-label">🍽️ 식사</span>
                                                         <div className="pc-meal-inline">
-                                                            <span className="pc-meal">조식 : {day.meals.breakfast && day.meals.breakfast !== '불포함' ? day.meals.breakfast : '자유식/불포함'}</span>
+                                                            <span className="pc-meal">조식 : {day.meals.breakfast || '불포함'}</span>
                                                             <span className="pc-meal-div">|</span>
-                                                            <span className="pc-meal">중식 : {day.meals.lunch && day.meals.lunch !== '불포함' ? day.meals.lunch : '자유식/불포함'}</span>
+                                                            <span className="pc-meal">중식 : {day.meals.lunch || '불포함'}</span>
                                                             <span className="pc-meal-div">|</span>
-                                                            <span className="pc-meal">석식 : {day.meals.dinner && day.meals.dinner !== '불포함' ? day.meals.dinner : '자유식/불포함'}</span>
+                                                            <span className="pc-meal">석식 : {day.meals.dinner || '불포함'}</span>
                                                         </div>
                                                     </div>
                                                 )}
@@ -805,8 +898,8 @@ export default function PrintConfirmationPage() {
                                                     
                                                     // 날씨 설명에서 "정보 없음" 또는 불필요한 텍스트 필터링
                                                     const desc = day.description && day.description !== '정보 없음' ? day.description : '-';
-                                                    const maxT = (day.tempMax || day.temp_max || '').replace(/[^0-9.-]/g, '');
-                                                    const minT = (day.tempMin || day.temp_min || '').replace(/[^0-9.-]/g, '');
+                                                    const maxT = String(day.tempMax || day.temp_max || '').replace(/[^0-9.-]/g, '');
+                                                    const minT = String(day.tempMin || day.temp_min || '').replace(/[^0-9.-]/g, '');
 
                                                     return (
                                                         <div key={i} className="pc-forecast-card">

@@ -22,7 +22,7 @@ if (fs.existsSync(envPath)) {
 
 async function test() {
     console.log('=== ScrapingBee 통합 테스트 시작 ===');
-    const testUrl = 'https://www.modetour.com/package/102840987?MLoc=99&Pnum=102840987&Sno=C117876&ANO=81440&thru=crs';
+    const testUrl = 'https://www.hanatour.com/trp/pkg/CHPC0PKG0200M200?pkgCd=APP216260804TWC&prePage=major-products';
 
     // Puppeteer를 강제로 실패하게 하거나 ScrapingBee가 호출되는지 로그로 확인
     // 현재 구현은 scrapeWithBrowser가 먼저 호출되므로, 

@@ -7,7 +7,11 @@ import "./buttons.css";
 import "./chat-viewer.css";
 import "./confirmation.css";
 import "./mobile-confirmation.css";
+import "./settings.css";
+import "./attendance.css";
+import "./calendar.css";
 import ClientLayoutWrapper from "./ClientLayoutWrapper";
+import DemoBanner from "@/components/DemoBanner";
 
 export const metadata: Metadata = {
   title: "CLUBMODE TRAVEL - Dashboard",
@@ -37,8 +41,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
         <script src="https://accounts.google.com/gsi/client" async defer></script>
+        <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" async defer></script>
       </head>
       <body style={{ fontFamily: "'Noto Sans KR', sans-serif" }} suppressHydrationWarning={true}>
+        <DemoBanner />
         <ClientLayoutWrapper>
           {children}
         </ClientLayoutWrapper>

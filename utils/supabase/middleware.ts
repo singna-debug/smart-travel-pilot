@@ -36,10 +36,14 @@ export async function updateSession(request: NextRequest) {
   // The matcher in middleware.ts should handle this, but being extra safe here
   const isAuthPage = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/auth')
   const isStaticAsset = request.nextUrl.pathname.includes('.') || request.nextUrl.pathname.startsWith('/_next')
-  // 고객이 보는 확정서 페이지(/confirmation/ID)는 로그인이 필요 없어야 함
-  const isPublicConfirmationViewer = request.nextUrl.pathname.startsWith('/confirmation/') && request.nextUrl.pathname !== '/confirmation'
+  // 고객이 보는 확정서 페이지(/confirmation/ID, /dummy/confirmation/ID)는 로그인이 필요 없어야 함
+  const isPublicConfirmationViewer = 
+      (request.nextUrl.pathname.startsWith('/confirmation/') && request.nextUrl.pathname !== '/confirmation') ||
+      (request.nextUrl.pathname.startsWith('/dummy/confirmation/') && request.nextUrl.pathname !== '/dummy/confirmation')
   // 확정서 데이터 API도 공개 (뷰어에서 데이터를 가져와야 하므로)
-  const isPublicConfirmationApi = request.nextUrl.pathname.startsWith('/api/confirmation/') && request.nextUrl.pathname !== '/api/confirmation'
+  const isPublicConfirmationApi = 
+      (request.nextUrl.pathname.startsWith('/api/confirmation/') && request.nextUrl.pathname !== '/api/confirmation') ||
+      (request.nextUrl.pathname.startsWith('/api/dummy/confirmation/') && request.nextUrl.pathname !== '/api/dummy/confirmation')
   // 환율 API도 확정서 뷰어에서 사용
   const isPublicUtilApi = request.nextUrl.pathname.startsWith('/api/exchange-rate')
   // 텔레그램 웹훅 API도 공개
