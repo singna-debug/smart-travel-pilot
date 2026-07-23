@@ -1415,27 +1415,12 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
                         {TEMPLATE_LABELS[templateType].icon} {TEMPLATE_LABELS[templateType].label} 미리보기
                     </div>
                     {generatedText && (
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                            <button
-                                className={`msg-copy-btn ${copied ? 'copied' : ''}`}
-                                onClick={handleCopy}
-                            >
-                                {copied ? '✅ 복사됨' : '📋 복사'}
-                            </button>
-                            <button
-                                className="msg-copy-btn"
-                                style={{ background: '#fee500', color: '#191919', fontWeight: 600, border: 'none' }}
-                                onClick={async () => {
-                                    await sendDirectKakaoMessage({
-                                        text: generatedText,
-                                        customerPhone: selectedCustomer?.phone,
-                                        customerName: selectedCustomer?.name
-                                    });
-                                }}
-                            >
-                                💬 카톡 바로 전송
-                            </button>
-                        </div>
+                        <button
+                            className={`msg-copy-btn ${copied ? 'copied' : ''}`}
+                            onClick={handleCopy}
+                        >
+                            {copied ? '✅ 복사됨' : '📋 복사'}
+                        </button>
                     )}
                 </div>
                 <div className="msg-preview-body">
