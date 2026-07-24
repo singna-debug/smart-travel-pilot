@@ -27,6 +27,15 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
         } else if (url.includes('hanatour.com')) {
             const { fetchHanaTourNative } = await import('../hanatour-utils');
             nativeData = await fetchHanaTourNative(url, false).catch(() => null);
+        } else if (url.includes('ybtour.co.kr') || url.includes('yellowballoon.co.kr')) {
+            const { fetchYellowBalloonNative } = await import('../yellowballoon-utils');
+            nativeData = await fetchYellowBalloonNative(url, false).catch(() => null);
+        } else if (url.includes('lottetour.com')) {
+            const { fetchLotteTourNative } = await import('../lottetour-utils');
+            nativeData = await fetchLotteTourNative(url, false).catch(() => null);
+        } else if (url.includes('hanjintravel.com') || url.includes('kaltour.com')) {
+            const { fetchHanjinTravelNative } = await import('../hanjintravel-utils');
+            nativeData = await fetchHanjinTravelNative(url, false).catch(() => null);
         }
         console.log(`[Confirmation/Index] Native API result: ${nativeData ? 'SUCCESS' : 'FAILED'}`);
     } catch (e) {
@@ -35,8 +44,9 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
 
     // ===== 2단계: Native 데이터가 충분한지 판단 =====
     const nativeHasItinerary = nativeData?.itinerary && Array.isArray(nativeData.itinerary) && nativeData.itinerary.length > 0;
-    const nativeHasTitle = !!nativeData?.title;
-    const nativeIsSufficient = nativeHasItinerary && nativeHasTitle;
+    const nativeHasTitle = !!nativeData?.title && nativeData.title.length > 3;
+    // title만 제대로 확보되었어도 무거운 20초 Puppeteer로 빠지지 않고 Native 확정서 데이터 반환
+    const nativeIsSufficient = nativeHasTitle;
 
     console.log(`[Confirmation/Index] Native sufficient: ${nativeIsSufficient} (itinerary: ${nativeData?.itinerary?.length || 0} days, title: ${nativeHasTitle})`);
 

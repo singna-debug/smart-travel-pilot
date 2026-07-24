@@ -58,19 +58,34 @@ async function analyzeSingleUrl(url: string, source: string | undefined, text?: 
             const fullText = htmlToText(html, url);
             info = await crawlForConfirmation(url, fullText, nextData);
         } else {
-            switch (effectiveMode) {
-                case 'booking':
-                    info = await crawlForBooking(url);
-                    break;
-                case 'reservation_guide':
-                    info = await crawlForReservationGuide(url);
-                    break;
-                case 'confirmation':
-                case 'deep':
-                    info = await crawlForConfirmation(url);
-                    break;
-                default:
-                    info = await crawlTravelProduct(url);
+            // 모두투어 URL은 확정서 제작 초고속 엔진(crawlForConfirmation)을 직접 사용하여 3초 만에 반환
+            if (url.includes('modetour.com') || url.includes('modetour.co.kr')) {
+                console.log('[API] Modetour detected: Using fast crawlForConfirmation engine (3s)...');
+                info = await crawlForConfirmation(url);
+            }
+
+            if (!info) {
+                const { dispatchToAgency } = await import('@/lib/crawlers/agency-dispatcher');
+                const agencyResult = await dispatchToAgency(url, effectiveMode as any);
+                
+                if (agencyResult) {
+                    info = agencyResult;
+                } else {
+                    switch (effectiveMode) {
+                        case 'booking':
+                            info = await crawlForBooking(url);
+                            break;
+                        case 'reservation_guide':
+                            info = await crawlForReservationGuide(url);
+                            break;
+                        case 'confirmation':
+                        case 'deep':
+                            info = await crawlForConfirmation(url);
+                            break;
+                        default:
+                            info = await crawlTravelProduct(url);
+                    }
+                }
             }
         }
 

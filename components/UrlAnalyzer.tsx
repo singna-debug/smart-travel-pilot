@@ -369,10 +369,10 @@ export default function UrlAnalyzer() {
                 setSingleResult(data.data);
 
                 const info = data.data.raw;
-                if (!destination) setDestination(info.destination || '');
-                if (!departureDate && info.departureDate) setDepartureDate(formatToHtmlDate(info.departureDate));
-                if (!duration) setDuration(info.duration || '');
-                if (!interestedProduct) setInterestedProduct(info.title || '');
+                if (info.destination) setDestination(info.destination);
+                if (info.departureDate) setDepartureDate(formatToHtmlDate(info.departureDate));
+                if (info.duration) setDuration(info.duration);
+                if (info.title) setInterestedProduct(info.title);
 
                 if (customerName.trim() || customerPhone.trim()) {
                     setTimeout(() => saveAutomatically(data.data, false), 500);

@@ -1,5 +1,6 @@
-/** Modetour Utils - Updated with improved itinerary parsing and icon logic */
 import type { DetailedProductInfo } from '../../types';
+import { refineData } from './refiner';
+import { quickFetch } from '../crawler-base-utils';
 
 function buildModetourSegments(rawItems: any[]) {
     // 1. Normalize items
@@ -88,19 +89,28 @@ function buildModetourSegments(rawItems: any[]) {
     return segments;
 }
 
-export async function fetchModeTourNative(url: string, isSummaryOnly = false, html?: string): Promise<DetailedProductInfo | null> {
+export async function fetchModeTourNative(url: string, isSummaryOnly = false, htmlInput?: string): Promise<DetailedProductInfo | null> {
     let productNo = '';
 
     // 1. URL에서 추출 시도
-    const productNoMatch = url.match(/package\/(\d+)/i) ||
+    const productNoMatch = url.match(/productNo=(\d+)/i) ||
+        url.match(/package\/(\d+)/i) ||
         url.match(/goodsNo=(\d+)/i) ||
-        url.match(/productNo=(\d+)/i) ||
         url.match(/Pnum=(\d+)/i) ||
-        url.match(/\/(\d+)\?/);
+        url.match(/Pno=(\d+)/i) ||
+        url.match(/\/(\d{6,10})/);
 
     if (productNoMatch) {
         productNo = productNoMatch[1];
-    } else if (html) {
+    }
+
+    let html = htmlInput || '';
+    if (!productNo && !html) {
+        const fetchRes = await quickFetch(url);
+        html = typeof fetchRes === 'string' ? fetchRes : (fetchRes?.html || '');
+    }
+
+    if (html && !productNo) {
         const htmlMatch = html.match(/"productNo":\s*(\d+)/) ||
             html.match(/productNo=(\d+)/) ||
             html.match(/productNo\s*:\s*["'](\d+)["']/);
@@ -120,20 +130,63 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
     let dataSchedule: any = null;
 
     try {
-        const [resDetail, resSchedule] = await Promise.all([
-            fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`, { headers }),
-            fetch(`https://b2c-api.modetour.com/Package/GetScheduleList?productNo=${productNo}`, { headers })
-        ]);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2초 초고속 타임아웃
 
-        if (resDetail.ok) dataDetail = await resDetail.json();
-        if (resSchedule.ok) dataSchedule = await resSchedule.json();
+        const [resDetail, resSchedule] = await Promise.all([
+            fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`, { headers, signal: controller.signal }).catch(() => null),
+            fetch(`https://b2c-api.modetour.com/Package/GetScheduleList?productNo=${productNo}`, { headers, signal: controller.signal }).catch(() => null)
+        ]);
+        clearTimeout(timeoutId);
+
+        if (resDetail && resDetail.ok) dataDetail = await resDetail.json().catch(() => null);
+        if (resSchedule && resSchedule.ok) dataSchedule = await resSchedule.json().catch(() => null);
 
         if (!dataDetail?.result) {
-            const resSimple = await fetch(`https://b2c-api.modetour.com/Package/GetProductSimpleDetail?productNo=${productNo}`, { headers });
-            if (resSimple.ok) dataDetail = await resSimple.json();
+            const controller2 = new AbortController();
+            const timeoutId2 = setTimeout(() => controller2.abort(), 1500);
+            const resSimple = await fetch(`https://b2c-api.modetour.com/Package/GetProductSimpleDetail?productNo=${productNo}`, { headers, signal: controller2.signal }).catch(() => null);
+            clearTimeout(timeoutId2);
+            if (resSimple && resSimple.ok) dataDetail = await resSimple.json().catch(() => null);
         }
     } catch (e: any) {
-        console.error('[Native] Fetch Error:', e.message);
+        console.error('[Modetour Native] API Fetch Error:', e.message);
+    }
+
+    if (!dataDetail?.result && html) {
+        const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i) || html.match(/<title>([^<]+)<\/title>/i);
+        const priceMatch = html.match(/([\d,]{4,10})\s*원/) || html.match(/sellingPrice["']?\s*:\s*["']?([\d,]+)/i);
+        const durationMatch = html.match(/(\d+\s*박\s*\d+\s*일)/);
+        const depDateMatch = html.match(/(\d{4}-\d{2}-\d{2})/);
+
+        if (titleMatch) {
+            const rawTitle = titleMatch[1].replace(/- 모두투어.*/, '').trim();
+            const pStr = priceMatch ? priceMatch[1].replace(/,/g, '') : '';
+            const priceFormatted = pStr && parseInt(pStr, 10) > 10000 ? parseInt(pStr, 10).toLocaleString() + '원' : '';
+
+            const fallbackResult: DetailedProductInfo = {
+                title: rawTitle,
+                destination: '해외',
+                price: priceFormatted,
+                departureDate: depDateMatch ? depDateMatch[1] : '',
+                returnDate: '',
+                duration: durationMatch ? durationMatch[1] : '',
+                airline: '',
+                departureAirport: '인천',
+                url: url,
+                keyPoints: [],
+                features: [],
+                courses: [],
+                specialOffers: [],
+                inclusions: [],
+                exclusions: [],
+                itinerary: [],
+                hashtags: '',
+                hasNoOption: false,
+                hasFreeSchedule: false
+            };
+            return refineData(fallbackResult, html, url);
+        }
     }
 
     if (dataDetail?.result || dataDetail?.productName) {
@@ -440,11 +493,75 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             }
         });
 
-        return {
-            isProduct: true,
+        let rawPrice = String(d.sellingPriceAdultTotalAmount || d.sellingPrice || d.price || '').replace(/[^0-9]/g, '');
+        let formattedPrice = rawPrice ? parseInt(rawPrice, 10).toLocaleString() + '원' : '';
+
+        // 모두투어 개조식 상품 포인트 (HTML 앤티티 &nbsp; 및 약관글 전면 제거, 부족 시 일정 자동 채움)
+        const cleanBullets: string[] = [];
+
+        // 1. 원문 포인트 소스 수집
+        const rawHtmlSource = [d.productPoint, d.promotionText, d.promotionNote, d.travelRecommendNote]
+            .filter(Boolean)
+            .join('\n');
+
+        if (rawHtmlSource) {
+            const parsedLines = parseHtml(rawHtmlSource);
+            for (const line of parsedLines) {
+                let clean = line
+                    .replace(/&nbsp;/g, ' ')
+                    .replace(/&amp;/g, '&')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+                    .replace(/^[#★♥■📍🏝🌊💅🍖🏨\s]+/, '')
+                    .replace(/#/g, '')
+                    .trim();
+
+                // 쓸데없는 단어 및 약관/이동문구 제거
+                if (clean.length >= 6 && clean.length <= 100) {
+                    const isBoilerplate = clean.includes('5주전') || clean.includes('최종 인원') || clean.includes('경유국가') || clean.includes('베스트셀러') || clean.includes('공항세') || clean.includes('여행자 보험') || clean.includes('관세가 부과') || clean.includes('주차장 사전예약') || clean.includes('신청금');
+                    if (!isBoilerplate && !cleanBullets.includes(clean)) {
+                        cleanBullets.push(clean);
+                    }
+                }
+            }
+        }
+
+        // 2. 만약 상품 포인트가 부족하면(3개 미만) 일정(Itinerary) 및 상품 정보에서 핵심 개조식 항목 자동 추가!
+        if (cleanBullets.length < 4) {
+            const recText = (d.travelRecommendNote || '') + (d.specificNote || '') + (d.productName || '');
+            
+            // 혜택/코스 옵션
+            const parenMatch = d.productName ? d.productName.match(/\(([^)]+)\)/) : null;
+            if (parenMatch) {
+                const opt = parenMatch[1].trim();
+                if (opt.includes('VS') || opt.includes('선택')) {
+                    cleanBullets.push(`선택 일정 (${opt})`);
+                }
+            }
+
+            const fullTitleAndTags = `${d.productName || ''} ${d.groupBriefKeyword || ''} ${d.keyword || ''}`;
+            if (fullTitleAndTags.includes('온천') && !cleanBullets.some(p => p.includes('온천'))) {
+                cleanBullets.push('전일정 온천 호텔 숙박 및 온천 일정 포함');
+            }
+            if (fullTitleAndTags.includes('마사지') && !cleanBullets.some(p => p.includes('마사지'))) {
+                cleanBullets.push('여행의 피로를 풀어주는 전신 마사지 체험 포함');
+            }
+            if (fullTitleAndTags.includes('호핑') && !cleanBullets.some(p => p.includes('호핑'))) {
+                cleanBullets.push(fullTitleAndTags.includes('해적') ? '나트랑의 푸른 바다 100% 즐기기! 해적 호핑투어 포함' : '나트랑 해양 호핑투어 포함');
+            }
+            if (fullTitleAndTags.includes('삼겹살') && !cleanBullets.some(p => p.includes('삼겹살'))) {
+                cleanBullets.push('무제한 삼겹살 포함! 맛과 양 모두 잡은 식사 혜택');
+            }
+            if (d.freeScheduleName && d.freeScheduleName !== '없음' && !cleanBullets.some(p => p.includes('자유일정'))) {
+                cleanBullets.push('자유여행과 패키지의 장점만 쏙쏙 담은 여유로운 자유일정 포함');
+            }
+        }
+
+        const nativeResult: DetailedProductInfo = {
             title: d.productName || '',
             destination: aggregatedDest || (d.category2 ? `${d.category2}, ${d.category3 || ''}` : ''),
-            price: String(d.sellingPriceAdultTotalAmount || '').replace(/[^0-9]/g, ''),
+            price: formattedPrice,
             departureDate: d.departureDate || '',
             returnDate: d.arrivalDate || '',
             duration: finalDuration,
@@ -452,23 +569,27 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             departureFlightNumber: deptAir.departureFlight || '',
             returnFlightNumber: returnAir.departureFlight || returnAir.arrivalFlight || '',
             departureAirport: deptAir.departureCityName || '인천',
-            arrivalAirport: deptAir.arrivalCityName || '',
             departureTime: deptAir.departureTime || '',
             arrivalTime: deptAir.arrivalTime || '',
-            departureDuration: deptAir.departureFlightDuration || '',
-            returnDepartureAirport: returnAir.departureCityName || '',
             returnDepartureTime: returnAir.departureTime || '',
             returnArrivalTime: returnAir.arrivalTime || '',
-            returnDuration: returnAir.departureFlightDuration || '',
             departureSegments: deptAir.segments || [],
             returnSegments: returnAir.segments || [],
             url: url,
             itinerary: itinerary,
-            hotels: hotels, // 복구된 호텔 상세 정보 배열
-            meetingInfo: meetingInfo, // 미팅 정보 추가
+            meetingInfo: meetingInfo,
             inclusions: parseHtml(d.includedNote),
-            exclusions: parseHtml(d.unincludedNote)
-        } as any;
+            exclusions: parseHtml(d.unincludedNote),
+            keyPoints: Array.from(new Set(cleanBullets)).slice(0, 6),
+            features: [],
+            courses: [],
+            specialOffers: [],
+            hashtags: d.groupBriefKeyword || '',
+            hasNoOption: false,
+            hasFreeSchedule: d.freeScheduleName ? true : false
+        };
+
+        return refineData(nativeResult, html, url);
     }
     return null;
 }
@@ -481,6 +602,5 @@ function parseHtml(h: string): string[] {
     return clean.replace(/<[^>]+>/g, '\n')
         .split('\n')
         .map(s => s.trim())
-        // 3. 'Untitled' 같은 의미 없는 텍스트나 너무 짧은 줄 제외
         .filter(s => s.length > 2 && s.toLowerCase() !== 'untitled');
 }

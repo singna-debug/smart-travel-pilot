@@ -47,9 +47,9 @@ export async function scrapeWithBrowser(url: string, options: ScrapeOptions = {}
         });
         */
 
-        // 타임아웃 60초, DOM 로드 시점까지만 대기 (이후 수동 로딩)
-        console.log('[Browser] 페이지 이동 (Timeout 60s, domcontentloaded)...');
-        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        // 타임아웃 6초, DOM 로드 시점까지만 대기
+        console.log('[Browser] 페이지 이동 (Timeout 6s, domcontentloaded)...');
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 6000 }).catch(() => {});
 
         // 1. 초기 로딩 대기 (최소한의 텍스트)
         try {
