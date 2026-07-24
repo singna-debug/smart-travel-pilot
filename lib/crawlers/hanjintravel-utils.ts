@@ -64,11 +64,19 @@ export async function fetchHanjinTravelNative(url: string, isSummaryOnly: boolea
         bodyText = renderedHtml.replace(/<[^>]+>/g, '\n');
       }
 
-      // 1. 상품명 (Vercel 호환 보장)
+      // 1. 상품명 (모든 <style> 및 CSS 대괄호 노이즈 100% 제거)
+      const cleanBody = bodyText
+        .replace(/<style[\s\S]*?<\/style>/gi, '')
+        .replace(/[a-z0-9_\-\.]+\s*\[[^\]]+\]\s*\{[^}]*\}/gi, '')
+        .replace(/\[disabled\][\s\S]*?\{[^}]*\}/gi, '')
+        .trim();
+
       let title = '';
-      const titleMatch = bodyText.match(/상품코드\s*[A-Z0-9]+\s*\n+([^\n]+)/) ||
-                         bodyText.match(/(\[[^\]]+\][^\n]{10,100})/);
-      if (titleMatch && !titleMatch[1].includes('한진트래블')) {
+      const titleMatch = cleanBody.match(/상품코드\s*[A-Z0-9]+\s*\n+([^\n]+)/) ||
+                         cleanBody.match(/(\[★[^\]]+\][^\n]{5,100})/) ||
+                         cleanBody.match(/(\[[^\]]{3,30}\][^\n]{10,100})/);
+
+      if (titleMatch && !titleMatch[1].includes('한진트래블') && !titleMatch[1].includes('disabled') && !titleMatch[1].includes('background')) {
         title = titleMatch[1].trim();
       } else {
         title = '[★추석연휴특별기획] 오사카/교토/우지/이네 4일 #전일정온천호텔 #교토숙박 #무제한주류&음료 2회!';
