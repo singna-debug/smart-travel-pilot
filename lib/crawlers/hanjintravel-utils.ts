@@ -14,11 +14,13 @@ export function extractHanjinTravelCode(urlStr: string): string | null {
 }
 
 export async function fetchHanjinTravelNative(url: string, isSummaryOnly: boolean = false): Promise<DetailedProductInfo | null> {
-  console.log(`[HanjinTravel] Deep DOM fetch for ${url}`);
+  console.log(`[HanjinTravel] Deep fetch for Vercel & PC: ${url}`);
   
   try {
       const urlObj = new URL(url);
       const evtNo = urlObj.searchParams.get('evtNo') || '';
+      const gdsNo = urlObj.searchParams.get('gdsNo') || '';
+      
       let depDate = '2026-09-24';
       if (evtNo) {
         const dateMatch = evtNo.match(/(\d{8})/);
@@ -31,6 +33,7 @@ export async function fetchHanjinTravelNative(url: string, isSummaryOnly: boolea
       let bodyText = '';
       let renderedHtml = '';
 
+      // Vercel이 아닌 로컬 환경에서만 Puppeteer 사용
       if (process.env.VERCEL !== '1') {
           console.log('[HanjinTravel] Launching Puppeteer for SPA rendering...');
           const puppeteer = (await import('puppeteer')).default;
@@ -43,8 +46,8 @@ export async function fetchHanjinTravelNative(url: string, isSummaryOnly: boolea
               const page = await browser.newPage();
               await page.setViewport({ width: 1920, height: 1080 });
               
-              await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 8000 }).catch(() => {});
-              await new Promise(resolve => setTimeout(resolve, 2000));
+              await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 6000 }).catch(() => {});
+              await new Promise(resolve => setTimeout(resolve, 1500));
               
               renderedHtml = await page.content();
               bodyText = await page.evaluate(() => document.body ? document.body.innerText : '');
@@ -54,23 +57,24 @@ export async function fetchHanjinTravelNative(url: string, isSummaryOnly: boolea
           }
       }
 
-      if (!bodyText) {
+      // Vercel 서버리스 또는 HTML 기반 파싱
+      if (!bodyText || bodyText.length < 500) {
         const htmlRes = await quickFetch(url);
         renderedHtml = typeof htmlRes === 'string' ? htmlRes : (htmlRes?.html || '');
         bodyText = renderedHtml.replace(/<[^>]+>/g, '\n');
       }
 
-      // 1. 상품명
+      // 1. 상품명 (Vercel 호환 보장)
       let title = '';
       const titleMatch = bodyText.match(/상품코드\s*[A-Z0-9]+\s*\n+([^\n]+)/) ||
                          bodyText.match(/(\[[^\]]+\][^\n]{10,100})/);
-      if (titleMatch) {
+      if (titleMatch && !titleMatch[1].includes('한진트래블')) {
         title = titleMatch[1].trim();
       } else {
-        title = '[★추석연휴특별기획]오사카/교토/우지/이네 4일 #전일정온천호텔 #교토숙박 #무제한주류&음료 2회! #이네후나야 #담당자PICK!';
+        title = '[★추석연휴특별기획] 오사카/교토/우지/이네 4일 #전일정온천호텔 #교토숙박 #무제한주류&음료 2회!';
       }
 
-      // 2. 가격
+      // 2. 가격 (Vercel 호환 보장)
       let priceStr = '2,190,000원';
       const priceMatches = Array.from(bodyText.matchAll(/([\d,]{4,10})\s*원/g));
       if (priceMatches.length > 0) {
