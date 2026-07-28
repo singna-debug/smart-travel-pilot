@@ -1,5 +1,5 @@
 import { DetailedProductInfo } from '../../types';
-import { quickFetch, inferDestination } from '../crawler-base-utils';
+import { quickFetch, inferDestination, htmlToText } from '../crawler-base-utils';
 
 export function extractHanjinTravelCode(url: string): string | null {
   try {
@@ -99,7 +99,13 @@ export async function fetchHanjinTravelNative(url: string, isSummaryOnly: boolea
     const spotMap: Record<string, string[]> = (typeof spotImageMap !== 'undefined' && spotImageMap) ? spotImageMap : {};
 
     if (!domText) {
-      domText = await quickFetch(targetUrl);
+      try {
+        const fetchResult = await quickFetch(targetUrl);
+        const rawHtml = typeof fetchResult === 'string' ? fetchResult : (fetchResult?.html || '');
+        domText = rawHtml ? htmlToText(rawHtml, targetUrl) : '';
+      } catch (e) {
+        console.error('[HanjinTravel] quickFetch fallback error:', e);
+      }
     }
 
     const isAfricaUrl = targetUrl.includes('KW62283') || targetUrl.includes('OP20260803017');
