@@ -131,9 +131,17 @@ export async function fetchHanjinTravelNative(url: string, isSummaryOnly: boolea
       }
     }
 
-    if (!priceStr && domText) {
-      const priceMatch = domText.match(/([\d,]+원)/);
-      if (priceMatch) priceStr = priceMatch[1];
+    if (!priceStr) {
+      const priceMatch = domText.match(/([0-9,]{5,}\s*원)/) || domText.match(/\b([5-9]\d{5,7}|1\d{6,7})\b/);
+      if (priceMatch) {
+        const num = parseInt(priceMatch[1].replace(/[^0-9]/g, ''), 10);
+        if (num >= 400000) {
+          priceStr = `${num.toLocaleString()}원`;
+        }
+      }
+    }
+    if (!priceStr || priceStr.trim().length === 0) {
+      priceStr = '가격 정보 문의 (선착순 특가)';
     }
 
     if (!depDate) {

@@ -993,6 +993,9 @@ export default function UrlAnalyzer() {
                                         (() => {
                                             const p = String(singleResult.raw.price);
                                             const digits = p.replace(/[^0-9]/g, '');
+                                            if (!digits || digits === '0') {
+                                                return p;
+                                            }
                                             const formatted = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                                             return formatted + '원';
                                         })()
