@@ -24,7 +24,9 @@ export async function fetchHanjinTravelNative(url: string, isSummaryOnly: boolea
     let domText = '';
     let extractedImages: string[] = [];
 
-    if (typeof window === 'undefined') {
+    // Skip Puppeteer on Vercel serverless functions or during fast URL analysis summary mode
+    const isVercel = process.env.VERCEL === '1' || process.env.NEXT_PUBLIC_VERCEL_ENV !== undefined;
+    if (typeof window === 'undefined' && !isVercel && !isSummaryOnly) {
       try {
         console.log('[HanjinTravel] Launching Puppeteer for SPA rendering & Image extraction...');
         const puppeteer = (await import('puppeteer')).default;
