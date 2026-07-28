@@ -122,10 +122,13 @@ export async function fetchHanjinTravelNative(url: string, isSummaryOnly: boolea
       if (codeIdx !== -1 && codeIdx + 1 < lines.length) {
         title = lines[codeIdx + 1];
       } else {
-        const titleLine = lines.find(l => (l.startsWith('[') || l.includes('일')) && l.length > 10 && !l.includes('상품검색') && !l.includes('고객센터') && !l.includes('광주월드컵점'));
+        const titleLine = lines.find(l => (l.startsWith('[') || l.includes('일')) && l.length > 10 && !l.includes('TARGET_METADATA') && !l.includes('====') && !l.includes('상품검색') && !l.includes('고객센터') && !l.includes('광주월드컵점'));
         if (titleLine) title = titleLine;
       }
-      if (!title) title = lines[0] || '한진관광 패키지 상품';
+      if (!title || title.includes('TARGET_METADATA') || title.includes('====')) {
+        const gdsMatch = targetUrl.match(/gdsNo=([A-Z0-9]+)/i);
+        title = gdsMatch ? `한진관광 추천 패키지 [${gdsMatch[1]}]` : '한진관광 추천 패키지 상품';
+      }
     }
 
     if (!priceStr && domText) {
