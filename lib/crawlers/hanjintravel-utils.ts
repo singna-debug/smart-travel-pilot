@@ -131,9 +131,14 @@ export async function fetchHanjinTravelNative(url: string, isSummaryOnly: boolea
       if (priceMatch) priceStr = priceMatch[1];
     }
 
-    if (!depDate && domText) {
-      const dateMatch = domText.match(/(\d{4}[-./]\d{2}[-./]\d{2}|\d{2}\.\d{2}\.\d{2}\([월화수목금토일]\))/);
-      if (dateMatch) depDate = dateMatch[1];
+    if (!depDate) {
+      const evtMatch = targetUrl.match(/evtNo=[A-Z]*(\d{4})(\d{2})(\d{2})/i) || domText.match(/evtNo=[A-Z]*(\d{4})(\d{2})(\d{2})/i);
+      if (evtMatch) {
+        depDate = `${evtMatch[1]}-${evtMatch[2]}-${evtMatch[3]}`;
+      } else if (domText) {
+        const dateMatch = domText.match(/(\d{4}[-./]\d{2}[-./]\d{2}|\d{2}\.\d{2}\.\d{2}\([월화수목금토일]\))/);
+        if (dateMatch) depDate = dateMatch[1];
+      }
     }
 
     // ─── 100% Exact Raw Inclusions & Exclusions ───
