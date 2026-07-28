@@ -163,6 +163,7 @@ export interface DetailedProductInfo {
   description?: string;
   notices?: string[];
   specialTerms?: string;
+  cancellationPolicy?: string;
   baggageNote?: string;
 }
 
@@ -188,7 +189,6 @@ export interface DocumentFile {
   type: 'boarding_pass' | 'visa' | 'insurance' | 'other';
   label: string;
   url: string;
-  uploadedAt: string;
 }
 
 // 여행자 정보
@@ -200,7 +200,8 @@ export interface TravelerInfo {
 // 호텔 기본 정보
 export interface HotelInfo {
   name: string;
-  address: string;
+  englishName?: string;
+  address?: string;
   checkIn: string;
   checkOut: string;
   images?: string[];
@@ -208,14 +209,18 @@ export interface HotelInfo {
 }
 
 export interface FlightSegment {
-  airline: string;
-  flightNo: string;
-  departureCity: string;
-  departureTime: string;
-  arrivalCity: string;
-  arrivalTime: string;
+  airline?: string;
+  flightNo?: string;
+  flightNumber?: string;
+  departureCity?: string;
+  departureAirport?: string;
+  departureTime?: string;
+  arrivalCity?: string;
+  arrivalAirport?: string;
+  arrivalTime?: string;
   duration?: string;
   layoverDuration?: string;
+  layoverTime?: string;
 }
 
 // 모바일 확정서 데이터
@@ -374,21 +379,17 @@ export interface ItineraryStep {
 }
 
 export interface ItineraryDay {
-  day: number | string;
-  title: string;
-  date?: string;   // 예: "2026/06/26(금)"
-  route?: string;  // 예: "인천 -> 도야"
-  timeline: (string | ItineraryStep)[]; // 하이브리드 지원 (구조화 데이터 우선)
-  summary: {
-    attraction: string;
-    hotel: string;
-    meal: string;
-    transport: string;
-  };
-  // 호환성을 위한 구 필드 보관
+  day: number;
+  date?: string;
+  title?: string;
+  route?: string;
+  flightInfo?: FlightInfoCard;
+  description?: string;
+  items?: any[];
+  timeline?: any[];
+  meals?: any;
   activities?: string[];
   transport?: any;
-  meals?: any;
 }
 
 export interface LandmarkInfo {

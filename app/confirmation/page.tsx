@@ -335,15 +335,45 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
                 // ---- 일정 및 미팅 (누락 차단 및 &nbsp; 정화) ----
                 if (raw.itinerary && Array.isArray(raw.itinerary)) {
                     console.log(`[DEBUG] Setting itinerary: ${raw.itinerary.length} days`);
-                    const cleanedItinerary = raw.itinerary.map((day: any) => ({
-                        ...day,
-                        items: Array.isArray(day.items) ? day.items.map((item: any) => ({
-                            ...item,
-                            title: clean(item.title),
-                            description: clean(item.description),
-                            location: clean(item.location)
-                        })) : []
-                    }));
+                    const cleanedItinerary = raw.itinerary.map((day: any) => {
+                        const rawItems = Array.isArray(day.items) && day.items.length > 0 
+                            ? day.items 
+                            : (Array.isArray(day.timeline) && day.timeline.length > 0 ? day.timeline : []);
+                        
+                        let finalItems = rawItems.map((item: any) => {
+                            const titleStr = clean(item.title || '');
+                            const isNonSpot = (t: string) => {
+                                return t.includes('조식') || t.includes('중식') || t.includes('석식') || t.startsWith('식사') ||
+                                    t.includes('이동') || t.includes('출발') || t.includes('도착') || t.includes('해산') || t.includes('공항') || t.includes('편') ||
+                                    t.includes('체크인') || t.includes('체크아웃') || t.includes('호텔 휴식') || t.includes('자유 시간') || t.includes('모임') || t.includes('미팅');
+                            };
+                            const typeVal = (item.type === 'location' || (!isNonSpot(titleStr) && titleStr.length > 1)) ? 'location' : 'default';
+
+                            return {
+                                ...item,
+                                title: titleStr,
+                                description: clean(item.description),
+                                location: clean(item.location),
+                                type: typeVal,
+                                image: item.image || item.imageUrl || ''
+                            };
+                        });
+
+                        if (finalItems.length === 0 && (day.description || day.title)) {
+                            finalItems = [{
+                                title: clean(day.title || `${day.day || 1}일차 일정`),
+                                description: clean(day.description || ''),
+                                type: 'default'
+                            }];
+                        }
+
+                        return {
+                            ...day,
+                            title: day.title ? clean(day.title) : '',
+                            items: finalItems,
+                            timeline: finalItems
+                        };
+                    });
                     setItinerary(cleanedItinerary);
                 }
 
@@ -366,9 +396,15 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
                     if (mInfo.length > 0) setMeetingInfo(mInfo);
                 }
 
-                // ---- 기타 사항 (문자열 강제 전환 및 &nbsp; 정화) ----
-                if (raw.inclusions) setInclusions(clean(raw.inclusions));
-                if (raw.exclusions) setExclusions(clean(raw.exclusions));
+                // ---- 기타 사항 (원문 100% 무가공 그대로 바인딩) ----
+                if (raw.inclusions) {
+                    const incStr = Array.isArray(raw.inclusions) ? raw.inclusions.join('\n') : String(raw.inclusions);
+                    setInclusions(incStr);
+                }
+                if (raw.exclusions) {
+                    const excStr = Array.isArray(raw.exclusions) ? raw.exclusions.join('\n') : String(raw.exclusions);
+                    setExclusions(excStr);
+                }
                 if (raw.cancellationPolicy) setCancellationPolicy(clean(raw.cancellationPolicy));
                 if (raw.checklist) setChecklist(clean(raw.checklist) || checklist); // AI 결과가 없으면 기본값 유지
 

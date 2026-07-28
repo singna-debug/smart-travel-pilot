@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { crawlTravelProduct, formatProductInfo, generateRecommendation, compareProducts, htmlToText, crawlForConfirmation, crawlForBooking, crawlForReservationGuide } from '@/lib/url-crawler';
 import type { TravelProductInfo, DetailedProductInfo } from '@/types';
 
-// URL 분석 API (단일 및 다중 URL 지원)
+// URL 분석 API (단일 및 다중 URL 지원) - Departure date 2026-08-02 & recursion fix applied
 export const preferredRegion = 'icn1';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -58,34 +58,18 @@ async function analyzeSingleUrl(url: string, source: string | undefined, text?: 
             const fullText = htmlToText(html, url);
             info = await crawlForConfirmation(url, fullText, nextData);
         } else {
-            // 모두투어 URL은 확정서 제작 초고속 엔진(crawlForConfirmation)을 직접 사용하여 3초 만에 반환
-            if (url.includes('modetour.com') || url.includes('modetour.co.kr')) {
-                console.log('[API] Modetour detected: Using fast crawlForConfirmation engine (3s)...');
+            if (effectiveMode === 'normal' || effectiveMode === 'summary') {
+                const { crawlForUrlAnalysis } = await import('@/lib/crawlers/url-analysis');
+                info = await crawlForUrlAnalysis(url);
+            } else if (effectiveMode === 'confirmation' || effectiveMode === 'deep') {
+                const { crawlForConfirmation } = await import('@/lib/crawlers/confirmation');
                 info = await crawlForConfirmation(url);
-            }
-
-            if (!info) {
-                const { dispatchToAgency } = await import('@/lib/crawlers/agency-dispatcher');
-                const agencyResult = await dispatchToAgency(url, effectiveMode as any);
-                
-                if (agencyResult) {
-                    info = agencyResult;
-                } else {
-                    switch (effectiveMode) {
-                        case 'booking':
-                            info = await crawlForBooking(url);
-                            break;
-                        case 'reservation_guide':
-                            info = await crawlForReservationGuide(url);
-                            break;
-                        case 'confirmation':
-                        case 'deep':
-                            info = await crawlForConfirmation(url);
-                            break;
-                        default:
-                            info = await crawlTravelProduct(url);
-                    }
-                }
+            } else if (effectiveMode === 'booking') {
+                info = await crawlForBooking(url);
+            } else if (effectiveMode === 'reservation_guide') {
+                info = await crawlForReservationGuide(url);
+            } else {
+                info = await crawlTravelProduct(url);
             }
         }
 

@@ -33,7 +33,6 @@ export async function fetchContent(url: string, options: FetchOptions = {}): Pro
         console.log(`[Fetcher] ModeTour Fetch Status. NativeData: ${!!nativeData}, HTML Length: ${html.length}`);
 
         // [CRITICAL] 404/Queue-it 등으로 HTML을 못 가져왔을 경우 브라우저 스크래퍼(Puppeteer) 시도
-        // 🚀 그러나 이미 nativeData를 통해 완벽한 정보(상품명 길이 등)를 확보했다면, 무거운 Puppeteer로 fallback하지 않고 시간을 단축합니다.
         const hasGoodNativeData = nativeData && nativeData.title && nativeData.title.length > 5;
         
         if (!hasGoodNativeData && (!html || html.length < 500)) {
@@ -49,7 +48,6 @@ export async function fetchContent(url: string, options: FetchOptions = {}): Pro
         }
 
         if (nativeData || html) {
-            // [추가] 만약 nativeData가 없다면 HTML에서 productNo를 찾아 재시도
             let finalNative = nativeData;
             if (!finalNative && html && html.length > 500) {
                 console.log('[Fetcher] NativeData missing. Retrying with HTML-based productNo detection...');
@@ -64,24 +62,19 @@ export async function fetchContent(url: string, options: FetchOptions = {}): Pro
     }
 
     const isHanaTour = url.includes('hanatour.com');
-    if (isHanaTour) {
-        try {
-            const { fetchHanaTourNative } = await import('./hanatour-utils');
-            const nativeData = await fetchHanaTourNative(url, isSummaryOnly).catch(e => {
-                console.error(`[Fetcher] Hanatour Native Fetch Error: ${e.message}`);
-                return null;
-            });
-            if (nativeData) {
-                console.log(`[Fetcher] Hanatour Native Fetch Success! Title: ${nativeData.title}`);
-                return {
-                    text: JSON.stringify(nativeData),
-                    nextData: undefined,
-                    nativeData
-                };
-            }
-        } catch (e: any) {
-            console.error('[Fetcher] Hanatour Native module import/execution failed:', e.message);
+    try {
+        const { crawlForUrlAnalysis } = await import('./url-analysis');
+        const nativeData = await crawlForUrlAnalysis(url).catch(() => null);
+        if (nativeData) {
+            console.log(`[Fetcher] Native Fetch Success via URL Analysis module! Title: ${nativeData.title}`);
+            return {
+                text: JSON.stringify(nativeData),
+                nextData: undefined,
+                nativeData
+            };
         }
+    } catch (e: any) {
+        console.error('[Fetcher] URL Analysis module failed:', e.message);
     }
 
     const { html } = await quickFetch(url);

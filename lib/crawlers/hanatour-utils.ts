@@ -204,6 +204,8 @@ export async function fetchHanaTourNative(url: string, isSummaryOnly = false): P
 
     const headers = {
         'content-type': 'application/json',
+        'accept': 'application/json',
+        'origin': 'https://www.hanatour.com',
         'prgmid': 'CHPC0PKG0200M200',
         'referer': 'https://www.hanatour.com/',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -426,14 +428,29 @@ export async function fetchHanaTourNative(url: string, isSummaryOnly = false): P
     }] : [];
 
     // Highlights / Keypoints
-    const keyPoints = (info.prodCorePntList || []).map((p: any) => 
+    let keyPoints = (info.prodCorePntList || []).map((p: any) => 
         cleanHtml(`${p.corePntTitlNm || ''}: ${p.corePntCont || ''}`)
     ).filter(Boolean).slice(0, 8);
 
-    return {
+    if (!keyPoints || keyPoints.length === 0) {
+        try {
+            const { quickFetch, htmlToText } = require('../crawler-base-utils');
+            const { extractRichKeyPointsFromText } = require('./url-analysis');
+            const fetchRes = await quickFetch(url).catch(() => ({ html: '' }));
+            if (fetchRes && fetchRes.html) {
+                const text = htmlToText(fetchRes.html, url);
+                const rich = extractRichKeyPointsFromText(text);
+                if (rich && rich.length > 0) {
+                    keyPoints = rich;
+                }
+            }
+        } catch (e) {}
+    }
+
+    const rawResult = {
         isProduct: true,
         title: cleanHtml(title),
-        destination: info.prdAttrCd === 'P' ? cleanHtml(lastDep.arrivalCity || '') : '',
+        destination: cleanHtml(info.destNm || lastDep.arrivalCity || ''),
         price: priceStr,
         departureDate,
         returnDate,
@@ -458,4 +475,7 @@ export async function fetchHanaTourNative(url: string, isSummaryOnly = false): P
         exclusions,
         keyPoints
     } as any;
+
+    const { refineData } = require('./refiner');
+    return refineData(rawResult, JSON.stringify(info), url);
 }

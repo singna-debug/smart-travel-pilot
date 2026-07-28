@@ -1147,4 +1147,11 @@
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
+
+    img {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        max-width: 100% !important;
+        display: block !important;
+    }
 }

@@ -387,6 +387,19 @@ const TimelineItem = ({ item }: { item: any }) => {
         cleanDesc = cleanDesc.replace(/<img[^>]+>/gi, '');
     }
 
+    // 2-1. Fallback: Check item.images or item.image if no HTML img tags extracted
+    if (imageUrls.length === 0) {
+        if (Array.isArray(item.images) && item.images.length > 0) {
+            item.images.forEach((imgUrl: any) => {
+                if (typeof imgUrl === 'string' && imgUrl.startsWith('http')) {
+                    imageUrls.push(imgUrl);
+                }
+            });
+        } else if (item.image && typeof item.image === 'string' && item.image.startsWith('http')) {
+            imageUrls.push(item.image);
+        }
+    }
+
     // 3. Format and collapse duplicate spacing/newlines for ALL descriptions
     cleanDesc = cleanDesc
         .replace(/<br\s*\/?>/gi, '\n')
@@ -457,10 +470,10 @@ const TimelineItem = ({ item }: { item: any }) => {
                 {imageUrls.length > 0 && (
                     <div style={{ 
                         display: imageUrls.length === 1 ? 'block' : 'grid', 
-                        gridTemplateColumns: imageUrls.length > 1 ? `repeat(${Math.min(imageUrls.length, 3)}, 1fr)` : 'none',
-                        gap: '8px', 
-                        marginTop: '8px', 
-                        marginBottom: '8px',
+                        gridTemplateColumns: imageUrls.length > 1 ? `repeat(${Math.min(imageUrls.length, 2)}, 1fr)` : 'none',
+                        gap: '10px', 
+                        marginTop: '10px', 
+                        marginBottom: '10px',
                         width: '100%' 
                     }}>
                         {imageUrls.map((url, uidx) => (
@@ -468,13 +481,13 @@ const TimelineItem = ({ item }: { item: any }) => {
                                 key={uidx} 
                                 src={url} 
                                 style={{ 
-                                    width: imageUrls.length === 1 ? 'auto' : '100%', 
-                                    height: imageUrls.length === 1 ? 'auto' : '180px', 
-                                    maxWidth: '100%',
-                                    maxHeight: imageUrls.length === 1 ? '220px' : 'none',
-                                    objectFit: imageUrls.length === 1 ? 'contain' : 'cover', 
-                                    borderRadius: '8px', 
-                                    display: 'block' 
+                                    width: '100%', 
+                                    aspectRatio: '16 / 10',
+                                    objectFit: 'cover', 
+                                    borderRadius: '12px', 
+                                    display: 'block',
+                                    border: '1px solid #f1f5f9',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                                 }} 
                                 alt="일정 이미지" 
                             />
@@ -843,7 +856,7 @@ const getAirlineInfo = (codeOrName: string) => {
 };
 const ParsedFlightCard = ({ day, isFirst, isLast }: { day: any, isFirst: boolean, isLast: boolean }) => {
     // 1. 크롤러가 직접 주입한 flight 객체 우선
-    let flightInfo = day.flight;
+    let flightInfo = day.flight || day.flightInfo;
     
     // 2. transport/transportation 파싱 fallback
     if (!flightInfo) {
@@ -1171,6 +1184,7 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
     const [activeTab, setActiveTab] = useState<TabKey>('개요');
     const [showHotelModal, setShowHotelModal] = useState(false);
     const [selectedHotelIdx, setSelectedHotelIdx] = useState(0);
+    const [isHotelCollapsed, setIsHotelCollapsed] = useState(true);
     const [expandedDays, setExpandedDays] = useState<Record<number, boolean>>({});
     const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
     const [calcAmount, setCalcAmount] = useState('');
@@ -1632,7 +1646,7 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                                                 ),
                                                 arrivalTime: doc.flight.arrivalTime,
                                                 duration: (doc.flight as any).departureDuration || (doc.itinerary[0] as any)?.flight?.duration,
-                                                segments: doc.flight.departureSegments
+                                                segments: (Array.isArray(doc.flight.departureSegments) && doc.flight.departureSegments.length > 1) ? doc.flight.departureSegments : undefined
                                             }} 
                                         />
                                     )}
@@ -1652,7 +1666,7 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                                                 arrivalCity: simplifyDestination(doc.flight.departureAirport),
                                                 arrivalTime: doc.flight.returnArrivalTime,
                                                 duration: (doc.flight as any).returnDuration || (doc.itinerary[doc.itinerary.length-1] as any)?.flight?.duration,
-                                                segments: doc.flight.returnSegments
+                                                segments: (Array.isArray(doc.flight.returnSegments) && doc.flight.returnSegments.length > 1) ? doc.flight.returnSegments : undefined
                                             }} 
                                         />
                                     )}
@@ -1773,32 +1787,43 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                 {/* ============================== 2. 일정표 (+ 숙소 통합) ============================== */}
                 {activeTab === '일정표' && (
                     <>
-                        {/* 호텔 요약 카드 (다중 지원) */}
+                        {/* 호텔 요약 카드 (다중 지원 - 기본 접힘) */}
                         {doc.hotels && doc.hotels.length > 0 ? (
-                            <div className="mc-section" style={{ paddingBottom: '12px' }}>
-                                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginBottom: '8px', paddingLeft: '4px' }}>숙소 정보 ({doc.hotels.length})</div>
-                                <div className="hotel-summary-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                    {doc.hotels.map((h, idx) => (
-                                        <div key={idx} className="mc-hotel-summary" onClick={() => { setSelectedHotelIdx(idx); setShowHotelModal(true); }}>
-                                            {h.images && h.images.length > 0 && (
-                                                <img
-                                                    className="hotel-summary-img"
-                                                    src={h.images[0]?.startsWith('[IMG: ') ? h.images[0].replace('[IMG: ', '').replace(']', '') : (h.images[0] || '')}
-                                                    alt={h.name}
-                                                />
-                                            )}
-                                            <div className="hotel-summary-info">
-                                                <div className="hotel-summary-name">{h.name}</div>
-                                                {h.address && <div className="hotel-summary-addr">{h.address}</div>}
-                                                <div className="hotel-summary-meta">
-                                                    {h.checkIn && <span>체크인 {h.checkIn}</span>}
-                                                    {h.checkOut && <span> · 체크아웃 {h.checkOut}</span>}
-                                                </div>
-                                            </div>
-                                            <div className="hotel-summary-arrow">›</div>
-                                        </div>
-                                    ))}
+                            <div className="mc-section" style={{ padding: isHotelCollapsed ? '16px' : '16px 16px 12px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                <div 
+                                    onClick={() => setIsHotelCollapsed(!isHotelCollapsed)}
+                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', width: '100%', minHeight: '24px', margin: 0 }}
+                                >
+                                    <div style={{ fontSize: '0.9rem', color: '#334155', fontWeight: 700, lineHeight: 1.2, display: 'flex', alignItems: 'center' }}>숙소 정보 ({doc.hotels.length}개)</div>
+                                    <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', lineHeight: 1.2 }}>
+                                        <span>{isHotelCollapsed ? '펼쳐보기' : '접기'}</span>
+                                        <span style={{ fontSize: '0.65rem', transform: isHotelCollapsed ? 'rotate(0deg)' : 'rotate(180deg)', transition: 'transform 0.2s ease', display: 'inline-flex', alignItems: 'center' }}>▼</span>
+                                    </div>
                                 </div>
+                                {!isHotelCollapsed && (
+                                    <div className="hotel-summary-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {doc.hotels.map((h, idx) => (
+                                            <div key={idx} className="mc-hotel-summary" onClick={() => { setSelectedHotelIdx(idx); setShowHotelModal(true); }}>
+                                                {h.images && h.images.length > 0 && (
+                                                    <img
+                                                        className="hotel-summary-img"
+                                                        src={h.images[0]?.startsWith('[IMG: ') ? h.images[0].replace('[IMG: ', '').replace(']', '') : (h.images[0] || '')}
+                                                        alt={h.name}
+                                                    />
+                                                )}
+                                                <div className="hotel-summary-info">
+                                                    <div className="hotel-summary-name">{h.name}</div>
+                                                    {h.address && <div className="hotel-summary-addr">{h.address}</div>}
+                                                    <div className="hotel-summary-meta">
+                                                        {h.checkIn && <span>체크인 {h.checkIn}</span>}
+                                                        {h.checkOut && <span> · 체크아웃 {h.checkOut}</span>}
+                                                    </div>
+                                                </div>
+                                                <div className="hotel-summary-arrow">›</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ) : null}
 
@@ -1813,31 +1838,32 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                                         const isOpen = expandedDays[i] !== false; // 기본: 열림
                                         
                                         const formatDateShort = (dateStr: string) => {
-                                            if (!dateStr) return '';
-                                            try {
-                                                const date = new Date(dateStr);
-                                                const mm = String(date.getMonth() + 1).padStart(2, '0');
-                                                const dd = String(date.getDate()).padStart(2, '0');
-                                                const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-                                                return `${mm}/${dd}(${dayNames[date.getDay()]})`;
-                                            } catch (e) {
-                                                return dateStr;
-                                            }
+                                            if (!dateStr || dateStr.toLowerCase().includes('nan') || dateStr.toLowerCase().includes('undefined')) return '';
+                                            return dateStr;
                                         };
 
                                         return (
                                             <div key={i} className={`mc-day-card ${isOpen ? 'open' : 'closed'}`}>
-                                                <div className="day-header" onClick={() => toggleDay(i)} style={{ padding: 0, display: 'flex', alignItems: 'stretch', minHeight: '64px', borderBottom: '1px solid #f1f5f9' }}>
-                                                    <div className="day-number" style={{ background: '#475569', color: '#fff', padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '2px', minWidth: '76px', flexShrink: 0, textAlign: 'center' }}>
-                                                        <span style={{ fontSize: '0.85rem', fontWeight: 800 }}>{day.day || (i + 1)}일차</span>
-                                                        {day.date && <span style={{ fontSize: '0.68rem', color: '#cbd5e1', fontWeight: 500 }}>{formatDateShort(day.date)}</span>}
-                                                    </div>
-                                                    <div style={{ flex: 1, padding: '10px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2px', minWidth: 0 }}>
-                                                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>{day.title || '보라카이'}</div>
-                                                        <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                            {((day.timeline || []).filter((item: any) => item.title && !item.title.includes('조식') && !item.title.includes('중식') && !item.title.includes('석식')).map((item: any) => item.title).join(', ')) || '상세내용을 확인해보세요'}
+                                                <div className="day-header" onClick={() => toggleDay(i)} style={{ padding: 0, display: 'flex', alignItems: 'stretch', minHeight: '56px', borderBottom: '1px solid #f1f5f9' }}>
+                                                    {day.title && day.title.trim() ? (
+                                                        <>
+                                                            <div className="day-number" style={{ background: '#475569', color: '#fff', padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '2px', minWidth: '76px', flexShrink: 0, textAlign: 'center' }}>
+                                                                <span style={{ fontSize: '0.85rem', fontWeight: 800 }}>{day.day || (i + 1)}일차</span>
+                                                                {formatDateShort(day.date) && <span style={{ fontSize: '0.68rem', color: '#cbd5e1', fontWeight: 500 }}>{formatDateShort(day.date)}</span>}
+                                                            </div>
+                                                            <div style={{ flex: 1, padding: '10px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2px', minWidth: 0 }}>
+                                                                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>{day.title}</div>
+                                                                <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                    {((day.timeline || []).filter((item: any) => item.title && !item.title.includes('조식') && !item.title.includes('중식') && !item.title.includes('석식')).map((item: any) => item.title).join(', ')) || '상세내용을 확인해보세요'}
+                                                                </div>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <div style={{ flex: 1, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                                            <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#1d4ed8' }}>{day.day || (i + 1)}일차</span>
+                                                            <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#334155' }}>{formatDateShort(day.date)}</span>
                                                         </div>
-                                                    </div>
+                                                    )}
                                                     <div className={`day-chevron ${isOpen ? 'open' : ''}`} style={{ alignSelf: 'center', marginRight: '16px' }}>›</div>
                                                 </div>
 

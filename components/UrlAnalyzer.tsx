@@ -971,7 +971,10 @@ export default function UrlAnalyzer() {
                             <div className="info-item" style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
                                 <span className="info-label" style={{ color: '#cbd5e1', fontSize: '0.9rem', display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>✈️ 출발공항</span>
                                 <span className="info-value" style={{ color: '#ffffff', fontWeight: '600' }}>
-                                    {singleResult.raw.departureAirport}
+                                    {singleResult.raw.departureAirport ? (
+                                        singleResult.raw.departureAirport.includes('(') ? singleResult.raw.departureAirport :
+                                        (singleResult.raw.departureAirport.includes('부산') || singleResult.raw.departureAirport.includes('김해') ? '부산(PUS)' : '서울(ICN)')
+                                    ) : '서울(ICN)'}
                                     {singleResult.raw.airline && <span style={{ fontSize: '0.9rem', color: '#cbd5e1', display: 'block', marginTop: '4px' }}>({singleResult.raw.airline})</span>}
                                 </span>
                             </div>
@@ -1000,20 +1003,23 @@ export default function UrlAnalyzer() {
 
                         {(Array.isArray(singleResult.raw.keyPoints) && singleResult.raw.keyPoints.length > 0) && (
                             <div className="product-section" style={{ marginBottom: '16px', background: '#1e293b', padding: '16px', borderRadius: '12px' }}>
-                                <h5 style={{ color: '#cbd5e1', fontSize: '1rem', fontWeight: '600', marginBottom: '12px' }}>💡 상품 포인트</h5>
+                                <h5 style={{ color: '#cbd5e1', fontSize: '1rem', fontWeight: '600', marginBottom: '12px' }}>상품 포인트</h5>
                                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                    {singleResult.raw.keyPoints.slice(0, 5).map((item: any, i: number) => (
-                                        <li key={i} style={{ marginBottom: '8px', paddingLeft: '14px', borderLeft: '2px solid #38bdf8', color: '#cbd5e1', fontSize: '0.95rem' }}>
-                                            {item}
-                                        </li>
-                                    ))}
+                                    {singleResult.raw.keyPoints.slice(0, 5).map((item: any, i: number) => {
+                                        const cleanText = String(item || '').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}✈🧚🍗♨🍷🏨🚌🌟★♥▶▒◆•●📌🍽🎑🌊🧧🚢✨💡]/gu, '').trim();
+                                        return (
+                                            <li key={i} style={{ marginBottom: '8px', paddingLeft: '14px', borderLeft: '2px solid #38bdf8', color: '#cbd5e1', fontSize: '0.95rem' }}>
+                                                {cleanText}
+                                            </li>
+                                        );
+                                    })}
                                 </ul>
                             </div>
                         )}
 
                         {(Array.isArray(singleResult.raw.features) && singleResult.raw.features.length > 0) && (
                             <div className="product-section" style={{ marginBottom: '16px' }}>
-                                <h5 style={{ color: '#cbd5e1', fontSize: '1rem', fontWeight: '600', marginBottom: '8px' }}>✨ 특징</h5>
+                                <h5 style={{ color: '#cbd5e1', fontSize: '1rem', fontWeight: '600', marginBottom: '8px' }}>특징</h5>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                     {singleResult.raw.features.map((item: any, i: number) => (
                                         <span key={i} style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', padding: '4px 10px', borderRadius: '20px', fontSize: '0.9rem' }}>

@@ -17,9 +17,38 @@ export function formatProductInfo(info: DetailedProductInfo, index?: number): st
     r += `* 기간 : ${info.duration || '-'}\n`;
 
     if (info.keyPoints && info.keyPoints.length > 0) {
-        r += `\n[상품별 특이사항]\n`;
-        info.keyPoints.slice(0, 10).forEach(point => {
-            r += `- ${point}\n`;
+        r += `\n[상품 포인트]\n`;
+        info.keyPoints.slice(0, 8).forEach(point => {
+            const cleanPoint = String(point || '').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}✈🧚🍗♨🍷🏨🚌🌟★♥▶▒◆•●📌🍽🎑🌊🧧🚢✨💡]/gu, '').trim();
+            if (cleanPoint) r += `• ${cleanPoint}\n`;
+        });
+    }
+
+    if (info.inclusions && info.inclusions.length > 0) {
+        r += `\n[✅ 포함사항]\n`;
+        info.inclusions.slice(0, 6).forEach(inc => {
+            r += `✓ ${inc}\n`;
+        });
+    }
+
+    if (info.exclusions && info.exclusions.length > 0) {
+        r += `\n[❌ 불포함사항]\n`;
+        info.exclusions.slice(0, 6).forEach(exc => {
+            r += `✕ ${exc}\n`;
+        });
+    }
+
+    if (info.hotel || (info.hotels && info.hotels.length > 0)) {
+        const hotelStr = info.hotel || info.hotels?.map((h: any) => h.name || h).join(', ');
+        r += `\n[🏨 예정 숙소]\n${hotelStr}\n`;
+    }
+
+    if (info.itinerary && info.itinerary.length > 0) {
+        r += `\n[🗺️ 일자별 핵심 일정 요약]\n`;
+        info.itinerary.forEach((day: any, idx: number) => {
+            const dayNum = day.day || (idx + 1);
+            const spots = (day.items || day.timeline || []).slice(0, 5).map((s: any) => typeof s === 'string' ? s : s.title).filter(Boolean).join(', ');
+            r += `${dayNum}일차: ${day.title || ''} ${spots ? `(${spots})` : ''}\n`;
         });
     }
 

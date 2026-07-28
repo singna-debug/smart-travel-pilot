@@ -115,7 +115,7 @@ export const CITY_CODE_MAP: Record<string, string> = {
 
     // 🇹🇭 태국 & 🇵🇭 필리핀
     '방콕': 'BKK', '수완나품': 'BKK', '돈므앙': 'DMK',
-    '푸켓': 'HKT', '치앙마이': 'CNX', '파타야': 'UTP', '코사무이': 'USM', '끄라비': 'KBV',
+    '푸켓': 'HKT', '치앙마이': 'CNX', '치앙라이': 'CEI', '파타야': 'UTP', '코사무이': 'USM', '끄라비': 'KBV',
     '세부': 'CEB', '막탄': 'CEB',
     '보라카이': 'KLO', '칼리보': 'KLO', '까띠끌란': 'MPH', 
     '보홀': 'TAG', '팡라오': 'TAG', '클락': 'CRK', '마닐라': 'MNL', '팔라완': 'PPS',

@@ -584,6 +584,19 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
                                                             cleanDesc = cleanDesc.replace(/<img[^>]+>/gi, '');
                                                         }
 
+                                                        // 2-1. Fallback: Check item.images or item.image if no HTML img tags extracted
+                                                        if (imageUrls.length === 0) {
+                                                            if (Array.isArray(item.images) && item.images.length > 0) {
+                                                                item.images.forEach((imgUrl: any) => {
+                                                                    if (typeof imgUrl === 'string' && imgUrl.startsWith('http')) {
+                                                                        imageUrls.push(imgUrl);
+                                                                    }
+                                                                });
+                                                            } else if (item.image && typeof item.image === 'string' && item.image.startsWith('http')) {
+                                                                imageUrls.push(item.image);
+                                                            }
+                                                        }
+
                                                         // 3. Format and collapse duplicate spacing/newlines for ALL descriptions
                                                         cleanDesc = cleanDesc
                                                             .replace(/<br\s*\/?>/gi, '\n')
@@ -605,7 +618,7 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
                                                                 {imageUrls.length > 0 && (
                                                                     <div style={{ 
                                                                         display: imageUrls.length === 1 ? 'block' : 'grid', 
-                                                                        gridTemplateColumns: imageUrls.length > 1 ? `repeat(${Math.min(imageUrls.length, 3)}, 1fr)` : 'none',
+                                                                        gridTemplateColumns: imageUrls.length > 1 ? `repeat(${Math.min(imageUrls.length, 2)}, 1fr)` : 'none',
                                                                         gap: '8px', 
                                                                         marginTop: '8px', 
                                                                         marginBottom: '8px',
@@ -617,13 +630,12 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
                                                                                 key={uidx} 
                                                                                 src={url} 
                                                                                 style={{ 
-                                                                                    width: imageUrls.length === 1 ? 'auto' : '100%', 
-                                                                                    height: imageUrls.length === 1 ? 'auto' : '180px', 
-                                                                                    maxWidth: '100%',
-                                                                                    maxHeight: imageUrls.length === 1 ? '220px' : 'none',
-                                                                                    objectFit: imageUrls.length === 1 ? 'contain' : 'cover', 
-                                                                                    borderRadius: '8px', 
-                                                                                    display: 'block' 
+                                                                                    width: '100%', 
+                                                                                    aspectRatio: '16 / 10', 
+                                                                                    objectFit: 'cover', 
+                                                                                    borderRadius: '10px', 
+                                                                                    display: 'block',
+                                                                                    border: '1px solid #e2e8f0'
                                                                                 }} 
                                                                                 alt="일정 이미지" 
                                                                             />

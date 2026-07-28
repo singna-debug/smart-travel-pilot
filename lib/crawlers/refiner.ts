@@ -12,11 +12,40 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
     }
     
     if (refined.price) {
-        const digits = refined.price.toString().replace(/[^0-9]/g, '');
-        if (digits && digits !== '0') {
-            refined.price = parseInt(digits, 10).toLocaleString() + '원';
+        const priceStr = refined.price.toString();
+        
+        if (priceStr.includes('~')) {
+            const parts = priceStr.split('~').map(p => {
+                const digits = p.replace(/[^0-9]/g, '');
+                return digits && digits !== '0' ? parseInt(digits, 10) : null;
+            });
+            
+            if (parts.length === 2 && parts[0] && parts[1]) {
+                refined.price = `${parts[0].toLocaleString()} ~ ${parts[1].toLocaleString()}원`;
+            } else if (parts[0]) {
+                refined.price = `${parts[0].toLocaleString()}원~`;
+            } else {
+                refined.price = '';
+            }
         } else {
-            refined.price = ''; // will trigger fallback below
+            const digits = priceStr.replace(/[^0-9]/g, '');
+            if (digits && digits !== '0') {
+                let pNum = parseInt(digits, 10);
+                const fuelMatch = originalText.match(/유류\s*할증료[^\d]*([\d,]{5,7})\s*원?/i) ||
+                                  (originalText.includes('100,000원') ? ['100000', '100000'] : null);
+                if (fuelMatch && fuelMatch[1]) {
+                    const fuelNum = parseInt(fuelMatch[1].replace(/,/g, ''), 10);
+                    if (fuelNum >= 10000 && fuelNum <= 1000000 && pNum < 10000000) {
+                        const candidateTotal = (pNum + fuelNum).toLocaleString();
+                        if (!refined.price.includes(candidateTotal)) {
+                            pNum += fuelNum;
+                        }
+                    }
+                }
+                refined.price = pNum.toLocaleString() + '원';
+            } else {
+                refined.price = priceStr || '가격 정보 문의 (선착순 특가)';
+            }
         }
     }
     
@@ -38,7 +67,7 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
                 if (match) {
                     const priceStr = match[1].replace(/,/g, '');
                     const priceNum = parseInt(priceStr, 10);
-                    if (priceNum > 10000) { // 만원 이상만 유효
+                    if (priceNum >= 500000 && priceNum <= 20000000) { // 패키지 투어 최소 50만원 이상만 유효 (선택옵션 30만원 방지)
                         refined.price = priceNum.toLocaleString() + '원';
                         break;
                     }
@@ -85,21 +114,30 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
         }
     }
 
-    // 3. CITY_CODE_MAP 기반 키워드 매칭 (국내 출발 공항/도시는 목적지 자동 추출 대상에서 배제)
-    if (!refined.destination || refined.destination.length < 2) {
-        const domesticCities = ['인천', '김포', '서울', '김해', '부산', '대구', '청주', '제주', '무안', '양양', '광주'];
-        const cities = Object.keys(CITY_CODE_MAP)
-            .filter(city => !domesticCities.includes(city))
-            .sort((a, b) => b.length - a.length);
-        for (const city of cities) {
-            if (refined.title.includes(city)) {
-                refined.destination = city;
-                break;
-            }
+    // 3. 제목 기반 목적지 우선 추출 (API가 리턴한 잡다한 경유지 등 제거)
+    const domesticCities = ['인천', '김포', '서울', '김해', '부산', '대구', '청주', '제주', '무안', '양양', '광주', '기내', '경유', '출발'];
+    const cities = Object.keys(CITY_CODE_MAP)
+        .filter(city => !domesticCities.includes(city))
+        .sort((a, b) => b.length - a.length);
+
+    const titleTokens = refined.title.split(/[\/\s#\[\]\(\),\+\-\:]+/).filter(Boolean);
+    const titleCities = [];
+    for (const city of cities) {
+        const isMatch = titleTokens.some(t => t === city || t.split(/[\/]/).includes(city));
+        if (isMatch) {
+            titleCities.push(city);
         }
     }
 
-
+    if (titleCities.length > 0) {
+        // 이미 찾은 도시들의 부분 문자열인 경우는 제외 (예: 오사카, 사카 -> 오사카)
+        const filteredCities = titleCities.filter(c1 => !titleCities.some(c2 => c1 !== c2 && c2.includes(c1)));
+        // 제목에 나오는 순서대로 정렬하기
+        filteredCities.sort((a, b) => refined.title.indexOf(a) - refined.title.indexOf(b));
+        refined.destination = filteredCities.join(', ');
+    } else if (!refined.destination || refined.destination.length < 2) {
+        refined.destination = '해외';
+    }
 
     if (!refined.duration || refined.duration === '미정' || refined.duration.includes('0일')) {
         const itineraryLen = Array.isArray(refined.itinerary) ? refined.itinerary.length : 0;
@@ -149,8 +187,8 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
             if (matches) {
                 // 상위 매칭 결과들을 순회하며 중복 없이 추가
                 matches.slice(0, 8).forEach(m => {
-                    const clean = m.trim().replace(/^[#♥★■]\s*/, '');
-                    if (clean.length > 3 && clean.length < 35 && !points.includes(clean)) {
+                    const clean = m.trim().replace(/^[#♥★■]\s*/, '').replace(/[\r\n]+/g, '').replace(/^n(?=[가-힣])/, '').replace(/^\d+회\s*/, '').replace(/^["]\s*/, '').trim();
+                    if (clean.length > 3 && clean.length < 35 && !points.some(p => p.includes(clean) || clean.includes(p))) {
                         points.push(clean);
                     }
                 });
@@ -163,7 +201,7 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
     if (refined.keyPoints && Array.isArray(refined.keyPoints)) {
         refined.keyPoints = refined.keyPoints
             .filter((p: any) => typeof p === 'string' && p.length > 2)
-            .map((p: string) => p.replace(/^[#♥★■]\s*/, '').trim());
+            .map((p: string) => p.replace(/^[#♥★■]\s*/, '').replace(/[\r\n]+/g, '').trim());
     } else {
         refined.keyPoints = [];
     }

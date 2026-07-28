@@ -317,3 +317,92 @@ export function fallbackParse(text: string): DetailedProductInfo {
         url: ''
     } as any;
 }
+
+export function inferDestination(title: string, domText?: string, url?: string): string {
+    const titleAndUrl = `${title || ''} ${url || ''}`;
+    const combined = `${titleAndUrl} ${domText || ''}`;
+
+    // 1. Determine base region (Check title & url first, then combined)
+    const matchRegion = (text: string): string => {
+        if (/동유럽|체코|오스트리아|헝가리|폴란드|프라하|부다페스트|비엔나|잘츠부르크|체스키크롬로프/i.test(text)) return '동유럽';
+        if (/서유럽/i.test(text)) return '서유럽';
+        if (/북유럽/i.test(text)) return '북유럽';
+        if (/발칸/i.test(text)) return '발칸';
+        if (/스페인|포르투갈/i.test(text)) return '스페인/포르투갈';
+        if (/미동부|캐나다|나이아가라|퀘백|토론토|몬트리올/i.test(text)) return '미동부/캐나다';
+        if (/미서부|로스앤젤레스|\bLA\b|샌프란시스코|라스베가스|그랜드캐년/i.test(text)) return '미서부/미국';
+        if (/하와이/i.test(text)) return '하와이';
+        if (/괌/i.test(text)) return '괌';
+        if (/사이판/i.test(text)) return '사이판';
+        if (/미국/i.test(text)) return '미국/캐나다';
+        if (/오사카|교토|도쿄|후쿠오카|삿포로|북해도|나고야|오키나와|우지|이네|시라하마|노보리베츠|오타루|도야|대마도|일본/i.test(text)) return '일본';
+        if (/다낭|나트랑|푸꾸옥|하노이|호이안|달랏|하롱베이|베트남/i.test(text)) return '베트남';
+        if (/방콕|푸켓|치앙마이|파타야|태국/i.test(text)) return '태국';
+        if (/세부|보라카이|마닐라|보홀|필리핀/i.test(text)) return '필리핀';
+        if (/타이베이|가오슝|타이중|대만|이란/i.test(text)) return '대만';
+        if (/홍콩|마카오|심천/i.test(text)) return '홍콩/중국';
+        if (/장가계|황산|청도|상해|북경|태항산|하이난|백두산|구채구|중국/i.test(text)) return '중국';
+        if (/호주|뉴질랜드|시드니|멜버른/i.test(text)) return '호주/뉴질랜드';
+        if (/싱가포르|싱가폴/i.test(text)) return '싱가포르';
+        if (/발리|인도네시아/i.test(text)) return '인도네시아/발리';
+        if (/말레이시아|코타키나발루/i.test(text)) return '말레이시아';
+        if (/두바이|아부다비|중동/i.test(text)) return '두바이/중동';
+        if (/아프리카|케냐|탄자니아|나미비아/i.test(text)) return '아프리카';
+        if (/이탈리아|프랑스|영국|스위스|독일|터키|튀르키예|그리스|크로아티아|유럽/i.test(text)) return '유럽';
+        if (/제주|울릉도|국내/i.test(text)) return '국내';
+        return '';
+    };
+
+    let baseRegion = matchRegion(titleAndUrl) || matchRegion(combined);
+
+    // 2. Extract specific cities & countries restricted to the detected baseRegion
+    const REGION_SPOTS_MAP: Record<string, string[]> = {
+        '동유럽': ['체코', '오스트리아', '헝가리', '부다페스트', '프라하', '잘츠부르크', '체스키크롬로프', '할슈타트', '비엔나', '빈', '독일', '폴란드'],
+        '서유럽': ['프랑스', '파리', '스위스', '인터라켄', '이탈리아', '로마', '베네치아', '피렌체', '영국', '런던'],
+        '북유럽': ['노르웨이', '스웨덴', '핀란드', '덴마크', '오슬로', '스톡홀름', '헬싱키'],
+        '발칸': ['크로아티아', '슬로베니아', '두브로브니크', '블레드', '보스니아'],
+        '스페인/포르투갈': ['스페인', '포르투갈', '마드리드', '바르셀로나', '세비야', '리스본'],
+        '유럽': ['이탈리아', '프랑스', '영국', '스위스', '독일', '터키', '튀르키예', '그리스', '크로아티아'],
+        '미동부/캐나다': ['미동부', '캐나다', '나이아가라', '퀘백', '뉴욕', '워싱턴', '보스턴', '토론토', '몬트리올'],
+        '미서부/미국': ['미서부', '로스앤젤레스', 'LA', '샌프란시스코', '라스베가스', '그랜드캐년'],
+        '일본': ['오사카', '교토', '우지', '이네', '도쿄', '후쿠오카', '삿포로', '북해도', '나고야', '오키나와', '노보리베츠', '오타루', '도야', '시라하마', '와카야마'],
+        '베트남': ['다낭', '호이안', '나트랑', '푸꾸옥', '하노이', '달랏', '하롱베이'],
+        '태국': ['방콕', '파타야', '푸켓', '치앙마이'],
+        '필리핀': ['보홀', '보라카이', '세부', '마닐라'],
+        '대만': ['타이베이', '타이페이', '가오슝', '타이중', '이란'],
+        '홍콩/중국': ['홍콩', '마카오', '심천'],
+        '중국': ['장가계', '황산', '청도', '상해', '북경', '태항산', '하이난', '백두산', '구채구'],
+        '호주/뉴질랜드': ['호주', '뉴질랜드', '시드니', '멜버른'],
+        '싱가포르': ['싱가포르', '센토사'],
+        '인도네시아/발리': ['발리', '우붓', '자카르타'],
+        '말레이시아': ['코타키나발루', '쿠알라룸푸르'],
+        '두바이/중동': ['두바이', '아부다비'],
+        '아프리카': ['케냐', '탄자니아', '나미비아', '세렝게티', '빅토리아폭포']
+    };
+
+    const foundSpots: string[] = [];
+    const allowedSpots = REGION_SPOTS_MAP[baseRegion] || [];
+    const titleAndUrlStr = `${title || ''} ${url || ''}`;
+
+    for (const spot of allowedSpots) {
+        if (titleAndUrlStr.includes(spot) || (domText && domText.includes(spot))) {
+            if (!foundSpots.includes(spot) && spot !== baseRegion) {
+                foundSpots.push(spot);
+            }
+        }
+    }
+
+    const normalizedSpots = foundSpots.map(s => (s === '타이페이' ? '타이베이' : s));
+    const uniqueSpots = Array.from(new Set(normalizedSpots));
+
+    if (uniqueSpots.length > 0) {
+        const spotsStr = uniqueSpots.slice(0, 5).join('/');
+        if (baseRegion && baseRegion !== '해외') {
+            return `${baseRegion} (${spotsStr})`;
+        }
+        return spotsStr;
+    }
+
+    return baseRegion || '해외';
+}
+

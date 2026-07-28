@@ -23,19 +23,20 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
     // ===== 1단계: Native API로 구조화된 데이터 확보 =====
     try {
         if (url.includes('modetour.com') || url.includes('modetour.co.kr')) {
-            nativeData = await fetchModeTourNative(url, false).catch(() => null);
+            const { crawlConfirmationModeTour } = await import('./modetour');
+            nativeData = await crawlConfirmationModeTour(url).catch(() => null);
         } else if (url.includes('hanatour.com')) {
-            const { fetchHanaTourNative } = await import('../hanatour-utils');
-            nativeData = await fetchHanaTourNative(url, false).catch(() => null);
+            const { crawlConfirmationHanaTour } = await import('./hanatour');
+            nativeData = await crawlConfirmationHanaTour(url).catch(() => null);
         } else if (url.includes('ybtour.co.kr') || url.includes('yellowballoon.co.kr')) {
-            const { fetchYellowBalloonNative } = await import('../yellowballoon-utils');
-            nativeData = await fetchYellowBalloonNative(url, false).catch(() => null);
+            const { crawlConfirmationYellowBalloon } = await import('./yellowballoon');
+            nativeData = await crawlConfirmationYellowBalloon(url).catch(() => null);
         } else if (url.includes('lottetour.com')) {
-            const { fetchLotteTourNative } = await import('../lottetour-utils');
-            nativeData = await fetchLotteTourNative(url, false).catch(() => null);
+            const { crawlConfirmationLotteTour } = await import('./lottetour');
+            nativeData = await crawlConfirmationLotteTour(url).catch(() => null);
         } else if (url.includes('hanjintravel.com') || url.includes('kaltour.com')) {
-            const { fetchHanjinTravelNative } = await import('../hanjintravel-utils');
-            nativeData = await fetchHanjinTravelNative(url, false).catch(() => null);
+            const { crawlConfirmationHanjinTravel } = await import('./hanjintravel');
+            nativeData = await crawlConfirmationHanjinTravel(url).catch(() => null);
         }
         console.log(`[Confirmation/Index] Native API result: ${nativeData ? 'SUCCESS' : 'FAILED'}`);
     } catch (e) {

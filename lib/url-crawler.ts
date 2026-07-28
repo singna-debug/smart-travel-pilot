@@ -8,6 +8,7 @@ import { crawlForBooking as bookingCrawl } from './crawlers/booking';
 import { crawlForConfirmation as confirmationCrawl } from './crawlers/confirmation/index';
 
 import { crawlForReservationGuide as reservationGuideCrawl } from '@/lib/crawlers/reservation-guide';
+// Cleaned up unused agency utils
 
 // 유틸리티 재수출 (호환성 유지)
 export * from './crawler-base-utils';
