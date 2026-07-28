@@ -29,27 +29,58 @@ export async function fetchLotteTourNative(url: string, isSummaryOnly?: boolean)
 
         const description = ogDescMatch ? ogDescMatch[1].trim() : '';
 
-        // 2. Price (Ignore deposit / 계약금 300,000원)
-        let price = '가격 정보 문의 (선착순 특가)';
-        
-        // Find price numbers greater than 400,000 KRW
-        const allPrices = text.match(/([0-9]{1,3}(?:,[0-9]{3})+)\s*원/g) || [];
-        const validPrices = allPrices.filter(p => {
-            const num = parseInt(p.replace(/[^0-9]/g, ''), 10);
-            return num > 400000 && !p.includes('300,000');
-        });
+        // Extract evtCd from URL parameter or script
+        let evtCd = '';
+        const evtCdMatch = url.match(/[?&]evtCd=([A-Za-z0-9_-]+)/i) || html.match(/m_evtCd_basicInfo\s*=\s*['"]([A-Za-z0-9_-]+)['"]/i);
+        if (evtCdMatch) {
+            evtCd = evtCdMatch[1];
+        }
 
-        if (validPrices.length > 0) {
-            price = validPrices[0];
-        } else {
-            const scriptPrice = html.match(/(?:godAmt|evtAmt|minPrice|price)["']?\s*[:=]\s*["']?([0-9]{6,})/i);
-            if (scriptPrice && Number(scriptPrice[1]) > 400000) {
-                price = `${Number(scriptPrice[1]).toLocaleString()}원`;
+        // Try calling Lotte Tour's native price API
+        let apiData: any = null;
+        if (evtCd) {
+            try {
+                const apiRes = await fetch('https://www.lottetour.com/evtDetail/totalPriceArea', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Referer': url,
+                        'User-Agent': 'Mozilla/5.0'
+                    },
+                    body: `evtCd=${evtCd}`
+                });
+                if (apiRes.ok) {
+                    const json = await apiRes.json();
+                    if (json && json.priceDetail) {
+                        apiData = json.priceDetail;
+                    }
+                }
+            } catch (e) {
+                console.log('[LotteTour] API price fetch failed:', e);
             }
         }
 
-        if (!price || price.trim().length === 0) {
-            price = '가격 정보 문의 (선착순 특가)';
+        // 2. Price
+        let price = '가격 정보 문의 (선착순 특가)';
+        if (apiData && apiData.priceAdt && apiData.priceAdt > 0) {
+            price = `${Number(apiData.priceAdt).toLocaleString()}원`;
+        } else {
+            // Find price numbers greater than 400,000 KRW
+            const allPrices = text.match(/([0-9]{1,3}(?:,[0-9]{3})+)\s*원/g) || [];
+            const validPrices = allPrices.filter(p => {
+                const num = parseInt(p.replace(/[^0-9]/g, ''), 10);
+                return num > 400000 && !p.includes('300,000');
+            });
+
+            if (validPrices.length > 0) {
+                price = validPrices[0];
+            } else {
+                const scriptPrice = html.match(/(?:godAmt|evtAmt|minPrice|price)["']?\s*[:=]\s*["']?([0-9]{6,})/i);
+                if (scriptPrice && Number(scriptPrice[1]) > 400000) {
+                    price = `${Number(scriptPrice[1]).toLocaleString()}원`;
+                }
+            }
         }
 
         // 3. Airline Code & Name
