@@ -232,10 +232,10 @@ export default function SettingsPanel() {
               <div className="settings-info-content">
                 <p className="settings-info-title">서비스 계정 권한 부여 안내</p>
                 <p className="settings-info-desc">
-                  아래 이메일 주소를 복사하여 연동할 구글 스프레드시트의 <strong>편집자</strong>로 추가해주세요.
+                  아래 이메일 주소를 복사하여 연동할 구글 스프레드시트의 <strong>편집자</strong>로 추가해 주세요.
                 </p>
                 <div className="settings-copy-box">
-                  <code>travel-pilot@smart-travel.iam.gserviceaccount.com</code>
+                  <code>{settings.googleClientEmail || 'modetour@gen-lang-client-0510450295.iam.gserviceaccount.com'}</code>
                   <button className="settings-copy-btn" onClick={handleCopyEmail} title="복사하기">
                     {copied ? <Check size={16} className="text-green" /> : <Copy size={16} />}
                   </button>
@@ -253,8 +253,11 @@ export default function SettingsPanel() {
                   className="settings-input" 
                   value={settings.googleSpreadsheetId}
                   onChange={handleChange}
-                  placeholder="URL의 /d/ 와 /edit 사이의 문자열"
+                  placeholder="예: 17Q0J_O13426hV2e951Q7z-8n3g8735391"
                 />
+                <span style={{ color: '#94a3b8', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
+                  ⚠️ 이메일 주소가 아닙니다! 구글 시트 주소창에서 /d/ 와 /edit 사이의 긴 영문+숫자 조합을 넣어주세요.
+                </span>
               </div>
               <div className="settings-form-group">
                 <label className="settings-label">워크시트 이름</label>
