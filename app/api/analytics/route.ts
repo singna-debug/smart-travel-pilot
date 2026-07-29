@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllConsultations } from '@/lib/google-sheets';
+import { supabase } from '@/lib/supabase';
+import { getTenantIdFromHeaderOrQuery, DEFAULT_TENANT_ID } from '@/lib/tenant';
 import { differenceInDays, startOfDay, subDays, format, startOfWeek, startOfMonth } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
@@ -8,8 +10,37 @@ export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const period = parseInt(searchParams.get('period') || '30', 10); // 7, 30, 90
+        const tenantId = getTenantIdFromHeaderOrQuery(request);
 
-        const consultations = await getAllConsultations();
+        let consultations: any[] = [];
+
+        if (tenantId === DEFAULT_TENANT_ID) {
+            consultations = await getAllConsultations();
+        } else if (process.env.NEXT_PUBLIC_SUPABASE_URL && supabase) {
+            const { data } = await supabase
+                .from('consultations')
+                .select('*')
+                .eq('tenant_id', tenantId)
+                .order('created_at', { ascending: false });
+
+            if (data) {
+                consultations = data.map(c => ({
+                    id: c.id,
+                    timestamp: c.created_at,
+                    visitor_id: c.visitor_id,
+                    customer: { name: c.customer_name, phone: c.customer_phone },
+                    trip: {
+                        destination: c.destination,
+                        product_name: c.product_name,
+                        departure_date: c.departure_date,
+                        url: c.url
+                    },
+                    automation: { status: c.status },
+                    summary: c.summary
+                }));
+            }
+        }
+
         const todayObj = startOfDay(new Date());
         const cutoff = subDays(todayObj, period);
 

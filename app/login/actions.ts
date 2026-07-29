@@ -44,10 +44,6 @@ export async function login(formData: FormData) {
     return redirect('/login?error=' + encodeURIComponent('이메일 인증이 필요합니다. 관리자 자동 승인이 진행되었으니 1초 후 다시 로그인 버튼을 눌러주세요.'))
   }
 
-  if (error) {
-    return redirect('/login?error=' + encodeURIComponent(error.message))
-  }
-
   revalidatePath('/', 'layout')
   redirect('/')
 }

@@ -83,8 +83,8 @@ export default function MessageTemplateCreator() {
     const isDummy = pathname?.startsWith('/dummy');
 
     // Tenant Settings (동적 설정)
-    const [agentName, setAgentName] = useState(DEFAULT_AGENT_NAME);
-    const [companyName, setCompanyName] = useState('(주)클럽모두투어');
+    const [agentName, setAgentName] = useState('담당자');
+    const [companyName, setCompanyName] = useState('여행사');
     const [kakaoTalkId, setKakaoTalkId] = useState('');
 
     useEffect(() => {
