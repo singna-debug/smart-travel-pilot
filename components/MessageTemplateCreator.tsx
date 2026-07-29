@@ -366,9 +366,9 @@ export default function MessageTemplateCreator() {
 
         switch (templateType) {
             case 'remind':
-                text = `✈️ [모두투어] 상담 상품 리마인드 (담당: ${AGENT_NAME})
+                text = `✈️ [${companyName}] 상담 상품 리마인드 (담당: ${AGENT_NAME})
 
-안녕하세요, ${name}(${phone})님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
+안녕하세요, ${name}(${phone})님! ${companyName} ${AGENT_NAME}입니다. 😊
 일전에 상담 도와드린 ${dest ? dest + ' ' : ''}여행 상품은 잘 확인해 보셨을까요?
 
 🔗 기존 안내한 일정 URL : ${url || '(일정표 링크)'}
@@ -377,14 +377,12 @@ export default function MessageTemplateCreator() {
 
 ──────────────────
 
-🏆 믿고 맡길 수 있는 '클럽모두투어'
+🏆 믿고 맡길 수 있는 '${companyName}'
 
-✅ 모두투어 직영 운영 20년
 ✅ 축적된 전문성과 노하우
-✅ 25년 연속 모두투어 최우수 대리점 선정
-✅ 2023년 고객만족 대상 수상
-✅ 중소기업청 공식 인증 우수 중소기업
-✅ "김반장과 함께" 단체여행 전문
+✅ 언제나 고객 최우선 맞춤 서비스
+✅ 합리적 가격의 명품 여행 패키지
+✅ 숙련된 담당자의 1:1 전담 상담
 
 생애 첫 허니문부터 소중한 부모님 효도 관광까지, 저희는 고객님의 생애 모든 소중한 여정을 진심으로 함께합니다.
 
@@ -392,9 +390,7 @@ export default function MessageTemplateCreator() {
 답장 기다리겠습니다. 감사합니다! ✈️
 
 📞 상담 및 문의
-• 담당자: (주)클럽모두투어 ${AGENT_NAME}
-• 직통전화: 02-951-9004
-• 휴대폰: 010-9307-9004`;
+• 담당자: ${companyName} ${AGENT_NAME}`;
                 break;
 
             case 'booking':
@@ -407,9 +403,9 @@ export default function MessageTemplateCreator() {
 + ${fuelStr}(유류 할증료 매월 변동되며 잔금 시 최종 확정 적용됩니다.) 
 ${travelersNum > 0 && pricePerPersonNum > 0 ? ` = ${perPersonTotalStr} * ${travelersNum}명 = ${totalPriceStr}` : ''}`;
 
-                text = `✈️ [모두투어] 여행 예약 안내
+                text = `✈️ [${companyName}] 여행 예약 안내
 
-안녕하세요, ${name}님! 모두투어 ${AGENT_NAME}입니다. 😊
+안녕하세요, ${name}님! ${companyName} ${AGENT_NAME}입니다. 😊
 예약을 진심으로 감사드립니다.
 원활한 여행 준비를 위해 주요 사항을 안내해 드립니다.
 
@@ -462,7 +458,7 @@ ${(() => {
 ──────────────────
 
 3. 결제방법
-1) 카드결제: 모두투어 홈페이지 혹은 어플을 통해 결제
+1) 카드결제: 여행사 계좌 또는 카드 단말기를 통해 결제
 
 2) 가상계좌
 ${bankAccount}
@@ -501,16 +497,14 @@ ${specialTerms || `■ 여행자의 여행계약 해제 요청 시 여행약관�
 7) 출발: 즐거운 여행!
 
 📞 상담 및 문의
-• 담당자: 모두투어 ${AGENT_NAME}
-• 직통전화: 02-951-9004
-• 휴대폰: 010-9307-9004`;
+• 담당자: ${companyName} ${AGENT_NAME}`;
                 break;
 
             case 'dotcom':
                 text = `✈️  여행 예약 안내
 
 ${name}(${phone}) 고객님, 안녕하세요! 😊
-이번 여행의 담당자로 배정된 모두투어 ${AGENT_NAME}입니다.
+이번 여행의 담당자로 배정된 ${companyName} ${AGENT_NAME}입니다.
 
 신속한 예약을 위해 현재 항공, 호텔 확인 중이며,
 잠시 후 예약 관련 안내를 위해 전화 드리겠습니다.
@@ -526,17 +520,15 @@ ${name}(${phone}) 고객님, 안녕하세요! 😊
 고객님의 즐거운 여행을 위해 정성을 다해 준비하겠습니다!
 
 📞 상담 및 문의
-• 담당자: (주)클럽모두투어 ${AGENT_NAME}
-• 직통전화: 02-951-9004
-• 휴대폰: 010-9307-9004
+• 담당자: ${companyName} ${AGENT_NAME}
 
 감사합니다. ${AGENT_NAME} 드림`;
                 break;
 
             case 'pre_4w':
-                text = `✈️ [모두투어] 출발 전 필수 체크사항 안내 
+                text = `✈️ [${companyName}] 출발 전 필수 체크사항 안내 
 
-안녕하세요, 고객님! 모두투어 ${AGENT_NAME}입니다. 😊
+안녕하세요, 고객님! ${companyName} ${AGENT_NAME}입니다. 😊
 여행 출발이 어느덧 한 달 앞으로 다가왔습니다.
 출발 전 확인 사항 안내해 드립니다.
 
@@ -547,11 +539,11 @@ ${name}(${phone}) 고객님, 안녕하세요! 😊
 
 ──────────────────
 
-2. 모두투어 회원가입 (마일리지 적립)
+2. 여행사 회원가입 (마일리지 적립)
 
 🎁 신규가입 혜택
 - 2만원 할인 쿠폰 발행 (현금처럼 사용 가능)
-- 모두투어 마일리지 적립 (항공사 마일리지와 별도)
+- 마일리지 적립 (항공사 마일리지와 별도)
 - 다음 여행 시 현금처럼 사용 가능
 
 📝 가입 방법
@@ -584,9 +576,7 @@ ${name}(${phone}) 고객님, 안녕하세요! 😊
 - 예약한 버스 시간을 여행사에 알려주세요
 
 📞 상담 및 문의
-• 담당자: (주)클럽모두투어 ${AGENT_NAME}
-• 직통전화: 02-951-9004
-• 휴대폰: 010-9307-9004`;
+• 담당자: ${companyName} ${AGENT_NAME}`;
                 break;
 
             case 'balance': {
@@ -594,9 +584,9 @@ ${name}(${phone}) 고객님, 안녕하세요! 😊
                 if (addDetails) detailBreakdown += `\n[추가 비용]\n${addDetails.trim()}`;
                 if (discountDetails) detailBreakdown += `\n[할인 내역]\n${discountDetails.trim()}`;
 
-                text = `✈️ [모두투어] 여행 상품 잔금 결제 안내 (담당: ${AGENT_NAME})
+                text = `✈️ [${companyName}] 여행 상품 잔금 결제 안내 (담당: ${AGENT_NAME})
 
-안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
+안녕하세요, ${name}님! ${companyName} ${AGENT_NAME}입니다. 😊
 기다려주신 ${dest} 여행이 이제 곧 시작됩니다!
 안전하고 즐거운 여행을 위해 기간 내 잔금 결제 부탁드립니다.
 
@@ -621,19 +611,17 @@ ${bankAccount}
 예금주 : ${bankHolder}
 
 2) 카드 결제
-- 모두투어 홈페이지 마이페이지에서 직접 결제
+- 여행사 카드 단말기 또는 담당자 안내에 따라 결제
 
 ──────────────────
 
 📞 담당자 정보
-(주)클럽모두투어 ${AGENT_NAME}
-- 전화: 02-951-9004
-- 휴대폰: 010-9307-9004`;
+${companyName} ${AGENT_NAME}`;
                 break;
             }
 
             case 'ticket':
-                text = `✈️ [모두투어] 항공권 발권 및 좌석 지정 안내
+                text = `✈️ [${companyName}] 항공권 발권 및 좌석 지정 안내
 
 안녕하세요, ${name}님! 
 항공권 발권이 완료되었습니다.
@@ -674,10 +662,10 @@ ${bankAccount}
                 text = `안녕하세요! ${name} 고객님
 이번 여행의 모바일 가이드북을 보내드립니다. ✈️
 
-1. 세부 일정은 아래 모두투어 일정표를 기준으로 움직입니다.
+1. 세부 일정은 아래 일정표를 기준으로 움직입니다.
 ${url}
 
-2. 아래 가이드북은 모두투어 일정을 바탕으로 고객님의 여행 날짜에 맞게 저희 여행사에서 별도로 만들었습니다. 
+2. 아래 가이드북은 일정을 바탕으로 고객님의 여행 날짜에 맞게 저희 여행사에서 별도로 만들었습니다. 
 
 📍 날씨 정보
 🧳 준비물 
@@ -692,9 +680,9 @@ ${confirmationLink}`;
                 break;
 
             case 'departure':
-                text = `✈️ [모두투어] 드디어 출발! 즐거운 여행 되세요! (담당: ${AGENT_NAME})
+                text = `✈️ [${companyName}] 드디어 출발! 즐거운 여행 되세요! (담당: ${AGENT_NAME})
 
-안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
+안녕하세요, ${name}님! ${companyName} ${AGENT_NAME}입니다. 😊
 드디어 기다리시던 ${dest} 여행 출발일입니다!
 
 짐은 빠짐없이 잘 챙기셨나요? 🧳
@@ -714,9 +702,9 @@ ${AGENT_NAME} 드림 ✈️`;
                 break;
 
             case 'happy_call':
-                text = `✈️ [모두투어] 여행은 즐거우셨나요? 해피콜 안내 (담당: ${AGENT_NAME})
+                text = `✈️ [${companyName}] 여행은 즐거우셨나요? 해피콜 안내 (담당: ${AGENT_NAME})
 
-안녕하세요, ${name}님! (주)클럽모두투어 ${AGENT_NAME}입니다. 😊
+안녕하세요, ${name}님! ${companyName} ${AGENT_NAME}입니다. 😊
 ${dest} 여행은 무사히 잘 다녀오셨나요? 일상으로 돌아오신 소감이 어떠신지 궁금합니다.
 
 이번 여행이 ${name}님께 소중한 추억으로 남았길 진심으로 바라며,
@@ -733,9 +721,7 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
 항상 감사드립니다! 💖
 
 📞 상담 및 문의
-• 담당자: (주)클럽모두투어 ${AGENT_NAME}
-• 직통전화: 02-951-9004
-• 휴대폰: 010-9307-9004`;
+• 담당자: ${companyName} ${AGENT_NAME}`;
                 break;
             case 'china_barcode':
                 text = `📱 중국 입국 온라인 출입국 바코드 안내
