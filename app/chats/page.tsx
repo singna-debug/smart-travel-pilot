@@ -58,6 +58,8 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
     const [chats, setChats] = useState<ChatItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [sheetUrl, setSheetUrl] = useState<string>('');
+    const [sheetId, setSheetId] = useState<string>('');
 
     const getApiUrl = (path: string) => {
         return isDummy ? `/api/dummy${path}` : `/api${path}`;
@@ -176,6 +178,25 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
 
     const fetchChats = async (forceRefresh = false) => {
         try {
+            let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+            if (!tenantId || tenantId === 'default_tenant') {
+                tenantId = 'default_tenant';
+            }
+
+            // 시트 정보 먼저 조회
+            try {
+                const sheetInfoRes = await fetch('/api/sheet-info', {
+                    headers: { 'x-tenant-id': tenantId }
+                });
+                const sheetInfo = await sheetInfoRes.json();
+                if (sheetInfo.success && sheetInfo.isConfigured) {
+                    setSheetUrl(sheetInfo.url);
+                    setSheetId(sheetInfo.sheetId);
+                }
+            } catch (err) {
+                console.error('Sheet info fetch error:', err);
+            }
+
             let url = getApiUrl('/chats?limit=100');
             if (forceRefresh) {
                 url += '&refresh=true';
@@ -185,10 +206,6 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
                 url += `&status=${encodeURIComponent(statusFilter)}`;
             }
 
-            let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
-            if (!tenantId || tenantId === 'default_tenant') {
-                tenantId = 'default_tenant';
-            }
             const response = await fetch(url, {
                 headers: { 'x-tenant-id': tenantId }
             });
@@ -472,10 +489,10 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
     const openGoogleSheet = (e: React.MouseEvent, rowIndex?: number, sheetName?: string, sheetGid?: number) => {
         e.preventDefault();
         e.stopPropagation();
-        const sheetId = process.env.NEXT_PUBLIC_SHEET_ID;
+        const targetSheetId = sheetId || process.env.NEXT_PUBLIC_SHEET_ID;
 
-        if (sheetId) {
-            const baseUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+        if (targetSheetId) {
+            const baseUrl = `https://docs.google.com/spreadsheets/d/${targetSheetId}/edit`;
             const gidParam = sheetGid !== undefined ? `gid=${sheetGid}` : '';
             const rangeParam = rowIndex ? `range=A${rowIndex}` : '';
 
@@ -488,8 +505,8 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
             console.log('Opening Google Sheet:', finalUrl);
             window.open(finalUrl, '_blank');
         } else {
-            console.error('NEXT_PUBLIC_SHEET_ID is missing');
-            alert('구글 시트 ID가 설정되지 않았습니다. .env 파일을 확인해 주세요.');
+            console.error('Sheet ID is missing');
+            alert('구글 시트 ID가 설정되지 않았습니다. [설정] 페이지를 확인해 주세요.');
         }
     };
 
@@ -629,7 +646,7 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
                     </button>
                     <button
                         className="action-button"
-                        onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${process.env.NEXT_PUBLIC_SHEET_ID || ''}`, '_blank')}
+                        onClick={() => window.open(sheetUrl || `https://docs.google.com/spreadsheets/d/${process.env.NEXT_PUBLIC_SHEET_ID || ''}`, '_blank')}
                         style={{ padding: '10px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#10b981', color: 'white', border: 'none' }}
                     >
                         시트 열기

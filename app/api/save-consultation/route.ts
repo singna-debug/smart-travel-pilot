@@ -56,6 +56,7 @@ function formatDurationString(durationStr: string): string {
 
 export async function POST(request: NextRequest) {
     try {
+        const tenantId = request.headers.get('x-tenant-id') || 'default_tenant';
         const body = await request.json();
         const {
             customerName,
@@ -223,7 +224,7 @@ export async function POST(request: NextRequest) {
             visitor_id: body.visitorId || `admin-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
         };
 
-        const success = await appendConsultationToSheet(consultationData);
+        const success = await appendConsultationToSheet(consultationData, tenantId);
 
         if (success) {
             return NextResponse.json({ success: true });

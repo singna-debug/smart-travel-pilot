@@ -1104,11 +1104,111 @@ async function fetchAllSheetData(forceRefresh = false): Promise<any[]> {
 }
 
 /**
+ * 테넌트 전용 구글 시트에서 상담 내역을 가져옵니다.
+ */
+async function getAllConsultationsForTenant(tenantId: string, forceRefresh = false): Promise<ConsultationData[]> {
+    try {
+        const { sheets, spreadsheetId } = await getSheetsConfigForTenant(tenantId);
+        if (!spreadsheetId) return [];
+
+        // 해당 스프레드시트의 모든 시트 목록 가져오기
+        const metaResp = await sheets.spreadsheets.get({ spreadsheetId });
+        const sheetList = metaResp.data.sheets || [];
+
+        // 월별 시트(yyyy-MM 형식) 필터링, 없으면 첫 번째 시트 사용
+        const monthlySheets = sheetList
+            .map((s: any) => s.properties?.title || '')
+            .filter((t: string) => /^\d{4}-\d{2}$/.test(t))
+            .sort()
+            .reverse();
+
+        const sheetsToRead = monthlySheets.length > 0
+            ? monthlySheets
+            : [sheetList[0]?.properties?.title].filter(Boolean);
+
+        if (sheetsToRead.length === 0) return [];
+
+        // 모든 시트에서 데이터 일괄 조회
+        const ranges = sheetsToRead.map((s: string) => `${s}!A:AD`);
+        const resp = await sheets.spreadsheets.values.batchGet({ spreadsheetId, ranges });
+
+        const allRows: any[] = [];
+        resp.data.valueRanges?.forEach((valueRange: any, index: number) => {
+            const sName = sheetsToRead[index];
+            const rows = valueRange.values || [];
+            if (rows.length > 1) {
+                for (let i = 1; i < rows.length; i++) {
+                    const row: any = rows[i];
+                    row._sheetName = sName;
+                    row._rowIndex = i + 1;
+                    row._sheetGid = sheetList.find((s: any) => s.properties?.title === sName)?.properties?.sheetId || 0;
+                    allRows.push(row);
+                }
+            }
+        });
+
+        // 최신순 정렬
+        allRows.sort((a, b) => new Date(b[0] || 0).getTime() - new Date(a[0] || 0).getTime());
+
+        // ConsultationData 형식으로 변환
+        return allRows
+            .filter(row => row[1] || row[2])
+            .map(row => ({
+                timestamp: row[0],
+                customer: { name: row[1] || '미정', phone: row[2] || '' },
+                trip: {
+                    travelers_count: row[3] || '',
+                    destination: row[6] || '',
+                    departure_date: autoFormatDateString(row[7]),
+                    return_date: autoFormatDateString(row[8]),
+                    duration: autoFormatDuration(row[9]),
+                    product_name: row[10] || '',
+                    url: row[11] || '',
+                },
+                summary: row[12] || '',
+                automation: {
+                    status: (row[13] as ConsultationData['automation']['status']) || '상담중',
+                    recurringCustomer: row[4],
+                    inquirySource: row[5],
+                    next_followup: autoFormatDateString(row[15]),
+                    confirmed_product: row[16] || '',
+                    confirmed_date: autoFormatDateString(row[17]),
+                    prepaid_date: autoFormatDateString(row[18]),
+                    notice_date: autoFormatDateString(row[19]),
+                    balance_date: autoFormatDateString(row[20]),
+                    confirmation_sent: autoFormatDateString(row[21]),
+                    departure_notice: autoFormatDateString(row[22]),
+                    phone_notice: autoFormatDateString(row[23]),
+                    happy_call: autoFormatDateString(row[24]),
+                    inquiry_info_backup: row[26] || '',
+                    reservation_number: row[28] || '',
+                },
+                specific_reminder_date: row[27] || '',
+                reservation_number: row[28] || '',
+                confirmation_link: row[29] || '',
+                source: row[14] || '수동등록',
+                visitor_id: row[25] || '',
+                sheetName: row._sheetName,
+                sheetRowIndex: row._rowIndex,
+                sheetGid: row._sheetGid,
+            }));
+    } catch (error) {
+        console.error(`[getAllConsultationsForTenant] 오류 (${tenantId}):`, error);
+        return [];
+    }
+}
+
+/**
  * 모든 상담 내역을 조회합니다 (대시보드용).
  * 성능 최적화를 위해 1분간 캐싱합니다.
  */
-export async function getAllConsultations(forceRefresh = false): Promise<ConsultationData[]> {
+export async function getAllConsultations(forceRefresh = false, tenantId = 'default_tenant'): Promise<ConsultationData[]> {
     try {
+        // 테넌트 전용 시트에서 읽기 (default_tenant가 아닌 경우)
+        if (tenantId && tenantId !== 'default_tenant') {
+            return await getAllConsultationsForTenant(tenantId, forceRefresh);
+        }
+
         if (!cleanEnv('GOOGLE_SHEET_ID')) return [];
 
         const allRows = await fetchAllSheetData(forceRefresh);

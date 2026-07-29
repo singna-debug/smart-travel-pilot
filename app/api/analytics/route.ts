@@ -14,32 +14,8 @@ export async function GET(request: NextRequest) {
 
         let consultations: any[] = [];
 
-        if (tenantId === DEFAULT_TENANT_ID) {
-            consultations = await getAllConsultations();
-        } else if (process.env.NEXT_PUBLIC_SUPABASE_URL && supabase) {
-            const { data } = await supabase
-                .from('consultations')
-                .select('*')
-                .eq('tenant_id', tenantId)
-                .order('created_at', { ascending: false });
-
-            if (data) {
-                consultations = data.map(c => ({
-                    id: c.id,
-                    timestamp: c.created_at,
-                    visitor_id: c.visitor_id,
-                    customer: { name: c.customer_name, phone: c.customer_phone },
-                    trip: {
-                        destination: c.destination,
-                        product_name: c.product_name,
-                        departure_date: c.departure_date,
-                        url: c.url
-                    },
-                    automation: { status: c.status },
-                    summary: c.summary
-                }));
-            }
-        }
+        // 항상 해당 테넌트의 구글 시트에서 데이터 조회
+        consultations = await getAllConsultations(false, tenantId);
 
         const todayObj = startOfDay(new Date());
         const cutoff = subDays(todayObj, period);

@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAllConsultations } from '@/lib/google-sheets';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        const consultations = await getAllConsultations();
+        const tenantId = request.headers.get('x-tenant-id') || 'default_tenant';
+        const consultations = await getAllConsultations(false, tenantId);
 
         // 고객 목록으로 변환 및 중복 제거 (전화번호 기준, 최신 정보 우선)
         const normalizePhone = (p: string) => (p || '').replace(/[^0-9]/g, '');

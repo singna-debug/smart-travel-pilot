@@ -1,45 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAllConsultations } from '@/lib/google-sheets';
-import { supabase } from '@/lib/supabase';
-import { getTenantIdFromHeaderOrQuery, DEFAULT_TENANT_ID } from '@/lib/tenant';
+import { getTenantIdFromHeaderOrQuery } from '@/lib/tenant';
 import { differenceInDays, isAfter, isBefore, addDays, startOfDay, parseISO, format } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const refresh = searchParams.get('refresh') === 'true';
         const tenantId = getTenantIdFromHeaderOrQuery(request);
 
-        let consultations: any[] = [];
+        // 항상 해당 테넌트의 구글 시트에서 데이터 조회
+        const consultations = await getAllConsultations(refresh, tenantId);
 
-        if (tenantId === DEFAULT_TENANT_ID) {
-            consultations = await getAllConsultations(refresh);
-        } else if (process.env.NEXT_PUBLIC_SUPABASE_URL && supabase) {
-            const { data } = await supabase
-                .from('consultations')
-                .select('*')
-                .eq('tenant_id', tenantId)
-                .order('created_at', { ascending: false });
-
-            if (data) {
-                consultations = data.map(c => ({
-                    id: c.id,
-                    timestamp: c.created_at,
-                    visitor_id: c.visitor_id,
-                    customer: { name: c.customer_name, phone: c.customer_phone },
-                    trip: {
-                        destination: c.destination,
-                        product_name: c.product_name,
-                        departure_date: c.departure_date,
-                        url: c.url
-                    },
-                    automation: { status: c.status },
-                    summary: c.summary
-                }));
-            }
-        }
         const todayObj = startOfDay(new Date());
 
         // 날짜 파싱 헬퍼

@@ -7,9 +7,10 @@ export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const query = searchParams.get('q') || '';
+        const tenantId = request.headers.get('x-tenant-id') || 'default_tenant';
         
-        // Fetch all consultations (it uses internal caching in google-sheets.ts)
-        const consultations = await getAllConsultations(false);
+        // Fetch all consultations from this tenant's sheet
+        const consultations = await getAllConsultations(false, tenantId);
 
         // 중복 제거 (이름 + 전화번호 기준, 가장 최근 행만 유지)
         const uniqueConsultations: any[] = [];

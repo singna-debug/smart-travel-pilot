@@ -488,7 +488,10 @@ export default function UrlAnalyzer() {
         try {
             await fetch(isDummy ? '/api/dummy/save-consultation' : '/api/save-consultation', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-tenant-id': localStorage.getItem('tenant_id') || 'default_tenant'
+                },
                 body: JSON.stringify({
                     customerName,
                     customerPhone,
