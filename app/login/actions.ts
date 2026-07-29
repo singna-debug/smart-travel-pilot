@@ -33,21 +33,54 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
-  const supabase = await createClient()
-
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const companyName = (formData.get('companyName') as string) || '신규 여행사'
   const managerName = (formData.get('managerName') as string) || '담당자'
 
-  const { data, error } = await supabase.auth.signUp({
+  // Service role key가 있는 경우 즉시 자동 승인 처리
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+
+  if (serviceKey && supabaseUrl) {
+    const { createClient: createAdminClient } = await import('@supabase/supabase-js')
+    const adminSupabase = createAdminClient(supabaseUrl, serviceKey, {
+      auth: { autoRefreshToken: false, persistSession: false }
+    })
+
+    const { data: newUser, error: adminErr } = await adminSupabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // 100% 자동 이메일 승인
+      user_metadata: {
+        company_name: companyName,
+        manager_name: managerName,
+        status: 'approved' // 100% 자동 승인 상태
+      }
+    })
+
+    if (adminErr) {
+      return redirect('/login?error=' + encodeURIComponent(adminErr.message))
+    }
+
+    // 신규 가입자 전용 테넌트 초기화
+    if (newUser.user?.id) {
+      const { initializeNewTenant } = await import('@/lib/tenant')
+      await initializeNewTenant(newUser.user.id, companyName, managerName)
+    }
+
+    return redirect('/login?message=' + encodeURIComponent('🎉 회원가입 및 승인이 완료되었습니다! 생성하신 계정으로 지금 바로 로그인해주세요.'))
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: {
         company_name: companyName,
         manager_name: managerName,
-        status: 'pending' // 사장님 승인 대기 상태
+        status: 'approved'
       }
     }
   })
@@ -56,8 +89,7 @@ export async function signup(formData: FormData) {
     return redirect('/login?error=' + encodeURIComponent(error.message))
   }
 
-  // 승인 대기 안내 메시지
-  return redirect('/login?message=' + encodeURIComponent('가입 신청이 완료되었습니다. 관리자(대표)의 승인 완료 후 로그인 가능합니다.'))
+  return redirect('/login?message=' + encodeURIComponent('🎉 회원가입이 완료되었습니다! 로그인해 주세요.'))
 }
 
 export async function logout() {
