@@ -207,7 +207,10 @@ export default function AnalyticsDashboard() {
     const fetchAnalytics = useCallback(async (p: number) => {
         setLoading(true);
         try {
-            const res = await fetch(isDummy ? `/api/dummy/analytics?period=${p}` : `/api/analytics?period=${p}`);
+            const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+            const res = await fetch(isDummy ? `/api/dummy/analytics?period=${p}` : `/api/analytics?period=${p}`, {
+                headers: tenantId ? { 'x-tenant-id': tenantId } : {}
+            });
             const json = await res.json();
             if (json.success) setData(json.data);
         } catch (e) {
@@ -215,7 +218,7 @@ export default function AnalyticsDashboard() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [isDummy]);
 
     useEffect(() => { fetchAnalytics(period); }, [period, fetchAnalytics]);
 

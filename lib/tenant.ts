@@ -16,11 +16,11 @@ export interface TenantInfo {
  */
 export function getTenantIdFromHeaderOrQuery(req?: any): string {
   if (typeof window !== 'undefined') {
-    // gktla71@gmail.com 이거나 비어있으면 무조건 default_tenant!
     const saved = localStorage.getItem('tenant_id');
-    if (!saved || saved === 'default_tenant') return DEFAULT_TENANT_ID;
+    if (saved && saved !== 'undefined' && saved !== 'null') {
+      return saved;
+    }
 
-    // 만약 tenant_id가 설정되어있더라도 gktla71@gmail.com 인 경우 default_tenant 강제 적용
     const tenantSetting = localStorage.getItem('tenant_settings');
     if (tenantSetting) {
       try {

@@ -92,18 +92,34 @@ export default function Sidebar() {
                     <span className="nav-label">카카오 채널</span>
                     <span className="external-icon">↗</span>
                 </a>
-                <a
-                    href={`https://docs.google.com/spreadsheets/d/${process.env.NEXT_PUBLIC_SHEET_ID || ''}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <button
+                    onClick={async () => {
+                        const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+                        const savedSettings = typeof window !== 'undefined' ? localStorage.getItem('tenant_settings') : null;
+                        let customSheetId = null;
+                        if (savedSettings) {
+                            try { customSheetId = JSON.parse(savedSettings).googleSpreadsheetId; } catch(e){}
+                        }
+
+                        // 사장님 본인 계정이면 사장님 구글 시트 연결
+                        if (!tenantId || tenantId === 'default_tenant') {
+                            const sheetId = process.env.NEXT_PUBLIC_SHEET_ID || '17Q0J_O13426hV2e951Q7z-8n3g8735391';
+                            window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`, '_blank');
+                        } else if (customSheetId) {
+                            window.open(`https://docs.google.com/spreadsheets/d/${customSheetId}/edit`, '_blank');
+                        } else {
+                            alert('⚙️ [설정] 페이지에서 사장님/여행사 전용 구글 시트 ID를 먼저 연결 후 이용해 주세요.');
+                        }
+                    }}
                     className="nav-item external"
+                    style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}
                 >
                     <span className="nav-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <TableProperties size={20} />
                     </span>
                     <span className="nav-label">Google Sheets</span>
                     <span className="external-icon">↗</span>
-                </a>
+                </button>
 
                 {/* Logout Button */}
                 <button 
