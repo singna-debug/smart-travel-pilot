@@ -6,7 +6,12 @@ import useSWR from 'swr';
 import { Search, User, Phone, X, Loader2 } from 'lucide-react';
 import { ConsultationData } from '@/types';
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => {
+    const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+    return fetch(url, {
+        headers: tenantId ? { 'x-tenant-id': tenantId } : {}
+    }).then((res) => res.json());
+};
 
 interface CustomerSearchBoxProps {
     onSelect: (customer: ConsultationData) => void;

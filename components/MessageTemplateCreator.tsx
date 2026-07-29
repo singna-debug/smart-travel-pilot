@@ -243,7 +243,10 @@ export default function MessageTemplateCreator() {
     async function fetchCustomers() {
         setLoadingCustomers(true);
         try {
-            const res = await fetch(isDummy ? '/api/dummy/messages' : '/api/messages');
+            const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+            const res = await fetch(isDummy ? '/api/dummy/messages' : '/api/messages', {
+                headers: tenantId ? { 'x-tenant-id': tenantId } : {}
+            });
             const data = await res.json();
             if (data.success) {
                 setCustomers(data.customers);

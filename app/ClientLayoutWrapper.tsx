@@ -14,6 +14,23 @@ export default function ClientLayoutWrapper({
 
     useEffect(() => {
         setMounted(true);
+        const syncTenant = async () => {
+            try {
+                const { createClient } = await import('@/utils/supabase/client');
+                const supabase = createClient();
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    if (user.email === 'gktla71@gmail.com') {
+                        localStorage.setItem('tenant_id', 'default_tenant');
+                    } else if (user.id) {
+                        localStorage.setItem('tenant_id', user.id);
+                    }
+                }
+            } catch (e) {
+                console.error('Tenant sync error in Layout:', e);
+            }
+        };
+        syncTenant();
     }, []);
 
     // If the path is exactly /confirmation (admin page), we show the sidebar.
