@@ -276,11 +276,88 @@ async function getOrCreateMonthlySheet(sheets: any, spreadsheetId: string, month
             return { title: month, gid: existingSheet.properties.sheetId };
         }
 
+        // 마스터 템플릿 시트 ID (사장님의 연동 구글 시트 ID)
+        const masterSpreadsheetId = '17Q0J_O13426hV2e951Q7z-8n3g8735391';
+        
+        // 신규 유저가 사장님 본인이 아니며, 사장님의 마스터 시트를 복사할 수 있는 상황인 경우
+        if (spreadsheetId !== masterSpreadsheetId) {
+            try {
+                console.log(`[Google Sheets] 마스터 템플릿 복사 시작: ${masterSpreadsheetId} -> ${spreadsheetId}`);
+                
+                // 마스터 스프레드시트에서 복제해올 시트(최신 월별 탭 또는 첫 번째 탭)의 정보 획득
+                const masterResponse = await sheets.spreadsheets.get({ spreadsheetId: masterSpreadsheetId });
+                const masterSheets = masterResponse.data.sheets || [];
+                // N박 M일 등 월별 정규식 형태인 시트 중 최신 시트를 템플릿 마스터로 선정
+                const monthPattern = /^\d{4}-\d{2}$/;
+                let templateSheet = masterSheets.find((s: any) => monthPattern.test(s.properties.title));
+                if (!templateSheet) {
+                    templateSheet = masterSheets[0]; // 없으면 첫 번째 탭 복사
+                }
+
+                if (templateSheet) {
+                    const templateSheetId = templateSheet.properties.sheetId;
+
+                    // 1. 마스터의 템플릿 탭을 신규 테넌트 시트로 전체 복사 (Copy)
+                    const copyResponse = await sheets.spreadsheets.sheets.copyTo({
+                        spreadsheetId: masterSpreadsheetId,
+                        sheetId: templateSheetId,
+                        requestBody: {
+                            destinationSpreadsheetId: spreadsheetId
+                        }
+                    });
+
+                    const copiedSheetId = copyResponse.data.sheetId;
+
+                    // 2. 복사된 시트의 이름을 현재 월 이름(예: 2026-07)으로 변경
+                    await sheets.spreadsheets.batchUpdate({
+                        spreadsheetId,
+                        requestBody: {
+                            requests: [
+                                {
+                                    updateSheetProperties: {
+                                        properties: {
+                                            sheetId: copiedSheetId,
+                                            title: month
+                                        },
+                                        fields: 'title'
+                                    }
+                                }
+                            ]
+                        }
+                    });
+
+                    // 3. 복사 성공 후 기본적으로 들어가 있는 빈 '시트1' 또는 'Sheet1'이 비어있다면 깔끔하게 삭제 처리
+                    const defaultSheet = sheetList.find((s: any) => s.properties.title === '시트1' || s.properties.title === 'Sheet1');
+                    if (defaultSheet) {
+                        try {
+                            await sheets.spreadsheets.batchUpdate({
+                                spreadsheetId,
+                                requestBody: {
+                                    requests: [
+                                        {
+                                            deleteSheet: {
+                                                sheetId: defaultSheet.properties.sheetId
+                                            }
+                                        }
+                                    ]
+                                }
+                            });
+                        } catch (delErr) {
+                            console.warn('[Google Sheets] 기본 시트 삭제 실패(무시함):', delErr);
+                        }
+                    }
+
+                    console.log(`[Google Sheets] 마스터 템플릿 복제 완료: ${month}`);
+                    return { title: month, gid: copiedSheetId };
+                }
+            } catch (copyErr: any) {
+                console.error('[Google Sheets] 마스터 시트 템플릿 복사 실패, 프로그래밍 방식으로 헤더를 수동 생성합니다:', copyErr.message);
+            }
+        }
+
         // '시트1' 또는 'Sheet1'이 있고, 목표하는 시트(month)가 없으면 '시트1'을 이름 변경 시도
         const defaultSheet = sheetList.find((s: any) => s.properties.title === '시트1' || s.properties.title === 'Sheet1');
         if (defaultSheet) {
-            // 해당 시트의 내용을 확인하여 비어있으면 이름 변경 (실제 구현에선 안전을 위해 이름 변경만 수행하거나 새로 생성)
-            // 여기서는 사용자 요청에 따라 이름 변경을 우선 시도
             await sheets.spreadsheets.batchUpdate({
                 spreadsheetId,
                 requestBody: {
@@ -296,6 +373,20 @@ async function getOrCreateMonthlySheet(sheets: any, spreadsheetId: string, month
                 }
             });
             console.log(`[Google Sheets] '${defaultSheet.properties.title}'를 '${month}'로 변경했습니다.`);
+            
+            // 헤더 강제 주입
+            const consultationHeaders = [
+                '상담일시', '고객성함', '연락처', '총인원', '재방문여부', '유입경로', '목적지', '출발일', '귀국일', '기간', '상품명', '상품URL', '상담요약', '상담단계', '등록방식', '팔로업일',
+                '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호', '확정서 링크'
+            ];
+            await sheets.spreadsheets.values.update({
+                spreadsheetId,
+                range: `${month}!A1:AD1`,
+                valueInputOption: 'USER_ENTERED',
+                requestBody: { values: [consultationHeaders] },
+            });
+            await applyDropdownValidation(sheets, spreadsheetId, defaultSheet.properties.sheetId);
+
             return { title: month, gid: defaultSheet.properties.sheetId };
         }
 

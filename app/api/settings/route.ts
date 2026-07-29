@@ -60,7 +60,15 @@ export async function GET(request: NextRequest) {
             }
         }
 
-        // 설정 데이터가 없는 경우 기본 빈 설정 리턴
+        // 설정 데이터가 없는 경우 DB에 즉시 기본값 생성 및 삽입
+        if (process.env.NEXT_PUBLIC_SUPABASE_URL && supabase && tenantId !== 'default_tenant') {
+            await supabase.from('tenant_settings').upsert({
+                tenant_id: tenantId,
+                work_start_time: '09:00',
+                work_end_time: '18:00'
+            });
+        }
+
         return NextResponse.json({
             success: true,
             settings: {
