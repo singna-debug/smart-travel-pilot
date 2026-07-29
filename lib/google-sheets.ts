@@ -166,7 +166,15 @@ export async function getSheetsConfigForTenant(tenantId: string) {
             const { data } = await supabase.from('tenant_settings').select('*').eq('tenant_id', tenantId).single();
             if (data) {
                 if (data.google_spreadsheet_id) {
-                    spreadsheetId = data.google_spreadsheet_id.trim();
+                    const tempId = data.google_spreadsheet_id.trim();
+                    // 이메일 오입력 방지: @ 가 포함되어 있으면 차단하고 에러 발생
+                    if (tempId.includes('@')) {
+                        throw new Error('⚠️ 올바른 구글 스프레드시트 ID를 입력해주세요. (이메일 주소는 시트 ID가 아닙니다.)');
+                    }
+                    spreadsheetId = tempId;
+                } else {
+                    // 신규 유저가 시트 ID를 입력하지 않았으면 사장님 시트를 오염시키지 않도록 빈 값 할당!
+                    spreadsheetId = '';
                 }
                 if (data.google_client_email && data.google_private_key) {
                     customCredentials = {
@@ -174,7 +182,11 @@ export async function getSheetsConfigForTenant(tenantId: string) {
                         privateKey: data.google_private_key.trim()
                     };
                 }
+            } else {
+                spreadsheetId = '';
             }
+        } else {
+            spreadsheetId = '';
         }
     }
 
