@@ -370,9 +370,11 @@ export default function DashboardCalendar({ consultations, lists, isLoading }: D
     }
   }, [consultations, lists]);
 
+  const isDefaultTenant = typeof window !== 'undefined' ? (localStorage.getItem('tenant_id') === null || localStorage.getItem('tenant_id') === 'default_tenant') : true;
+
   const activeEvents = parsedRealEvents.length > 0 
     ? parsedRealEvents 
-    : generateMockEvents(currentMonth.getFullYear(), currentMonth.getMonth() + 1);
+    : (isDefaultTenant ? generateMockEvents(currentMonth.getFullYear(), currentMonth.getMonth() + 1) : []);
 
   const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
