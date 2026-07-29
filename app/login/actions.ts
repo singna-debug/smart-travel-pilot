@@ -15,8 +15,9 @@ export async function login(formData: FormData) {
     password,
   })
 
-  // Email not confirmed 에러 발생 시 SUPABASE_SERVICE_ROLE_KEY로 강제 자동 승인 후 재로그인 시도
-  if (error && error.message.includes('Email not confirmed')) {
+  if (error) {
+    // Email not confirmed 에러 발생 시 SUPABASE_SERVICE_ROLE_KEY로 강제 자동 승인 후 재로그인 시도
+    if (error.message.includes('Email not confirmed')) {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     if (serviceKey && supabaseUrl) {
@@ -43,6 +44,10 @@ export async function login(formData: FormData) {
     }
     return redirect('/login?error=' + encodeURIComponent('이메일 인증이 필요합니다. 관리자 자동 승인이 진행되었으니 1초 후 다시 로그인 버튼을 눌러주세요.'))
   }
+
+  // 일반 로그인 에러 (비밀번호 불일치 등) 발생 시 에러 메시지와 함께 리다이렉트
+  return redirect('/login?error=' + encodeURIComponent(error.message))
+}
 
   revalidatePath('/', 'layout')
   redirect('/')
