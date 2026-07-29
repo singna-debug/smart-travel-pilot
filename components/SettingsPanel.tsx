@@ -56,7 +56,20 @@ export default function SettingsPanel() {
     setIsMounted(true);
     const loadSettings = async () => {
       try {
-        const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+        let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+        
+        // Supabase 세션 체크로 2중 안전 장치 마련
+        const { createClient } = await import('@/utils/supabase/client');
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          if (user.email === 'gktla71@gmail.com') {
+            tenantId = 'default_tenant';
+          } else if (user.id) {
+            tenantId = user.id;
+          }
+        }
+
         const res = await fetch('/api/settings', {
           headers: tenantId ? { 'x-tenant-id': tenantId } : {}
         });
@@ -82,7 +95,19 @@ export default function SettingsPanel() {
 
   const handleSave = async () => {
     try {
-      const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+      let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+      
+      const { createClient } = await import('@/utils/supabase/client');
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        if (user.email === 'gktla71@gmail.com') {
+          tenantId = 'default_tenant';
+        } else if (user.id) {
+          tenantId = user.id;
+        }
+      }
+
       localStorage.setItem('tenant_settings', JSON.stringify(settings));
       const res = await fetch('/api/settings', {
         method: 'POST',

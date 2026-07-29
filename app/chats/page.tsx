@@ -646,7 +646,13 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
                     </button>
                     <button
                         className="action-button"
-                        onClick={() => window.open(sheetUrl || `https://docs.google.com/spreadsheets/d/${process.env.NEXT_PUBLIC_SHEET_ID || ''}`, '_blank')}
+                        onClick={() => {
+                            if (!sheetUrl || sheetUrl === '#' || !sheetUrl.startsWith('http')) {
+                                alert('⚙️ 구글 시트가 연동되지 않았습니다. [⚙️ 설정] 페이지에서 스프레드시트 ID와 공유 설정을 먼저 완료해 주세요.');
+                                return;
+                            }
+                            window.open(sheetUrl, '_blank');
+                        }}
                         style={{ padding: '10px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#10b981', color: 'white', border: 'none' }}
                     >
                         시트 열기

@@ -88,17 +88,47 @@ export default function MessageTemplateCreator() {
     const [kakaoTalkId, setKakaoTalkId] = useState('');
 
     useEffect(() => {
-        const saved = localStorage.getItem('tenant_settings');
-        if (saved) {
+        const loadSettings = async () => {
             try {
-                const parsed = JSON.parse(saved);
-                if (parsed.managerName) setAgentName(parsed.managerName);
-                if (parsed.companyName) setCompanyName(parsed.companyName);
-                if (parsed.kakaoTalkId) setKakaoTalkId(parsed.kakaoTalkId);
+                let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+                
+                // Supabase에서 세션을 즉시 한번더 안전하게 체크
+                const { createClient } = await import('@/utils/supabase/client');
+                const supabase = createClient();
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    if (user.email === 'gktla71@gmail.com') {
+                        tenantId = 'default_tenant';
+                    } else if (user.id) {
+                        tenantId = user.id;
+                    }
+                }
+
+                const res = await fetch('/api/settings', {
+                    headers: tenantId ? { 'x-tenant-id': tenantId } : {}
+                });
+                const data = await res.json();
+                if (data.success && data.settings) {
+                    const s = data.settings;
+                    if (s.managerName) setAgentName(s.managerName);
+                    if (s.companyName) setCompanyName(s.companyName);
+                    if (s.kakaoTalkId) setKakaoTalkId(s.kakaoTalkId);
+                    localStorage.setItem('tenant_settings', JSON.stringify(s));
+                }
             } catch (e) {
-                console.error('Failed to parse tenant settings');
+                // fallback to localStorage
+                const saved = localStorage.getItem('tenant_settings');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        if (parsed.managerName) setAgentName(parsed.managerName);
+                        if (parsed.companyName) setCompanyName(parsed.companyName);
+                        if (parsed.kakaoTalkId) setKakaoTalkId(parsed.kakaoTalkId);
+                    } catch (err) {}
+                }
             }
-        }
+        };
+        loadSettings();
     }, []);
 
     const AGENT_NAME = agentName;
