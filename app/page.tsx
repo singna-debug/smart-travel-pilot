@@ -58,7 +58,19 @@ export default function DashboardPage({ isDummy = false }: { isDummy?: boolean }
   const pendingCount = data?.lists.recentInquiries.filter(c => c.automation.status === '확인필요').length || 0;
 
   useEffect(() => {
-    fetchDashboardData(false);
+    const initTenant = async () => {
+      try {
+        const { createClient } = await import('@/utils/supabase/client');
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user && user.id) {
+          localStorage.setItem('tenant_id', user.id);
+        }
+      } catch (e) {}
+      fetchDashboardData(false);
+    };
+
+    initTenant();
     const interval = setInterval(() => fetchDashboardData(false), 60000);
     return () => clearInterval(interval);
   }, []);
@@ -67,7 +79,11 @@ export default function DashboardPage({ isDummy = false }: { isDummy?: boolean }
     try {
       const baseUrl = isDummy ? '/api/dummy/stats' : '/api/stats';
       const url = forceRefresh ? `${baseUrl}?refresh=true` : baseUrl;
-      const response = await fetch(url);
+      const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+      
+      const response = await fetch(url, {
+        headers: tenantId ? { 'x-tenant-id': tenantId } : {}
+      });
       const result = await response.json();
       if (result.success) {
         setData(result.data);
