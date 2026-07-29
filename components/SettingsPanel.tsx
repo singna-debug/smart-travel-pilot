@@ -54,14 +54,25 @@ export default function SettingsPanel() {
 
   useEffect(() => {
     setIsMounted(true);
-    const saved = localStorage.getItem('tenant_settings');
-    if (saved) {
+    const loadSettings = async () => {
       try {
-        setSettings(JSON.parse(saved));
+        const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+        const res = await fetch('/api/settings', {
+          headers: tenantId ? { 'x-tenant-id': tenantId } : {}
+        });
+        const data = await res.json();
+        if (data.success && data.settings) {
+          setSettings(data.settings);
+          localStorage.setItem('tenant_settings', JSON.stringify(data.settings));
+        }
       } catch (e) {
-        console.error('Failed to parse settings');
+        const saved = localStorage.getItem('tenant_settings');
+        if (saved) {
+          try { setSettings(JSON.parse(saved)); } catch (err) {}
+        }
       }
-    }
+    };
+    loadSettings();
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -69,9 +80,22 @@ export default function SettingsPanel() {
     setSettings(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    localStorage.setItem('tenant_settings', JSON.stringify(settings));
-    showToast('설정이 저장되었습니다.');
+  const handleSave = async () => {
+    try {
+      const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+      localStorage.setItem('tenant_settings', JSON.stringify(settings));
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(tenantId ? { 'x-tenant-id': tenantId } : {})
+        },
+        body: JSON.stringify(settings)
+      });
+      showToast('🎉 본인 전용 API 연동 및 설정이 성공적으로 저장되었습니다.');
+    } catch (e) {
+      showToast('설정이 로컬에 저장되었습니다.');
+    }
   };
 
   const showToast = (message: string) => {
