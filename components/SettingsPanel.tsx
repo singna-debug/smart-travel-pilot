@@ -110,7 +110,7 @@ export default function SettingsPanel() {
           className={`settings-tab ${activeTab === 'company' ? 'active' : ''}`}
           onClick={() => setActiveTab('company')}
         >
-          🏢 회사 및 대표 설정
+          🏢 회사 정보
         </button>
         <button 
           className={`settings-tab ${activeTab === 'google' ? 'active' : ''}`}
@@ -122,14 +122,7 @@ export default function SettingsPanel() {
           className={`settings-tab ${activeTab === 'api' ? 'active' : ''}`}
           onClick={() => setActiveTab('api')}
         >
-          🔑 AI & 카카오 API
-        </button>
-        <button 
-          className={`settings-tab ${activeTab === 'approval' ? 'active' : ''}`}
-          style={{ position: 'relative' }}
-          onClick={() => setActiveTab('approval')}
-        >
-          👥 신규 회원 승인 {pendingUsers.length > 0 && <span style={{ background: '#ff4d4f', color: '#fff', fontSize: '10px', padding: '2px 6px', borderRadius: '10px', marginLeft: '6px' }}>{pendingUsers.length}</span>}
+          🤖 AI & 카카오 API
         </button>
       </div>
 

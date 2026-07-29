@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, Suspense } from 'react'
-import { login } from './actions'
+import { login, signup } from './actions'
 import { Lock, Mail, Loader2, BarChart3 } from 'lucide-react'
 import './login.css'
 import { useSearchParams } from 'next/navigation'

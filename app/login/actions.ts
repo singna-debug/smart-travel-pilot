@@ -10,13 +10,22 @@ export async function login(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
 
   if (error) {
     return redirect('/login?error=' + encodeURIComponent(error.message))
+  }
+
+  // Supabase 대시보드 승인 여부 체크 (raw_user_meta_data.status === 'approved' 또는 email_confirmed_at)
+  const user = data.user
+  const isApproved = user?.user_metadata?.status === 'approved' || !!user?.email_confirmed_at
+
+  if (!isApproved && user?.user_metadata?.status === 'pending') {
+    await supabase.auth.signOut()
+    return redirect('/login?error=' + encodeURIComponent('아직 관리자의 승인이 완료되지 않은 계정입니다. Supabase 대시보드에서 승인 후 로그인해주세요.'))
   }
 
   revalidatePath('/', 'layout')
