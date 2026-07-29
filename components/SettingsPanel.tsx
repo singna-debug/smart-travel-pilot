@@ -232,11 +232,15 @@ export default function SettingsPanel() {
               <div className="settings-info-content">
                 <p className="settings-info-title">서비스 계정 권한 부여 안내</p>
                 <p className="settings-info-desc">
-                  아래 이메일 주소를 복사하여 연동할 구글 스프레드시트의 <strong>편집자</strong>로 추가해 주세요.
+                  아래 이메일 주소를 복사하여 연동할 구글 스프레드시트의 <strong>[공유] ➔ 편집자</strong>로 추가해 주세요.
                 </p>
                 <div className="settings-copy-box">
-                  <code>{settings.googleClientEmail || 'modetour@gen-lang-client-0510450295.iam.gserviceaccount.com'}</code>
-                  <button className="settings-copy-btn" onClick={handleCopyEmail} title="복사하기">
+                  <code>modetour@gen-lang-client-0510450295.iam.gserviceaccount.com</code>
+                  <button className="settings-copy-btn" onClick={() => {
+                    navigator.clipboard.writeText('modetour@gen-lang-client-0510450295.iam.gserviceaccount.com');
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }} title="복사하기">
                     {copied ? <Check size={16} className="text-green" /> : <Copy size={16} />}
                   </button>
                   {copied && <span className="settings-copied-tooltip">Copied!</span>}
@@ -253,44 +257,50 @@ export default function SettingsPanel() {
                   className="settings-input" 
                   value={settings.googleSpreadsheetId}
                   onChange={handleChange}
-                  placeholder="예: 17Q0J_O13426hV2e951Q7z-8n3g8735391"
+                  placeholder="예: 104ZbZrUmO6-FSp6xoK3LF5n58ZD6TrAqHSRVGpsorQk"
                 />
                 <span style={{ color: '#94a3b8', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
                   ⚠️ 이메일 주소가 아닙니다! 구글 시트 주소창에서 /d/ 와 /edit 사이의 긴 영문+숫자 조합을 넣어주세요.
                 </span>
               </div>
               <div className="settings-form-group">
-                <label className="settings-label">워크시트 이름</label>
+                <label className="settings-label">워크시트 이름 (선택)</label>
                 <input 
                   type="text" 
                   name="googleSheetName"
                   className="settings-input" 
                   value={settings.googleSheetName}
                   onChange={handleChange}
-                  placeholder="예: 시트1"
+                  placeholder="예: 7월상담DB"
                 />
               </div>
-              <div className="settings-form-group settings-full-width">
-                <label className="settings-label">서비스 계정 이메일 (Client Email)</label>
-                <input 
-                  type="email" 
-                  name="googleClientEmail"
-                  className="settings-input" 
-                  value={settings.googleClientEmail}
-                  onChange={handleChange}
-                  placeholder="service-account@project.iam.gserviceaccount.com"
-                />
-              </div>
-              <div className="settings-form-group settings-full-width">
-                <label className="settings-label">Private Key</label>
-                <textarea 
-                  name="googlePrivateKey"
-                  className="settings-textarea" 
-                  value={settings.googlePrivateKey}
-                  onChange={handleChange}
-                  placeholder="-----BEGIN PRIVATE KEY-----\n..."
-                />
-              </div>
+
+              {/* 사장님(마스터 계정)에게만 서비스 이메일과 Private Key 입력란 노출 */}
+              {settings.companyName === '클럽모두투어' && (
+                <>
+                  <div className="settings-form-group settings-full-width">
+                    <label className="settings-label">서비스 계정 이메일 (Client Email) [관리자 전용]</label>
+                    <input 
+                      type="email" 
+                      name="googleClientEmail"
+                      className="settings-input" 
+                      value={settings.googleClientEmail}
+                      onChange={handleChange}
+                      placeholder="service-account@project.iam.gserviceaccount.com"
+                    />
+                  </div>
+                  <div className="settings-form-group settings-full-width">
+                    <label className="settings-label">Private Key [관리자 전용]</label>
+                    <textarea 
+                      name="googlePrivateKey"
+                      className="settings-textarea" 
+                      value={settings.googlePrivateKey}
+                      onChange={handleChange}
+                      placeholder="-----BEGIN PRIVATE KEY-----\n..."
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="settings-actions-row">
