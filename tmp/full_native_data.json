@@ -1,216 +1,244 @@
 {
-  "isProduct": true,
-  "title": "[출발확정/비즈니스탑승] 아프리카 6개국 13일(케냐/탄자니아/짐바브웨/보츠와나/잠비아/남아공) <헬기투어포함/사파리/빅토리아폭포>",
-  "destination": "선시티, 나이로비, 응고롱고로 자연보호구, 아루샤, 킬리만자로, 빅토리 폴스, 초베 국립공원, 케이프타운",
-  "price": "18900000",
-  "departureDate": "2026-08-13",
-  "returnDate": "2026-08-25",
-  "duration": "12박 13일",
-  "airline": "에미레이트 항공 (경유)",
-  "departureFlightNumber": "EK323 / EK719",
-  "returnFlightNumber": "EK773 / EK322",
-  "departureAirport": "인천",
-  "arrivalAirport": "나이로비",
-  "departureTime": "23:55",
-  "arrivalTime": "14:30",
-  "departureDuration": "",
-  "returnDepartureAirport": "케이프타운",
-  "returnDepartureTime": "13:15",
-  "returnArrivalTime": "17:00",
-  "returnDuration": "",
-  "departureSegments": [
-    {
-      "airline": "에미레이트 항공",
-      "flightNo": "EK323",
-      "departureCity": "인천",
-      "departureTime": "23:55",
-      "arrivalCity": "두바이",
-      "arrivalTime": "04:25",
-      "duration": "09:30",
-      "layoverDuration": "6시간 5분"
-    },
-    {
-      "airline": "에미레이트 항공",
-      "flightNo": "EK719",
-      "departureCity": "두바이",
-      "departureTime": "10:30",
-      "arrivalCity": "나이로비",
-      "arrivalTime": "14:30",
-      "duration": "05:00",
-      "layoverDuration": ""
-    }
-  ],
-  "returnSegments": [
-    {
-      "airline": "에미레이트 항공",
-      "flightNo": "EK773",
-      "departureCity": "케이프타운",
-      "departureTime": "13:15",
-      "arrivalCity": "두바이",
-      "arrivalTime": "00:35",
-      "duration": "09:30",
-      "layoverDuration": "3시간 5분"
-    },
-    {
-      "airline": "에미레이트 항공",
-      "flightNo": "EK322",
-      "departureCity": "두바이",
-      "departureTime": "03:40",
-      "arrivalCity": "인천",
-      "arrivalTime": "17:00",
-      "duration": "08:20",
-      "layoverDuration": ""
-    }
-  ],
-  "url": "https://na.modetour.co.kr/package/105175602",
+  "title": "[베스트셀러] 오사카/나라 4일 (교토관광VS유니버셜스튜디오)",
+  "destination": "오사카, 교토, 나라",
+  "price": "1,139,900원",
+  "departureDate": "2026-10-22",
+  "returnDate": "2026-10-25",
+  "duration": "3박 4일",
+  "airline": "진에어",
+  "departureFlightNumber": "LJ251",
+  "returnFlightNumber": "LJ612",
+  "departureAirport": "부산",
+  "departureTime": "13:35",
+  "arrivalTime": "15:05",
+  "returnDepartureTime": "11:00",
+  "returnArrivalTime": "12:30",
+  "departureSegments": [],
+  "returnSegments": [],
+  "url": "https://www.modetour.com/package/103203388",
   "itinerary": [
     {
       "day": 1,
       "date": "",
-      "title": "인천",
+      "title": "부산",
       "transport": "항공",
       "flight": {
-        "flightNo": "EK323 / EK719",
-        "airline": "에미레이트 항공 (경유)",
-        "departureCity": "인천",
-        "departureTime": "23:55",
-        "arrivalCity": "나이로비",
-        "arrivalTime": "14:30",
-        "duration": "",
-        "segments": [
-          {
-            "airline": "에미레이트 항공",
-            "flightNo": "EK323",
-            "departureCity": "인천",
-            "departureTime": "23:55",
-            "arrivalCity": "두바이",
-            "arrivalTime": "04:25",
-            "duration": "09:30",
-            "layoverDuration": "6시간 5분"
-          },
-          {
-            "airline": "에미레이트 항공",
-            "flightNo": "EK719",
-            "departureCity": "두바이",
-            "departureTime": "10:30",
-            "arrivalCity": "나이로비",
-            "arrivalTime": "14:30",
-            "duration": "05:00",
-            "layoverDuration": ""
-          }
-        ]
+        "flightNo": "LJ251",
+        "airline": "진에어",
+        "departureCity": "부산",
+        "departureTime": "13:35",
+        "arrivalCity": "오사카",
+        "arrivalTime": "15:05",
+        "duration": "01:30",
+        "segments": []
       },
       "timeline": [
         {
           "type": "default",
-          "title": "인천국제공항 출발",
+          "title": "유의 ㅣ 안내사항",
+          "subtitle": "",
+          "description": "일정 유의 사항 안내\n\r▶본 상품은 모두투어의 타항공(진에어,이스타항공)과 현지에서 조인 되어 진행되며, 이용 항공에 따라 상품가격의 차이가 있을 수 있습니다. 항공상황 및 조인상황에 따라 1일차, 4일차 현지공항에서 소정의 대기시간이 발생될 수 있습니다.  \r\n \r\n▶출발 3일전까지 일정 확정시 홈페이지를 통해 확인 가능합니다.\r\n\r\n▶현지 상황에 따라 일정 순서 및 식사 메뉴는 변경될 수 있습니다. 출발 3일 전 확정 일정표를 확인해주세요"
+        },
+        {
+          "type": "default",
+          "title": "한국-일본 여행 입국시 관련 안내",
+          "subtitle": "",
+          "description": "<b>■ 여권/비자</b></font>\r\n- 여권 : 유효기간 6개월 이상\r\n- 비자 : 일본 관광비자 불필요 (단, 장기체류 및 유학/기타 목적 따른 입국시 해당 비자 필요)\r\n* 여권/비자의 경우 경미한 훼손이라도 출입국시 불이익을 받을 수 있으니, 미리 확인하여 주시기 바랍니다.</br>\r\n<b>[출입국 관련사이트]</b></font>\t\t\r\n- 주 일본 대한민국 대사관  <font color=\"#0000FF\"><A href=\"https://overseas.mofa.go.kr/jp-ko/index.do\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font>\r\n- 주 대한민국 일본 대사관  <font color=\"#0000FF\"><A href=\"https://www.kr.emb-japan.go.jp/itprtop_ko/index.html\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font>\r\n- 일본 후생노동성 홈페이지  <font color=\"#0000FF\"><A href=\"https://www.mhlw.go.jp/index.html\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font>\r\n*출입국관련 제한 사항은 사전 안내없이 변경되는 경우도 있습니다. 자세한 내용은  관련 홈페이지를 참고 부탁드리겠습니다.</br>\r\n<b>[외국/이중국적자 주의사항]</b></font>\r\n- 외국/이중국적자의 해외여행은 도착지국가(경유국가 포함)의 출입국정책이 상이하므로, 반드시 여행자본인이 해당국의 대사관에 확인하셔야 합니다. (비자 대행 불가)\r\n- K-ETA가 필요할 수 있으니 개별 준비 부탁드리며, 아래 홈페이지 내용 참고 부탁드립니다.\r\n- K-ETA 홈페이지  <font color=\"#0000FF\"><A href=\"https://www.k-eta.go.kr/portal/apply/index.do\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font></br>\r\n<b>■ 일본 입국시 금제품 반입 주의</b></font>\r\n최근 일본세관의 강화된 심사로 인해 불편을 겪는 사례가 자주 발생하고 있습니다.\r\n우리국민 여행객 여러분께서는 아래의 내용을 참고하시어 입국 시 세관 단속 관련 불이익을 입지 않도록 주의하시기 바라오며, 평소 착용하시던 고가의 금제품은 한국에 보관하시고 오시기를 권합니다.</br>\r\n<b>[일본 세관의 금 또는 금제품 관련 신고기준]</b></font>\r\n- 순도와 중량, 사용(착용) 여부와 관계없이 금 또는 금제품을 휴대하여 반입하는 경우에는 「휴대품·별송품 신고서」에 해당 물품에 대한 정보를 반드시 신고(금지금 또는 금제품 란에 있음으로 체크)하여야 하며, 면세범위(20만엔)를 넘는 경우 해당 물품에 소비세 등이 과세됩니다, 또한 이를 신고하지않고 반입할 시, 일본 관세법상 허위신고로 처벌 및 물품 압수 등이 될 수 있습니다."
+        },
+        {
+          "type": "default",
+          "title": "유의 ㅣ 안내사항",
+          "subtitle": "",
+          "description": "현지차량 관련 유의사항 안내\n\r오사카 현지 관광객 급증으로 인하여 현지 상황 또는 행사 일정 및 인원에 따라 일차별 차량이 변경될 수 있습니다."
+        },
+        {
+          "type": "default",
+          "title": "오사카 간사이 국제공항 도착 - 입국 수속",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "default",
-          "title": "황열병 필수 예방접종 안내",
-          "subtitle": "",
-          "description": "☞황열병 예방주사 접종 안내\r\n\r\n*<a href=\"https://nqs.kdca.go.kr/nqs/vaccination.do?gubun=yellowFever&subGubun=2\">질병관리청 예방접종 안내 바로가기</A> ←클릭\r\n\r\n*아프리카 여행시 황열병 예방접종 증명서 지참이 필수입니다.\r\n*예방접종은 출국 최소 10일 전에 완료 되어야합니다.\r\n*이미 접종을 받으신 분은 재접종 없이 증명서만 준비하시면 됩니다.\r\n\r\n*<a href=\"https://nqs.kdca.go.kr/nqs/html/vaccination/vaccinationOrgList.html\">예방접종 가능 병원 리스트 바로가기</A> ←클릭\r\n\r\n1. 접종 희망 병원에 전화예약 (필수)\r\n2. 여권 원본 또는 사본 지참 (필수)\r\n3. 필요시 복용 중인 약 정보\r\n4. 전자수입 인지 지불 및 발급 (37,440원-금액변동가능) (<a href=\"https://www.e-revenuestamp.or.kr\">홈페이지</a> / 또는 병원 인근 은행이나 우체국)\r\n5. 병원 방문 접종 및 접종 증명서 발급, 수입인지 제출 및 접종료 지불 (19,610원)\r\n6. 여행시 황열병 예방 접종 증명서를 항시 지참해야 합니다. (필수)"
-        },
-        {
-          "type": "default",
-          "title": "아프리카 여행 준비사항",
-          "subtitle": "",
-          "description": "아프리카 여행시 준비사항 안내"
-        },
-        {
-          "type": "default",
-          "title": "프라이빗 공항 이동 서비스 EK",
-          "subtitle": "",
-          "description": "프라이빗 공항 이동 서비스 : 쇼퍼 드라이브(Chauffeur-drive)"
-        },
-        {
-          "type": "default",
-          "title": "※현지 특성에 의해 일정의 순서가 사전 또는 현지 진행 중 변경 될 수 있습니다.",
+          "title": "오사카 이동",
           "subtitle": "",
           "description": ""
+        },
+        {
+          "type": "default",
+          "title": "호텔 체크인 후 자유관광 및 자유석식 [호텔개별리턴]",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "※ 3인 일행의 경우 객실 변경 사전문의 필수",
+          "subtitle": "",
+          "description": "※ 3인 일행의 경우 객실 변경 사전문의 필수 \r\n※ 객실 변경 시 트윈베드 + 엑스트라 베드 대응으로 다소 좁으실 수 있습니다.\r\n※ 변경이 불가할 경우 트윈룸+싱글룸으로 이용하셔야 하며, 싱글 객실 이용 요금이 추가로 발생합니다."
         }
       ],
       "items": [
         {
           "type": "default",
-          "title": "인천국제공항 출발",
+          "title": "유의 ㅣ 안내사항",
+          "subtitle": "",
+          "description": "일정 유의 사항 안내\n\r▶본 상품은 모두투어의 타항공(진에어,이스타항공)과 현지에서 조인 되어 진행되며, 이용 항공에 따라 상품가격의 차이가 있을 수 있습니다. 항공상황 및 조인상황에 따라 1일차, 4일차 현지공항에서 소정의 대기시간이 발생될 수 있습니다.  \r\n \r\n▶출발 3일전까지 일정 확정시 홈페이지를 통해 확인 가능합니다.\r\n\r\n▶현지 상황에 따라 일정 순서 및 식사 메뉴는 변경될 수 있습니다. 출발 3일 전 확정 일정표를 확인해주세요"
+        },
+        {
+          "type": "default",
+          "title": "한국-일본 여행 입국시 관련 안내",
+          "subtitle": "",
+          "description": "<b>■ 여권/비자</b></font>\r\n- 여권 : 유효기간 6개월 이상\r\n- 비자 : 일본 관광비자 불필요 (단, 장기체류 및 유학/기타 목적 따른 입국시 해당 비자 필요)\r\n* 여권/비자의 경우 경미한 훼손이라도 출입국시 불이익을 받을 수 있으니, 미리 확인하여 주시기 바랍니다.</br>\r\n<b>[출입국 관련사이트]</b></font>\t\t\r\n- 주 일본 대한민국 대사관  <font color=\"#0000FF\"><A href=\"https://overseas.mofa.go.kr/jp-ko/index.do\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font>\r\n- 주 대한민국 일본 대사관  <font color=\"#0000FF\"><A href=\"https://www.kr.emb-japan.go.jp/itprtop_ko/index.html\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font>\r\n- 일본 후생노동성 홈페이지  <font color=\"#0000FF\"><A href=\"https://www.mhlw.go.jp/index.html\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font>\r\n*출입국관련 제한 사항은 사전 안내없이 변경되는 경우도 있습니다. 자세한 내용은  관련 홈페이지를 참고 부탁드리겠습니다.</br>\r\n<b>[외국/이중국적자 주의사항]</b></font>\r\n- 외국/이중국적자의 해외여행은 도착지국가(경유국가 포함)의 출입국정책이 상이하므로, 반드시 여행자본인이 해당국의 대사관에 확인하셔야 합니다. (비자 대행 불가)\r\n- K-ETA가 필요할 수 있으니 개별 준비 부탁드리며, 아래 홈페이지 내용 참고 부탁드립니다.\r\n- K-ETA 홈페이지  <font color=\"#0000FF\"><A href=\"https://www.k-eta.go.kr/portal/apply/index.do\" target =\"blank\" style=\"text-decoration:none\"> ☞바로가기 </A></font></br>\r\n<b>■ 일본 입국시 금제품 반입 주의</b></font>\r\n최근 일본세관의 강화된 심사로 인해 불편을 겪는 사례가 자주 발생하고 있습니다.\r\n우리국민 여행객 여러분께서는 아래의 내용을 참고하시어 입국 시 세관 단속 관련 불이익을 입지 않도록 주의하시기 바라오며, 평소 착용하시던 고가의 금제품은 한국에 보관하시고 오시기를 권합니다.</br>\r\n<b>[일본 세관의 금 또는 금제품 관련 신고기준]</b></font>\r\n- 순도와 중량, 사용(착용) 여부와 관계없이 금 또는 금제품을 휴대하여 반입하는 경우에는 「휴대품·별송품 신고서」에 해당 물품에 대한 정보를 반드시 신고(금지금 또는 금제품 란에 있음으로 체크)하여야 하며, 면세범위(20만엔)를 넘는 경우 해당 물품에 소비세 등이 과세됩니다, 또한 이를 신고하지않고 반입할 시, 일본 관세법상 허위신고로 처벌 및 물품 압수 등이 될 수 있습니다."
+        },
+        {
+          "type": "default",
+          "title": "유의 ㅣ 안내사항",
+          "subtitle": "",
+          "description": "현지차량 관련 유의사항 안내\n\r오사카 현지 관광객 급증으로 인하여 현지 상황 또는 행사 일정 및 인원에 따라 일차별 차량이 변경될 수 있습니다."
+        },
+        {
+          "type": "default",
+          "title": "오사카 간사이 국제공항 도착 - 입국 수속",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "default",
-          "title": "황열병 필수 예방접종 안내",
-          "subtitle": "",
-          "description": "☞황열병 예방주사 접종 안내\r\n\r\n*<a href=\"https://nqs.kdca.go.kr/nqs/vaccination.do?gubun=yellowFever&subGubun=2\">질병관리청 예방접종 안내 바로가기</A> ←클릭\r\n\r\n*아프리카 여행시 황열병 예방접종 증명서 지참이 필수입니다.\r\n*예방접종은 출국 최소 10일 전에 완료 되어야합니다.\r\n*이미 접종을 받으신 분은 재접종 없이 증명서만 준비하시면 됩니다.\r\n\r\n*<a href=\"https://nqs.kdca.go.kr/nqs/html/vaccination/vaccinationOrgList.html\">예방접종 가능 병원 리스트 바로가기</A> ←클릭\r\n\r\n1. 접종 희망 병원에 전화예약 (필수)\r\n2. 여권 원본 또는 사본 지참 (필수)\r\n3. 필요시 복용 중인 약 정보\r\n4. 전자수입 인지 지불 및 발급 (37,440원-금액변동가능) (<a href=\"https://www.e-revenuestamp.or.kr\">홈페이지</a> / 또는 병원 인근 은행이나 우체국)\r\n5. 병원 방문 접종 및 접종 증명서 발급, 수입인지 제출 및 접종료 지불 (19,610원)\r\n6. 여행시 황열병 예방 접종 증명서를 항시 지참해야 합니다. (필수)"
-        },
-        {
-          "type": "default",
-          "title": "아프리카 여행 준비사항",
-          "subtitle": "",
-          "description": "아프리카 여행시 준비사항 안내"
-        },
-        {
-          "type": "default",
-          "title": "프라이빗 공항 이동 서비스 EK",
-          "subtitle": "",
-          "description": "프라이빗 공항 이동 서비스 : 쇼퍼 드라이브(Chauffeur-drive)"
-        },
-        {
-          "type": "default",
-          "title": "※현지 특성에 의해 일정의 순서가 사전 또는 현지 진행 중 변경 될 수 있습니다.",
+          "title": "오사카 이동",
           "subtitle": "",
           "description": ""
+        },
+        {
+          "type": "default",
+          "title": "호텔 체크인 후 자유관광 및 자유석식 [호텔개별리턴]",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "※ 3인 일행의 경우 객실 변경 사전문의 필수",
+          "subtitle": "",
+          "description": "※ 3인 일행의 경우 객실 변경 사전문의 필수 \r\n※ 객실 변경 시 트윈베드 + 엑스트라 베드 대응으로 다소 좁으실 수 있습니다.\r\n※ 변경이 불가할 경우 트윈룸+싱글룸으로 이용하셔야 하며, 싱글 객실 이용 요금이 추가로 발생합니다."
         }
       ],
-      "hotel": "호텔 확정 예정",
+      "hotel": "사라사 도톤보리 호텔 (3성급 ★★★)",
       "meals": {
         "breakfast": "-",
         "lunch": "-",
-        "dinner": "기내식"
+        "dinner": "불포함(자유식)"
       }
     },
     {
       "day": 2,
       "date": "",
-      "title": "나이로비",
+      "title": "교토 → 오사카",
       "transport": "-",
       "flight": null,
       "timeline": [
         {
           "type": "default",
-          "title": "두바이 환승 후 나이로비 조모 케냐타 국제공항 도착",
+          "title": "호텔 조식 후 일정 진행",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "default",
-          "title": "시내로 이동하여 카렌브릭슨 박물관 관람",
+          "title": "1번. 기본일정 또는 2번. USJ(유니버셜 스튜디오재팬)일정 진행",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "★기본일정 또는 선택관광일정(USJ) 중 최종 진행일정을 출발 1주일 전까지 선택해주세요.",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "행사 진행은 호텔 - USJ - 관광(교토, 아라시야마) - USJ - 호텔순으로 송영",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "★★★기본 일정1. 교토/아라시야마 (추가 비용 없음)★★★",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "교토 이동",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "location",
-          "title": "카렌브릭슨 박물관",
+          "title": "청수사",
           "subtitle": "",
-          "description": "'아웃 오브 아프리카'의 촬영지 및 작가 생가"
+          "description": "교토를 대표하는 유서 깊은 불교 사찰로, 특히 나무로 지어진 웅장한 본당이 유명한 세계문화유산"
         },
         {
           "type": "location",
-          "title": "사파리 캣츠 쇼",
+          "title": "니넨자카",
           "subtitle": "",
-          "description": "사파리파크 호텔의 명물, 아프리카 원주민들의 현란한 몸동작의 '사파리 캣츠 쇼'관람"
+          "description": "옛 일본 분위기를 느낄 수 있는 전통적인 돌계단 거리"
+        },
+        {
+          "type": "location",
+          "title": "산넨자카",
+          "subtitle": "",
+          "description": "아기자기한 상점과 찻집이 늘어서있는 언덕길"
         },
         {
           "type": "default",
-          "title": "일정 안내",
+          "title": "아라시야마로 이동",
           "subtitle": "",
-          "description": "<iframe width=\"656\" height=\"369\" src=\"https://www.youtube.com/embed/b2_c9pGZVrI\" title=\"Safari Cats Dancers &amp; Acrobats\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>"
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "아라시야마",
+          "subtitle": "",
+          "description": "자연과 역사가 어우러져 사계절 내내 아름다운 풍경을 즐길 수 있는 관광지"
+        },
+        {
+          "type": "location",
+          "title": "토게쯔교",
+          "subtitle": "",
+          "description": "아라시야마 지역을 가로지르는 가쓰라강 위에 놓인 목조 다리"
+        },
+        {
+          "type": "location",
+          "title": "노노미야 신사(치쿠린 대숲)",
+          "subtitle": "",
+          "description": "인연과 사랑을 기원하는 것으로 유명한 천 년 역사의 유서 깊은 신사"
         },
         {
           "type": "default",
-          "title": "석식 후 호텔로 이동하여 휴식",
+          "title": "오사카 이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "★선택 일정2. 유니버셜 스튜디어 재팬(USJ) 1인당 8만원 추가★",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "유의 ㅣ 안내사항",
+          "subtitle": "",
+          "description": "▶▶ 유니버설 스튜디오 재팬™(USJ) 진행시 안내사항 ◀◀\n\r※ 추가비용 : 80,000원 (성인, 아동 동일)\r\n※ 4명 이상 진행 (출발인원 미달시, 개별이동 조건으로 티켓만 발권가능)\r\n※ 출발 일주일전까지 선택 필수, 발권한 티켓은 환불불가합니다. \r\n※ 포함사항 : 1일 파크 입장권(스튜디오 패스)\r\n※ 불포함 사항 : 중식 및 석식※ 공동으로 행사를 진행하는 다른 손님들과 함께 이동합니다.\r\n※ 가이드는 유니버설 스튜디오 재팬에 입장하지 않습니다.\r\n※익스프레스 패스권(시간단축권)은 구매대행이 불가하오니, 사전 개별구매 부탁드립니다.\r\n※ USJ 출발 오전8시~9시, 리턴 합류시 17시~19시까지 전용 버스를 이용하여 호텔로 이동 예정입니다.  단, 정확한 미팅 시간은 현지에서 가이드가 안내 예정입니다. 익스프레스권 사용 시간 및 개인적인 사유로 인해 송영 차량 시간 변경은 어렵습니다. 개별적으로 리턴 진행하셔야 합니다.\r\n※ 익스프레스 패스권(시간단축권)은 구매대행이 불가함을 알려드립니다.\r\n<익스프레스 티켓관련 안내> USJ 공식 홈페이지 : https://www.usj.co.jp/web/ko/kr/tickets/express-pass\r\n※슈퍼 닌텐도 월드 입장에 관한 안내사항 \r\n※ 슈퍼 닌텐도 월드™에 입장하려면 ‘에어리어 입장 확약권/'에어리어 입장 정리권'이 필요합니다."
+        },
+        {
+          "type": "default",
+          "title": "관광+USJ팀 함께 호텔로 이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "호텔 체크인 후 자유시간",
           "subtitle": "",
           "description": ""
         }
@@ -218,82 +246,196 @@
       "items": [
         {
           "type": "default",
-          "title": "두바이 환승 후 나이로비 조모 케냐타 국제공항 도착",
+          "title": "호텔 조식 후 일정 진행",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "default",
-          "title": "시내로 이동하여 카렌브릭슨 박물관 관람",
+          "title": "1번. 기본일정 또는 2번. USJ(유니버셜 스튜디오재팬)일정 진행",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "★기본일정 또는 선택관광일정(USJ) 중 최종 진행일정을 출발 1주일 전까지 선택해주세요.",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "행사 진행은 호텔 - USJ - 관광(교토, 아라시야마) - USJ - 호텔순으로 송영",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "★★★기본 일정1. 교토/아라시야마 (추가 비용 없음)★★★",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "교토 이동",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "location",
-          "title": "카렌브릭슨 박물관",
+          "title": "청수사",
           "subtitle": "",
-          "description": "'아웃 오브 아프리카'의 촬영지 및 작가 생가"
+          "description": "교토를 대표하는 유서 깊은 불교 사찰로, 특히 나무로 지어진 웅장한 본당이 유명한 세계문화유산"
         },
         {
           "type": "location",
-          "title": "사파리 캣츠 쇼",
+          "title": "니넨자카",
           "subtitle": "",
-          "description": "사파리파크 호텔의 명물, 아프리카 원주민들의 현란한 몸동작의 '사파리 캣츠 쇼'관람"
+          "description": "옛 일본 분위기를 느낄 수 있는 전통적인 돌계단 거리"
+        },
+        {
+          "type": "location",
+          "title": "산넨자카",
+          "subtitle": "",
+          "description": "아기자기한 상점과 찻집이 늘어서있는 언덕길"
         },
         {
           "type": "default",
-          "title": "일정 안내",
+          "title": "아라시야마로 이동",
           "subtitle": "",
-          "description": "<iframe width=\"656\" height=\"369\" src=\"https://www.youtube.com/embed/b2_c9pGZVrI\" title=\"Safari Cats Dancers &amp; Acrobats\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>"
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "아라시야마",
+          "subtitle": "",
+          "description": "자연과 역사가 어우러져 사계절 내내 아름다운 풍경을 즐길 수 있는 관광지"
+        },
+        {
+          "type": "location",
+          "title": "토게쯔교",
+          "subtitle": "",
+          "description": "아라시야마 지역을 가로지르는 가쓰라강 위에 놓인 목조 다리"
+        },
+        {
+          "type": "location",
+          "title": "노노미야 신사(치쿠린 대숲)",
+          "subtitle": "",
+          "description": "인연과 사랑을 기원하는 것으로 유명한 천 년 역사의 유서 깊은 신사"
         },
         {
           "type": "default",
-          "title": "석식 후 호텔로 이동하여 휴식",
+          "title": "오사카 이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "★선택 일정2. 유니버셜 스튜디어 재팬(USJ) 1인당 8만원 추가★",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "유의 ㅣ 안내사항",
+          "subtitle": "",
+          "description": "▶▶ 유니버설 스튜디오 재팬™(USJ) 진행시 안내사항 ◀◀\n\r※ 추가비용 : 80,000원 (성인, 아동 동일)\r\n※ 4명 이상 진행 (출발인원 미달시, 개별이동 조건으로 티켓만 발권가능)\r\n※ 출발 일주일전까지 선택 필수, 발권한 티켓은 환불불가합니다. \r\n※ 포함사항 : 1일 파크 입장권(스튜디오 패스)\r\n※ 불포함 사항 : 중식 및 석식※ 공동으로 행사를 진행하는 다른 손님들과 함께 이동합니다.\r\n※ 가이드는 유니버설 스튜디오 재팬에 입장하지 않습니다.\r\n※익스프레스 패스권(시간단축권)은 구매대행이 불가하오니, 사전 개별구매 부탁드립니다.\r\n※ USJ 출발 오전8시~9시, 리턴 합류시 17시~19시까지 전용 버스를 이용하여 호텔로 이동 예정입니다.  단, 정확한 미팅 시간은 현지에서 가이드가 안내 예정입니다. 익스프레스권 사용 시간 및 개인적인 사유로 인해 송영 차량 시간 변경은 어렵습니다. 개별적으로 리턴 진행하셔야 합니다.\r\n※ 익스프레스 패스권(시간단축권)은 구매대행이 불가함을 알려드립니다.\r\n<익스프레스 티켓관련 안내> USJ 공식 홈페이지 : https://www.usj.co.jp/web/ko/kr/tickets/express-pass\r\n※슈퍼 닌텐도 월드 입장에 관한 안내사항 \r\n※ 슈퍼 닌텐도 월드™에 입장하려면 ‘에어리어 입장 확약권/'에어리어 입장 정리권'이 필요합니다."
+        },
+        {
+          "type": "default",
+          "title": "관광+USJ팀 함께 호텔로 이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "default",
+          "title": "호텔 체크인 후 자유시간",
           "subtitle": "",
           "description": ""
         }
       ],
-      "hotel": "Safari Park Hotel (★★★★★)",
+      "hotel": "호텔은 1일차와 동일합니다.(오사카)",
       "meals": {
-        "breakfast": "기내식",
-        "lunch": "기내식",
-        "dinner": "-"
+        "breakfast": "호텔식",
+        "lunch": "현지식/불포함(USJ)",
+        "dinner": "현지식/불포함(USJ)"
       }
     },
     {
       "day": 3,
       "date": "",
-      "title": "응고롱고로 자연보호구",
+      "title": "나라 → 오사카",
       "transport": "-",
       "flight": null,
       "timeline": [
         {
           "type": "default",
-          "title": "호텔 조식 후",
+          "title": "사슴의 도시 나라로 이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "나라코엔(나라사슴공원)",
+          "subtitle": "",
+          "description": "약 1,000여 마리의 귀여운 사슴들이 뛰어노는 공원"
+        },
+        {
+          "type": "location",
+          "title": "동대사(도다이지)",
+          "subtitle": "",
+          "description": "세계 최대 규모의 목조 대불전과 나라 대불을 품은 유네스코 세계문화유산"
+        },
+        {
+          "type": "location",
+          "title": "가스가타이샤",
+          "subtitle": "",
+          "description": "이끼 낀 석등이 펼쳐져 있는 카스가 석등길 산책\n\r* 본당 및 국보전 불포함"
+        },
+        {
+          "type": "default",
+          "title": "오사카 이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "오사카성",
+          "subtitle": "",
+          "description": "일본 3대 성 중 하나인 오사카 성\n\r* 천수각 불포함"
+        },
+        {
+          "type": "location",
+          "title": "오사카잇큐온천",
+          "subtitle": "",
+          "description": "외부온천욕 포함 (수건불포함/대여가능)\n\r* 현지 상황에 따라 다른 온천 시설(노베하노유/후후노유/스파월드 등)로 변경될 수 있습니다."
+        },
+        {
+          "type": "location",
+          "title": "자유관광 및 자유석식",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "신사이바시",
+          "subtitle": "",
+          "description": "오사카를 대표하는 쇼핑 중심가"
+        },
+        {
+          "type": "location",
+          "title": "도톤보리",
+          "subtitle": "",
+          "description": "난바 지역의 도톤보리 강을 따라 위치한 활기찬 번화가"
+        },
+        {
+          "type": "default",
+          "title": "호텔로 이동",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "default",
-          "title": "케냐와 탄자니아 국경인 나망가를 통과",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "아루샤 도착 후, 중식",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "세계에서 가장 큰 분화구인 응고롱고로 자연보호구로 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "롯지로 이동하여 석식 후 휴식",
+          "title": "호텔 체크인 후 휴식",
           "subtitle": "",
           "description": ""
         }
@@ -301,859 +443,115 @@
       "items": [
         {
           "type": "default",
-          "title": "호텔 조식 후",
+          "title": "사슴의 도시 나라로 이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "나라코엔(나라사슴공원)",
+          "subtitle": "",
+          "description": "약 1,000여 마리의 귀여운 사슴들이 뛰어노는 공원"
+        },
+        {
+          "type": "location",
+          "title": "동대사(도다이지)",
+          "subtitle": "",
+          "description": "세계 최대 규모의 목조 대불전과 나라 대불을 품은 유네스코 세계문화유산"
+        },
+        {
+          "type": "location",
+          "title": "가스가타이샤",
+          "subtitle": "",
+          "description": "이끼 낀 석등이 펼쳐져 있는 카스가 석등길 산책\n\r* 본당 및 국보전 불포함"
+        },
+        {
+          "type": "default",
+          "title": "오사카 이동",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "오사카성",
+          "subtitle": "",
+          "description": "일본 3대 성 중 하나인 오사카 성\n\r* 천수각 불포함"
+        },
+        {
+          "type": "location",
+          "title": "오사카잇큐온천",
+          "subtitle": "",
+          "description": "외부온천욕 포함 (수건불포함/대여가능)\n\r* 현지 상황에 따라 다른 온천 시설(노베하노유/후후노유/스파월드 등)로 변경될 수 있습니다."
+        },
+        {
+          "type": "location",
+          "title": "자유관광 및 자유석식",
+          "subtitle": "",
+          "description": ""
+        },
+        {
+          "type": "location",
+          "title": "신사이바시",
+          "subtitle": "",
+          "description": "오사카를 대표하는 쇼핑 중심가"
+        },
+        {
+          "type": "location",
+          "title": "도톤보리",
+          "subtitle": "",
+          "description": "난바 지역의 도톤보리 강을 따라 위치한 활기찬 번화가"
+        },
+        {
+          "type": "default",
+          "title": "호텔로 이동",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "default",
-          "title": "케냐와 탄자니아 국경인 나망가를 통과",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "아루샤 도착 후, 중식",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "세계에서 가장 큰 분화구인 응고롱고로 자연보호구로 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "롯지로 이동하여 석식 후 휴식",
+          "title": "호텔 체크인 후 휴식",
           "subtitle": "",
           "description": ""
         }
       ],
-      "hotel": "Ngorongoro Serena Lodge",
+      "hotel": "호텔은 1일차와 동일합니다.(오사카)",
       "meals": {
         "breakfast": "호텔식",
         "lunch": "현지식",
-        "dinner": "롯지식"
+        "dinner": "불포함(자유식)"
       }
     },
     {
       "day": 4,
       "date": "",
-      "title": "응고롱고로 자연보호구",
-      "transport": "-",
-      "flight": null,
-      "timeline": [
-        {
-          "type": "default",
-          "title": "롯지 조식 후",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "응고롱고로 분화구 사파리 게임드라이브",
-          "subtitle": "",
-          "description": "응고롱고로 국림공원에서 게임드라이브 사파리 진행\n\r▶Big Five 관광: 사자, 코끼리, 버팔로, 표범, 코뿔소"
-        },
-        {
-          "type": "default",
-          "title": "롯지 귀환 후 중식",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "마사이 부족마을",
-          "subtitle": "",
-          "description": "아프리카 마사이 부족 전통마을 방문"
-        },
-        {
-          "type": "default",
-          "title": "세렝게티 국립공원으로 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "세렝게티 국립공원",
-          "subtitle": "",
-          "description": "숙소로 이동하면서 세렝게티 국립공원 사파리 게임 드라이브 관광"
-        },
-        {
-          "type": "default",
-          "title": "롯지로 이동하여 석식 후 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "items": [
-        {
-          "type": "default",
-          "title": "롯지 조식 후",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "응고롱고로 분화구 사파리 게임드라이브",
-          "subtitle": "",
-          "description": "응고롱고로 국림공원에서 게임드라이브 사파리 진행\n\r▶Big Five 관광: 사자, 코끼리, 버팔로, 표범, 코뿔소"
-        },
-        {
-          "type": "default",
-          "title": "롯지 귀환 후 중식",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "마사이 부족마을",
-          "subtitle": "",
-          "description": "아프리카 마사이 부족 전통마을 방문"
-        },
-        {
-          "type": "default",
-          "title": "세렝게티 국립공원으로 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "세렝게티 국립공원",
-          "subtitle": "",
-          "description": "숙소로 이동하면서 세렝게티 국립공원 사파리 게임 드라이브 관광"
-        },
-        {
-          "type": "default",
-          "title": "롯지로 이동하여 석식 후 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "hotel": "Serengeti Serena Lodge",
-      "meals": {
-        "breakfast": "롯지식",
-        "lunch": "롯지식",
-        "dinner": "롯지식"
-      }
-    },
-    {
-      "day": 5,
-      "date": "",
-      "title": "아루샤",
-      "transport": "-",
-      "flight": null,
-      "timeline": [
-        {
-          "type": "default",
-          "title": "롯지 조식 후",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "세렝게티 국립공원",
-          "subtitle": "",
-          "description": "아프리카의 상징 세렝게티에서 게임드라이브 사파리 진행"
-        },
-        {
-          "type": "default",
-          "title": "세렝게티 초원에서 도시락으로 중식",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "경비행기 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "아루샤 도착이후 호텔로 이동, 석식 후 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "items": [
-        {
-          "type": "default",
-          "title": "롯지 조식 후",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "세렝게티 국립공원",
-          "subtitle": "",
-          "description": "아프리카의 상징 세렝게티에서 게임드라이브 사파리 진행"
-        },
-        {
-          "type": "default",
-          "title": "세렝게티 초원에서 도시락으로 중식",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "경비행기 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "아루샤 도착이후 호텔로 이동, 석식 후 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "hotel": "Mount Meru Hotel",
-      "meals": {
-        "breakfast": "롯지식",
-        "lunch": "도시락",
-        "dinner": "호텔식"
-      }
-    },
-    {
-      "day": 6,
-      "date": "",
-      "title": "킬리만자로 → 나이로비",
-      "transport": "-",
-      "flight": null,
-      "timeline": [
-        {
-          "type": "default",
-          "title": "호텔 조식 후",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "만년설의 전설을 간직한 킬리만자로 국립공원 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "킬리만자로",
-          "subtitle": "",
-          "description": "킬리만자로 국립공원 가벼운 트래킹 및 주변 경관 감상, 산책 (*약 2시간)"
-        },
-        {
-          "type": "default",
-          "title": "아루샤로 이동, 중식",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "케냐와 탄자니아 국경인 나망가를 지나 나이로비로 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "나이로비 도착, 석식 후 호텔로 이동하여 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "items": [
-        {
-          "type": "default",
-          "title": "호텔 조식 후",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "만년설의 전설을 간직한 킬리만자로 국립공원 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "킬리만자로",
-          "subtitle": "",
-          "description": "킬리만자로 국립공원 가벼운 트래킹 및 주변 경관 감상, 산책 (*약 2시간)"
-        },
-        {
-          "type": "default",
-          "title": "아루샤로 이동, 중식",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "케냐와 탄자니아 국경인 나망가를 지나 나이로비로 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "나이로비 도착, 석식 후 호텔로 이동하여 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "hotel": "Sarova Stanley Hotel (★★★★★)",
-      "meals": {
-        "breakfast": "호텔식",
-        "lunch": "현지식",
-        "dinner": "한   식"
-      }
-    },
-    {
-      "day": 7,
-      "date": "",
-      "title": "빅토리 폴스",
-      "transport": "-",
-      "flight": null,
-      "timeline": [
-        {
-          "type": "default",
-          "title": "호텔에서 도시락 챙겨서 공항이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "KQ 792편 이용",
-          "subtitle": "",
-          "description": "KQ 792편 이용\r\n7:25 나이로비 출발\r\n9:40 빅토리아폴스 도착"
-        },
-        {
-          "type": "location",
-          "title": "빅토리아폭포",
-          "subtitle": "",
-          "description": "짐바브웨 방면 빅토리아 폭포 도보 관광"
-        },
-        {
-          "type": "location",
-          "title": "노천목각시장",
-          "subtitle": "",
-          "description": "다양한 동물들의 목각을 판매하는 시장 방문\n\r자유시간 부여"
-        },
-        {
-          "type": "location",
-          "title": "잠베지강 선셋 크루즈",
-          "subtitle": "",
-          "description": "노을이 지는 아름다운 잠베지 강 상류에서 선셋 선상크루즈\n\r※ 음료 무제한 제공 (맥주, 와인, 환타, 콜라 등)"
-        },
-        {
-          "type": "default",
-          "title": "석식 후 호텔로 이동하여 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "items": [
-        {
-          "type": "default",
-          "title": "호텔에서 도시락 챙겨서 공항이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "KQ 792편 이용",
-          "subtitle": "",
-          "description": "KQ 792편 이용\r\n7:25 나이로비 출발\r\n9:40 빅토리아폴스 도착"
-        },
-        {
-          "type": "location",
-          "title": "빅토리아폭포",
-          "subtitle": "",
-          "description": "짐바브웨 방면 빅토리아 폭포 도보 관광"
-        },
-        {
-          "type": "location",
-          "title": "노천목각시장",
-          "subtitle": "",
-          "description": "다양한 동물들의 목각을 판매하는 시장 방문\n\r자유시간 부여"
-        },
-        {
-          "type": "location",
-          "title": "잠베지강 선셋 크루즈",
-          "subtitle": "",
-          "description": "노을이 지는 아름다운 잠베지 강 상류에서 선셋 선상크루즈\n\r※ 음료 무제한 제공 (맥주, 와인, 환타, 콜라 등)"
-        },
-        {
-          "type": "default",
-          "title": "석식 후 호텔로 이동하여 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "hotel": "Elephant Hills Hotel",
-      "meals": {
-        "breakfast": "도시락",
-        "lunch": "현지식",
-        "dinner": "현지식"
-      }
-    },
-    {
-      "day": 8,
-      "date": "",
-      "title": "초베 국립공원 → 빅토리 폴스",
-      "transport": "-",
-      "flight": null,
-      "timeline": [
-        {
-          "type": "default",
-          "title": "호텔 조식 후 보츠와나 국경 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "초베 국립공원 보트 사파리",
-          "subtitle": "",
-          "description": "코끼리의 천국, 쵸베강의 다양한 야생동물들을 관찰하는 보트 사파리\n\r- 하마, 악어, 각종 물새 등"
-        },
-        {
-          "type": "default",
-          "title": "Lodge 중식 후, 국경을 넘어 잠비아로 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "빅토리아 폭포",
-          "subtitle": "",
-          "description": "잠비아 방면 빅토리아 폭포 도보 관광"
-        },
-        {
-          "type": "location",
-          "title": "빅토리아폭포 헬기투어",
-          "subtitle": "",
-          "description": "[스페셜포함-헬기투어]"
-        },
-        {
-          "type": "default",
-          "title": "석식 후 호텔로 이동하여 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "items": [
-        {
-          "type": "default",
-          "title": "호텔 조식 후 보츠와나 국경 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "초베 국립공원 보트 사파리",
-          "subtitle": "",
-          "description": "코끼리의 천국, 쵸베강의 다양한 야생동물들을 관찰하는 보트 사파리\n\r- 하마, 악어, 각종 물새 등"
-        },
-        {
-          "type": "default",
-          "title": "Lodge 중식 후, 국경을 넘어 잠비아로 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "빅토리아 폭포",
-          "subtitle": "",
-          "description": "잠비아 방면 빅토리아 폭포 도보 관광"
-        },
-        {
-          "type": "location",
-          "title": "빅토리아폭포 헬기투어",
-          "subtitle": "",
-          "description": "[스페셜포함-헬기투어]"
-        },
-        {
-          "type": "default",
-          "title": "석식 후 호텔로 이동하여 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "hotel": "Elephant Hills Hotel",
-      "meals": {
-        "breakfast": "호텔식",
-        "lunch": "롯지식",
-        "dinner": "정글정션뷔페"
-      }
-    },
-    {
-      "day": 9,
-      "date": "",
-      "title": "케이프타운",
-      "transport": "-",
-      "flight": null,
-      "timeline": [
-        {
-          "type": "default",
-          "title": "호텔 조식 후 국경을 통과하여 빅토리아폴스공항으로 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "KQ792 10:25 빅토리아폴스 출발",
-          "subtitle": "",
-          "description": "KQ792 10:25 빅토리아폴스 출발\r\n13:35 케이프타운 도착"
-        },
-        {
-          "type": "default",
-          "title": "케이프타운 도착하여 관광",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "케이블카",
-          "subtitle": "",
-          "description": "1080m의 테이블 산을 오르는 360도 회전 케이블카"
-        },
-        {
-          "type": "location",
-          "title": "테이블 마운틴",
-          "subtitle": "",
-          "description": "케이프타운 시내를 한눈에 내려다 볼 수 있는 산\n\r※ 날씨로 인해 케이블카 운항이 되지 않을 경우 시그널힐 투어로 일정 대체됩니다."
-        },
-        {
-          "type": "location",
-          "title": "보캅지구",
-          "subtitle": "",
-          "description": "형형 색색의 집들과 말레이인들이 최초 정착한 마을"
-        },
-        {
-          "type": "default",
-          "title": "석식 후 호텔로 이동하여 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "items": [
-        {
-          "type": "default",
-          "title": "호텔 조식 후 국경을 통과하여 빅토리아폴스공항으로 이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "KQ792 10:25 빅토리아폴스 출발",
-          "subtitle": "",
-          "description": "KQ792 10:25 빅토리아폴스 출발\r\n13:35 케이프타운 도착"
-        },
-        {
-          "type": "default",
-          "title": "케이프타운 도착하여 관광",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "케이블카",
-          "subtitle": "",
-          "description": "1080m의 테이블 산을 오르는 360도 회전 케이블카"
-        },
-        {
-          "type": "location",
-          "title": "테이블 마운틴",
-          "subtitle": "",
-          "description": "케이프타운 시내를 한눈에 내려다 볼 수 있는 산\n\r※ 날씨로 인해 케이블카 운항이 되지 않을 경우 시그널힐 투어로 일정 대체됩니다."
-        },
-        {
-          "type": "location",
-          "title": "보캅지구",
-          "subtitle": "",
-          "description": "형형 색색의 집들과 말레이인들이 최초 정착한 마을"
-        },
-        {
-          "type": "default",
-          "title": "석식 후 호텔로 이동하여 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "hotel": "The Westin Cape Town Hotel (★★★★★)",
-      "meals": {
-        "breakfast": "호텔식",
-        "lunch": "기내식",
-        "dinner": "현지식"
-      }
-    },
-    {
-      "day": 10,
-      "date": "",
-      "title": "케이프타운",
-      "transport": "-",
-      "flight": null,
-      "timeline": [
-        {
-          "type": "default",
-          "title": "호텔 조식 후 케이프타운 관광",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "캠스베이",
-          "subtitle": "",
-          "description": "12사도 봉우리와 아름다운 해안 캠스베이에서 잠시 정차하여 포토 타임"
-        },
-        {
-          "type": "location",
-          "title": "커스텐보쉬 국립식물원",
-          "subtitle": "",
-          "description": "남아공 최초의 식물원인 커스텐 보쉬 식물원 관람"
-        },
-        {
-          "type": "location",
-          "title": "와인 테이스팅",
-          "subtitle": "",
-          "description": "Groot Constancia 와인 농장에서 세계적으로 유명한 남아공 와인 테이스팅"
-        },
-        {
-          "type": "location",
-          "title": "워터프론트",
-          "subtitle": "",
-          "description": "아름다운 항구에 위치한 복합쇼핑몰 자유시간"
-        },
-        {
-          "type": "default",
-          "title": "석식 후 호텔로 이동하여 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "items": [
-        {
-          "type": "default",
-          "title": "호텔 조식 후 케이프타운 관광",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "캠스베이",
-          "subtitle": "",
-          "description": "12사도 봉우리와 아름다운 해안 캠스베이에서 잠시 정차하여 포토 타임"
-        },
-        {
-          "type": "location",
-          "title": "커스텐보쉬 국립식물원",
-          "subtitle": "",
-          "description": "남아공 최초의 식물원인 커스텐 보쉬 식물원 관람"
-        },
-        {
-          "type": "location",
-          "title": "와인 테이스팅",
-          "subtitle": "",
-          "description": "Groot Constancia 와인 농장에서 세계적으로 유명한 남아공 와인 테이스팅"
-        },
-        {
-          "type": "location",
-          "title": "워터프론트",
-          "subtitle": "",
-          "description": "아름다운 항구에 위치한 복합쇼핑몰 자유시간"
-        },
-        {
-          "type": "default",
-          "title": "석식 후 호텔로 이동하여 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "hotel": "The Westin Cape Town Hotel (★★★★★)",
-      "meals": {
-        "breakfast": "호텔식",
-        "lunch": "현지식",
-        "dinner": "현지식"
-      }
-    },
-    {
-      "day": 11,
-      "date": "",
-      "title": "케이프타운",
-      "transport": "-",
-      "flight": null,
-      "timeline": [
-        {
-          "type": "default",
-          "title": "호텔 조식 후 케이프타운 관광",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "물개섬",
-          "subtitle": "",
-          "description": "보트를 타고 케이프 해안선을 따라 물개섬 관광"
-        },
-        {
-          "type": "location",
-          "title": "볼더스 비치",
-          "subtitle": "",
-          "description": "아프리카에 사는 자카스 펭귄이 자연 서식하는 해변"
-        },
-        {
-          "type": "location",
-          "title": "케이프 포인트",
-          "subtitle": "",
-          "description": "아프리카의 최남단"
-        },
-        {
-          "type": "location",
-          "title": "희망봉",
-          "subtitle": "",
-          "description": "남아프리카공화국 희망봉 자연보호구. 해발 248m의 지점에 있으며, 안개 때문에 보이지 않을 때가 많아 지"
-        },
-        {
-          "type": "default",
-          "title": "석식 후 호텔로 이동하여 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "items": [
-        {
-          "type": "default",
-          "title": "호텔 조식 후 케이프타운 관광",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "물개섬",
-          "subtitle": "",
-          "description": "보트를 타고 케이프 해안선을 따라 물개섬 관광"
-        },
-        {
-          "type": "location",
-          "title": "볼더스 비치",
-          "subtitle": "",
-          "description": "아프리카에 사는 자카스 펭귄이 자연 서식하는 해변"
-        },
-        {
-          "type": "location",
-          "title": "케이프 포인트",
-          "subtitle": "",
-          "description": "아프리카의 최남단"
-        },
-        {
-          "type": "location",
-          "title": "희망봉",
-          "subtitle": "",
-          "description": "남아프리카공화국 희망봉 자연보호구. 해발 248m의 지점에 있으며, 안개 때문에 보이지 않을 때가 많아 지"
-        },
-        {
-          "type": "default",
-          "title": "석식 후 호텔로 이동하여 휴식",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "hotel": "The Westin Cape Town Hotel (★★★★★)",
-      "meals": {
-        "breakfast": "호텔식",
-        "lunch": "-",
-        "dinner": "한   식"
-      }
-    },
-    {
-      "day": 12,
-      "date": "",
-      "title": "",
-      "transport": "-",
-      "flight": null,
-      "timeline": [
-        {
-          "type": "default",
-          "title": "조식 후 공항이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "케이프타운 국제공항 출발",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "items": [
-        {
-          "type": "default",
-          "title": "조식 후 공항이동",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "케이프타운 국제공항 출발",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "hotel": "호텔 확정 예정",
-      "meals": {
-        "breakfast": "호텔식",
-        "lunch": "기내식",
-        "dinner": "기내식"
-      }
-    },
-    {
-      "day": 13,
-      "date": "",
-      "title": "인천",
+      "title": "부산",
       "transport": "항공",
       "flight": {
-        "flightNo": "EK773 / EK322",
-        "airline": "에미레이트 항공 (경유)",
-        "departureCity": "케이프타운",
-        "departureTime": "13:15",
-        "arrivalCity": "인천",
-        "arrivalTime": "17:00",
-        "duration": "",
-        "segments": [
-          {
-            "airline": "에미레이트 항공",
-            "flightNo": "EK773",
-            "departureCity": "케이프타운",
-            "departureTime": "13:15",
-            "arrivalCity": "두바이",
-            "arrivalTime": "00:35",
-            "duration": "09:30",
-            "layoverDuration": "3시간 5분"
-          },
-          {
-            "airline": "에미레이트 항공",
-            "flightNo": "EK322",
-            "departureCity": "두바이",
-            "departureTime": "03:40",
-            "arrivalCity": "인천",
-            "arrivalTime": "17:00",
-            "duration": "08:20",
-            "layoverDuration": ""
-          }
-        ]
+        "flightNo": "LJ612",
+        "airline": "진에어",
+        "departureCity": "오사카",
+        "departureTime": "11:00",
+        "arrivalCity": "부산",
+        "arrivalTime": "12:30",
+        "duration": "01:30",
+        "segments": []
       },
       "timeline": [
         {
           "type": "default",
-          "title": "두바이 국제공항 환승 후",
+          "title": "호텔 조식 후 공항 이동",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "default",
-          "title": "인천국제공항 도착",
+          "title": "간사이 공항 이동 및 출국수속",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "default",
-          "title": "♥♥ 모두투어를 이용해 주셔서 감사 합니다. ♥♥",
+          "title": "오사카 간사이 공항 출발-김해공항 도착 후 해산",
           "subtitle": "",
           "description": ""
         }
@@ -1161,129 +559,61 @@
       "items": [
         {
           "type": "default",
-          "title": "두바이 국제공항 환승 후",
+          "title": "호텔 조식 후 공항 이동",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "default",
-          "title": "인천국제공항 도착",
+          "title": "간사이 공항 이동 및 출국수속",
           "subtitle": "",
           "description": ""
         },
         {
           "type": "default",
-          "title": "♥♥ 모두투어를 이용해 주셔서 감사 합니다. ♥♥",
+          "title": "오사카 간사이 공항 출발-김해공항 도착 후 해산",
           "subtitle": "",
           "description": ""
         }
       ],
       "hotel": "",
       "meals": {
-        "breakfast": "기내식",
-        "lunch": "기내식",
+        "breakfast": "호텔식",
+        "lunch": "-",
         "dinner": "-"
       }
-    }
-  ],
-  "hotels": [
-    {
-      "name": "Safari Park Hotel (★★★★★)",
-      "address": "Nairobi City",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "Ngorongoro Serena Lodge",
-      "address": "Ngorongoro Crater Conservancy, Arusha, Ngorongoro Crater Conservancy, 탄자니아",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "Serengeti Serena Lodge",
-      "address": "Serengeti National Park, Mara Region, 탄자니아",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "Mount Meru Hotel",
-      "address": "Kanisa Rd, Arusha, 탄자니아",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "Sarova Stanley Hotel (★★★★★)",
-      "address": "",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "Elephant Hills Hotel",
-      "address": "328 Park Way, Victoria Falls, Zimbabwe",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
-    },
-    {
-      "name": "The Westin Cape Town Hotel (★★★★★)",
-      "address": "",
-      "images": [],
-      "checkIn": "",
-      "checkOut": ""
     }
   ],
   "meetingInfo": [
     {
       "type": "미팅안내",
-      "location": "인천국제공항 1터미널 3층 출국장 14번 출구 앞(N카운터 옆 창측) 여행사카운터  9~10번 테이블 \"모두투어\"",
+      "location": "김해국제공항 국제선 3층 오른쪽 \"모두투어\" 안내판 앞 (가이드 별도 연락) / 현지가이드(미팅없음)",
       "description": "",
-      "time": "19:55",
-      "imageUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=1000&auto=format&fit=crop"
+      "time": "11:00",
+      "imageUrl": "https://img.modetour.com/tourinfo/meeting/icn_t1_mode.jpg"
     }
   ],
   "inclusions": [
-    "☞ 전문 인솔 가이드 동행",
-    "☞ 국제선 왕복 항공료",
-    "☞ 일정상의 항공료,호텔(2인 1실 기준),식사,관광입장료 포함",
-    "☞ 공동경비(가이드&amp;기사경비) 포함",
-    "☞ 여행자 보험료,인천공항세,출국납부금,제세금 포함.",
-    "☞ 유류할증료 포함",
-    "☞ 호텔은 출발 1일 전에 확정이 되며 홈페이지를 통해 알려드리겠습니다."
+    "◈ 김해공항세, 현지공항세, 관광 진흥 기금",
+    "◈ 1억원 해외여행자 보험"
   ],
   "exclusions": [
-    "☞ 개인경비 (물값, 개인경비 등), 각종 매너팁 (테이블팁, 객실팁, 포터비용 등)",
-    "** 매너팁은 서비스에 대한 자율적 선택으로 지불여부에 따른 불이익은 없습니다.",
-    "☞전 지역 비자비용 불포함",
-    "케냐 전자비자 60,000원 (최소 15일전 사전접수, 대행비용 포함)",
-    "*유효기간 6개월 이상 \"필수\"(입국일 기준)",
-    "*여권의 빈 사증란이 최소 6면이 남아 있어야합니다. (필수)",
-    "*6개월 이내 촬영된 여권용사진&nbsp;(현재 여권사진과 동일하지 않은 사진)",
-    "탄자니아 도착비자 50$",
-    "짐바브웨 + 잠비아 유니(통합)비자 50$",
-    "*단 일정순서에 따라 공항이 변경될 경우, 비용은 다소 변경 될 수 있습니다.",
-    "*비자 비용과 방식은 국가 정책에 의해 변경될 수 있습니다.",
-    "*관용여권일경우 비자비용이 인상됩니다.",
-    "*국가별 정책에 따라 비자비용이 변경될 수 있습니다. (한국이외 국적일경우 개별문의요망)",
-    "☞황열병 예방주사 접종 안내",
-    "질병관리청 예방접종 안내 바로가기",
-    "&nbsp;←클릭",
-    "*아프리카 여행시 황열병 예방접종 증명서 지참이 필수입니다.",
-    "*예방접종은 출국 최소 10일 전에 완료 되어야합니다.",
-    "*이미 접종을 받으신 분은 재접종 없이 증명서만 준비하시면 됩니다.",
-    "예방접종 가능 병원 리스트 바로가기",
-    "←클릭",
-    "1. 접종 희망 병원에 전화예약 (필수)",
-    "2. 여권 원본 또는 사본 지참 (필수)",
-    "3. 필요시 복용 중인 약 정보",
-    "4. 전자수입 인지 지불 및 발급 (37,400원)",
-    "홈페이지",
-    "/ 또는 병원 인근 은행이나 우체국)",
-    "5. 병원 방문 접종 및 접종 증명서 발급, 수입인지 제출 및 접종료 지불 (19,610원)",
-    "6. 여행시 황열병 예방 접종 증명서를 항시 지참해야 합니다. (필수)"
-  ]
+    "◈ 개인비용(환전은 ￥(엔)으로 바꿔가시기 바랍니다.)",
+    "◈ 가이드/기사 현지필수경비[1인4천엔 현지지불/아동동일]",
+    "◈ 일정표상 불포함으로 표기된 식사",
+    "◈ 2일차 USJ 선택관광 진행시 추가 경비&nbsp;&nbsp;"
+  ],
+  "keyPoints": [
+    "성인 4명이상 출발확정",
+    "선택 일정 (교토관광VS유니버셜스튜디오)",
+    "전일정 온천 호텔 숙박 및 온천 일정 포함",
+    "자유여행과 패키지의 장점만 쏙쏙 담은 여유로운 자유일정 포함",
+    "베스트셀러"
+  ],
+  "features": [],
+  "courses": [],
+  "specialOffers": [],
+  "hashtags": "#온천 #오사카 #나라 #유니버셜스튜디오재팬",
+  "hasNoOption": false,
+  "hasFreeSchedule": true
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllConsultations } from '@/lib/google-sheets';
 import { supabase } from '@/lib/supabase';
+import { getTenantIdFromHeaderOrQuery, DEFAULT_TENANT_ID } from '@/lib/tenant';
 
 // 상담 목록 조회
 export async function GET(request: NextRequest) {
@@ -9,18 +10,23 @@ export async function GET(request: NextRequest) {
         const status = searchParams.get('status');
         const search = searchParams.get('search');
         const limit = parseInt(searchParams.get('limit') || '50');
+        const tenantId = getTenantIdFromHeaderOrQuery(request);
 
         let consultations: any[] = [];
 
-        // 1. Supabase에서 데이터 가져오기 시도
+        // 1. Supabase에서 테넌트별 데이터 가져오기
         if (process.env.NEXT_PUBLIC_SUPABASE_URL && supabase) {
-            const { data, error } = await supabase
-                .from('consultations')
-                .select('*')
-                .order('created_at', { ascending: false });
+            let query = supabase.from('consultations').select('*');
+            
+            if (tenantId !== DEFAULT_TENANT_ID) {
+                query = query.eq('tenant_id', tenantId);
+            }
+            
+            const { data, error } = await query.order('created_at', { ascending: false });
 
-            if (!error && data && data.length > 0) {
+            if (!error && data) {
                 consultations = data.map(c => ({
+                    id: c.id,
                     timestamp: c.created_at,
                     visitor_id: c.visitor_id,
                     customer: { name: c.customer_name, phone: c.customer_phone },
@@ -38,8 +44,11 @@ export async function GET(request: NextRequest) {
 
         const refresh = searchParams.get('refresh') === 'true';
 
-        // 2. Google Sheets에서 데이터 가져오기 (항상 수행, refresh 파라미터에 따라 캐시 우회)
-        const sheetData = await getAllConsultations(refresh);
+        // 2. 신규 테넌트가 아닐 때만 기존 구글 시트 데모/실데이터 병합
+        let sheetData: any[] = [];
+        if (tenantId === DEFAULT_TENANT_ID) {
+            sheetData = await getAllConsultations(refresh);
+        }
 
         // 3. 데이터 병합 및 중복 처리 (같은 날 중복 문의 병합)
         const consultationsByDay = new Map<string, any>(); // key: phone-YYYY-MM-DD or name-YYYY-MM-DD
