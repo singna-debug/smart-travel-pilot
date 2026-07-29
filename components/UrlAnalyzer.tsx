@@ -580,7 +580,10 @@ export default function UrlAnalyzer() {
                     <button
                         onClick={async () => {
                             try {
-                                const resp = await fetch(isDummy ? '/api/dummy/sheet-info' : '/api/sheet-info');
+                                const tenantId = localStorage.getItem('tenant_id') || 'default_tenant';
+                                const resp = await fetch(isDummy ? '/api/dummy/sheet-info' : '/api/sheet-info', {
+                                    headers: { 'x-tenant-id': tenantId }
+                                });
                                 const data = await resp.json();
                                 if (data.success && data.url) {
                                     window.open(data.url, '_blank');
