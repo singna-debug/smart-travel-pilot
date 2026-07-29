@@ -84,7 +84,7 @@ export default function SettingsPanel() {
     try {
       const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
       localStorage.setItem('tenant_settings', JSON.stringify(settings));
-      await fetch('/api/settings', {
+      const res = await fetch('/api/settings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,9 +92,14 @@ export default function SettingsPanel() {
         },
         body: JSON.stringify(settings)
       });
-      showToast('🎉 본인 전용 API 연동 및 설정이 성공적으로 저장되었습니다.');
-    } catch (e) {
-      showToast('설정이 로컬에 저장되었습니다.');
+      const result = await res.json();
+      if (result.success) {
+        showToast(result.message || '🎉 본인 전용 API 연동 및 설정이 성공적으로 저장되었습니다.');
+      } else {
+        showToast(`❌ 설정 저장 실패: ${result.error}`);
+      }
+    } catch (e: any) {
+      showToast('❌ 서버 통신 오류가 발생했습니다.');
     }
   };
 
@@ -102,11 +107,11 @@ export default function SettingsPanel() {
     setToast({ show: true, message });
     setTimeout(() => {
       setToast({ show: false, message: '' });
-    }, 3000);
+    }, 4000);
   };
 
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText('travel-pilot@smart-travel.iam.gserviceaccount.com');
+    navigator.clipboard.writeText('modetour@gen-lang-client-0510450295.iam.gserviceaccount.com');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
