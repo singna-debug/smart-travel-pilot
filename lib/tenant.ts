@@ -49,6 +49,27 @@ export function getTenantIdFromHeaderOrQuery(req?: any): string {
 }
 
 /**
+ * API 키 보안 격리: 오직 사장님 계정(default_tenant)만 서버의 .env.local Google/Gemini API 키를 사용하며,
+ * 신규 가입 사용자는 본인이 [⚙️ 설정]에서 직접 입력한 키만 사용하도록 100% 격리
+ */
+export function getTenantApiKeys(tenantId: string, customSettings?: { googleSpreadsheetId?: string; geminiApiKey?: string }) {
+  if (tenantId === DEFAULT_TENANT_ID) {
+    return {
+      googleSpreadsheetId: process.env.GOOGLE_SHEET_ID?.trim() || null,
+      geminiApiKey: process.env.GEMINI_API_KEY?.trim() || process.env.NEXT_PUBLIC_GEMINI_API_KEY?.trim() || null,
+      isDefaultOwner: true
+    };
+  }
+
+  // 신규 가입 아이디: 사장님 API 키 공유 100% 차단!
+  return {
+    googleSpreadsheetId: customSettings?.googleSpreadsheetId?.trim() || null,
+    geminiApiKey: customSettings?.geminiApiKey?.trim() || null,
+    isDefaultOwner: false
+  };
+}
+
+/**
  * 신규 테넌트 가입 초기화
  */
 export async function initializeNewTenant(tenantId: string, companyName: string, managerName: string) {

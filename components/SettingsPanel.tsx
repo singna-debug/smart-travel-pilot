@@ -289,6 +289,19 @@ export default function SettingsPanel() {
           <div className="settings-card fade-in">
             <h2 className="settings-section-title">API 키 설정</h2>
             
+            <div className="settings-notice-banner" style={{
+              background: 'rgba(59, 130, 246, 0.12)',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              marginBottom: '20px',
+              color: '#93c5fd',
+              fontSize: '0.9rem'
+            }}>
+              <strong>💡 API 연동 필수 안내:</strong><br />
+              본인의 여행사 전용 <strong>Gemini API Key</strong>와 <strong>구글 시트 ID</strong>를 여기에 입력하고 저장하셔야 상품 분석, 확정서 제작 및 시트 저장이 연동되어 작동합니다. (미입력 시 기능 사용 제한)
+            </div>
+            
             <div className="settings-form-group">
               <label className="settings-label">Gemini API Key</label>
               <div className="settings-input-wrapper">
@@ -298,7 +311,7 @@ export default function SettingsPanel() {
                   className="settings-input" 
                   value={settings.geminiApiKey}
                   onChange={handleChange}
-                  placeholder="AI-..."
+                  placeholder="AI_zaSy..."
                 />
                 <button 
                   type="button" 

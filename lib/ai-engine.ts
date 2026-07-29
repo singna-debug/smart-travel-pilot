@@ -14,14 +14,17 @@ const debugLog = (msg: string) => {
     } catch (e) { console.error(e); }
 };
 
-// Gemini AI 초기화
-const apiKey = (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY || '').replace(/[\x00-\x1F\x7F]/g, '').trim();
-if (!apiKey) {
-    console.error('[AI Engine] GEMINI_API_KEY 또는 GOOGLE_GENAI_API_KEY가 설정되지 않았습니다!');
+// Gemini AI 동적 획득 헬퍼
+export function getGenAIModel(customApiKey?: string | null) {
+    const keyToUse = customApiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY || '';
+    const cleanKey = keyToUse.replace(/[\x00-\x1F\x7F]/g, '').trim();
+    if (!cleanKey) {
+        throw new Error('⚙️ [설정] 페이지에서 사장님/여행사 전용 Gemini API 키를 등록 후 사용해 주세요.');
+    }
+    const genAI = new GoogleGenerativeAI(cleanKey);
+    const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash';
+    return genAI.getGenerativeModel({ model: modelName });
 }
-const genAI = new GoogleGenerativeAI(apiKey);
-const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash';
-const model = genAI.getGenerativeModel({ model: modelName }); // 환경변수에서 모델명을 가져옴
 
 // 대화 컨텍스트 (메모리)
 const conversationContexts = new Map<string, {
