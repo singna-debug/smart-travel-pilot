@@ -36,7 +36,10 @@ const defaultSettings: TenantSettings = {
 };
 
 export default function SettingsPanel() {
-  const [activeTab, setActiveTab] = useState<'company' | 'google' | 'api'>('company');
+  const [activeTab, setActiveTab] = useState<'company' | 'google' | 'api' | 'approval'>('company');
+  const [pendingUsers, setPendingUsers] = useState<any[]>([
+    { id: 'usr_new_01', email: 'partner_test@modetour.com', companyName: '모두투어 강남점', managerName: '김철수', createdAt: '2026-07-29' }
+  ]);
   const [settings, setSettings] = useState<TenantSettings>(defaultSettings);
   const [isMounted, setIsMounted] = useState(false);
   
@@ -107,7 +110,7 @@ export default function SettingsPanel() {
           className={`settings-tab ${activeTab === 'company' ? 'active' : ''}`}
           onClick={() => setActiveTab('company')}
         >
-          🏢 회사 정보
+          🏢 회사 및 대표 설정
         </button>
         <button 
           className={`settings-tab ${activeTab === 'google' ? 'active' : ''}`}
@@ -119,7 +122,14 @@ export default function SettingsPanel() {
           className={`settings-tab ${activeTab === 'api' ? 'active' : ''}`}
           onClick={() => setActiveTab('api')}
         >
-          🤖 AI & 카카오 API
+          🔑 AI & 카카오 API
+        </button>
+        <button 
+          className={`settings-tab ${activeTab === 'approval' ? 'active' : ''}`}
+          style={{ position: 'relative' }}
+          onClick={() => setActiveTab('approval')}
+        >
+          👥 신규 회원 승인 {pendingUsers.length > 0 && <span style={{ background: '#ff4d4f', color: '#fff', fontSize: '10px', padding: '2px 6px', borderRadius: '10px', marginLeft: '6px' }}>{pendingUsers.length}</span>}
         </button>
       </div>
 
@@ -348,6 +358,58 @@ export default function SettingsPanel() {
             {testState.api === 'fail' && (
               <div className="settings-test-result fail fade-in">
                 <X size={20} /> API 테스트 실패: 키를 확인해주세요.
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'approval' && (
+          <div className="settings-section fade-in">
+            <div className="settings-section-title">
+              <h3>👥 신규 가입 신청 승인 관리</h3>
+              <p>신규로 가입 신청한 여행사/직원의 계정을 사장님께서 직접 승인하거나 거절하실 수 있습니다.</p>
+            </div>
+
+            {pendingUsers.length === 0 ? (
+              <div style={{ textOverflow: 'ellipsis', padding: '40px 20px', textAlign: 'center', color: '#8a8a9e', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                🎉 현재 승인 대기 중인 신규 가입 신청이 없습니다.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {pendingUsers.map(u => (
+                  <div key={u.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#19192c', border: '1px solid rgba(255,255,255,0.1)', padding: '16px 20px', borderRadius: '12px' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '15px', color: '#ffffff', marginBottom: '4px' }}>
+                        🏢 {u.companyName} <span style={{ fontSize: '13px', color: '#00d4aa', fontWeight: 500 }}>({u.managerName} 님)</span>
+                      </div>
+                      <div style={{ fontSize: '13px', color: '#8a8a9e' }}>
+                        📧 {u.email} · 신청일: {u.createdAt}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        type="button"
+                        style={{ background: '#00d4aa', color: '#000', border: 'none', padding: '8px 14px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', fontSize: '13px' }}
+                        onClick={() => {
+                          setPendingUsers(prev => prev.filter(item => item.id !== u.id));
+                          showToast(`[${u.companyName}] 신규 회원 가입을 승인하셨습니다!`);
+                        }}
+                      >
+                        ✅ 승인하기
+                      </button>
+                      <button
+                        type="button"
+                        style={{ background: 'rgba(255,77,79,0.15)', color: '#ff4d4f', border: '1px solid rgba(255,77,79,0.3)', padding: '8px 14px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}
+                        onClick={() => {
+                          setPendingUsers(prev => prev.filter(item => item.id !== u.id));
+                          showToast(`[${u.companyName}] 신규 회원 가입을 거절하셨습니다.`);
+                        }}
+                      >
+                        ❌ 거절
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
