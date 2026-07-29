@@ -63,7 +63,12 @@ export default function DashboardPage({ isDummy = false }: { isDummy?: boolean }
         const { createClient } = await import('@/utils/supabase/client');
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user || user.email === 'gktla71@gmail.com') {
+        if (!user) {
+          window.location.href = '/login';
+          return;
+        }
+        
+        if (user.email === 'gktla71@gmail.com') {
           // 사장님 계정 및 비로그인 기본값은 무조건 default_tenant!
           localStorage.setItem('tenant_id', 'default_tenant');
         } else if (user.id) {
@@ -71,6 +76,8 @@ export default function DashboardPage({ isDummy = false }: { isDummy?: boolean }
         }
       } catch (e) {
         localStorage.setItem('tenant_id', 'default_tenant');
+        window.location.href = '/login';
+        return;
       }
       fetchDashboardData(false);
     };
