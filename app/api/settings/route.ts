@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTenantIdFromHeaderOrQuery, DEFAULT_TENANT_ID } from '@/lib/tenant';
 import { supabase } from '@/lib/supabase';
+import { getSheetsConfigForTenant, getOrCreateMonthlySheet } from '@/lib/google-sheets';
 
 export const dynamic = 'force-dynamic';
 
@@ -126,7 +127,6 @@ export async function POST(request: NextRequest) {
         // 2. 설정이 저장되는 즉시, 빈 시트인 경우 사장님과 똑같은 클럽모두 표준 양식 탭을 즉각 자동 생성!
         if (sheetId && tenantId !== 'default_tenant') {
             try {
-                const { getSheetsConfigForTenant, getOrCreateMonthlySheet } = await import('@/lib/google-sheets');
                 const { sheets } = await getSheetsConfigForTenant(tenantId);
                 const currentMonth = new Date().toISOString().substring(0, 7); // yyyy-MM
                 await getOrCreateMonthlySheet(sheets, sheetId, currentMonth);

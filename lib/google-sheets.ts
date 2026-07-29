@@ -266,7 +266,7 @@ export async function getMonthSheetGid(month?: string): Promise<number> {
 /**
  * 특정 월의 시트를 가져오거나 없으면 생성합니다.
  */
-async function getOrCreateMonthlySheet(sheets: any, spreadsheetId: string, month: string) {
+export async function getOrCreateMonthlySheet(sheets: any, spreadsheetId: string, month: string) {
     try {
         const response = await sheets.spreadsheets.get({ spreadsheetId });
         const sheetList = response.data.sheets || [];

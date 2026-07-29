@@ -1,6 +1,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getMonthSheetGid } from '@/lib/google-sheets';
+import { getMonthSheetGid, getSheetsConfigForTenant, getOrCreateMonthlySheet } from '@/lib/google-sheets';
 import { getTenantIdFromHeaderOrQuery, DEFAULT_TENANT_ID } from '@/lib/tenant';
 
 export async function GET(request: NextRequest) {
@@ -9,7 +9,6 @@ export async function GET(request: NextRequest) {
 
         // 신규 가입 유저의 전용 시트 연동 처리
         if (tenantId !== DEFAULT_TENANT_ID) {
-            const { getSheetsConfigForTenant, getOrCreateMonthlySheet } = await import('@/lib/google-sheets');
             const { sheets, spreadsheetId } = await getSheetsConfigForTenant(tenantId);
 
             if (!spreadsheetId || spreadsheetId.includes('@')) {
@@ -23,7 +22,7 @@ export async function GET(request: NextRequest) {
             }
 
             const currentMonth = new Date().toISOString().substring(0, 7); // yyyy-MM
-            // 시트가 비어있으면 시스템이 즉각 월별 상담 양식 탭을 생성해 줍니다!
+            // 시트가 비어있으면 즉각 월별 상담 양식 탭을 생성
             const { gid } = await getOrCreateMonthlySheet(sheets, spreadsheetId, currentMonth);
 
             const url = gid
