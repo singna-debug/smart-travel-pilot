@@ -63,15 +63,15 @@ export default function DashboardPage({ isDummy = false }: { isDummy?: boolean }
         const { createClient } = await import('@/utils/supabase/client');
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          // 사장님 본인 계정이면 무조건 default_tenant로 복구!
-          if (user.email === 'gktla71@gmail.com') {
-            localStorage.setItem('tenant_id', 'default_tenant');
-          } else if (user.id) {
-            localStorage.setItem('tenant_id', user.id);
-          }
+        if (!user || user.email === 'gktla71@gmail.com') {
+          // 사장님 계정 및 비로그인 기본값은 무조건 default_tenant!
+          localStorage.setItem('tenant_id', 'default_tenant');
+        } else if (user.id) {
+          localStorage.setItem('tenant_id', user.id);
         }
-      } catch (e) {}
+      } catch (e) {
+        localStorage.setItem('tenant_id', 'default_tenant');
+      }
       fetchDashboardData(false);
     };
 

@@ -185,9 +185,12 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
                 url += `&status=${encodeURIComponent(statusFilter)}`;
             }
 
-            const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+            let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+            if (!tenantId || tenantId === 'default_tenant') {
+                tenantId = 'default_tenant';
+            }
             const response = await fetch(url, {
-                headers: tenantId ? { 'x-tenant-id': tenantId } : {}
+                headers: { 'x-tenant-id': tenantId }
             });
             const data = await response.json();
             if (data.success) {

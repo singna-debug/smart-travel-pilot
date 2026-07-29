@@ -16,14 +16,16 @@ export interface TenantInfo {
  */
 export function getTenantIdFromHeaderOrQuery(req?: any): string {
   if (typeof window !== 'undefined') {
-    // 1. Client side: localStorage 또는 cookie
+    // gktla71@gmail.com 이거나 비어있으면 무조건 default_tenant!
     const saved = localStorage.getItem('tenant_id');
-    if (saved) return saved;
+    if (!saved || saved === 'default_tenant') return DEFAULT_TENANT_ID;
 
+    // 만약 tenant_id가 설정되어있더라도 gktla71@gmail.com 인 경우 default_tenant 강제 적용
     const tenantSetting = localStorage.getItem('tenant_settings');
     if (tenantSetting) {
       try {
         const parsed = JSON.parse(tenantSetting);
+        if (parsed.email === 'gktla71@gmail.com') return DEFAULT_TENANT_ID;
         if (parsed.tenantId) return parsed.tenantId;
       } catch (e) {}
     }
@@ -32,7 +34,9 @@ export function getTenantIdFromHeaderOrQuery(req?: any): string {
   // 2. Server side: request headers or query
   if (req) {
     const headerTenant = req.headers?.get?.('x-tenant-id') || req.headers?.['x-tenant-id'];
-    if (headerTenant) return headerTenant;
+    if (headerTenant && headerTenant !== 'null' && headerTenant !== 'undefined') {
+      return headerTenant;
+    }
 
     try {
       const url = new URL(req.url || 'https://localhost');
