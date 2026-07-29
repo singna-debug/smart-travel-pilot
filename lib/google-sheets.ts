@@ -53,11 +53,24 @@ export function autoFormatDuration(value: any): string {
     return str;
 }
 
-export function getGoogleSheetsClient() {
+export function getGoogleSheetsClient(customCredentials?: { clientEmail?: string; privateKey?: string } | null) {
     try {
         let auth;
 
-        // 방법 1: JSON 파일 직접 읽기 (가장 안정적)
+        // 개별 테넌트의 전용 구글 서비스 계정 이메일과 키가 정상적으로 설정된 경우 해당 키로 자격인증
+        if (customCredentials && customCredentials.clientEmail && customCredentials.privateKey) {
+            const formattedKey = customCredentials.privateKey.replace(/\\n/g, '\n');
+            auth = new google.auth.GoogleAuth({
+                credentials: {
+                    client_email: customCredentials.clientEmail,
+                    private_key: formattedKey
+                },
+                scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+            });
+            return google.sheets({ version: 'v4', auth });
+        }
+
+        // 방법 1: JSON 파일 직접 읽기 (가장 안정적 - 사장님 본인 계정 및 신규 여행사의 공통 브릿지 용)
         const credentialsPath = path.join(process.cwd(), 'google-credentials.json');
         if (fs.existsSync(credentialsPath)) {
             const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
@@ -114,7 +127,6 @@ export function getGoogleSheetsClient() {
             try {
                 const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL.trim();
                 const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n').trim();
-                
                 auth = new google.auth.GoogleAuth({
                     credentials: {
                         client_email: clientEmail,
@@ -138,6 +150,36 @@ export function getGoogleSheetsClient() {
         console.error('[Google Sheets] 클라이언트 생성 오류:', error.message);
         throw error;
     }
+}
+
+/**
+ * 특정 테넌트 전용 구글 시트 클라이언트와 시트 ID를 안전하게 획득합니다.
+ * 이메일/키가 설정 안 된 경우 공통 서비스 계정을 브릿지로 사용합니다.
+ */
+export async function getSheetsConfigForTenant(tenantId: string) {
+    let spreadsheetId = process.env.GOOGLE_SHEET_ID?.trim() || '';
+    let customCredentials = null;
+
+    if (tenantId !== 'default_tenant') {
+        const { supabase } = await import('./supabase');
+        if (supabase) {
+            const { data } = await supabase.from('tenant_settings').select('*').eq('tenant_id', tenantId).single();
+            if (data) {
+                if (data.google_spreadsheet_id) {
+                    spreadsheetId = data.google_spreadsheet_id.trim();
+                }
+                if (data.google_client_email && data.google_private_key) {
+                    customCredentials = {
+                        clientEmail: data.google_client_email.trim(),
+                        privateKey: data.google_private_key.trim()
+                    };
+                }
+            }
+        }
+    }
+
+    const sheets = getGoogleSheetsClient(customCredentials);
+    return { sheets, spreadsheetId };
 }
 
 /**
@@ -406,18 +448,17 @@ export async function preCreateMonthlySheets(year?: string): Promise<boolean> {
 /**
  * 상담 데이터를 Google Sheets에 추가합니다.
  */
-export async function appendConsultationToSheet(data: ConsultationData): Promise<boolean> {
+export async function appendConsultationToSheet(data: ConsultationData, tenantId: string = 'default_tenant'): Promise<boolean> {
     try {
-        const sheets = getGoogleSheetsClient();
-        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
+        const { sheets, spreadsheetId } = await getSheetsConfigForTenant(tenantId);
 
-        if (!sheetId) {
-            console.error('GOOGLE_SHEET_ID가 설정되지 않았습니다.');
+        if (!spreadsheetId) {
+            console.error('구글 시트 ID가 설정되지 않았습니다.');
             return false;
         }
 
         const currentMonth = format(getKSTDate(), 'yyyy-MM');
-        const { title: targetSheet } = await getOrCreateMonthlySheet(sheets, sheetId, currentMonth);
+        const { title: targetSheet } = await getOrCreateMonthlySheet(sheets, spreadsheetId, currentMonth);
 
         const timestamp = format(getKSTDate(), 'yyyy-MM-dd HH:mm:ss');
 
