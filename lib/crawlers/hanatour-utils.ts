@@ -344,11 +344,32 @@ export async function fetchHanaTourNative(url: string, isSummaryOnly = false): P
             // Format HTML safely, preserving basic tags, links, and images
             const formattedDesc = processCardHtml(rawDesc);
             
+            // 본문 및 카드 이미지 수집
+            const descImgs = (rawDesc || '').match(/src=["']?([^"'\s>]+)["']?/gi) || [];
+            const collectedImages: string[] = [];
+            if (item.imgUrl) collectedImages.push(item.imgUrl);
+            if (item.cardImgUrl) collectedImages.push(item.cardImgUrl);
+            descImgs.forEach((m: string) => {
+                const s = m.match(/src=["']?([^"'\s>]+)["']?/i);
+                if (s && s[1] && s[1].startsWith('http') && !collectedImages.includes(s[1])) {
+                    collectedImages.push(s[1]);
+                }
+            });
+
+            // 뱃지 수집 (선택관광, MD추천, 스페셜 등)
+            const badges: string[] = [];
+            if (item.chcStsngCd === 'Y' || rawDesc.includes('선택관광') || itemTitle.includes('선택관광')) badges.push('선택관광');
+            if (rawDesc.includes('MD추천') || itemTitle.includes('MD추천')) badges.push('MD추천');
+            if (rawDesc.includes('스페셜') || itemTitle.includes('스페셜')) badges.push('스페셜포함');
+
             return {
                 type: item.schdCatgNm === '관광지' ? 'location' : 'default',
                 title: cleanHtml(itemTitle),
                 subtitle: '',
-                description: formattedDesc
+                description: formattedDesc,
+                image: collectedImages[0] || '',
+                images: collectedImages,
+                badges
             };
         }).filter((t: any) => t.title);
 
