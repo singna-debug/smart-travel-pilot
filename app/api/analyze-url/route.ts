@@ -52,15 +52,9 @@ async function analyzeSingleUrl(url: string, source: string | undefined, text?: 
         
         let info: DetailedProductInfo | null = null;
         
-        if (effectiveMode === 'confirmation') {
-            // 확정서 전용 초고속 크롤러 호출
-            const { crawlForConfirmation } = await import('@/lib/crawlers/confirmation');
-            info = await crawlForConfirmation(url, text, nextData);
-        } else {
-            // 일반 상담/상품 분석 전용 크롤러 호출
-            const { crawlProductUrl } = await import('@/lib/crawlers');
-            info = await crawlProductUrl(url);
-        }
+        // 초고속 크롤러 호출 (상담 및 확정서 모두 완벽 지원)
+        const { crawlForConfirmation } = await import('@/lib/crawlers/confirmation');
+        info = await crawlForConfirmation(url, text, nextData);
 
         if (info) {
             return NextResponse.json({
