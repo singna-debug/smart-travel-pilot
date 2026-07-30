@@ -381,12 +381,7 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     }).filter(Boolean))).sort().reverse();
 
-    useEffect(() => {
-        if (selectedMonth === null && allMonths.length > 0) {
-            setSelectedMonth(allMonths[0]);
-        }
-    }, [allMonths, selectedMonth]);
-
+    // 기본값은 전체 보기('')
     const monthFilteredChats = selectedMonth
         ? chats.filter(c => c.lastMessageAt && c.lastMessageAt.startsWith(selectedMonth))
         : chats;

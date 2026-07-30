@@ -52,25 +52,14 @@ async function analyzeSingleUrl(url: string, source: string | undefined, text?: 
         
         let info: DetailedProductInfo | null = null;
         
-        if (text) {
+        if (effectiveMode === 'confirmation') {
+            // 확정서 전용 초고속 크롤러 호출
+            const { crawlForConfirmation } = await import('@/lib/crawlers/confirmation');
             info = await crawlForConfirmation(url, text, nextData);
-        } else if (html) {
-            const fullText = htmlToText(html, url);
-            info = await crawlForConfirmation(url, fullText, nextData);
         } else {
-            if (effectiveMode === 'normal' || effectiveMode === 'summary') {
-                const { crawlForUrlAnalysis } = await import('@/lib/crawlers/url-analysis');
-                info = await crawlForUrlAnalysis(url);
-            } else if (effectiveMode === 'confirmation' || effectiveMode === 'deep') {
-                const { crawlForConfirmation } = await import('@/lib/crawlers/confirmation');
-                info = await crawlForConfirmation(url);
-            } else if (effectiveMode === 'booking') {
-                info = await crawlForBooking(url);
-            } else if (effectiveMode === 'reservation_guide') {
-                info = await crawlForReservationGuide(url);
-            } else {
-                info = await crawlTravelProduct(url);
-            }
+            // 일반 상담/상품 분석 전용 크롤러 호출
+            const { crawlProductUrl } = await import('@/lib/crawlers');
+            info = await crawlProductUrl(url);
         }
 
         if (info) {

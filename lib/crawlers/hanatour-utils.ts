@@ -303,7 +303,9 @@ export async function fetchHanaTourNative(url: string, isSummaryOnly = false): P
     const firstRet = rawRetSegments[0] || {};
     const lastRet = rawRetSegments[rawRetSegments.length - 1] || {};
 
-    const airlineName = firstDep.airline || (flights[0]?.airlNm || '');
+    const airlineName = firstDep.airline || (flights[0]?.airlNm || info.airlNm || '');
+    const departureFlightNumber = firstDep.flightNo || (flights[0]?.flgtNm || info.depFlgtCd || info.flgtNo || '');
+    const returnFlightNumber = firstRet.flightNo || (flights[1]?.flgtNm || info.arrFlgtCd || info.retFlgtNo || '');
 
     // Hotels mapped by day
     const htlInfoList = htl.htlInfoList || [];
@@ -362,7 +364,7 @@ export async function fetchHanaTourNative(url: string, isSummaryOnly = false): P
         const dayHotel = htlInfoList.find((h: any) => h.schdDay === idx + 1);
         const hotelName = dayHotel ? dayHotel.htlKoNm : '호텔 확정 예정';
 
-        const destCity = info.prdAttrCd === 'P' ? cleanHtml(lastDep.arrivalCity || info.destNm || '') : '보라카이';
+        const destCity = cleanHtml(info.destNm || firstDep.arrivalCity || '목적지');
         let dayTitle = '';
         if (idx === 0) {
             dayTitle = `인천, ${destCity}`;
@@ -380,8 +382,8 @@ export async function fetchHanaTourNative(url: string, isSummaryOnly = false): P
             airline: airlineName,
             departureCity: firstDep.departureCity || '인천',
             departureTime: firstDep.departureTime || '',
-            arrivalCity: lastDep.arrivalCity || '',
-            arrivalTime: lastDep.arrivalTime || '',
+            arrivalCity: firstDep.arrivalCity || '',
+            arrivalTime: firstDep.arrivalTime || '',
             duration: '',
             segments: departureSegments
         } : (isLastDay && returnSegments.length > 0 ? {
@@ -389,8 +391,8 @@ export async function fetchHanaTourNative(url: string, isSummaryOnly = false): P
             airline: returnSegments[0]?.airline || airlineName,
             departureCity: firstRet.departureCity || '',
             departureTime: firstRet.departureTime || '',
-            arrivalCity: lastRet.arrivalCity || '',
-            arrivalTime: lastRet.arrivalTime || '',
+            arrivalCity: firstRet.arrivalCity || '',
+            arrivalTime: firstRet.arrivalTime || '',
             duration: '',
             segments: returnSegments
         } : undefined);

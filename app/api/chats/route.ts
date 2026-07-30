@@ -12,26 +12,29 @@ export async function GET(request: NextRequest) {
         const tenantId = getTenantIdFromHeaderOrQuery(request);
         const refresh = searchParams.get('refresh') === 'true';
 
-        // 테넌트 구글 시트에서 데이터 조회
-        const allData = await getAllConsultations(refresh, tenantId);
+        // 테넌트 구글 시트에서 최신 데이터 즉시 조회 (새로고침 보장)
+        const allData = await getAllConsultations(true, tenantId);
+        console.log(`[Chats API Debug] tenantId: ${tenantId}, fetched ${allData.length} items from sheets`);
 
         // 데이터 병합 및 중복 처리
         const consultationsByDay = new Map<string, any>();
         const normalizePhone = (p: string) => (p || '').replace(/[^0-9]/g, '');
-        const getDay = (ts: string) => ts ? ts.split('T')[0].split(' ')[0] : '';
+        const getDay = (ts: string) => {
+            if (!ts) return '';
+            const match = ts.match(/\d{4}-\d{2}-\d{2}/);
+            return match ? match[0] : ts.slice(0, 10);
+        };
 
-        allData.forEach(item => {
+        allData.forEach((item, index) => {
             const phone = normalizePhone(item.customer.phone);
             const name = (item.customer.name || '').trim();
-            const day = getDay(item.timestamp);
             
-            // 필수 정보 필터링: 이름이 '미정'이거나 없고, 전화번호와 목적지도 없으면 제외
-            const isInvalid = (name === '미정' || !name) && (!phone || phone === '미정') && (!item.trip.destination || item.trip.destination === '미정');
-            if (isInvalid) return;
+            // 헤더 행 제외
+            if (name === '고객성함' || phone === '연락처') return;
+            if (!name && !phone) return;
 
-            const key = (phone && phone !== '미정') 
-                ? `${phone}-${day}` 
-                : `${name}-${day}`;
+            const day = getDay(item.timestamp);
+            const key = item.visitor_id || (phone ? `${phone}-${day}-${index}` : `${name}-${day}-${index}`);
 
             if (consultationsByDay.has(key)) {
                 const existing = consultationsByDay.get(key);
@@ -130,7 +133,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
             success: true,
             data: responseData,
-            total: consultations.length,
+            total: mergedList.length,
         });
     } catch (error) {
         console.error('상담 목록 조회 API 오류:', error);

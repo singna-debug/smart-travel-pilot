@@ -197,11 +197,23 @@ export default function ManualConsultationForm() {
         setSuccess(false);
 
         try {
+            let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+            const { createClient } = await import('@/utils/supabase/client');
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                if (user.email === 'gktla71@gmail.com') {
+                    tenantId = 'default_tenant';
+                } else if (user.id) {
+                    tenantId = user.id;
+                }
+            }
+
             const response = await fetch(isDummy ? '/api/dummy/save-consultation' : '/api/save-consultation', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'x-tenant-id': localStorage.getItem('tenant_id') || 'default_tenant'
+                    'x-tenant-id': tenantId || 'default_tenant'
                 },
                 body: JSON.stringify({
                     customerName: form.customerName,

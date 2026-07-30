@@ -161,13 +161,12 @@ export async function getSheetsConfigForTenant(tenantId: string) {
     let customCredentials = null;
 
     if (tenantId !== 'default_tenant') {
-        const { supabase } = await import('./supabase');
-        if (supabase) {
-            const { data } = await supabase.from('tenant_settings').select('*').eq('tenant_id', tenantId).single();
+        const { supabaseAdmin } = await import('./supabase');
+        if (supabaseAdmin) {
+            const { data } = await supabaseAdmin.from('tenant_settings').select('*').eq('tenant_id', tenantId).single();
             if (data) {
                 if (data.google_spreadsheet_id) {
                     const tempId = data.google_spreadsheet_id.trim();
-                    // 이메일 오입력 방지: @ 가 포함되어 있으면 차단하고 에러 발생
                     if (tempId.includes('@')) {
                         throw new Error('⚠️ 올바른 구글 스프레드시트 ID를 입력해주세요. (이메일 주소는 시트 ID가 아닙니다.)');
                     }
@@ -599,7 +598,7 @@ export async function appendConsultationToSheet(data: ConsultationData, tenantId
         ];
 
         await sheets.spreadsheets.values.append({
-            spreadsheetId: sheetId,
+            spreadsheetId: spreadsheetId,
             range: `${targetSheet}!A:AC`,
             valueInputOption: 'USER_ENTERED',
             requestBody: {
@@ -1115,16 +1114,10 @@ async function getAllConsultationsForTenant(tenantId: string, forceRefresh = fal
         const metaResp = await sheets.spreadsheets.get({ spreadsheetId });
         const sheetList = metaResp.data.sheets || [];
 
-        // 월별 시트(yyyy-MM 형식) 필터링, 없으면 첫 번째 시트 사용
-        const monthlySheets = sheetList
+        // 모든 시트 탭 목록 가져오기 (월별 시트, Sheet1 등 모든 탭 대상)
+        const sheetsToRead = sheetList
             .map((s: any) => s.properties?.title || '')
-            .filter((t: string) => /^\d{4}-\d{2}$/.test(t))
-            .sort()
-            .reverse();
-
-        const sheetsToRead = monthlySheets.length > 0
-            ? monthlySheets
-            : [sheetList[0]?.properties?.title].filter(Boolean);
+            .filter(Boolean);
 
         if (sheetsToRead.length === 0) return [];
 

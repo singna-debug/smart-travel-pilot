@@ -218,16 +218,98 @@ export default function SettingsPanel() {
                   placeholder="담당자 이름 입력"
                 />
               </div>
-              <div className="settings-form-group">
-                <label className="settings-label">연락처(전화번호)</label>
-                <input 
-                  type="text" 
-                  name="phone"
-                  className="settings-input" 
-                  value={settings.phone}
-                  onChange={handleChange}
-                  placeholder="010-0000-0000"
-                />
+              <div className="settings-form-group" style={{ gridColumn: 'span 2' }}>
+                <label className="settings-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>📞 대표 및 직통 연락처 목록</span>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const current = settings.phone ? settings.phone.split('|||') : [];
+                      setSettings(prev => ({
+                        ...prev,
+                        phone: [...current, '직통전화: 010-0000-0000'].join('|||')
+                      }));
+                    }}
+                    style={{
+                      fontSize: '12px',
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      backgroundColor: '#3b82f6',
+                      color: '#fff',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    + 연락처 추가
+                  </button>
+                </label>
+                
+                {(() => {
+                  const phoneItems = settings.phone ? settings.phone.split('|||') : [''];
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
+                      {phoneItems.map((item, idx) => {
+                        let label = '';
+                        let num = item;
+                        if (item.includes(':')) {
+                          const parts = item.split(':');
+                          label = parts[0].trim();
+                          num = parts.slice(1).join(':').trim();
+                        } else {
+                          label = idx === 0 ? '대표전화' : `연락처${idx + 1}`;
+                        }
+
+                        const updateItem = (newLabel: string, newNum: string) => {
+                          const newItems = [...phoneItems];
+                          newItems[idx] = `${newLabel.trim()}: ${newNum.trim()}`;
+                          setSettings(prev => ({ ...prev, phone: newItems.join('|||') }));
+                        };
+
+                        const removeItem = () => {
+                          const newItems = phoneItems.filter((_, i) => i !== idx);
+                          setSettings(prev => ({ ...prev, phone: newItems.join('|||') }));
+                        };
+
+                        return (
+                          <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <input 
+                              type="text" 
+                              className="settings-input" 
+                              style={{ width: '140px', flexShrink: 0 }}
+                              value={label}
+                              onChange={(e) => updateItem(e.target.value, num)}
+                              placeholder="예: 직통전화, 가이드"
+                            />
+                            <input 
+                              type="text" 
+                              className="settings-input" 
+                              style={{ flex: 1 }}
+                              value={num}
+                              onChange={(e) => updateItem(label, e.target.value)}
+                              placeholder="010-0000-0000"
+                            />
+                            {phoneItems.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={removeItem}
+                                style={{
+                                  padding: '8px 12px',
+                                  backgroundColor: '#ef444420',
+                                  border: '1px solid #ef4444',
+                                  color: '#f87171',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                삭제
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
               </div>
               <div className="settings-form-group">
                 <label className="settings-label">출근 시간</label>

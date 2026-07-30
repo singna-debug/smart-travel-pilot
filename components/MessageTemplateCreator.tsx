@@ -86,13 +86,13 @@ export default function MessageTemplateCreator() {
     const [agentName, setAgentName] = useState('담당자');
     const [companyName, setCompanyName] = useState('여행사');
     const [kakaoTalkId, setKakaoTalkId] = useState('');
+    const [companyPhone, setCompanyPhone] = useState('');
 
     useEffect(() => {
         const loadSettings = async () => {
             try {
                 let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
                 
-                // Supabase에서 세션을 즉시 한번더 안전하게 체크
                 const { createClient } = await import('@/utils/supabase/client');
                 const supabase = createClient();
                 const { data: { user } } = await supabase.auth.getUser();
@@ -110,20 +110,21 @@ export default function MessageTemplateCreator() {
                 const data = await res.json();
                 if (data.success && data.settings) {
                     const s = data.settings;
-                    if (s.managerName) setAgentName(s.managerName);
                     if (s.companyName) setCompanyName(s.companyName);
+                    if (s.managerName) setAgentName(s.managerName);
                     if (s.kakaoTalkId) setKakaoTalkId(s.kakaoTalkId);
+                    if (s.phone) setCompanyPhone(s.phone);
                     localStorage.setItem('tenant_settings', JSON.stringify(s));
                 }
             } catch (e) {
-                // fallback to localStorage
                 const saved = localStorage.getItem('tenant_settings');
                 if (saved) {
                     try {
                         const parsed = JSON.parse(saved);
-                        if (parsed.managerName) setAgentName(parsed.managerName);
                         if (parsed.companyName) setCompanyName(parsed.companyName);
+                        if (parsed.managerName) setAgentName(parsed.managerName);
                         if (parsed.kakaoTalkId) setKakaoTalkId(parsed.kakaoTalkId);
+                        if (parsed.phone) setCompanyPhone(parsed.phone);
                     } catch (err) {}
                 }
             }
@@ -132,6 +133,15 @@ export default function MessageTemplateCreator() {
     }, []);
 
     const AGENT_NAME = agentName;
+
+    const getContactFooter = () => {
+        if (!companyPhone) {
+            return `📞 상담 및 문의\n• 담당자: ${companyName} ${AGENT_NAME}`;
+        }
+        const items = companyPhone.split('|||').map(i => i.trim()).filter(Boolean);
+        const phoneText = items.map(item => `• ${item}`).join('\n');
+        return `📞 상담 및 문의\n• 담당자: ${companyName} ${AGENT_NAME}\n${phoneText}`;
+    };
 
     // State
     const [customers, setCustomers] = useState<Customer[]>([]);
@@ -422,8 +432,7 @@ export default function MessageTemplateCreator() {
 신뢰와 전문성으로 완벽한 여행을 약속드립니다.
 답장 기다리겠습니다. 감사합니다! ✈️
 
-📞 상담 및 문의
-• 담당자: ${companyName} ${AGENT_NAME}`;
+${getContactFooter()}`;
                 break;
 
             case 'booking':
@@ -529,8 +538,7 @@ ${specialTerms || `■ 여행자의 여행계약 해제 요청 시 여행약관�
 6) 출발 2~5일 전: 호텔/일정 확정, 가이드 배정
 7) 출발: 즐거운 여행!
 
-📞 상담 및 문의
-• 담당자: ${companyName} ${AGENT_NAME}`;
+${getContactFooter()}`;
                 break;
 
             case 'dotcom':
@@ -552,10 +560,7 @@ ${name}(${phone}) 고객님, 안녕하세요! 😊
 기타 궁금하신 점은 아래 연락처로 언제든 편하게 문의해 주세요.
 고객님의 즐거운 여행을 위해 정성을 다해 준비하겠습니다!
 
-📞 상담 및 문의
-• 담당자: ${companyName} ${AGENT_NAME}
-
-감사합니다. ${AGENT_NAME} 드림`;
+${getContactFooter()}`;
                 break;
 
             case 'pre_4w':
@@ -608,8 +613,7 @@ ${name}(${phone}) 고객님, 안녕하세요! 😊
 📞 예약 후
 - 예약한 버스 시간을 여행사에 알려주세요
 
-📞 상담 및 문의
-• 담당자: ${companyName} ${AGENT_NAME}`;
+${getContactFooter()}`;
                 break;
 
             case 'balance': {
@@ -753,8 +757,7 @@ ${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
 다음 여행도 ${name}님께 가장 완벽한 일정으로 준비해 드리겠습니다.
 항상 감사드립니다! 💖
 
-📞 상담 및 문의
-• 담당자: ${companyName} ${AGENT_NAME}`;
+${getContactFooter()}`;
                 break;
             case 'china_barcode':
                 text = `📱 중국 입국 온라인 출입국 바코드 안내

@@ -37,7 +37,7 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
                     const fuelNum = parseInt(fuelMatch[1].replace(/,/g, ''), 10);
                     if (fuelNum >= 10000 && fuelNum <= 1000000 && pNum < 10000000) {
                         const candidateTotal = (pNum + fuelNum).toLocaleString();
-                        if (!refined.price.includes(candidateTotal)) {
+                        if (!String(refined.price || '').includes(candidateTotal)) {
                             pNum += fuelNum;
                         }
                     }

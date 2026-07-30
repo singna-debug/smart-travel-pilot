@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTenantIdFromHeaderOrQuery, DEFAULT_TENANT_ID } from '@/lib/tenant';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { getSheetsConfigForTenant, getOrCreateMonthlySheet } from '@/lib/google-sheets';
 
 export const dynamic = 'force-dynamic';
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     try {
         const tenantId = getTenantIdFromHeaderOrQuery(request);
 
-        // 1. 사장님 본인 계정 (gktla71@gmail.com / default_tenant) 인 경우 .env.local 값 채워주기
+        // 1. 마스터 계정은 .env.local 값으로 리턴
         if (tenantId === DEFAULT_TENANT_ID) {
             return NextResponse.json({
                 success: true,
@@ -21,23 +21,27 @@ export async function GET(request: NextRequest) {
                     workStartTime: '09:00',
                     workEndTime: '18:00',
                     googleSpreadsheetId: process.env.GOOGLE_SHEET_ID?.trim() || '',
-                    googleSheetName: '7월상담DB',
+                    googleSheetName: '',
                     googleClientEmail: process.env.GOOGLE_CLIENT_EMAIL?.trim() || '',
                     googlePrivateKey: process.env.GOOGLE_PRIVATE_KEY ? '••••••••••••••••' : '',
-                    geminiApiKey: process.env.GEMINI_API_KEY?.trim() || process.env.NEXT_PUBLIC_GEMINI_API_KEY?.trim() || '',
+                    geminiApiKey: process.env.GEMINI_API_KEY?.trim() || '',
                     kakaoChannelId: '',
                     kakaoTalkId: '',
                 }
             });
         }
 
-        // 2. 일반 가입 유저인 경우 DB에서 본인만의 설정 조회
-        if (process.env.NEXT_PUBLIC_SUPABASE_URL && supabase) {
-            const { data } = await supabase
+        // 2. 일반 가입 유저 - supabaseAdmin으로 RLS 우회 조회
+        if (supabaseAdmin) {
+            const { data, error } = await supabaseAdmin
                 .from('tenant_settings')
                 .select('*')
                 .eq('tenant_id', tenantId)
                 .single();
+
+            if (error) {
+                console.error('[Settings GET] Supabase error:', error.message);
+            }
 
             if (data) {
                 return NextResponse.json({
@@ -61,15 +65,7 @@ export async function GET(request: NextRequest) {
             }
         }
 
-        // 설정 데이터가 없는 경우 DB에 즉시 기본값 생성 및 삽입
-        if (process.env.NEXT_PUBLIC_SUPABASE_URL && supabase && tenantId !== 'default_tenant') {
-            await supabase.from('tenant_settings').upsert({
-                tenant_id: tenantId,
-                work_start_time: '09:00',
-                work_end_time: '18:00'
-            });
-        }
-
+        // 3. 설정 없으면 빈 값 반환 (초기 가입자)
         return NextResponse.json({
             success: true,
             settings: {
@@ -96,6 +92,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const tenantId = getTenantIdFromHeaderOrQuery(request);
+
+        if (tenantId === DEFAULT_TENANT_ID) {
+            return NextResponse.json({ success: false, error: '마스터 계정의 설정은 변경할 수 없습니다.' }, { status: 403 });
+        }
+
         const body = await request.json();
 
         const sheetId = body.googleSpreadsheetId?.trim();
@@ -103,43 +104,62 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: '⚠️ 올바른 구글 스프레드시트 ID를 입력해주세요. (이메일 주소는 시트 ID가 아닙니다.)' }, { status: 400 });
         }
 
-        // 1. DB에 개별 테넌트 전용 API 키 및 설정 저장
-        if (process.env.NEXT_PUBLIC_SUPABASE_URL && supabase) {
-            await supabase.from('tenant_settings').upsert({
-                tenant_id: tenantId,
-                company_name: body.companyName,
-                company_english_name: body.companyEnglishName,
-                manager_name: body.managerName,
-                phone: body.phone,
-                work_start_time: body.workStartTime,
-                work_end_time: body.workEndTime,
-                google_spreadsheet_id: sheetId,
-                google_sheet_name: body.googleSheetName,
-                google_client_email: body.googleClientEmail,
-                google_private_key: body.googlePrivateKey,
-                gemini_api_key: body.geminiApiKey,
-                kakao_channel_id: body.kakaoChannelId,
-                kakao_talk_id: body.kakaoTalkId,
-                updated_at: new Date().toISOString()
-            });
+        if (!supabaseAdmin) {
+            return NextResponse.json({ success: false, error: 'Supabase가 연결되지 않았습니다.' }, { status: 500 });
         }
 
-        // 2. 설정이 저장되는 즉시, 빈 시트인 경우 사장님과 똑같은 클럽모두 표준 양식 탭을 즉각 자동 생성!
-        if (sheetId && tenantId !== 'default_tenant') {
+        // 마스킹 문자열(••••)이 실수로 저장되는 것 방지
+        const privateKeyToSave = (body.googlePrivateKey && !body.googlePrivateKey.includes('•'))
+            ? body.googlePrivateKey
+            : undefined; // undefined면 기존 값 유지됨 (upsert 특성)
+
+        // DB에 저장 (service_role로 RLS 우회)
+        const upsertData: any = {
+            tenant_id: tenantId,
+            company_name: body.companyName || null,
+            company_english_name: body.companyEnglishName || null,
+            manager_name: body.managerName || null,
+            phone: body.phone || null,
+            work_start_time: body.workStartTime || '09:00',
+            work_end_time: body.workEndTime || '18:00',
+            google_spreadsheet_id: sheetId || null,
+            google_sheet_name: body.googleSheetName || null,
+            google_client_email: body.googleClientEmail || null,
+            gemini_api_key: body.geminiApiKey || null,
+            kakao_channel_id: body.kakaoChannelId || null,
+            kakao_talk_id: body.kakaoTalkId || null,
+            updated_at: new Date().toISOString(),
+        };
+
+        if (privateKeyToSave) {
+            upsertData.google_private_key = privateKeyToSave;
+        }
+
+        const { error: upsertError } = await supabaseAdmin
+            .from('tenant_settings')
+            .upsert(upsertData, { onConflict: 'tenant_id' });
+
+        if (upsertError) {
+            console.error('[Settings POST] upsert error:', upsertError);
+            return NextResponse.json({ success: false, error: `DB 저장 실패: ${upsertError.message}` }, { status: 500 });
+        }
+
+        // 구글 시트 월별 탭 자동 생성
+        if (sheetId) {
             try {
                 const { sheets } = await getSheetsConfigForTenant(tenantId);
-                const currentMonth = new Date().toISOString().substring(0, 7); // yyyy-MM
+                const currentMonth = new Date().toISOString().substring(0, 7);
                 await getOrCreateMonthlySheet(sheets, sheetId, currentMonth);
             } catch (e: any) {
                 console.error('[Settings API] 구글 시트 양식 생성 오류:', e.message);
                 return NextResponse.json({
                     success: true,
-                    message: `설정은 저장되었으나 구글 시트 연동 오류가 발생했습니다: ${e.message}. 구글 시트 [공유] 설정에 이메일이 잘 들어갔는지 확인해 주세요.`
+                    message: `설정은 저장되었으나 구글 시트 연동 오류: ${e.message}\n\n📌 구글 시트 [공유] 버튼 → 아래 이메일을 편집자로 추가해주세요:\nclubmode-sheets@clubmode-travel.iam.gserviceaccount.com`
                 });
             }
         }
 
-        return NextResponse.json({ success: true, message: '🎉 설정 저장 및 전용 구글 시트 양식 생성이 완벽히 완료되었습니다!' });
+        return NextResponse.json({ success: true, message: '✅ 설정이 저장되었습니다!' });
     } catch (error: any) {
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
