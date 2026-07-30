@@ -20,9 +20,14 @@ export function formatProductInfo(info: DetailedProductInfo, index?: number): st
 
     if (info.keyPoints && info.keyPoints.length > 0) {
         r += `\n[상품 포인트]\n`;
-        info.keyPoints.slice(0, 10).forEach(point => {
+        info.keyPoints.slice(0, 12).forEach(point => {
             let cleanPoint = sanitizeText(point).replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}✈🧚🍗♨🍷🏨🚌🌟★♥▶▒◆•●📌🍽🎑🌊🧧🚢✨💡]/gu, '').trim();
-            if (cleanPoint && !cleanPoint.includes('공항') && !cleanPoint.includes('경유국가')) {
+            // 색상 코드(HEX), 브랜드 안내문, 공항명 필터링
+            const isHexColor = /^[0-9A-Fa-f]{6}$/.test(cleanPoint);
+            const isBrandNotice = cleanPoint.includes('본 상품은') || cleanPoint.includes('모두투어') || cleanPoint.includes('하나투어');
+            const isAirport = cleanPoint.includes('공항') || cleanPoint.includes('경유국가');
+
+            if (cleanPoint && !isHexColor && !isBrandNotice && !isAirport && cleanPoint.length > 1) {
                 r += `• ${cleanPoint}\n`;
             }
         });
