@@ -296,7 +296,7 @@ ${itineraryContext || '일정표 참조'}
     "베트남 대표 코코넛 커피 & 쓰어다 커피 음료 포함"
   ]
 }`;
-        const aiResult = await analyzeWithGemini(prompt, itineraryContext || result.title || '', false);
+        const aiResult = await analyzeWithGemini(prompt, itineraryContext || result.title || '', true);
         if (aiResult) {
             let parsedPoints: string[] = [];
             if (Array.isArray(aiResult.keyPoints) && aiResult.keyPoints.length > 0) {

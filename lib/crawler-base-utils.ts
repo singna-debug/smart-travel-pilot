@@ -162,7 +162,7 @@ export async function analyzeWithGemini(contextOrPrompt: string, url: string, is
 
     let prompt = contextOrPrompt;
 
-    if (isSummaryOnly) {
+    if (isSummaryOnly && !contextOrPrompt.startsWith('아래 패키지') && !contextOrPrompt.includes('[MISSION]')) {
         const instruction = `
 [MISSION]
 여행 상품 정보를 분석하여 JSON 형식으로 반환하세요.
