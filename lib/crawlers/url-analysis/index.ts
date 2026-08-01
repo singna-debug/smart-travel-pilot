@@ -263,53 +263,71 @@ export async function enrichKeyPointsToAtLeastFive(result: DetailedProductInfo, 
 
     const rawPoints = cleanAndDeduplicateKeyPoints(points);
 
-    // Gemini AI를 사용하여 전체 일정표(Itinerary) 텍스트를 읽고 고품질 5줄 상품 포인트 요약
+    // 모두투어 URL인 경우에만 AI로 전체 일정표/포함사항을 몽땅 읽어 풍부한 5줄 문장 생성
+    const isModeTour = result.url?.includes('modetour.com') || result.url?.includes('modetour.co.kr');
+    if (!isModeTour) {
+        return rawPoints.slice(0, 5);
+    }
+
     try {
         const { analyzeWithGemini } = require('../../crawler-base-utils');
-        let itineraryContext = '';
+        
+        // 모두투어 일차별 주요 명소 축약 (속도 최적화: 긴 설명문 제거하고 1~2줄 핵심 명소만)
+        let itinerarySummary = '';
         if (Array.isArray(result.itinerary) && result.itinerary.length > 0) {
-            itineraryContext = result.itinerary.map((d: any) => {
-                const itemsStr = (d.items || d.timeline || []).map((i: any) => typeof i === 'string' ? i : (i.title || i.description || '')).filter(Boolean).join(', ');
-                return `${d.day || 1}일차 (${d.title || ''}): ${itemsStr}`;
-            }).join('\n');
+            itinerarySummary = result.itinerary.map((d: any) => {
+                const spots = (d.items || d.timeline || []).map((i: any) => typeof i === 'string' ? i : i.title).filter(Boolean).slice(0, 4).join(', ');
+                const hotelStr = d.hotel ? ` (${d.hotel})` : '';
+                return `${d.day}일차: ${spots}${hotelStr}`;
+            }).join(' / ');
         }
 
-        const prompt = `아래 패키지 여행 상품의 제목 및 전체 일정표를 기반으로, 상담 시 고객에게 제시할 명확한 [상품 핵심 포인트 5줄 요약]을 작성해줘.
+        const prompt = `아래 모두투어 패키지 여행 상품의 정보를 바탕으로, 고객이 한눈에 반할 만한 [매력적인 핵심 상품 포인트 5줄]을 작성해줘.
 
-[작성 규칙 - 매우 중요]:
-1. "~하세요", "~경험하세요" 같은 장황한 서술형/구어체 문장을 절대 쓰지 말고, 반드시 간결하고 명확한 개조식 문구(~포함, ~제공, ~투숙, ~체험, ~일정)로 작성해.
-2. 반드시 서로 다른 핵심 혜택으로 구성된 정확히 5개의 줄(개조식)로 반환해.
-3. 한 줄에 너무 많은 내용을 섞지 말고 1줄당 1개 혜택만 명확히 정리해.
+[작성 지침 - 필수]:
+1. 너무 길고 장황하게 쓰지 마. 한 줄당 15자~30자 내외로 매우 깔끔하고 명확한 개조식 표현으로 작성해.
+2. 예시 스타일 참고:
+   - "일본 소도시의 여유를 만끽하는 유유자적 탐방"
+   - "도시별 매력을 경험하는 시내호텔 1박 + 온천호텔 1박 구성"
+   - "에어부산 직항으로 편안하게 출발"
+   - "마츠야마, 타카마츠의 핵심 명소 알찬 방문"
+   - "일상에서 벗어나 힐링할 수 있는 실속 여행"
+3. "오사카", "베스트셀러" 같은 단순 단어 나열 절대 금지.
+4. 반드시 서로 다른 혜택 5개의 줄로 반환해.
 
 [상품 제목]: ${result.title || ''}
-[주요 키워드]: ${rawPoints.join(', ')}
-[전체 일정표 요약]:
-${itineraryContext || '일정표 참조'}
+[항공/출발]: ${result.airline || ''} (${result.departureAirport || '인천'} 출발)
+[숙소/특전]: ${result.hotel || ''}
+[일정 요약]: ${itinerarySummary.substring(0, 1500)}
 
 반드시 아래 JSON 형식으로만 응답해줘:
 {
   "keyPoints": [
-    "전일정 5성급 특급 호텔 투숙 및 편안한 휴식",
-    "스피드보트 탑승 소이 아일랜드 해양 액티비티 체험",
-    "나트랑 & 고원 도시 달랏 핵심 관광지 알찬 일정",
-    "매일 제공되는 현지 로컬 간식(반미/사탕수수주스) 제공",
-    "베트남 대표 코코넛 커피 & 쓰어다 커피 음료 포함"
+    "포인트 1",
+    "포인트 2",
+    "포인트 3",
+    "포인트 4",
+    "포인트 5"
   ]
 }`;
-        const aiResult = await analyzeWithGemini(prompt, itineraryContext || result.title || '', true);
+        const aiResult = await analyzeWithGemini(prompt, result.title || '', false);
         if (aiResult) {
             let parsedPoints: string[] = [];
             if (Array.isArray(aiResult.keyPoints) && aiResult.keyPoints.length > 0) {
                 parsedPoints = aiResult.keyPoints;
+            } else if (Array.isArray(aiResult) && aiResult.length > 0) {
+                parsedPoints = aiResult.filter((v: any) => typeof v === 'string');
             } else if (typeof aiResult === 'object') {
-                const keys = Object.values(aiResult).flat();
-                parsedPoints = keys.filter((v: any) => typeof v === 'string' && v.length > 3);
+                const vals = Object.values(aiResult).flat();
+                parsedPoints = vals.filter((v: any) => typeof v === 'string' && v.length > 5);
             }
-            if (parsedPoints.length > 0) {
+            if (parsedPoints.length >= 3) {
                 return parsedPoints.slice(0, 5);
             }
         }
-    } catch (e) {}
+    } catch (e) {
+        console.error('[Modetour KeyPoints AI Error]:', e);
+    }
 
     return rawPoints.slice(0, 5);
 }
