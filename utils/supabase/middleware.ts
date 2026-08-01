@@ -44,8 +44,8 @@ export async function updateSession(request: NextRequest) {
   const isPublicConfirmationApi = 
       (request.nextUrl.pathname.startsWith('/api/confirmation/') && request.nextUrl.pathname !== '/api/confirmation') ||
       (request.nextUrl.pathname.startsWith('/api/dummy/confirmation/') && request.nextUrl.pathname !== '/api/dummy/confirmation')
-  // 환율 API도 확정서 뷰어에서 사용
-  const isPublicUtilApi = request.nextUrl.pathname.startsWith('/api/exchange-rate')
+  // 환율 API 및 URL 분석 API도 공개
+  const isPublicUtilApi = request.nextUrl.pathname.startsWith('/api/exchange-rate') || request.nextUrl.pathname.startsWith('/api/analyze-url')
   // 텔레그램 웹훅 API도 공개
   const isTelegramWebhook = request.nextUrl.pathname.startsWith('/api/telegram-webhook')
   // 카카오 스킬 API도 공개

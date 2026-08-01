@@ -52,11 +52,28 @@ async function analyzeSingleUrl(url: string, source: string | undefined, text?: 
         
         let info: DetailedProductInfo | null = null;
         
-        // 초고속 크롤러 호출 (상담 및 확정서 모두 완벽 지원)
-        const { crawlForConfirmation } = await import('@/lib/crawlers/confirmation');
-        info = await crawlForConfirmation(url, text, nextData);
+        if (effectiveMode === 'confirmation') {
+            const { crawlForConfirmation } = await import('@/lib/crawlers/confirmation');
+            info = await crawlForConfirmation(url, text, nextData);
+        } else {
+            const { crawlForUrlAnalysis } = await import('@/lib/crawlers/url-analysis');
+            info = await crawlForUrlAnalysis(url);
+        }
 
         if (info) {
+            // URL 분석 모드에서는 Gemini AI로 풍부한 상품 포인트 생성
+            if (effectiveMode !== 'confirmation') {
+                try {
+                    const { enrichKeyPointsToAtLeastFive } = await import('@/lib/crawlers/url-analysis');
+                    const enrichedPoints = await enrichKeyPointsToAtLeastFive(info);
+                    if (enrichedPoints && enrichedPoints.length > 0) {
+                        info.keyPoints = enrichedPoints;
+                    }
+                } catch (e) {
+                    console.error('[API] KeyPoints enrichment failed (using raw):', e);
+                }
+            }
+
             return NextResponse.json({
                 success: true,
                 data: {

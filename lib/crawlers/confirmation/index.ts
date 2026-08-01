@@ -122,12 +122,18 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
 
     logDiagnostic(url, text, nativeData);
 
+    // 하단 약관 및 가축/현금영수증/마일리지 쓰레기 텍스트 완전 제거
+    const cleanText = text
+        .split('\n')
+        .filter(l => !/가축전염병|현금영수증|할부\s*서비스|제공하는\s*서비스|개인정보|이용약관|사업자등록번호|통신판매업|저작권|부동산|배송비|관세/i.test(l))
+        .join('\n');
+
     const fullPrompt = `${CONFIRMATION_PROMPT}
     
     입력된 데이터(HTML 텍스트 요약):
     URL: ${url}
     --- [Page Scraped Content] ---
-    ${text.substring(0, 70000)}`;
+    ${cleanText.substring(0, 50000)}`;
 
     const result = await analyzeWithGemini(fullPrompt, url, false, nextData);
     console.log(`[Confirmation/Index] Gemini Result:`, result ? 'Success' : 'Failed');

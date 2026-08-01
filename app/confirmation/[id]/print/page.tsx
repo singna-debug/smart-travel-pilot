@@ -120,6 +120,19 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    const [brandName, setBrandName] = useState('CLUBMODE TRAVEL');
+    const [companyInfo, setCompanyInfo] = useState<{
+        companyName: string;
+        companyEnglishName: string;
+        phone: string;
+        managerName: string;
+    }>({
+        companyName: '(주)클럽모두',
+        companyEnglishName: 'CLUBMODE TRAVEL',
+        phone: '02-951-9004 / 휴대폰: 010-9307-9004',
+        managerName: ''
+    });
+
     useEffect(() => {
         const loadDoc = async () => {
             try {
@@ -137,7 +150,28 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
                 setLoading(false);
             }
         };
+
+        const loadSettings = async () => {
+            try {
+                const res = await fetch('/api/settings');
+                const json = await res.json();
+                if (json.success && json.settings) {
+                    const st = json.settings;
+                    if (st.companyEnglishName) setBrandName(st.companyEnglishName);
+                    setCompanyInfo({
+                        companyName: st.companyName || '(주)클럽모두',
+                        companyEnglishName: st.companyEnglishName || 'CLUBMODE TRAVEL',
+                        phone: st.phone ? `대표전화: ${st.phone}` : '전화: 02-951-9004 / 휴대폰: 010-9307-9004',
+                        managerName: st.managerName || ''
+                    });
+                }
+            } catch (e) {
+                // 기본값 유지
+            }
+        };
+
         loadDoc();
+        loadSettings();
     }, [id]);
 
     // 브라우저 탭 타이틀 동적 변경
@@ -303,7 +337,7 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
                 {/* ─── 1. 헤더 ─── */}
                 <div className="pc-header">
                     <div className="pc-header-left">
-                        <div className="pc-brand">CLUBMODE TRAVEL</div>
+                        <div className="pc-brand">{brandName}</div>
                         <h1 className="pc-doc-title">여행 예약 확정서</h1>
                         <p className="pc-doc-subtitle">TRAVEL CONFIRMATION & ITINERARY</p>
                     </div>
@@ -1052,13 +1086,13 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
                 {/* ─── 10. 푸터 ─── */}
                 <div className="pc-footer">
                     <div className="pc-footer-left">
-                        <p className="pc-footer-brand">(주)클럽모두</p>
-                        <p className="pc-footer-info">전화: 02-951-9004 / 휴대폰: 010-9307-9004</p>
+                        <p className="pc-footer-brand">{companyInfo.companyName}</p>
+                        <p className="pc-footer-info">{companyInfo.phone}{companyInfo.managerName ? ` (담당: ${companyInfo.managerName})` : ''}</p>
                         <p className="pc-footer-disclaimer">※ 본 확정서는 항공 좌석 및 호텔 예약 상태에 따라 최종 변동될 수 있습니다.</p>
                     </div>
                     <div className="pc-footer-right">
-                        <p className="pc-footer-logo">CLUBMODE</p>
-                        <p className="pc-footer-tagline">즐거운 여행이 되도록 클럽모드가 함께하겠습니다. 🌟</p>
+                        <p className="pc-footer-logo">{companyInfo.companyEnglishName || 'CLUBMODE'}</p>
+                        <p className="pc-footer-tagline">즐거운 여행이 되도록 {companyInfo.companyName}가 함께하겠습니다. 🌟</p>
                     </div>
                 </div>
 

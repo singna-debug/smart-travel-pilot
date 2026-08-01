@@ -131,7 +131,7 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
 
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2초 초고속 타임아웃
+        const timeoutId = setTimeout(() => controller.abort(), 7000); // 일정/이미지 상세 데이터 수집 시간 확보 (7초)
 
         const [resDetail, resSchedule] = await Promise.all([
             fetch(`https://b2c-api.modetour.com/Package/GetProductDetailInfo?productNo=${productNo}`, { headers, signal: controller.signal }).catch(() => null),
@@ -192,6 +192,7 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
     if (dataDetail?.result || dataDetail?.productName) {
         const d = dataDetail.result || dataDetail;
         const scheduleRaw = dataSchedule?.result?.scheduleItemList || [];
+
         let deptAir: any = {}, returnAir: any = {};
         const deptRawItems: any[] = [];
         const returnRawItems: any[] = [];
@@ -274,6 +275,7 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
         const itinerary = scheduleRaw.map((day: any, idx: number) => {
             // 타임라인 매핑: 모데투어 API는 'ortherActions'라는 필드명을 사용함
             const rawTimeline = day.ortherActions || day.ScheduleDetailList || [];
+
             const timeline = rawTimeline.map((t: any) => {
                 const titleRaw = t.itiPlaceName || t.placeNameK || t.itiServiceName || '';
                 // '간략일정' 우선: itiSummaryDes 사용, 없으면 detailDes
@@ -322,11 +324,37 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                     isSight = false;
                 }
 
+                // 이미지 URL 추출 — 실제 API 필드: placeImage(string[]), arrPlaceImge(string[]), googleMapImg(string)
+                const images: string[] = [];
+
+                const addCleanImg = (u: any) => {
+                    if (!u) return;
+                    const str = typeof u === 'string' ? u : (u.url || u.fileUrl || u.imgUrl || u.imagePath || u.filePath);
+                    if (str && typeof str === 'string' && str.length > 5) {
+                        const cleanUrl = str.startsWith('//') ? `https:${str}` : (str.startsWith('/') ? `https://img.modetour.com${str}` : str);
+                        if (!images.includes(cleanUrl)) images.push(cleanUrl);
+                    }
+                };
+
+                // ★ 핵심: placeImage 배열 (실제 관광지 사진 URL들)
+                if (t.placeImage && Array.isArray(t.placeImage)) t.placeImage.forEach(addCleanImg);
+                // arrPlaceImge 배열 (대체 이미지 소스)
+                if (t.arrPlaceImge && Array.isArray(t.arrPlaceImge)) t.arrPlaceImge.forEach(addCleanImg);
+                // googleMapImg (지도 이미지, 최후의 폴백)
+                if (t.googleMapImg && typeof t.googleMapImg === 'string' && t.googleMapImg.length > 5) addCleanImg(t.googleMapImg);
+                // 기존 호환: 다른 형태의 API 응답 대비
+                if (t.itiPlaceImages && Array.isArray(t.itiPlaceImages)) t.itiPlaceImages.forEach(addCleanImg);
+                if (t.listImageInfo && Array.isArray(t.listImageInfo)) t.listImageInfo.forEach(addCleanImg);
+
+                const itemImg = images.length > 0 ? images[0] : undefined;
+
                 return {
                     type: isSight ? 'location' : 'default',
                     title: finalTitle ? finalTitle.trim() : '일정 안내',
                     subtitle: subtitle,
-                    description: summary
+                    description: summary,
+                    imageUrl: itemImg || undefined,
+                    images: images.length > 0 ? images : undefined
                 };
             }).filter((item: any) => (item.title && item.title !== '일정 안내') || item.description);
 
@@ -496,10 +524,10 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
         let rawPrice = String(d.sellingPriceAdultTotalAmount || d.sellingPrice || d.price || '').replace(/[^0-9]/g, '');
         let formattedPrice = rawPrice ? parseInt(rawPrice, 10).toLocaleString() + '원' : '';
 
-        // 모두투어 개조식 상품 포인트 (HTML 앤티티 &nbsp; 및 약관글 전면 제거, 부족 시 일정 자동 채움)
+        // 모두투어 개조식 상품 포인트 (품질 높은 5개 항목 구성)
         const cleanBullets: string[] = [];
 
-        // 1. 원문 포인트 소스 수집
+        // 1. 원문 포인트 소스 수집 (productPoint, promotionText 등)
         const rawHtmlSource = [d.productPoint, d.promotionText, d.promotionNote, d.travelRecommendNote]
             .filter(Boolean)
             .join('\n');
@@ -517,44 +545,62 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
                     .replace(/#/g, '')
                     .trim();
 
-                // 쓸데없는 단어 및 약관/이동문구 제거
                 if (clean.length >= 6 && clean.length <= 100) {
                     const isBoilerplate = clean.includes('5주전') || clean.includes('최종 인원') || clean.includes('경유국가') || clean.includes('베스트셀러') || clean.includes('공항세') || clean.includes('여행자 보험') || clean.includes('관세가 부과') || clean.includes('주차장 사전예약') || clean.includes('신청금');
-                    if (!isBoilerplate && !cleanBullets.includes(clean)) {
+                    if (!isBoilerplate && !cleanBullets.some(p => p.includes(clean) || clean.includes(p))) {
                         cleanBullets.push(clean);
                     }
                 }
             }
         }
 
-        // 2. 만약 상품 포인트가 부족하면(3개 미만) 일정(Itinerary) 및 상품 정보에서 핵심 개조식 항목 자동 추가!
-        if (cleanBullets.length < 4) {
-            const recText = (d.travelRecommendNote || '') + (d.specificNote || '') + (d.productName || '');
-            
-            // 혜택/코스 옵션
-            const parenMatch = d.productName ? d.productName.match(/\(([^)]+)\)/) : null;
-            if (parenMatch) {
-                const opt = parenMatch[1].trim();
-                if (opt.includes('VS') || opt.includes('선택')) {
-                    cleanBullets.push(`선택 일정 (${opt})`);
-                }
-            }
+        // 2. 해시태그(groupBriefKeyword: #14시레이트체크아웃 #노쇼핑 등)를 완전한 문장으로 정제
+        if (d.groupBriefKeyword) {
+            const tags = (d.groupBriefKeyword.match(/#[^\s#]+/g) || []).map((t: string) => t.replace(/^#/, '').trim());
+            for (const tag of tags) {
+                if (tag.length < 2 || /PICK|담당자|추천|인기|베스트셀러/i.test(tag)) continue;
+                
+                let formatted = tag;
+                if (tag === '노쇼핑' || tag === '노옵션' || tag === '노팁') formatted = `부담 없는 ${tag} 여행`;
+                else if (tag.includes('출발확정')) formatted = `${tag}`;
+                else if (tag.includes('체크아웃')) formatted = `${tag} 혜택`;
+                else if (tag.includes('자유일정')) formatted = `여유로운 ${tag} 포함`;
+                else if (tag.endsWith('투어') || tag.endsWith('관광')) formatted = `${tag} 일정 포함`;
+                else if (tag.endsWith('투숙') || tag.endsWith('호텔') || tag.endsWith('리조트')) formatted = `${tag} 투숙`;
+                else if (tag.endsWith('차량') || tag.endsWith('픽업')) formatted = `${tag} 서비스 제공`;
 
-            const fullTitleAndTags = `${d.productName || ''} ${d.groupBriefKeyword || ''} ${d.keyword || ''}`;
-            if (fullTitleAndTags.includes('온천') && !cleanBullets.some(p => p.includes('온천'))) {
-                cleanBullets.push('전일정 온천 호텔 숙박 및 온천 일정 포함');
+                if (!cleanBullets.some(p => p.includes(tag) || tag.includes(p))) {
+                    cleanBullets.push(formatted);
+                }
+                if (cleanBullets.length >= 8) break;
             }
-            if (fullTitleAndTags.includes('마사지') && !cleanBullets.some(p => p.includes('마사지'))) {
-                cleanBullets.push('여행의 피로를 풀어주는 전신 마사지 체험 포함');
-            }
-            if (fullTitleAndTags.includes('호핑') && !cleanBullets.some(p => p.includes('호핑'))) {
-                cleanBullets.push(fullTitleAndTags.includes('해적') ? '나트랑의 푸른 바다 100% 즐기기! 해적 호핑투어 포함' : '나트랑 해양 호핑투어 포함');
-            }
-            if (fullTitleAndTags.includes('삼겹살') && !cleanBullets.some(p => p.includes('삼겹살'))) {
-                cleanBullets.push('무제한 삼겹살 포함! 맛과 양 모두 잡은 식사 혜택');
-            }
-            if (d.freeScheduleName && d.freeScheduleName !== '없음' && !cleanBullets.some(p => p.includes('자유일정'))) {
-                cleanBullets.push('자유여행과 패키지의 장점만 쏙쏙 담은 여유로운 자유일정 포함');
+        }
+
+        // 3. 주요 키워드 자동 보강
+        const fullTitleAndTags = `${d.productName || ''} ${d.groupBriefKeyword || ''} ${d.keyword || ''}`;
+        if (fullTitleAndTags.includes('유니버셜') && !cleanBullets.some(p => p.includes('유니버셜'))) cleanBullets.push('유니버셜 스튜디오 재팬 일정/이용권 포함');
+        if (fullTitleAndTags.includes('온천') && !cleanBullets.some(p => p.includes('온천'))) cleanBullets.push('전일정 온천 호텔 숙박 및 온천 체험 포함');
+        if (fullTitleAndTags.includes('마사지') && !cleanBullets.some(p => p.includes('마사지'))) cleanBullets.push('여행의 피로를 풀어주는 전신 마사지 체험 포함');
+        if (fullTitleAndTags.includes('호핑') && !cleanBullets.some(p => p.includes('호핑'))) cleanBullets.push('해양 호핑투어 일정 포함');
+        if (fullTitleAndTags.includes('삼겹살') && !cleanBullets.some(p => p.includes('삼겹살'))) cleanBullets.push('무제한 삼겹살 특식 제공');
+        if (d.freeScheduleName && d.freeScheduleName !== '없음' && !cleanBullets.some(p => p.includes('자유일정'))) cleanBullets.push('여유로운 전일/반일 자유일정 포함');
+
+        // 4. 부족할 경우 대표 일차별 관광지/식사에서 완성도 높은 문장으로 추가
+        if (cleanBullets.length < 5 && scheduleRaw.length > 0) {
+            for (const day of scheduleRaw) {
+                const actions = day.ortherActions || [];
+                for (const act of actions) {
+                    const placeName = (act.itiPlaceName || act.placeNameK || '').trim();
+                    const invalidSpots = ['공항', '미팅', '체크인', '체크아웃', '도착', '출발', '휴식', '오사카', '베스트셀러'];
+                    if (placeName && placeName.length >= 3 && !invalidSpots.some(w => placeName.includes(w))) {
+                        const spotText = `${placeName} 관광 및 명소 포함`;
+                        if (!cleanBullets.some(p => p.includes(placeName))) {
+                            cleanBullets.push(spotText);
+                        }
+                    }
+                    if (cleanBullets.length >= 6) break;
+                }
+                if (cleanBullets.length >= 6) break;
             }
         }
 
@@ -577,6 +623,8 @@ export async function fetchModeTourNative(url: string, isSummaryOnly = false, ht
             returnSegments: returnAir.segments || [],
             url: url,
             itinerary: itinerary,
+            hotels: hotels,
+            hotel: hotels.length > 0 ? hotels[0].name : '',
             meetingInfo: meetingInfo,
             inclusions: parseHtml(d.includedNote),
             exclusions: parseHtml(d.unincludedNote),

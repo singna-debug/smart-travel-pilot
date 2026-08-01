@@ -161,6 +161,7 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
     const [notices, setNotices] = useState('');
     const [checklist, setChecklist] = useState('여권\n항공권\n\n바람막이 또는 가디건\n수영복, 아쿠아슈즈\n\n220V 사용가능\n보조배터리(반드시 기내 휴대)\n멀티 어댑터\n\n상비약(감기약, 소화제, 지사제, 밴드)\n자외선 차단제\n개인 세면도구\n중요한 약은 반드시 기내로\n(혈압, 당뇨약 등)');
     const [cancellationPolicy, setCancellationPolicy] = useState('');
+    const [agencyPhone, setAgencyPhone] = useState(''); // 상담원 연결 전화번호
     const [itinerary, setItinerary] = useState<any[]>([]); // 일정표 상태 추가
     const [meetingInfo, setMeetingInfo] = useState<MeetingInfo[]>([]); // 미팅 및 수속 정보
 
@@ -180,6 +181,48 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
     const [generatedId, setGeneratedId] = useState('');
     const [showShareModal, setShowShareModal] = useState(false);
     const [expandedDays, setExpandedDays] = useState<Record<number, boolean>>({});
+
+    const [phoneOptions, setPhoneOptions] = useState<string[]>([]);
+
+    useEffect(() => {
+        const loadSettings = async () => {
+            try {
+                let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+                const { createClient } = await import('@/utils/supabase/client');
+                const supabase = createClient();
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    if (user.email === 'gktla71@gmail.com') {
+                        tenantId = 'default_tenant';
+                    } else if (user.id) {
+                        tenantId = user.id;
+                    }
+                }
+
+                const res = await fetch('/api/settings', {
+                    headers: tenantId ? { 'x-tenant-id': tenantId } : {}
+                });
+                const json = await res.json();
+                if (json.success && json.settings) {
+                    const st = json.settings;
+                    const opts: string[] = [];
+                    if (st.phone) {
+                        const splitPhones = st.phone.split(/[\n,\/]+/).map((p: string) => p.trim()).filter(Boolean);
+                        splitPhones.forEach((p: string) => {
+                            if (!opts.includes(p)) opts.push(p);
+                        });
+                    }
+                    if (opts.length > 0) {
+                        setPhoneOptions(opts);
+                        setAgencyPhone(opts[0]);
+                    }
+                }
+            } catch (e) {
+                // ignore
+            }
+        };
+        loadSettings();
+    }, []);
 
     const toggleDay = (dayIndex: number) => {
         setExpandedDays(prev => ({
@@ -349,13 +392,18 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
                             };
                             const typeVal = (item.type === 'location' || (!isNonSpot(titleStr) && titleStr.length > 1)) ? 'location' : 'default';
 
+                            let itemImg = item.image || item.imageUrl || '';
+                            if (!itemImg && Array.isArray(item.images) && item.images.length > 0) {
+                                itemImg = item.images[0];
+                            }
+
                             return {
                                 ...item,
                                 title: titleStr,
                                 description: clean(item.description),
                                 location: clean(item.location),
                                 type: typeVal,
-                                image: item.image || item.imageUrl || ''
+                                image: itemImg
                             };
                         });
 
@@ -405,7 +453,10 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
                     const excStr = Array.isArray(raw.exclusions) ? raw.exclusions.join('\n') : String(raw.exclusions);
                     setExclusions(excStr);
                 }
-                if (raw.cancellationPolicy) setCancellationPolicy(clean(raw.cancellationPolicy));
+                if (raw.cancellationPolicy) {
+                    const cpArr = Array.isArray(raw.cancellationPolicy) ? raw.cancellationPolicy : [raw.cancellationPolicy];
+                    setCancellationPolicy(cpArr.map((s: any) => clean(s)).filter(Boolean).join('\n\n'));
+                }
                 if (raw.checklist) setChecklist(clean(raw.checklist) || checklist); // AI 결과가 없으면 기본값 유지
 
                 // ---- 유의사항 통합 (사용자 요청으로 자동 비활성화: 비워두기) ----
@@ -977,6 +1028,7 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
                 reservationNumber: reservationNumber.trim(),
                 sheetRowIndex: sheetRowIndex,
                 sheetName: sheetName,
+                agencyPhone: agencyPhone.trim(),
                 customer: { name: customerName, phone: customerPhone, visitorId: visitorId },
                 trip: {
                     productName, productUrl, destination,
@@ -1076,8 +1128,35 @@ ${shareUrl}`;
                         <input value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="홍길동" />
                     </div>
                     <div className="confirm-field">
-                        <label>연락처</label>
+                        <label>고객 연락처</label>
                         <input value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} placeholder="010-1234-5678" />
+                    </div>
+                    <div className="confirm-field">
+                        <label>상담원 연결 전화번호 (확정서 버튼 연결)</label>
+                        {phoneOptions.length > 0 ? (
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <select 
+                                    value={agencyPhone} 
+                                    onChange={e => setAgencyPhone(e.target.value)}
+                                    style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+                                >
+                                    {phoneOptions.map((ph, idx) => (
+                                        <option key={idx} value={ph}>{ph}</option>
+                                    ))}
+                                    <option value="custom">직접 입력...</option>
+                                </select>
+                                {(!phoneOptions.includes(agencyPhone) || agencyPhone === 'custom') && (
+                                    <input 
+                                        value={agencyPhone === 'custom' ? '' : agencyPhone} 
+                                        onChange={e => setAgencyPhone(e.target.value)} 
+                                        placeholder="010-0000-0000" 
+                                        style={{ flex: 1 }}
+                                    />
+                                )}
+                            </div>
+                        ) : (
+                            <input value={agencyPhone} onChange={e => setAgencyPhone(e.target.value)} placeholder="예: 010-9307-9004 또는 02-951-9004" />
+                        )}
                     </div>
                 </div>
             </div>
@@ -1234,8 +1313,8 @@ ${shareUrl}`;
                     </div>
                 </div>
 
-                {/* 경유 정보 상세 에디터 */}
-                {departureSegments.length > 0 && (
+                {/* 경유 정보 상세 에디터 (2개 이상 세그먼트, 즉 실제 경유일 때만 노출) */}
+                {departureSegments.length > 1 && (
                     <div style={{ marginTop: '20px', padding: '16px', background: '#111827', borderRadius: '12px', border: '1px solid #374151' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                             <h4 style={{ margin: 0, fontSize: '14px', color: '#60a5fa' }}>가는 편 경유 구간 상세</h4>
@@ -1259,7 +1338,7 @@ ${shareUrl}`;
                 )}
 
                 {/* 오는 편 경유 구간 (경유 정보가 있을 때만 표시) */}
-                {returnSegments.length > 0 && (
+                {returnSegments.length > 1 && (
                     <div style={{ marginTop: '20px', padding: '16px', background: '#111827', borderRadius: '12px', border: '1px solid #374151' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                             <h4 style={{ margin: 0, fontSize: '14px', color: '#10b981' }}>오는 편 경유 구간 상세</h4>
@@ -1283,7 +1362,7 @@ ${shareUrl}`;
                 )}
 
                 {/* 경유 정보 수동 추가 버튼 (항공과 숙박 사이) */}
-                {departureSegments.length === 0 && returnSegments.length === 0 && (
+                {departureSegments.length <= 1 && returnSegments.length <= 1 && (
                     <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end' }}>
                         <button 
                             onClick={() => {
@@ -1675,6 +1754,122 @@ ${shareUrl}`;
                                                     placeholder="일정의 상세 내용을 입력하세요..."
                                                     rows={3}
                                                 />
+                                            </div>
+
+                                            {/* 이미지 관리 섹션: 시각적 섬네일 프리뷰 + 이미지 파일 업로드 & URL 추가 / 삭제 */}
+                                            <div className="confirm-field" style={{ marginTop: '8px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
+                                                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                                                        🖼️ 일정 이미지 ({item.images && Array.isArray(item.images) ? item.images.length : (item.image ? 1 : 0)}개)
+                                                    </span>
+                                                    <div style={{ display: 'flex', gap: '6px' }}>
+                                                        {/* 이미지 파일 직접 업로드 버튼 */}
+                                                        <label
+                                                            style={{
+                                                                fontSize: '0.75rem',
+                                                                padding: '4px 10px',
+                                                                borderRadius: '4px',
+                                                                background: '#3b82f6',
+                                                                color: '#ffffff',
+                                                                cursor: 'pointer',
+                                                                fontWeight: 'bold',
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                gap: '4px'
+                                                            }}
+                                                        >
+                                                            📁 파일 업로드
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                multiple
+                                                                style={{ display: 'none' }}
+                                                                onChange={(e) => {
+                                                                    const files = Array.from(e.target.files || []);
+                                                                    if (files.length === 0) return;
+                                                                    const currentImgs = item.images && Array.isArray(item.images) ? item.images : (item.image ? [item.image] : []);
+                                                                    
+                                                                    let readCount = 0;
+                                                                    const newBase64s: string[] = [];
+                                                                    files.forEach((file) => {
+                                                                        const reader = new FileReader();
+                                                                        reader.onload = (event) => {
+                                                                            if (event.target?.result) {
+                                                                                newBase64s.push(String(event.target.result));
+                                                                            }
+                                                                            readCount++;
+                                                                            if (readCount === files.length) {
+                                                                                const updated = [...currentImgs, ...newBase64s];
+                                                                                updateTimelineItem(i, idx, 'images', updated);
+                                                                                updateTimelineItem(i, idx, 'image', updated[0]);
+                                                                            }
+                                                                        };
+                                                                        reader.readAsDataURL(file);
+                                                                    });
+                                                                    e.target.value = '';
+                                                                }}
+                                                            />
+                                                        </label>
+
+                                                        {/* URL 주소 추가 버튼 */}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const url = prompt('추가할 이미지 URL 주소를 입력하세요:');
+                                                                if (url && url.trim()) {
+                                                                    const currentImgs = item.images && Array.isArray(item.images) ? item.images : (item.image ? [item.image] : []);
+                                                                    const updated = [...currentImgs, url.trim()];
+                                                                    updateTimelineItem(i, idx, 'images', updated);
+                                                                    updateTimelineItem(i, idx, 'image', updated[0]);
+                                                                }
+                                                            }}
+                                                            style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '4px', background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.4)', cursor: 'pointer', fontWeight: 'bold' }}
+                                                        >
+                                                            🔗 URL 추가
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {(() => {
+                                                    const imgList: string[] = item.images && Array.isArray(item.images) && item.images.length > 0
+                                                        ? item.images
+                                                        : (item.image ? [item.image] : []);
+                                                    
+                                                    if (imgList.length === 0) {
+                                                        return (
+                                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic', padding: '4px 0' }}>
+                                                                등록된 이미지가 없습니다.
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    return (
+                                                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '8px' }}>
+                                                            {imgList.map((imgUrl: string, imgIdx: number) => (
+                                                                <div key={imgIdx} style={{ position: 'relative', width: '140px', height: '85px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.15)', background: '#0f172a', boxShadow: '0 2px 6px rgba(0,0,0,0.3)' }}>
+                                                                    <img
+                                                                        src={imgUrl}
+                                                                        alt={`일정 이미지 ${imgIdx + 1}`}
+                                                                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                                                        onError={(e) => { (e.target as HTMLElement).style.opacity = '0.3'; }}
+                                                                    />
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            const updated = imgList.filter((_, k) => k !== imgIdx);
+                                                                            updateTimelineItem(i, idx, 'images', updated);
+                                                                            updateTimelineItem(i, idx, 'image', updated[0] || '');
+                                                                        }}
+                                                                        style={{ position: 'absolute', top: '4px', right: '4px', width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.9)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.5)', zIndex: 2 }}
+                                                                        title="이미지 삭제"
+                                                                    >
+                                                                        ✕
+                                                                    </button>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    );
+                                                })()}
                                             </div>
                                         </div>
 

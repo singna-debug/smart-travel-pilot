@@ -364,6 +364,67 @@ const TimelineItem = ({ item }: { item: any }) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const [needsCollapse, setNeedsCollapse] = useState(false);
 
+    // 일정 내부 항공 정보 카드 렌더링
+    if (item.type === 'flight' || (item.badges && item.badges.includes('항공편'))) {
+        const info = item.flightInfo || {};
+        const isReturn = item.title?.includes('오는') || item.title?.includes('귀국');
+        return (
+            <div style={{ margin: '14px 0 20px 0', width: '100%' }}>
+                <div style={{
+                    background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%)',
+                    color: '#ffffff',
+                    padding: '8px 16px',
+                    borderRadius: '16px 16px 0 0',
+                    fontSize: '0.9rem',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                }}>
+                    <span>✈️ {isReturn ? '오는 편' : '가는 편'} 항공권 정보</span>
+                    <span style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '10px' }}>{info.flightNo || (isReturn ? '7C2126' : '7C2125')}</span>
+                </div>
+                <div style={{
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderTop: 'none',
+                    borderRadius: '0 0 16px 16px',
+                    padding: '16px 20px',
+                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.08)'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ textAlign: 'left' }}>
+                            <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>{info.departureCity || (isReturn ? '보홀 (TAG)' : '서울 (ICN)')}</div>
+                            <div style={{ fontSize: '1.3rem', color: '#0f172a', fontWeight: 800, marginTop: '2px' }}>
+                                {info.departureTime || (isReturn ? '02:00' : '21:30')}
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, padding: '0 16px' }}>
+                            <div style={{ fontSize: '0.8rem', color: '#ea580c', fontWeight: 700 }}>
+                                {info.airline || '제주항공'}
+                            </div>
+                            <div style={{ width: '100%', height: '2px', background: '#cbd5e1', margin: '8px 0', position: 'relative' }}>
+                                <div style={{ position: 'absolute', top: '-3px', left: '0', width: '8px', height: '8px', borderRadius: '50%', background: '#94a3b8' }}></div>
+                                <div style={{ position: 'absolute', top: '-3px', right: '0', width: '8px', height: '8px', borderRadius: '50%', background: '#94a3b8' }}></div>
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: '#0d9488', fontWeight: 700 }}>
+                                {info.duration || '3시간 45분 소요'}
+                            </div>
+                        </div>
+
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>{info.arrivalCity || (isReturn ? '서울 (ICN)' : '보홀 (TAG)')}</div>
+                            <div style={{ fontSize: '1.3rem', color: '#0f172a', fontWeight: 800, marginTop: '2px' }}>
+                                {info.arrivalTime || (isReturn ? '07:30' : '01:15')}<span style={{ fontSize: '0.75rem', color: '#ef4444', marginLeft: '2px', verticalAlign: 'super' }}>+1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     // Extract img tags from description to render them outside clamped container
     let cleanDesc = item.description || '';
     
@@ -451,13 +512,27 @@ const TimelineItem = ({ item }: { item: any }) => {
                         color: '#1e293b', 
                         display: 'flex', 
                         alignItems: 'center', 
-                        gap: '4px',
+                        flexWrap: 'wrap',
+                        gap: '6px',
                         cursor: needsCollapse ? 'pointer' : 'default',
                         lineHeight: 1.4
                     }} 
                     onClick={() => needsCollapse && setIsExpanded(!isExpanded)}
                 >
                     <span dangerouslySetInnerHTML={{ __html: cleanupHtml(item.title) }} />
+                    {item.badges && item.badges.map((b: string, bi: number) => (
+                        <span key={bi} style={{
+                            background: b === '선택관광' ? '#ef4444' : (b === 'MD추천' ? '#f59e0b' : (b === '항공편' ? '#2563eb' : '#10b981')),
+                            color: '#ffffff',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            lineHeight: 1.2
+                        }}>{b}</span>
+                    ))}
                     {isLocation && <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 400, marginLeft: '2px' }}>›</span>}
                 </div>
                 
@@ -467,33 +542,59 @@ const TimelineItem = ({ item }: { item: any }) => {
                     </div>
                 )}
 
-                {imageUrls.length > 0 && (
-                    <div style={{ 
-                        display: imageUrls.length === 1 ? 'block' : 'grid', 
-                        gridTemplateColumns: imageUrls.length > 1 ? `repeat(${Math.min(imageUrls.length, 2)}, 1fr)` : 'none',
-                        gap: '10px', 
-                        marginTop: '10px', 
-                        marginBottom: '10px',
-                        width: '100%' 
-                    }}>
-                        {imageUrls.map((url, uidx) => (
-                            <img 
-                                key={uidx} 
-                                src={url} 
-                                style={{ 
-                                    width: '100%', 
-                                    aspectRatio: '16 / 10',
-                                    objectFit: 'cover', 
-                                    borderRadius: '12px', 
-                                    display: 'block',
-                                    border: '1px solid #f1f5f9',
-                                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-                                }} 
-                                alt="일정 이미지" 
-                            />
-                        ))}
-                    </div>
-                )}
+                {/* 관광지 제목 바로 아래 1:1 슬라이더 및 클릭 확대 */}
+                {(() => {
+                    const allImages: string[] = [...imageUrls];
+                    if (item.image && !allImages.includes(item.image)) allImages.unshift(item.image);
+                    if (item.images && Array.isArray(item.images)) {
+                        item.images.forEach((img: string) => {
+                            if (img && !allImages.includes(img)) allImages.push(img);
+                        });
+                    }
+
+                    if (allImages.length === 0) return null;
+
+                    return (
+                        <div style={{ 
+                            display: 'flex', 
+                            gap: '10px', 
+                            overflowX: 'auto', 
+                            padding: '8px 0 10px 0', 
+                            marginTop: '8px',
+                            scrollSnapType: 'x mandatory',
+                            WebkitOverflowScrolling: 'touch'
+                        }}>
+                            {allImages.map((url, uidx) => (
+                                <img 
+                                    key={uidx} 
+                                    src={url} 
+                                    style={{ 
+                                        width: '340px',
+                                        height: '190px',
+                                        objectFit: 'cover', 
+                                        borderRadius: '12px', 
+                                        display: 'block',
+                                        border: '1px solid #e2e8f0',
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                                        cursor: 'pointer',
+                                        scrollSnapAlign: 'start',
+                                        flexShrink: 0
+                                    }} 
+                                    alt="일정 이미지" 
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        if (typeof (window as any).openImageModal === 'function') {
+                                            (window as any).openImageModal(url);
+                                        }
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    );
+                })()}
+
+
 
                 {cleanDesc && (
                     <div style={{ marginTop: '6px', position: 'relative' }}>
@@ -855,37 +956,44 @@ const getAirlineInfo = (codeOrName: string) => {
     return { name: codeOrName, logoUrl: null, color: '#3b82f6' };
 };
 const ParsedFlightCard = ({ day, isFirst, isLast }: { day: any, isFirst: boolean, isLast: boolean }) => {
-    // 1. 크롤러가 직접 주입한 flight 객체 우선
+    // 1일차(가는편)나 마지막일차가 아니면 일정표 내부 항공 카드 미출력
+    if (!isFirst && !isLast) return null;
+
     let flightInfo = day.flight || day.flightInfo;
-    
-    // 2. transport/transportation 파싱 fallback
-    if (!flightInfo) {
-        if (day.transport) {
-            const t = day.transport;
+
+    // 1일차는 무조건 가는 편 항공 정보만 노출
+    if (isFirst) {
+        if (!flightInfo || String(flightInfo.title || '').includes('오는')) {
             flightInfo = {
-                flightNo: t.flightNo,
-                airline: t.airline,
-                departureCity: t.departureCity,
-                departureTime: t.departureTime,
-                arrivalCity: t.arrivalCity,
-                arrivalTime: t.arrivalTime,
-                duration: t.duration,
+                airline: day.airline || '항공사',
+                flightNo: day.departureFlightNumber || '',
+                departureCity: day.departureAirport || '인천',
+                departureTime: day.departureTime || '',
+                arrivalCity: day.arrivalAirport || '',
+                arrivalTime: day.arrivalTime || ''
             };
-        } else if (day.transportation) {
-            const matchOld = day.transportation.match(/비행기\s*([A-Z0-9]*)\s*\((.+?)\s+(\d{2}:\d{2})\s*출발,\s*(.+?)\s+(\d{2}:\d{2})\s*도착,\s*(.+?)\s*소요\)/);
-            const matchNew = day.transportation.match(/([가-힣a-zA-Z]+항공|[가-힣a-zA-Z]+에어)\s*([A-Za-z0-9]+)?,\s*출발\s*(\d{2}:\d{2}),\s*도착\s*(\d{2}:\d{2}),\s*소요(?:시간)?\s*(.+)/);
-            if (matchOld) {
-                flightInfo = { flightNo: matchOld[1], departureCity: matchOld[2], departureTime: matchOld[3], arrivalCity: matchOld[4], arrivalTime: matchOld[5], duration: matchOld[6] };
-            } else if (matchNew) {
-                flightInfo = { airline: matchNew[1], flightNo: matchNew[2] || '', departureTime: matchNew[3], arrivalTime: matchNew[4], duration: matchNew[5] };
-            }
         }
+        if (!flightInfo.flightNo && !flightInfo.departureTime) return null;
+        return <UnifiedFlightCard flightInfo={flightInfo} dateStr={day.date} title="가는 편" />;
     }
-    
-    // 데이터가 유효한지(최소한 편명이나 시간이 있는지) 체크하여 노출 결정
-    if (!flightInfo || (!flightInfo.flightNo && !flightInfo.departureTime)) return null;
-    const title = isFirst ? '가는 편' : (isLast ? '오는 편' : undefined);
-    return <UnifiedFlightCard flightInfo={flightInfo} dateStr={day.date} title={title} />;
+
+    // 마지막일차는 무조건 오는 편 항공 정보만 노출
+    if (isLast) {
+        if (!flightInfo || String(flightInfo.title || '').includes('가는')) {
+            flightInfo = {
+                airline: day.airline || '항공사',
+                flightNo: day.returnFlightNumber || '',
+                departureCity: day.returnDepartureAirport || '',
+                departureTime: day.returnDepartureTime || '',
+                arrivalCity: day.departureAirport || '인천',
+                arrivalTime: day.returnArrivalTime || ''
+            };
+        }
+        if (!flightInfo.flightNo && !flightInfo.departureTime) return null;
+        return <UnifiedFlightCard flightInfo={flightInfo} dateStr={day.date} title="오는 편" />;
+    }
+
+    return null;
 };
 
 const parseDurationToMins = (durationStr: string) => {
@@ -1123,7 +1231,7 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
     const headerBg = isOutbound ? 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)' : 'linear-gradient(135deg, #581c87 0%, #7c3aed 100%)';
 
     return (
-        <div style={{ marginBottom: '32px' }}>
+        <div style={{ marginTop: '12px', marginBottom: '24px' }}>
             {title && (
                 <div style={{ 
                     display: 'flex',
@@ -1179,6 +1287,14 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
         return isDummy ? `/api/dummy${path}` : `/api${path}`;
     };
     const [doc, setDoc] = useState<ConfirmationDocument | null>(null);
+    const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        (window as any).openImageModal = (url: string) => {
+            setModalImageUrl(url);
+        };
+    }, []);
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState<TabKey>('개요');
@@ -1236,6 +1352,8 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
         SEK: '스웨덴', ISK: '아이슬란드', GBP: '영국', CHF: '스위스' 
     };
 
+    const [brandName, setBrandName] = useState('CLUBMODE TRAVEL');
+
     useEffect(() => {
         const loadDoc = async () => {
             try {
@@ -1243,7 +1361,6 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                 const json = await res.json();
                 if (json.success) {
                     setDoc(json.data);
-                    // 미팅 정보가 있으면 기본적으로 아코디언을 엽니다.
                     if (json.data.meetingInfo && json.data.meetingInfo.length > 0) {
                         setExpandedSections(prev => ({ ...prev, meeting: true }));
                     }
@@ -1256,7 +1373,35 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                 setLoading(false);
             }
         };
+
+        const loadSettings = async () => {
+            try {
+                let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+                const { createClient } = await import('@/utils/supabase/client');
+                const supabase = createClient();
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    if (user.email === 'gktla71@gmail.com') {
+                        tenantId = 'default_tenant';
+                    } else if (user.id) {
+                        tenantId = user.id;
+                    }
+                }
+
+                const res = await fetch('/api/settings', {
+                    headers: tenantId ? { 'x-tenant-id': tenantId } : {}
+                });
+                const json = await res.json();
+                if (json.success && json.settings?.companyEnglishName) {
+                    setBrandName(json.settings.companyEnglishName);
+                }
+            } catch (e) {
+                // 기본값 유지
+            }
+        };
+
         loadDoc();
+        loadSettings();
     }, [id]);
 
     // 환율 관련 설정 초기화 및 통화 목록 추출
@@ -1427,7 +1572,7 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
         return (
             <div className="mobile-confirm">
                 <div className="mc-header">
-                    <div className="mc-brand">CLUBMODE TRAVEL</div>
+                    <div className="mc-brand">{brandName}</div>
                     <h1>확정서를 찾을 수 없습니다</h1>
                 </div>
                 <div className="mc-empty-notice">{error || '잘못된 링크입니다.'}</div>
@@ -1500,7 +1645,7 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
         <div className="mobile-confirm">
             {/* 상단 헤더 */}
             <div className="mc-header">
-                <div className="mc-brand">CLUBMODE TRAVEL</div>
+                <div className="mc-brand">{brandName}</div>
                 <h1>{doc.trip.productName || '여행 확정서'}</h1>
                 <div className="mc-subtitle" title={doc.trip.destination}>{formatDestination(doc.trip.destination)}</div>
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '14px', alignItems: 'center' }}>
@@ -1877,7 +2022,9 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                                                         <div className="day-content" style={{ marginTop: '16px' }}>
                                                             {day.timeline && Array.isArray(day.timeline) && day.timeline.length > 0 ? (
                                                                 <div className="timeline-list" style={{ paddingLeft: '4px' }}>
-                                                                    {day.timeline.map((item: any, ti: number) => (
+                                                                    {day.timeline
+                                                                        .filter((item: any) => item.type !== 'flight' && !(item.badges && item.badges.includes('항공편')))
+                                                                        .map((item: any, ti: number) => (
                                                                         <TimelineItem key={ti} item={item} />
                                                                     ))}
                                                                 </div>
@@ -2274,12 +2421,16 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                         )}
 
                         {/* 취소 규정 */}
-                        {doc.cancellationPolicy && (
+                        {doc.cancellationPolicy && (Array.isArray(doc.cancellationPolicy) ? doc.cancellationPolicy.length > 0 : String(doc.cancellationPolicy).trim().length > 0) && (
                             <div className="mc-section">
                                 <div className="mc-section-title">
                                     <span className="sec-icon">⚠️</span> 취소 · 환불 규정
                                 </div>
-                                <div className="mc-policy-text">{doc.cancellationPolicy}</div>
+                                <div className="mc-policy-text" style={{ whiteSpace: 'pre-line', lineHeight: 1.8, fontSize: '0.87rem', color: '#334155' }}>
+                                    {Array.isArray(doc.cancellationPolicy)
+                                        ? doc.cancellationPolicy.join('\n\n')
+                                        : String(doc.cancellationPolicy)}
+                                </div>
                             </div>
                         )}
 
@@ -2899,7 +3050,7 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
 
             {/* 하단 액션 바 */}
             <div className="mc-bottom-bar">
-                <a href="tel:01093079004" className="mc-action-btn kakao" style={{ flex: 2 }}>
+                <a href={`tel:${(doc as any).agencyPhone || '010-9307-9004'}`} className="mc-action-btn kakao" style={{ flex: 2 }}>
                     상담원 연결
                 </a>
                 <button className="mc-action-btn share" onClick={handleShare}>
@@ -2959,6 +3110,13 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                 </div>
             )}
 
+            {/* 일정 이미지 확대 보기 모달 (PinchZoomModal 활용) */}
+            {modalImageUrl && (
+                <PinchZoomModal 
+                    src={modalImageUrl} 
+                    onClose={() => setModalImageUrl(null)} 
+                />
+            )}
             {/* 미팅 안내 이미지 모달 */}
             {selectedImage && <PinchZoomModal src={selectedImage} onClose={() => setSelectedImage(null)} />}
             {/* 서류 뷰어 모달 (전체 화면 통합 뷰어) */}

@@ -619,10 +619,9 @@ export async function appendConsultationToSheet(data: ConsultationData, tenantId
  * 상담 데이터를 Google Sheets에 추가하거나 업데이트(Upsert)합니다.
  * 순서 보장을 위해 기존 행이 있으면 삭제하고 맨 아래(최신)에 새로 추가합니다.
  */
-export async function upsertConsultationToSheet(data: ConsultationData): Promise<boolean> {
+export async function upsertConsultationToSheet(data: ConsultationData, tenantId: string = 'default_tenant'): Promise<boolean> {
     try {
-        const sheets = getGoogleSheetsClient();
-        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
+        const { sheets, spreadsheetId: sheetId } = await getSheetsConfigForTenant(tenantId);
 
         if (!sheetId) {
             console.error('GOOGLE_SHEET_ID가 설정되지 않았습니다.');
@@ -1144,7 +1143,7 @@ async function getAllConsultationsForTenant(tenantId: string, forceRefresh = fal
         allRows.sort((a, b) => new Date(b[0] || 0).getTime() - new Date(a[0] || 0).getTime());
 
         // ConsultationData 형식으로 변환
-        return allRows
+        const formatted = allRows
             .filter(row => row[1] || row[2])
             .map(row => ({
                 timestamp: row[0],
@@ -1185,6 +1184,38 @@ async function getAllConsultationsForTenant(tenantId: string, forceRefresh = fal
                 sheetRowIndex: row._rowIndex,
                 sheetGid: row._sheetGid,
             }));
+
+        // 동일 고객 + 문의 건에 대한 중복 통합 (최신 항목 1건만 유지)
+        const deduped: ConsultationData[] = [];
+        const seenKeys = new Set<string>();
+
+        for (const item of formatted) {
+            const cleanName = (item.customer.name || '').trim();
+            const cleanPhone = (item.customer.phone || '').replace(/[^0-9]/g, '');
+            const dest = (item.trip.destination || '').trim();
+            const depDate = (item.trip.departure_date || '').trim();
+            const prod = (item.trip.product_name || '').trim();
+
+            // 고객 식별키: (visitor_id) 또는 (성함+연락처+목적지) 또는 (성함+상품명)
+            let uniqueKey = '';
+            if (item.visitor_id && item.visitor_id.length > 5) {
+                uniqueKey = `vid:${item.visitor_id}`;
+            } else if (cleanName && cleanName !== '미정') {
+                uniqueKey = `name:${cleanName}_phone:${cleanPhone}_dest:${dest}_dep:${depDate}`;
+            } else if (cleanPhone) {
+                uniqueKey = `phone:${cleanPhone}_dest:${dest}_dep:${depDate}`;
+            }
+
+            if (uniqueKey && seenKeys.has(uniqueKey)) {
+                // 이미 더 최신의 동일 내역이 등록되었으므로 생략 (중복 병합)
+                continue;
+            }
+
+            if (uniqueKey) seenKeys.add(uniqueKey);
+            deduped.push(item);
+        }
+
+        return deduped;
     } catch (error) {
         console.error(`[getAllConsultationsForTenant] 오류 (${tenantId}):`, error);
         return [];
@@ -1254,11 +1285,41 @@ export async function getAllConsultations(forceRefresh = false, tenantId = 'defa
             });
         }
 
+        // 최신순 정렬
+        consultations.sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime());
+
+        // 동일 고객 + 문의 건에 대한 중복 통합 (최신 항목 1건만 유지)
+        const deduped: ConsultationData[] = [];
+        const seenKeys = new Set<string>();
+
+        for (const item of consultations) {
+            const cleanName = (item.customer.name || '').trim();
+            const cleanPhone = (item.customer.phone || '').replace(/[^0-9]/g, '');
+            const dest = (item.trip.destination || '').trim();
+            const depDate = (item.trip.departure_date || '').trim();
+
+            let uniqueKey = '';
+            if (item.visitor_id && item.visitor_id.length > 5) {
+                uniqueKey = `vid:${item.visitor_id}`;
+            } else if (cleanName && cleanName !== '미정') {
+                uniqueKey = `name:${cleanName}_phone:${cleanPhone}_dest:${dest}_dep:${depDate}`;
+            } else if (cleanPhone) {
+                uniqueKey = `phone:${cleanPhone}_dest:${dest}_dep:${depDate}`;
+            }
+
+            if (uniqueKey && seenKeys.has(uniqueKey)) {
+                continue;
+            }
+
+            if (uniqueKey) seenKeys.add(uniqueKey);
+            deduped.push(item);
+        }
+
         // 캐시 업데이트
-        cachedConsultations = consultations;
+        cachedConsultations = deduped;
         lastFetchTime = Date.now();
 
-        return consultations;
+        return deduped;
     } catch (error) {
         console.error('전체 상담 조회 오류:', error);
         return cachedConsultations || []; // 오류 시 이전 캐시라도 반환

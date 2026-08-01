@@ -414,6 +414,11 @@
     background: #fff;
     border-bottom: 1px solid #f8fafc;
     cursor: pointer;
+    margin-bottom: 0;
+}
+
+.mc-day-card + .mc-day-card {
+    margin-top: 8px;
 }
 
 .mc-day-card .day-number {
@@ -441,7 +446,7 @@
 }
 
 .day-body {
-    padding: 20px;
+    padding: 16px 20px 20px;
     position: relative;
 }
 
@@ -1164,7 +1169,7 @@
 }
 
 .day-body {
-    padding: 0 14px 14px;
+    padding: 6px 14px 14px;
     animation: fadeIn 0.2s ease;
 }
 

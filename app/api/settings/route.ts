@@ -9,15 +9,45 @@ export async function GET(request: NextRequest) {
     try {
         const tenantId = getTenantIdFromHeaderOrQuery(request);
 
-        // 1. 마스터 계정은 .env.local 값으로 리턴
+        // 1. Supabase에서 해당 테넌트 설정 우선 조회
+        if (supabaseAdmin) {
+            const { data } = await supabaseAdmin
+                .from('tenant_settings')
+                .select('*')
+                .eq('tenant_id', tenantId)
+                .single();
+
+            if (data) {
+                return NextResponse.json({
+                    success: true,
+                    settings: {
+                        companyName: data.company_name || '',
+                        companyEnglishName: data.company_english_name || '',
+                        managerName: data.manager_name || '',
+                        phone: data.phone || '',
+                        workStartTime: data.work_start_time || '09:00',
+                        workEndTime: data.work_end_time || '18:00',
+                        googleSpreadsheetId: data.google_spreadsheet_id || (tenantId === DEFAULT_TENANT_ID ? process.env.GOOGLE_SHEET_ID?.trim() || '' : ''),
+                        googleSheetName: data.google_sheet_name || '',
+                        googleClientEmail: data.google_client_email || '',
+                        googlePrivateKey: data.google_private_key ? '••••••••' : '',
+                        geminiApiKey: data.gemini_api_key || (tenantId === DEFAULT_TENANT_ID ? process.env.GEMINI_API_KEY?.trim() || '' : ''),
+                        kakaoChannelId: data.kakao_channel_id || '',
+                        kakaoTalkId: data.kakao_talk_id || '',
+                    }
+                });
+            }
+        }
+
+        // 2. 데이터가 없는데 마스터 계정인 경우 .env.local fallback
         if (tenantId === DEFAULT_TENANT_ID) {
             return NextResponse.json({
                 success: true,
                 settings: {
-                    companyName: '(주)클럽모두투어',
-                    companyEnglishName: 'CLUBMODE TRAVEL',
-                    managerName: '김대표',
-                    phone: '010-0000-0000',
+                    companyName: process.env.NEXT_PUBLIC_COMPANY_NAME || '',
+                    companyEnglishName: process.env.NEXT_PUBLIC_COMPANY_ENG_NAME || '',
+                    managerName: process.env.NEXT_PUBLIC_MANAGER_NAME || '',
+                    phone: process.env.NEXT_PUBLIC_COMPANY_PHONE || '',
                     workStartTime: '09:00',
                     workEndTime: '18:00',
                     googleSpreadsheetId: process.env.GOOGLE_SHEET_ID?.trim() || '',
@@ -92,11 +122,6 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const tenantId = getTenantIdFromHeaderOrQuery(request);
-
-        if (tenantId === DEFAULT_TENANT_ID) {
-            return NextResponse.json({ success: false, error: '마스터 계정의 설정은 변경할 수 없습니다.' }, { status: 403 });
-        }
-
         const body = await request.json();
 
         const sheetId = body.googleSpreadsheetId?.trim();

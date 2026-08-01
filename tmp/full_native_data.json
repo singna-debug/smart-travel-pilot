@@ -1,512 +1,61 @@
 {
   "isProduct": true,
-  "title": "보홀 5일 #라메디 #전신마사지 #다이빙강습 #알로나비치 #보홀시티투어 #특식3회",
-  "destination": "보홀",
-  "price": "556,000원",
-  "departureDate": "2026-09-01",
-  "returnDate": "2026-09-05",
-  "duration": "3박 5일",
-  "airline": "제주항공",
-  "departureFlightNumber": "",
-  "returnFlightNumber": "",
-  "departureAirport": "서울",
-  "arrivalAirport": "보홀",
-  "departureTime": "21:30",
-  "arrivalTime": "01:15",
-  "returnDepartureAirport": "보홀",
-  "returnDepartureTime": "02:15",
-  "returnArrivalTime": "07:50",
-  "departureSegments": [],
-  "returnSegments": [],
-  "url": "https://www.hanatour.com/trp/pkg/CHPC0PKG0200M200?pkgCd=APP2382609017CB&prePage=major-products",
-  "itinerary": [
+  "title": "[푸켓6일] 썬수리그랜드뷰풀빌라 4박_허니문_OZ",
+  "destination": "태국",
+  "price": "1,290,000원",
+  "departureDate": "2026-07-25",
+  "returnDate": "2026-07-30",
+  "duration": "4박6일",
+  "airline": "아시아나항공",
+  "departureFlightNumber": "OZ747",
+  "returnFlightNumber": "OZ748",
+  "departureAirport": "인천",
+  "arrivalAirport": "푸켓",
+  "departureTime": "16:30",
+  "arrivalTime": "20:55",
+  "returnDepartureAirport": "푸켓",
+  "returnDepartureTime": "22:15",
+  "returnArrivalTime": "06:35",
+  "departureSegments": [
     {
-      "day": 1,
-      "date": "2026-09-01",
-      "title": "인천, 보홀",
-      "transport": "항공",
-      "timeline": [
-        {
-          "type": "default",
-          "title": "※ 해당 운항 일정은 유동적이며 추후 여행이 가능한 항공편 및 출·도착 일정으로 변경될 수 있습니다.",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "필리핀 출입국 안내",
-          "subtitle": "",
-          "description": "<p>한국 출국 전 준비사항/절차</p>\n\n        \n            <b>[ 여권 및 비자 ]</b>\n- 관광을 목적으로 필리핀에 방문하는 대한민국 국민은 30일까지 무비자 입국 가능\n- 무비자 입국 시 여권 만료일이 6개월 이상 남아있는 여권과 도착일이 명시된 항공권을 소지해야 함\n- 외국 국적 여권을 소지한 경우 개별적으로 필리핀 입국 시 필요한 비자 확인 필요\n※ 그 밖의 자세한 문의는 주한 필리핀 대사관을 통해 확인 바랍니다.\n\n<b>[ 필리핀 이트래블 입국신고서 및 세관신고서 ]</b>\n항공 탑승 시간 기준 72시간 이내 등록 필수\n이트래블 등록사이트  ☞ <a href=\"https://etravel.gov.ph/\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #10b981; text-decoration: underline; font-weight: 600; word-break: break-all;\">https://etravel.gov.ph/</a>\n이트래블 작성방법  ☞ <a href=\"https://philippinetourism.co.kr/travel/eTravel\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #10b981; text-decoration: underline; font-weight: 600; word-break: break-all;\">https://philippinetourism.co.kr/travel/eTravel</a>\n※ 2024년 5월 10일부터 이트래블 입국신고서 QR코드와 세관신고서 QR코드가 하나로 통합되었습니다. \n입국신고서와 세관신고서를 모두 작성하시면 바로 QR코드가 발급됩니다. \n※ 출입국 규정이 사전 고지없이 변경될 수 있으니 출발 전 아래 링크 참조바랍니다. \n필리핀 관광부 ☞ <a href=\"https://philippinetourism.co.kr\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #10b981; text-decoration: underline; font-weight: 600; word-break: break-all;\">https://philippinetourism.co.kr</a>\n\n<b>[ 만 15세 미만 미성년자 필리핀 입국 시 유의사항 ]</b>\n만 15세 미만의 소아는 필리핀 이민법에 의거하여 만 18세 이상의 성인 보호자가 서류를 준비하여 동반 입국 하셔야 합니다.\n필리핀 소아 입국 규정 ☞ <a href=\"https://philippinetourism.co.kr/travel/kids\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #10b981; text-decoration: underline; font-weight: 600; word-break: break-all;\">https://philippinetourism.co.kr/travel/kids</a>\n\n● 15세 미만 소아와 아버지가 동반 하는 경우\n- 여권상 영문 성이 같을 경우 : 별도의 서류 필요 없음 (단, 입국심사관 재량에 따라 증빙서류 요구할 수도 있음) \n- 여권상 영문 성이 다를 경우 : 영문 주민등록 등본1매 (아버지와 소아의 여권상 영문철자와 영문 주민등록 영문 철자가 동일해야 함)\n※ 부모가 모두 동반하는 경우라도 입국심사관의 재량에 따라 가족관계증명서를 요구할 수 있습니다. 아버지가 동반하는 경우에도 만약의 경우에 대비하여 가족임을 증명할 수 있는 서류를 준비해 주시는 것이 좋습니다. \n● 15세 미만 소아와 어머니만 동반 하는 경우 (여권상 영문 성이 같을 경우, 다를 경우 모두 포함)\n- 영문 주민등록 등본 1매 (어머니와 소아의 여권상 영문철자와 영문 주민등록 영문 철자가 동일해야함)\n● 15세 미만 소아가 부모가 아닌 만 18세 이상의 제3자와 동반 하는 경우\n- 입국 수수료 (3,620페소), 공증 문서 (영문 여행 동의서, 영문 주민등록등본 영문 번역본), 여권사본, 항공권 등 서류 필요\n\n<b>[ 입국 시 여행자 휴대품 관련 주의사항 ]</b>\n필리핀 입국 시 담배 2보루, 술 2병(1.5L 이하), 면세 한도 10,000페소 이하이며, 위반 시 벌금이 부과됩니다.\n            \n            <span><!--custTime--></span>\n            \n        \n        \n         \n  <!--20220215000003_custTitle--> \n  <!--20220215000003_custMemo--> \n\n    \n<p><!--custTitleGroup--></p><p><!--custMemoGroup--></p><p><!--timeTitleGroup--></p><p></p>"
-        },
-        {
-          "type": "location",
-          "title": "필리핀 패키지 현지행사 안내사항",
-          "subtitle": "",
-          "description": "<p>현지 행사 관련 유의사항으로 여행 전 필독해 주시기 바랍니다.</p>\n\n        \n            ① 타 호텔 및 유사 일정의 하나투어 패키지 고객분들과 합류 행사가 진행되므로, 상품에 예약된 인원과 현지 행사 인원이 다를 수 있습니다.\n② 투어 진행 순서는 현지 사정에 따라 변경될 수 있습니다.\n③ 본 상품은 순수한 단체관광 목적만을 위한 패키지 상품으로 일정 중 개별적인 활동(친지 방문, 하나투어와 계약되지 않은 업체 조인 등)이 불가합니다. 개별 일정을 원하시는 경우 패키지 상품이 아닌 자유여행 상품을 이용해 주시기 바랍니다. 또한 타 업체 이용시 발생한 사고에 대해서는 하나투어가 책임을 지지 않습니다. \n④ [국외여행표준약관 12조 6항]에 의거 출발 후 고객의 사정에 의하여 여행요금에 포함된 숙박, 식사, 관광, 미샌딩 서비스, 공항세 등를 제공 받지 못한 경우 그에 상응하는 요금의 환급을 청구 할 수 없습니다.\n            \n            <span></span>\n            \n        \n        \n         \n  <!--custTitle--> \n  <!--custMemo-->"
-        },
-        {
-          "type": "default",
-          "title": "석식 (기내-불포함(유료제공))",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "가이드 미팅",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "리조트로 이동 후 휴식",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "부담 없는 가격으로 만나는 가성비 갑 보홀 여행 | 라메디 리조트",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/08/18/10000/97712fc2-6170-47d3-98f8-f651dc2282ad.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/08/18/10000/05463292-1906-4854-abc4-3c081b4f5ed0.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/08/18/10000/c403747e-c8b2-4dff-ae1d-d2def6654161.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/08/18/10000/318451d6-8441-479c-9c06-2a22e09e5398.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/08/18/10000/d573c5c5-7af7-44c3-a6b8-dc4c3d94beb9.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/08/18/10000/60274db2-c870-4505-97f2-42167ccb7c7e.PNG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p>라메디 리조트 보홀</p>\n        \n            \n            \n            <strong><b>호텔 소개</b></strong>라메디 리조트는 팡라오 공항에서 차량으로 약 10분, 알로나 비치까지 약 5분 거리에 위치해 접근성이 좋습니다. 깔끔한 시설과 합리적인 가격대로 많은 여행객들이 부담 없이 이용하기 좋은 리조트입니다. 총 101개의 객실을 보유하고 있으며, 야외 수영장 2개와 키즈풀 1개, Pool Bar가 마련되어 있어 리조트 내에서도 여유롭게 물놀이와 휴식을 즐기기에 적합합니다.\n            \n            \n        \n        \n        <!--20230818000023_custTitle--> <!--20230818000023_custMemo-->\n    \n\n    \n        \n        <p>라메디 리조트 보홀</p>\n        \n            \n            \n            <strong><b>객실 정보</b></strong>기본 객실 : 디럭스룸\n베드 구성 : 퀸사이즈 베드 or 퀸+싱글 베드 | 사전 지정 불가, 체크인 시 배정\n객실 시설 : WI-FI, TV, 에어컨, 헤어드라이어, 안전금고 등\n객실 내 최대 투숙 인원 : 성인2명+아동1명 또는 성인3명 (아동 만11세 이하)\n아동 엑스트라 베드 요청시 : 룸/박당 20$ 추가 (1 퀸사이즈 베드 룸타입에만 엑스트라 베드 설치 가능)\n리조트 규정상 만12세 이상 아동인 경우 성인으로 분류되어 성인 요금이 적용됩니다.\n\n<b>객실 별 룸/박당 추가 요금 및 객실 최대 투숙 인원 (아동 만11세 이하)</b>\n프리미어룸 : 룸/박당 $25 | 성인2명+아동2명 또는 성인3명\n프리미어 풀 억세스룸 : 룸/박당 $30 | 성인2명+아동2명 또는 성인3명\n\n<b>주의 사항</b>\n리조트내 모든 객실은 금연이며, 흡연시에는 큰 금액의 과징금이 부과됩니다.\n            \n            \n        \n        \n        <!--20230830000023_custTitle--> <!--20230830000023_custMemo-->\n    \n<p><!--custTitleGroup--></p><p><!--custMemoGroup--></p><p><!--timeTitleGroup--></p><p></p>"
-        }
-      ],
-      "items": [
-        {
-          "type": "default",
-          "title": "※ 해당 운항 일정은 유동적이며 추후 여행이 가능한 항공편 및 출·도착 일정으로 변경될 수 있습니다.",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "필리핀 출입국 안내",
-          "subtitle": "",
-          "description": "<p>한국 출국 전 준비사항/절차</p>\n\n        \n            <b>[ 여권 및 비자 ]</b>\n- 관광을 목적으로 필리핀에 방문하는 대한민국 국민은 30일까지 무비자 입국 가능\n- 무비자 입국 시 여권 만료일이 6개월 이상 남아있는 여권과 도착일이 명시된 항공권을 소지해야 함\n- 외국 국적 여권을 소지한 경우 개별적으로 필리핀 입국 시 필요한 비자 확인 필요\n※ 그 밖의 자세한 문의는 주한 필리핀 대사관을 통해 확인 바랍니다.\n\n<b>[ 필리핀 이트래블 입국신고서 및 세관신고서 ]</b>\n항공 탑승 시간 기준 72시간 이내 등록 필수\n이트래블 등록사이트  ☞ <a href=\"https://etravel.gov.ph/\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #10b981; text-decoration: underline; font-weight: 600; word-break: break-all;\">https://etravel.gov.ph/</a>\n이트래블 작성방법  ☞ <a href=\"https://philippinetourism.co.kr/travel/eTravel\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #10b981; text-decoration: underline; font-weight: 600; word-break: break-all;\">https://philippinetourism.co.kr/travel/eTravel</a>\n※ 2024년 5월 10일부터 이트래블 입국신고서 QR코드와 세관신고서 QR코드가 하나로 통합되었습니다. \n입국신고서와 세관신고서를 모두 작성하시면 바로 QR코드가 발급됩니다. \n※ 출입국 규정이 사전 고지없이 변경될 수 있으니 출발 전 아래 링크 참조바랍니다. \n필리핀 관광부 ☞ <a href=\"https://philippinetourism.co.kr\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #10b981; text-decoration: underline; font-weight: 600; word-break: break-all;\">https://philippinetourism.co.kr</a>\n\n<b>[ 만 15세 미만 미성년자 필리핀 입국 시 유의사항 ]</b>\n만 15세 미만의 소아는 필리핀 이민법에 의거하여 만 18세 이상의 성인 보호자가 서류를 준비하여 동반 입국 하셔야 합니다.\n필리핀 소아 입국 규정 ☞ <a href=\"https://philippinetourism.co.kr/travel/kids\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #10b981; text-decoration: underline; font-weight: 600; word-break: break-all;\">https://philippinetourism.co.kr/travel/kids</a>\n\n● 15세 미만 소아와 아버지가 동반 하는 경우\n- 여권상 영문 성이 같을 경우 : 별도의 서류 필요 없음 (단, 입국심사관 재량에 따라 증빙서류 요구할 수도 있음) \n- 여권상 영문 성이 다를 경우 : 영문 주민등록 등본1매 (아버지와 소아의 여권상 영문철자와 영문 주민등록 영문 철자가 동일해야 함)\n※ 부모가 모두 동반하는 경우라도 입국심사관의 재량에 따라 가족관계증명서를 요구할 수 있습니다. 아버지가 동반하는 경우에도 만약의 경우에 대비하여 가족임을 증명할 수 있는 서류를 준비해 주시는 것이 좋습니다. \n● 15세 미만 소아와 어머니만 동반 하는 경우 (여권상 영문 성이 같을 경우, 다를 경우 모두 포함)\n- 영문 주민등록 등본 1매 (어머니와 소아의 여권상 영문철자와 영문 주민등록 영문 철자가 동일해야함)\n● 15세 미만 소아가 부모가 아닌 만 18세 이상의 제3자와 동반 하는 경우\n- 입국 수수료 (3,620페소), 공증 문서 (영문 여행 동의서, 영문 주민등록등본 영문 번역본), 여권사본, 항공권 등 서류 필요\n\n<b>[ 입국 시 여행자 휴대품 관련 주의사항 ]</b>\n필리핀 입국 시 담배 2보루, 술 2병(1.5L 이하), 면세 한도 10,000페소 이하이며, 위반 시 벌금이 부과됩니다.\n            \n            <span><!--custTime--></span>\n            \n        \n        \n         \n  <!--20220215000003_custTitle--> \n  <!--20220215000003_custMemo--> \n\n    \n<p><!--custTitleGroup--></p><p><!--custMemoGroup--></p><p><!--timeTitleGroup--></p><p></p>"
-        },
-        {
-          "type": "location",
-          "title": "필리핀 패키지 현지행사 안내사항",
-          "subtitle": "",
-          "description": "<p>현지 행사 관련 유의사항으로 여행 전 필독해 주시기 바랍니다.</p>\n\n        \n            ① 타 호텔 및 유사 일정의 하나투어 패키지 고객분들과 합류 행사가 진행되므로, 상품에 예약된 인원과 현지 행사 인원이 다를 수 있습니다.\n② 투어 진행 순서는 현지 사정에 따라 변경될 수 있습니다.\n③ 본 상품은 순수한 단체관광 목적만을 위한 패키지 상품으로 일정 중 개별적인 활동(친지 방문, 하나투어와 계약되지 않은 업체 조인 등)이 불가합니다. 개별 일정을 원하시는 경우 패키지 상품이 아닌 자유여행 상품을 이용해 주시기 바랍니다. 또한 타 업체 이용시 발생한 사고에 대해서는 하나투어가 책임을 지지 않습니다. \n④ [국외여행표준약관 12조 6항]에 의거 출발 후 고객의 사정에 의하여 여행요금에 포함된 숙박, 식사, 관광, 미샌딩 서비스, 공항세 등를 제공 받지 못한 경우 그에 상응하는 요금의 환급을 청구 할 수 없습니다.\n            \n            <span></span>\n            \n        \n        \n         \n  <!--custTitle--> \n  <!--custMemo-->"
-        },
-        {
-          "type": "default",
-          "title": "석식 (기내-불포함(유료제공))",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "가이드 미팅",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "리조트로 이동 후 휴식",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "부담 없는 가격으로 만나는 가성비 갑 보홀 여행 | 라메디 리조트",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/08/18/10000/97712fc2-6170-47d3-98f8-f651dc2282ad.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/08/18/10000/05463292-1906-4854-abc4-3c081b4f5ed0.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/08/18/10000/c403747e-c8b2-4dff-ae1d-d2def6654161.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/08/18/10000/318451d6-8441-479c-9c06-2a22e09e5398.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/08/18/10000/d573c5c5-7af7-44c3-a6b8-dc4c3d94beb9.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/08/18/10000/60274db2-c870-4505-97f2-42167ccb7c7e.PNG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p>라메디 리조트 보홀</p>\n        \n            \n            \n            <strong><b>호텔 소개</b></strong>라메디 리조트는 팡라오 공항에서 차량으로 약 10분, 알로나 비치까지 약 5분 거리에 위치해 접근성이 좋습니다. 깔끔한 시설과 합리적인 가격대로 많은 여행객들이 부담 없이 이용하기 좋은 리조트입니다. 총 101개의 객실을 보유하고 있으며, 야외 수영장 2개와 키즈풀 1개, Pool Bar가 마련되어 있어 리조트 내에서도 여유롭게 물놀이와 휴식을 즐기기에 적합합니다.\n            \n            \n        \n        \n        <!--20230818000023_custTitle--> <!--20230818000023_custMemo-->\n    \n\n    \n        \n        <p>라메디 리조트 보홀</p>\n        \n            \n            \n            <strong><b>객실 정보</b></strong>기본 객실 : 디럭스룸\n베드 구성 : 퀸사이즈 베드 or 퀸+싱글 베드 | 사전 지정 불가, 체크인 시 배정\n객실 시설 : WI-FI, TV, 에어컨, 헤어드라이어, 안전금고 등\n객실 내 최대 투숙 인원 : 성인2명+아동1명 또는 성인3명 (아동 만11세 이하)\n아동 엑스트라 베드 요청시 : 룸/박당 20$ 추가 (1 퀸사이즈 베드 룸타입에만 엑스트라 베드 설치 가능)\n리조트 규정상 만12세 이상 아동인 경우 성인으로 분류되어 성인 요금이 적용됩니다.\n\n<b>객실 별 룸/박당 추가 요금 및 객실 최대 투숙 인원 (아동 만11세 이하)</b>\n프리미어룸 : 룸/박당 $25 | 성인2명+아동2명 또는 성인3명\n프리미어 풀 억세스룸 : 룸/박당 $30 | 성인2명+아동2명 또는 성인3명\n\n<b>주의 사항</b>\n리조트내 모든 객실은 금연이며, 흡연시에는 큰 금액의 과징금이 부과됩니다.\n            \n            \n        \n        \n        <!--20230830000023_custTitle--> <!--20230830000023_custMemo-->\n    \n<p><!--custTitleGroup--></p><p><!--custMemoGroup--></p><p><!--timeTitleGroup--></p><p></p>"
-        }
-      ],
-      "hotel": "라메디 리조트 보홀",
-      "meals": {
-        "breakfast": "-",
-        "lunch": "-",
-        "dinner": "기내-불포함(유료제공)"
-      }
-    },
-    {
-      "day": 2,
-      "date": "2026-09-02",
-      "title": "보홀",
-      "transport": "-",
-      "timeline": [
-        {
-          "type": "default",
-          "title": "조식 (리조트식)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "가이드 미팅",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "체험 다이빙 강습",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2009/04/10/10000/8a798e55-3448-460e-87da-959d23a5e012.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p>본격적인 바다 다이빙 전에 진행하는 강습</p>\n        \n            \n            보홀 다이빙 샵의 수영장 또는 앞바다에서 전문가에게 다이빙 기초 강습을 받을 수 있습니다.\n강습은 약 30분간 진행되며 열 살 이하 아동은 성장 상태에 따라 교육이 진행됩니다.\n강습 진행이 어려운 아동은 다이빙 샵에서 물놀이를 즐기며 대기할 수 있습니다.\n\n다양한 바닷속 해양 생물을 만나고 싶으신 고객님은 기초 강습 후 체험 다이빙 선택관광 ($100/인당) 을 추천드립니다.\n            \n            \n            \n        \n        \n         \n  <!--custTitle--> \n  <!--custMemo-->"
-        },
-        {
-          "type": "default",
-          "title": "중식 (불포함)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "석식 특식 (삼겹살)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "보홀 추천 선택관광",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2018/08/31/10000/e49c2285-8a68-4ed3-b8cb-63bdd392cb85.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2017/02/23/10000/174dd54f-85cf-43e4-9324-b819b5cf2171.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2016/07/29/10000/eb37de64-10cf-4f84-ad29-7fbb16ed2982.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2019/10/16/10000/fccabf88-8137-487e-8e33-3d0e2d4e8139.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2019/10/16/10000/64d5593e-ff6b-4f85-8d67-8621103f94a0.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/10/17/10000/f81f7b3b-6ce5-454a-9fe9-756337fb2861.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2014/01/24/10000/ce625fcb-1710-4535-8e39-1f29fd6f4e9b.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2014/07/03/10000/4b1a74a0-b603-406c-b7ad-f58b9ff61a79.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2024/06/27/10000/3cc07854-fbc6-4e7c-b46b-c9c6aa268b48.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2018/11/27/10000/e9faeaef-8c4b-48f3-8296-6a0e65e76f09.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2014/01/24/10000/18d3c52a-1806-40b1-b26d-3dc884fa791c.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2025/02/04/10000/fc0de9ba-552e-4300-b5b6-e2997ea7475e.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p style=\"margin: 0 0 6px 0; display: block;\"><span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #0284c7; background: #e0f2fe; border: 1px solid #bae6fd;\">선택관광</span> <span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0;\">BEST</span> <span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #d97706; background: #fef3c7; border: 1px solid #fde68a;\">MD추천</span></p>팡라오 지역에서 약 1시간 가량 떨어져 있는 반딧불이 서식지로 이동합니다. 주변의 나무나 풀에 붙어 여러 개체가 동시에 밝은 빛을 내는 모습이 장관을 이룹니다. 반딧불이를 만나러 가는 고요한 시간이 지나면 밤하늘을 수놓는 반딧불이들의 반짝이는 쇼 타임. 보홀 여행자라면 반드시 방문해야 하는 필수 코스 중 하나 입니다. \n<br><b>참고 사항</b><br>※ 주변에 모기가 많은 편으로 긴팔 옷을 별도로 지참 하실 것을 추천합니다.<br><!--20160724001876_optSpc--><span>요금 : 성인 60USD / 아동 60USD<br></span><br><span>소요시간 : 약 2시간 | 왕복 1시간 20분 이동 시간 포함<br></span><br><span>대체일정 : 선택관광 미참여시에는 개인 자유일정으로 진행되며. 가이드나 인솔자가 동행하지 않습니다.<br></span><br><span>미선택시 가이드동행 : 미동행<br></span><br><!--20160724001876_custTitle--><!--20160724001876_custMemo-->\n    \n\n    \n        \n        \n        \n            \n            수영을 못해도 가능한 체험 다이빙. 두려워하지 마시고 후회 없도록 도전해 보세요. \n기본 교육을 받으신 후 안전하게 한국인 강사가 함께 아름다운 수중 세계 탐험을 도와드립니다. \n다양한 열대 물고기들이 살고 있는 산호 숲 속에서 기념 사진도 남겨보세요. \n(장비 착용 후 기본 강습 →  스쿠버 다이빙 약 20분 → 귀환)\n<br><b>참고 사항</b><br>※ 10세 미만 아동은 진행 불가합니다. 다만 성장 상태에 따라 10세 이상이라도 어려울 수 있으니 강사님과 상의해 주시기 바랍니다. \n            \n            \n            <!--20160724001880_optSpc--><span>요금 : 성인 100USD / 아동 100USD<br></span><br><span>소요시간 : 약 1시간<br></span><br><span>대체일정 : 선택관광 미참여시에는 개인 자유일정으로 진행되며. 가이드나 인솔자가 동행하지 않습니다.<br></span><br><span>미선택시 가이드동행 : 미동행<br></span><br><!--20160724001880_custTitle--><!--20160724001880_custMemo-->\n    \n\n    \n        \n        \n        \n            \n            고래상어를 만나는 인생 여행, 아름다움을 넘어 경이로움을 만나는 그 곳!\n고래상어 투어로 버킷 리스트를 하나씩 실천해보세요. \n아름다운 바다에서 커다란 고래 상어와 함께 헤엄치는 멋진 순간이 기다리고 있습니다.\n<br><b>간단 일정</b><br>[05:00~06:00] 리조트별 손님 픽업 후 모모 비치로 이동 (업체 차량 이용)<br>[06:15~06:30] 모모 비치 도착 후 신상 정보 등록, 스피드보트로 페리 이동 후 보홀 출발<br>[08:00~08:30] 세부 오슬롭 퀄텔 비치 도착, 고래상어 투어 장소로 이동<br>[08:30~10:00] 오슬롭 안전 교육 후 고래상어 포인트로 이동 및 🌊🦈🐋 스노클링 (약 30~40분)<br>[10:00~10:30] 간단한 샤워 및 휴식<br>[10:30~11:00] 선착장 (오슬롭 퀄텔 비치) 으로 이동<br>[11:00~11:30] 스피드보트로 페리 이동 후 세부 출발<br>[11:30~13:00] 보홀 도착 후 스피드보트를 이용해 모모 비치로 이동<br>[13:00~13:15] 모모 비치 도착 후 투어 종료\n<br><b>참고 사항</b><br>※ 준비물 : 수영복 또는 래시가드, 슬리퍼 또는 아쿠아슈즈, 타올, 선글라스, 선블록, 멀미약 등<br>※ 이른 투어 일정(오전 5~6시 출발) 으로 인해 리조트 조식 이용이 어려우실 수 있으며, 리조트별 정책에 따라 제공 여부가 상이할 수 있습니다. 대신 필리핀 대표 패스트푸드점 졸리비 세트 메뉴를 준비해드릴 예정입니다.<br>※ 본 투어는 이동 시간이 길고 식사 시간이 일정하지 않아 다소 피로할 수 있습니다. 편안한 여행을 위해 여분의 옷과 간단한 간식, 음료를 준비해 오시길 권장드립니다.<br>※ 투어 진행 시, 인원에 따라 현지에서 다른 팀과 합류하여 행사가 진행될 수 있으며, 일정 또는 날짜가 변경될 수도 있습니다. (행사 가이드와 오슬롭 고래상어 투어 시 동행하는 가이드는 다를 수 있습니다.)<br>※ 고래상어 스노클링 진행 시, 현장 상황에 따라 대기 시간이 발생할 수 있습니다. 또한 고래상어 포인트로 이동할 때는 작은 배를 이용하며, 이때 가이드는 동행하지 않습니다.<br>※ 만 5세 이상 아동만 고래상어 스노클링에 참여할 수 있습니다. 다만, 만 5세 이상이라도 아동의 성장 상태에 따라 배 탑승이나 관람이 제한될 수 있습니다.<br>※ 강풍이나 높은 파도 등 현지 기상 상황에 따라 투어가 진행되지 않을 수 있습니다. 이 경우 오슬롭 고래상어 투어는 아로마 스파 2시간 30분으로 대체됩니다.\n            \n            \n            <!--20251028000036_optSpc--><span>요금 : 성인 100USD / 아동 90USD<br></span><br><span>소요시간 : 약 7시간 | 왕복 6시간 이동 시간 포함<br></span><br><span>대체일정 : 선택관광 미참여시에는 개인 자유일정으로 진행되며. 가이드나 인솔자가 동행하지 않습니다.<br></span><br><span>미선택시 가이드동행 : 미동행<br></span><br><span>최소신청인원 : 2명<br></span><br><!--20251028000036_custTitle--><!--20251028000036_custMemo-->\n    \n<p><!--custTitleGroup--></p><p><!--custMemoGroup--></p><p><!--timeTitleGroup--></p><p></p>"
-        }
-      ],
-      "items": [
-        {
-          "type": "default",
-          "title": "조식 (리조트식)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "가이드 미팅",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "체험 다이빙 강습",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2009/04/10/10000/8a798e55-3448-460e-87da-959d23a5e012.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p>본격적인 바다 다이빙 전에 진행하는 강습</p>\n        \n            \n            보홀 다이빙 샵의 수영장 또는 앞바다에서 전문가에게 다이빙 기초 강습을 받을 수 있습니다.\n강습은 약 30분간 진행되며 열 살 이하 아동은 성장 상태에 따라 교육이 진행됩니다.\n강습 진행이 어려운 아동은 다이빙 샵에서 물놀이를 즐기며 대기할 수 있습니다.\n\n다양한 바닷속 해양 생물을 만나고 싶으신 고객님은 기초 강습 후 체험 다이빙 선택관광 ($100/인당) 을 추천드립니다.\n            \n            \n            \n        \n        \n         \n  <!--custTitle--> \n  <!--custMemo-->"
-        },
-        {
-          "type": "default",
-          "title": "중식 (불포함)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "석식 특식 (삼겹살)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "보홀 추천 선택관광",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2018/08/31/10000/e49c2285-8a68-4ed3-b8cb-63bdd392cb85.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2017/02/23/10000/174dd54f-85cf-43e4-9324-b819b5cf2171.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2016/07/29/10000/eb37de64-10cf-4f84-ad29-7fbb16ed2982.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2019/10/16/10000/fccabf88-8137-487e-8e33-3d0e2d4e8139.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2019/10/16/10000/64d5593e-ff6b-4f85-8d67-8621103f94a0.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/10/17/10000/f81f7b3b-6ce5-454a-9fe9-756337fb2861.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2014/01/24/10000/ce625fcb-1710-4535-8e39-1f29fd6f4e9b.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2014/07/03/10000/4b1a74a0-b603-406c-b7ad-f58b9ff61a79.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2024/06/27/10000/3cc07854-fbc6-4e7c-b46b-c9c6aa268b48.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2018/11/27/10000/e9faeaef-8c4b-48f3-8296-6a0e65e76f09.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2014/01/24/10000/18d3c52a-1806-40b1-b26d-3dc884fa791c.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2025/02/04/10000/fc0de9ba-552e-4300-b5b6-e2997ea7475e.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p style=\"margin: 0 0 6px 0; display: block;\"><span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #0284c7; background: #e0f2fe; border: 1px solid #bae6fd;\">선택관광</span> <span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0;\">BEST</span> <span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #d97706; background: #fef3c7; border: 1px solid #fde68a;\">MD추천</span></p>팡라오 지역에서 약 1시간 가량 떨어져 있는 반딧불이 서식지로 이동합니다. 주변의 나무나 풀에 붙어 여러 개체가 동시에 밝은 빛을 내는 모습이 장관을 이룹니다. 반딧불이를 만나러 가는 고요한 시간이 지나면 밤하늘을 수놓는 반딧불이들의 반짝이는 쇼 타임. 보홀 여행자라면 반드시 방문해야 하는 필수 코스 중 하나 입니다. \n<br><b>참고 사항</b><br>※ 주변에 모기가 많은 편으로 긴팔 옷을 별도로 지참 하실 것을 추천합니다.<br><!--20160724001876_optSpc--><span>요금 : 성인 60USD / 아동 60USD<br></span><br><span>소요시간 : 약 2시간 | 왕복 1시간 20분 이동 시간 포함<br></span><br><span>대체일정 : 선택관광 미참여시에는 개인 자유일정으로 진행되며. 가이드나 인솔자가 동행하지 않습니다.<br></span><br><span>미선택시 가이드동행 : 미동행<br></span><br><!--20160724001876_custTitle--><!--20160724001876_custMemo-->\n    \n\n    \n        \n        \n        \n            \n            수영을 못해도 가능한 체험 다이빙. 두려워하지 마시고 후회 없도록 도전해 보세요. \n기본 교육을 받으신 후 안전하게 한국인 강사가 함께 아름다운 수중 세계 탐험을 도와드립니다. \n다양한 열대 물고기들이 살고 있는 산호 숲 속에서 기념 사진도 남겨보세요. \n(장비 착용 후 기본 강습 →  스쿠버 다이빙 약 20분 → 귀환)\n<br><b>참고 사항</b><br>※ 10세 미만 아동은 진행 불가합니다. 다만 성장 상태에 따라 10세 이상이라도 어려울 수 있으니 강사님과 상의해 주시기 바랍니다. \n            \n            \n            <!--20160724001880_optSpc--><span>요금 : 성인 100USD / 아동 100USD<br></span><br><span>소요시간 : 약 1시간<br></span><br><span>대체일정 : 선택관광 미참여시에는 개인 자유일정으로 진행되며. 가이드나 인솔자가 동행하지 않습니다.<br></span><br><span>미선택시 가이드동행 : 미동행<br></span><br><!--20160724001880_custTitle--><!--20160724001880_custMemo-->\n    \n\n    \n        \n        \n        \n            \n            고래상어를 만나는 인생 여행, 아름다움을 넘어 경이로움을 만나는 그 곳!\n고래상어 투어로 버킷 리스트를 하나씩 실천해보세요. \n아름다운 바다에서 커다란 고래 상어와 함께 헤엄치는 멋진 순간이 기다리고 있습니다.\n<br><b>간단 일정</b><br>[05:00~06:00] 리조트별 손님 픽업 후 모모 비치로 이동 (업체 차량 이용)<br>[06:15~06:30] 모모 비치 도착 후 신상 정보 등록, 스피드보트로 페리 이동 후 보홀 출발<br>[08:00~08:30] 세부 오슬롭 퀄텔 비치 도착, 고래상어 투어 장소로 이동<br>[08:30~10:00] 오슬롭 안전 교육 후 고래상어 포인트로 이동 및 🌊🦈🐋 스노클링 (약 30~40분)<br>[10:00~10:30] 간단한 샤워 및 휴식<br>[10:30~11:00] 선착장 (오슬롭 퀄텔 비치) 으로 이동<br>[11:00~11:30] 스피드보트로 페리 이동 후 세부 출발<br>[11:30~13:00] 보홀 도착 후 스피드보트를 이용해 모모 비치로 이동<br>[13:00~13:15] 모모 비치 도착 후 투어 종료\n<br><b>참고 사항</b><br>※ 준비물 : 수영복 또는 래시가드, 슬리퍼 또는 아쿠아슈즈, 타올, 선글라스, 선블록, 멀미약 등<br>※ 이른 투어 일정(오전 5~6시 출발) 으로 인해 리조트 조식 이용이 어려우실 수 있으며, 리조트별 정책에 따라 제공 여부가 상이할 수 있습니다. 대신 필리핀 대표 패스트푸드점 졸리비 세트 메뉴를 준비해드릴 예정입니다.<br>※ 본 투어는 이동 시간이 길고 식사 시간이 일정하지 않아 다소 피로할 수 있습니다. 편안한 여행을 위해 여분의 옷과 간단한 간식, 음료를 준비해 오시길 권장드립니다.<br>※ 투어 진행 시, 인원에 따라 현지에서 다른 팀과 합류하여 행사가 진행될 수 있으며, 일정 또는 날짜가 변경될 수도 있습니다. (행사 가이드와 오슬롭 고래상어 투어 시 동행하는 가이드는 다를 수 있습니다.)<br>※ 고래상어 스노클링 진행 시, 현장 상황에 따라 대기 시간이 발생할 수 있습니다. 또한 고래상어 포인트로 이동할 때는 작은 배를 이용하며, 이때 가이드는 동행하지 않습니다.<br>※ 만 5세 이상 아동만 고래상어 스노클링에 참여할 수 있습니다. 다만, 만 5세 이상이라도 아동의 성장 상태에 따라 배 탑승이나 관람이 제한될 수 있습니다.<br>※ 강풍이나 높은 파도 등 현지 기상 상황에 따라 투어가 진행되지 않을 수 있습니다. 이 경우 오슬롭 고래상어 투어는 아로마 스파 2시간 30분으로 대체됩니다.\n            \n            \n            <!--20251028000036_optSpc--><span>요금 : 성인 100USD / 아동 90USD<br></span><br><span>소요시간 : 약 7시간 | 왕복 6시간 이동 시간 포함<br></span><br><span>대체일정 : 선택관광 미참여시에는 개인 자유일정으로 진행되며. 가이드나 인솔자가 동행하지 않습니다.<br></span><br><span>미선택시 가이드동행 : 미동행<br></span><br><span>최소신청인원 : 2명<br></span><br><!--20251028000036_custTitle--><!--20251028000036_custMemo-->\n    \n<p><!--custTitleGroup--></p><p><!--custMemoGroup--></p><p><!--timeTitleGroup--></p><p></p>"
-        }
-      ],
-      "hotel": "라메디 리조트 보홀",
-      "meals": {
-        "breakfast": "리조트식",
-        "lunch": "불포함",
-        "dinner": "삼겹살"
-      }
-    },
-    {
-      "day": 3,
-      "date": "2026-09-03",
-      "title": "보홀",
-      "transport": "-",
-      "timeline": [
-        {
-          "type": "default",
-          "title": "조식 (리조트식)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "중식 (불포함)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "전신마사지(약 1시간)",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2022/05/16/10000/159cc366-304b-47e7-9137-564fa9176541.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p style=\"margin: 0 0 6px 0; display: block;\"><span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #7c3aed; background: #f3e8ff; border: 1px solid #e9d5ff;\">스페셜포함</span></p>여행의 피로를 개운하게 해결해 주는 보홀의 마사지를 놓치지 마세요. \n필리핀 전문 마사지사의 섬세한 손길이 여러분의 피로를 말끔히 풀어 드립니다.\n            \n            \n            \n        \n        \n        <!--custTitle--><!--custMemo-->"
-        },
-        {
-          "type": "location",
-          "title": "화이트 샌드와 에메랄드 빛 바다를 자랑하는 '알로나 비치'",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/800_0/2026/06/26/10000/17d5e170-3c7a-4192-87f4-76841b30e712.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2016/11/02/10000/45d2ea31-90c0-4852-bf64-b040d7e11515.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2013/03/04/10000/da0da320-82d0-449a-ad50-eeb79362aed5.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/05/04/10000/2ccccb46-2412-466f-a704-4e797c198309.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/05/04/10000/7cd2db53-1103-44f8-8347-d31867b97e08.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/05/04/10000/928e0a49-9605-43f7-8cbc-f922c033108d.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/05/04/10000/ff3b36b5-9f08-4cc2-a79b-ff06fae1885f.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p>아름다운 해변으로 유명한 곳</p>\n        \n            \n            \n            \n            \n            \n        \n        \n        <!--20260626000017_custTitle--> <!--20260626000017_custMemo-->\n    \n\n    \n        \n        <p>Alona Beach</p><p>아름다운 해변으로 유명한 곳</p>\n        \n            \n            보홀 핫플레이스 알로나비치 ! \n보홀에서 가장 아름다운 해변으로 형형색색의 열대어를 볼 수 있는 깨끗한 바다와 하얀 모래사장이 특징입니다.\n다양한 기념품점과 현지 맛집이 즐비한 알로나 비치에서 파도를 바라보며 휴식을 취해 보세요.\n\n📍 아메리카노 또는 소프트드링크 한잔 제공\n            \n            \n            \n        \n        \n         \n  <!--20160905014491_custTitle--> \n  <!--20160905014491_custMemo--> \n\n    \n<p><!--custTitleGroup--></p><p><!--custMemoGroup--></p><p><!--timeTitleGroup--></p><p></p>"
-        },
-        {
-          "type": "default",
-          "title": "석식 (불포함)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "보홀 추천 선택관광",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/800_0/2026/06/25/10000/2fa59fcf-9ce7-4c58-a6b7-921a5e33c6bb.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2018/04/24/10000/36e67173-0782-4c66-a284-2b5693510213.png\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2022/11/10/10000/6572e831-7fd4-4f9a-8580-13de47c0feae.png\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2019/10/16/10000/81a86198-cdcc-4139-a1c4-3a83d9d2b4a2.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2019/10/16/10000/76842db1-aa7e-4c6d-b11a-c7e52ec68881.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2022/11/10/10000/d1f7f9f7-63ab-4b11-8af8-fcb9121585f1.png\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2025/03/12/10000/6f6c792e-5376-4c28-9fe9-04062c07becb.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p style=\"margin: 0 0 6px 0; display: block;\"><span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #0284c7; background: #e0f2fe; border: 1px solid #bae6fd;\">선택관광</span> <span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #d97706; background: #fef3c7; border: 1px solid #fde68a;\">MD추천</span></p><!--20260626000008_custTitle--> <!--20260626000008_custMemo-->\n    \n\n    \n        \n        \n        \n            \n            우리가 보홀을 사랑하는 이유는 바로 오션 디스커버리 호핑투어\n돌핀 왓칭부터 거북이, 열대어들과 스노클링, 알록달록 산호초까지 다양한 바다생물을 한번에~\n\nTV나 책 속이 아닌 내 눈앞에서 실제로 돌고래가 점프하는 모습을 보실 수 있습니다.\n귀여운 돌핀 왓칭은 남녀노소 구분 없이 누구에게나 새롭고 행복한 경험이 되실 것입니다.\n\n푸른 하늘 아래 보홀의 에메랄드빛 바다에서 즐기는 나만의 힐링 타임!\n아름다운 자연경관을 간직한 섬인 보홀 바다에서 거북이, 열대어들과 스노클링하며 청정 바다를 만나보세요.\n신나는 호핑투어 후 쾌적한 하나투어 고객식당에서 꿀맛 현지식 BBQ와 후식 과일이 제공됩니다.\n<br><b>하나투어만의 차별화된 오션 디스커버리 호핑투어<br>👍 단순한 호핑투어가 아니다! 돌핀 왓칭, 거북이 스노클링, 호핑투어까지 한번에 즐기는 호핑 풀패키지 <br>👍 현지 핫플에서 맛있게 즐기자! 쾌적한 하나투어 고객식당에서 한층 업그레이드된 식사 제공<br>👍 세심한 서비스까지! 토퍼 무료 대여 및 하나투어 생수 제공</b>\n<br><b>간단 일정</b><br>[07:00~07:30] 가이드 미팅 후 선착장으로 이동<br>[07:30~08:30] 🐬 돌핀 왓칭 투어 | 사랑스런 돌고래와 눈맞춤 할 시간<br>[08:30~10:00] 🐢 1차 거북이 스노클링 | 신비로운 동물 거북이와 함께~ 만지면 안돼요. 눈으로만 즐겨요.<br>[10:00~11:30] 🐠 2차 열대어 스노클링 | 에메랄드 빛 바닷속에 몸을 맡기고 신비로운 산호와 열대어를 만나는 순간<br>[11:30~13:00] 팡라오 섬으로 귀환 후 중식 (현지식 BBQ, 후식 과일)\n<br><b>참고 사항</b><br>※ 준비물 : 수영복 또는 래시가드, 슬리퍼 또는 아쿠아슈즈, 타올, 선글라스, 선블록, 호핑 현지인 헬퍼 매너팁 (인당 100페소) 등<br>※ 현지 기상 상황에 따라 투어 진행 순서 및 일자, 스노클링 포인트 등이 변경될 수 있습니다. 돌핀 왓칭, 거북이 스노클링 진행시에 야생 동물의 특성상 날씨나 여러 사정에 의해 돌고래, 거북이를 보지 못할 수도 있습니다. 이에 따른 별도의 환불이나 대체일정은 제공하지 않습니다. 단, 천재지변으로 인해 오션 디스커버리 호핑투어 진행이 불가한 경우 전신 마사지 2시간 + 한식으로 대체됩니다.\n            \n            \n            <!--20250306000028_optSpc--><span>요금 : 성인 90USD / 아동 80USD<br></span><br><span>소요시간 : 약 5~6시간<br></span><br><span>대체일정 : 선택관광 미참여시에는 개인 자유일정으로 진행되며, 가이드나 인솔자가 동행하지 않습니다.<br></span><br><span>미선택시 가이드동행 : 미동행<br></span><br><!--20250306000028_custTitle--><!--20250306000028_custMemo-->\n    \n<p><!--custTitleGroup--></p><p><!--custMemoGroup--></p><p><!--timeTitleGroup--></p><p></p>"
-        }
-      ],
-      "items": [
-        {
-          "type": "default",
-          "title": "조식 (리조트식)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "중식 (불포함)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "전신마사지(약 1시간)",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2022/05/16/10000/159cc366-304b-47e7-9137-564fa9176541.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p style=\"margin: 0 0 6px 0; display: block;\"><span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #7c3aed; background: #f3e8ff; border: 1px solid #e9d5ff;\">스페셜포함</span></p>여행의 피로를 개운하게 해결해 주는 보홀의 마사지를 놓치지 마세요. \n필리핀 전문 마사지사의 섬세한 손길이 여러분의 피로를 말끔히 풀어 드립니다.\n            \n            \n            \n        \n        \n        <!--custTitle--><!--custMemo-->"
-        },
-        {
-          "type": "location",
-          "title": "화이트 샌드와 에메랄드 빛 바다를 자랑하는 '알로나 비치'",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/800_0/2026/06/26/10000/17d5e170-3c7a-4192-87f4-76841b30e712.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2016/11/02/10000/45d2ea31-90c0-4852-bf64-b040d7e11515.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2013/03/04/10000/da0da320-82d0-449a-ad50-eeb79362aed5.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/05/04/10000/2ccccb46-2412-466f-a704-4e797c198309.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/05/04/10000/7cd2db53-1103-44f8-8347-d31867b97e08.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/05/04/10000/928e0a49-9605-43f7-8cbc-f922c033108d.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2023/05/04/10000/ff3b36b5-9f08-4cc2-a79b-ff06fae1885f.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p>아름다운 해변으로 유명한 곳</p>\n        \n            \n            \n            \n            \n            \n        \n        \n        <!--20260626000017_custTitle--> <!--20260626000017_custMemo-->\n    \n\n    \n        \n        <p>Alona Beach</p><p>아름다운 해변으로 유명한 곳</p>\n        \n            \n            보홀 핫플레이스 알로나비치 ! \n보홀에서 가장 아름다운 해변으로 형형색색의 열대어를 볼 수 있는 깨끗한 바다와 하얀 모래사장이 특징입니다.\n다양한 기념품점과 현지 맛집이 즐비한 알로나 비치에서 파도를 바라보며 휴식을 취해 보세요.\n\n📍 아메리카노 또는 소프트드링크 한잔 제공\n            \n            \n            \n        \n        \n         \n  <!--20160905014491_custTitle--> \n  <!--20160905014491_custMemo--> \n\n    \n<p><!--custTitleGroup--></p><p><!--custMemoGroup--></p><p><!--timeTitleGroup--></p><p></p>"
-        },
-        {
-          "type": "default",
-          "title": "석식 (불포함)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "보홀 추천 선택관광",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/800_0/2026/06/25/10000/2fa59fcf-9ce7-4c58-a6b7-921a5e33c6bb.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2018/04/24/10000/36e67173-0782-4c66-a284-2b5693510213.png\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2022/11/10/10000/6572e831-7fd4-4f9a-8580-13de47c0feae.png\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2019/10/16/10000/81a86198-cdcc-4139-a1c4-3a83d9d2b4a2.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2019/10/16/10000/76842db1-aa7e-4c6d-b11a-c7e52ec68881.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2022/11/10/10000/d1f7f9f7-63ab-4b11-8af8-fcb9121585f1.png\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2025/03/12/10000/6f6c792e-5376-4c28-9fe9-04062c07becb.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p style=\"margin: 0 0 6px 0; display: block;\"><span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #0284c7; background: #e0f2fe; border: 1px solid #bae6fd;\">선택관광</span> <span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #d97706; background: #fef3c7; border: 1px solid #fde68a;\">MD추천</span></p><!--20260626000008_custTitle--> <!--20260626000008_custMemo-->\n    \n\n    \n        \n        \n        \n            \n            우리가 보홀을 사랑하는 이유는 바로 오션 디스커버리 호핑투어\n돌핀 왓칭부터 거북이, 열대어들과 스노클링, 알록달록 산호초까지 다양한 바다생물을 한번에~\n\nTV나 책 속이 아닌 내 눈앞에서 실제로 돌고래가 점프하는 모습을 보실 수 있습니다.\n귀여운 돌핀 왓칭은 남녀노소 구분 없이 누구에게나 새롭고 행복한 경험이 되실 것입니다.\n\n푸른 하늘 아래 보홀의 에메랄드빛 바다에서 즐기는 나만의 힐링 타임!\n아름다운 자연경관을 간직한 섬인 보홀 바다에서 거북이, 열대어들과 스노클링하며 청정 바다를 만나보세요.\n신나는 호핑투어 후 쾌적한 하나투어 고객식당에서 꿀맛 현지식 BBQ와 후식 과일이 제공됩니다.\n<br><b>하나투어만의 차별화된 오션 디스커버리 호핑투어<br>👍 단순한 호핑투어가 아니다! 돌핀 왓칭, 거북이 스노클링, 호핑투어까지 한번에 즐기는 호핑 풀패키지 <br>👍 현지 핫플에서 맛있게 즐기자! 쾌적한 하나투어 고객식당에서 한층 업그레이드된 식사 제공<br>👍 세심한 서비스까지! 토퍼 무료 대여 및 하나투어 생수 제공</b>\n<br><b>간단 일정</b><br>[07:00~07:30] 가이드 미팅 후 선착장으로 이동<br>[07:30~08:30] 🐬 돌핀 왓칭 투어 | 사랑스런 돌고래와 눈맞춤 할 시간<br>[08:30~10:00] 🐢 1차 거북이 스노클링 | 신비로운 동물 거북이와 함께~ 만지면 안돼요. 눈으로만 즐겨요.<br>[10:00~11:30] 🐠 2차 열대어 스노클링 | 에메랄드 빛 바닷속에 몸을 맡기고 신비로운 산호와 열대어를 만나는 순간<br>[11:30~13:00] 팡라오 섬으로 귀환 후 중식 (현지식 BBQ, 후식 과일)\n<br><b>참고 사항</b><br>※ 준비물 : 수영복 또는 래시가드, 슬리퍼 또는 아쿠아슈즈, 타올, 선글라스, 선블록, 호핑 현지인 헬퍼 매너팁 (인당 100페소) 등<br>※ 현지 기상 상황에 따라 투어 진행 순서 및 일자, 스노클링 포인트 등이 변경될 수 있습니다. 돌핀 왓칭, 거북이 스노클링 진행시에 야생 동물의 특성상 날씨나 여러 사정에 의해 돌고래, 거북이를 보지 못할 수도 있습니다. 이에 따른 별도의 환불이나 대체일정은 제공하지 않습니다. 단, 천재지변으로 인해 오션 디스커버리 호핑투어 진행이 불가한 경우 전신 마사지 2시간 + 한식으로 대체됩니다.\n            \n            \n            <!--20250306000028_optSpc--><span>요금 : 성인 90USD / 아동 80USD<br></span><br><span>소요시간 : 약 5~6시간<br></span><br><span>대체일정 : 선택관광 미참여시에는 개인 자유일정으로 진행되며, 가이드나 인솔자가 동행하지 않습니다.<br></span><br><span>미선택시 가이드동행 : 미동행<br></span><br><!--20250306000028_custTitle--><!--20250306000028_custMemo-->\n    \n<p><!--custTitleGroup--></p><p><!--custMemoGroup--></p><p><!--timeTitleGroup--></p><p></p>"
-        }
-      ],
-      "hotel": "라메디 리조트 보홀",
-      "meals": {
-        "breakfast": "리조트식",
-        "lunch": "불포함",
-        "dinner": "불포함"
-      }
-    },
-    {
-      "day": 4,
-      "date": "2026-09-04",
-      "title": "보홀",
-      "transport": "-",
-      "timeline": [
-        {
-          "type": "default",
-          "title": "조식 (리조트식)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "리조트 체크아웃 및 가이드 미팅",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "중식 특식 (논끼 도시락 세트)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "보홀의 역사와 문화를 한번에, 과거로 떠나는 여행",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2019/09/20/10000/2b8be74e-d4f9-47e8-a368-22b0757a757b.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2019/09/20/10000/dcf14884-69b4-4cc2-936b-591199020610.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2019/09/20/10000/ada21440-ec37-4c72-bb90-df7863307694.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2011/03/30/10000/9b413d9b-5b38-49b7-9670-bb92c3784ed7.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2011/03/30/10000/068b9bb0-2067-42dc-a34b-24fb07940413.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2011/03/30/10000/24eeebbc-aa0f-40fc-baf3-a8b7cf46bc59.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2011/04/02/10000/76b2c5a6-ee92-494c-a2d7-7ae6c233684c.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2011/03/30/10000/e11456fb-7176-4cd1-99c4-1fd0fb1d9235.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2011/03/30/10000/2824f86d-c3d5-4739-a057-a5065410d6b8.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p>보홀의 역사를 볼 수 있는 국립 박물관</p>\n        \n            \n            구 지방 의회 건물을 개조하여 만들어진 국립 박물관은 규모는 작지만 보홀의 역사를 알아볼 수 있습니다. 1층에는 '현대 필리핀 조각의 아버지'라 불리는 나폴레온 아부에바의 개인 소장품이 있고, 2013년 보홀 섬 지진 이후 성당의 복원 과정이 전시되어 있습니다. 2층에는 보홀섬의 형성 과정과 스페인 점령 당시의 군대와 혁명을 일으킨 혁명가의 초상화 등을 볼 수 있습니다.\n\n※ 보홀 국립 박물관은 매주 월요일 휴관입니다. 또한 현지 공휴일 및 기념일에도 문을 닫는 경우가 있으며, 휴관일에는 박물관 투어를 할 수 없습니다. 휴관일에는 팡라오 성당 투어로 일정이 대체됩니다.\n            \n            \n            <!--custTime-->\n        \n        \n         \n  <!--20190920000011_custTitle--> \n  <!--20190920000011_custMemo--> \n\n    \n\n    \n        \n        <p>Baclayon Church</p><p>필리핀에서 가장 오래된 성당 중 하나</p>\n        \n            \n            1595년 스페인 선교사들에 의해 지어진 바클레욘 성당은 약 400년의 역사를 간직하고 있습니다. 건물들은 여러 해에 걸쳐 세워졌으며, 하얀 빛의 건물은 산호 가루와 계란 흰자를 섞어 만들었다고 합니다. 16세기부터 간직한 귀중한 골동품과 종교 유물들이 전시되어 있으며, 1995년 보홀 국보로 지정되었습니다.\n\n※ 바클레욘 성당은 매주 화요일 및 현지에서 미사, 결혼식, 장례식 등 특별한 행사가 있을 경우에는 내부 관람이 불가능합니다. (성당 외부 관람 가능) 또한 성당 내부 관람시에 민소매, 짧은 바지, 슬리퍼 등을 착용할 경우에는 입장이 제한될 수 있습니다.\n            \n            \n            <!--custTime-->\n        \n        \n         \n  <!--20160722003297_custTitle--> \n  <!--20160722003297_custMemo--> \n\n    \n\n    \n        \n        <p>Marker of Blood Pact</p><p>유럽과 아시아 최초의 우호 조약</p>\n        \n            \n            1565년, 스페인 총독 레가스피와 보홀섬의 추장인 시카투나가 맺은 최초의 우호 조약을 기념하기 위해 만들어진 기념비입니다. 협정 당시에 각자 손목을 베어 포도주가 담긴 잔에 핏방울을 떨어뜨려 마시면서 조약을 맺었다고 합니다. 혈맹 기념비는 이 순간의 모습을 나타내고 있습니다.\n            \n            \n            <!--custTime-->\n        \n        \n         \n  <!--20160722003303_custTitle--> \n  <!--20160722003303_custMemo--> \n\n    \n<p><!--custTitleGroup--></p><p><!--custMemoGroup--></p><p><!--timeTitleGroup--></p><p></p>"
-        },
-        {
-          "type": "default",
-          "title": "보홀 추천 선택관광",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/800_0/2026/06/25/10000/1385584b-03a9-4ca1-811f-ac935a785696.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2024/08/30/10000/2d4d13d9-5b75-4bf4-af0a-b694fd8409ff.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2009/09/08/10000/fb3b8ce9-1cd3-41e9-b27c-9f034d3eea2f.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2017/02/10/10000/4dd59f31-f8f8-4cc3-96a0-f15874cd6046.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2021/12/21/10000/86e75ea1-c19c-4a5f-9bcb-8783672f4b9b.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2017/02/10/10000/caffb511-b48b-4584-a4a7-272820649a12.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2011/10/20/10000/eb9553f5-07bd-4a75-a10c-855f4db47bad.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p style=\"margin: 0 0 6px 0; display: block;\"><span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #0284c7; background: #e0f2fe; border: 1px solid #bae6fd;\">선택관광</span> <span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #d97706; background: #fef3c7; border: 1px solid #fde68a;\">MD추천</span></p><!--20260626000021_custTitle--> <!--20260626000021_custMemo-->\n    \n\n    \n        \n        \n        \n            \n            초콜릿 모양과 색이 닮았다 하여 이름 붙여진 초콜릿 힐\n세계적인 보호 종이자 손바닥만한 크기의 보홀의 인기 스타,  타르시어스 원숭이 (안경 원숭이)\n열대 우림 숲을 배를 타고 가로 지르며, 선상식를 즐기고 원주민 마을도 방문해 보는 코스인 로복(로아이)강 투어까지\n사람들의 손이 아직은 닿지 않은 보홀에서 잊지 못할 대자연의 신비로운 생태 체험 여행을 경험해 보실 수 있습니다.\n<br><b>참고 사항</b><br>※ 보홀 데이투어는 다른 하나투어 고객분들과 조인행사로 진행되며, 현지 일정이나 상황에 따라 투어 진행 날짜가 변경 될 수도 있습니다.\n            \n            \n            <!--20160724001882_optSpc--><span>요금 : 성인 90USD / 아동 90USD<br></span><br><span>소요시간 : 약 5~6시간<br></span><br><span>대체일정 : 선택관광 미참여시에는 개인 자유일정으로 진행되며. 가이드나 인솔자가 동행하지 않습니다.<br></span><br><span>미선택시 가이드동행 : 미동행<br></span><br><!--20160724001882_custTitle--><!--20160724001882_custMemo-->\n    \n<p><!--custTitleGroup--></p><p><!--custMemoGroup--></p><p><!--timeTitleGroup--></p><p></p>"
-        },
-        {
-          "type": "default",
-          "title": "쇼핑 관광",
-          "subtitle": "",
-          "description": "여유시간을 이용한 여행의 색다른 즐거움"
-        },
-        {
-          "type": "default",
-          "title": "석식 특식 (샤브샤브)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "공항으로 이동",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "items": [
-        {
-          "type": "default",
-          "title": "조식 (리조트식)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "리조트 체크아웃 및 가이드 미팅",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "중식 특식 (논끼 도시락 세트)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "보홀의 역사와 문화를 한번에, 과거로 떠나는 여행",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2019/09/20/10000/2b8be74e-d4f9-47e8-a368-22b0757a757b.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2019/09/20/10000/dcf14884-69b4-4cc2-936b-591199020610.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2019/09/20/10000/ada21440-ec37-4c72-bb90-df7863307694.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2011/03/30/10000/9b413d9b-5b38-49b7-9670-bb92c3784ed7.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2011/03/30/10000/068b9bb0-2067-42dc-a34b-24fb07940413.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2011/03/30/10000/24eeebbc-aa0f-40fc-baf3-a8b7cf46bc59.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2011/04/02/10000/76b2c5a6-ee92-494c-a2d7-7ae6c233684c.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2011/03/30/10000/e11456fb-7176-4cd1-99c4-1fd0fb1d9235.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2011/03/30/10000/2824f86d-c3d5-4739-a057-a5065410d6b8.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p>보홀의 역사를 볼 수 있는 국립 박물관</p>\n        \n            \n            구 지방 의회 건물을 개조하여 만들어진 국립 박물관은 규모는 작지만 보홀의 역사를 알아볼 수 있습니다. 1층에는 '현대 필리핀 조각의 아버지'라 불리는 나폴레온 아부에바의 개인 소장품이 있고, 2013년 보홀 섬 지진 이후 성당의 복원 과정이 전시되어 있습니다. 2층에는 보홀섬의 형성 과정과 스페인 점령 당시의 군대와 혁명을 일으킨 혁명가의 초상화 등을 볼 수 있습니다.\n\n※ 보홀 국립 박물관은 매주 월요일 휴관입니다. 또한 현지 공휴일 및 기념일에도 문을 닫는 경우가 있으며, 휴관일에는 박물관 투어를 할 수 없습니다. 휴관일에는 팡라오 성당 투어로 일정이 대체됩니다.\n            \n            \n            <!--custTime-->\n        \n        \n         \n  <!--20190920000011_custTitle--> \n  <!--20190920000011_custMemo--> \n\n    \n\n    \n        \n        <p>Baclayon Church</p><p>필리핀에서 가장 오래된 성당 중 하나</p>\n        \n            \n            1595년 스페인 선교사들에 의해 지어진 바클레욘 성당은 약 400년의 역사를 간직하고 있습니다. 건물들은 여러 해에 걸쳐 세워졌으며, 하얀 빛의 건물은 산호 가루와 계란 흰자를 섞어 만들었다고 합니다. 16세기부터 간직한 귀중한 골동품과 종교 유물들이 전시되어 있으며, 1995년 보홀 국보로 지정되었습니다.\n\n※ 바클레욘 성당은 매주 화요일 및 현지에서 미사, 결혼식, 장례식 등 특별한 행사가 있을 경우에는 내부 관람이 불가능합니다. (성당 외부 관람 가능) 또한 성당 내부 관람시에 민소매, 짧은 바지, 슬리퍼 등을 착용할 경우에는 입장이 제한될 수 있습니다.\n            \n            \n            <!--custTime-->\n        \n        \n         \n  <!--20160722003297_custTitle--> \n  <!--20160722003297_custMemo--> \n\n    \n\n    \n        \n        <p>Marker of Blood Pact</p><p>유럽과 아시아 최초의 우호 조약</p>\n        \n            \n            1565년, 스페인 총독 레가스피와 보홀섬의 추장인 시카투나가 맺은 최초의 우호 조약을 기념하기 위해 만들어진 기념비입니다. 협정 당시에 각자 손목을 베어 포도주가 담긴 잔에 핏방울을 떨어뜨려 마시면서 조약을 맺었다고 합니다. 혈맹 기념비는 이 순간의 모습을 나타내고 있습니다.\n            \n            \n            <!--custTime-->\n        \n        \n         \n  <!--20160722003303_custTitle--> \n  <!--20160722003303_custMemo--> \n\n    \n<p><!--custTitleGroup--></p><p><!--custMemoGroup--></p><p><!--timeTitleGroup--></p><p></p>"
-        },
-        {
-          "type": "default",
-          "title": "보홀 추천 선택관광",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/800_0/2026/06/25/10000/1385584b-03a9-4ca1-811f-ac935a785696.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2024/08/30/10000/2d4d13d9-5b75-4bf4-af0a-b694fd8409ff.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2009/09/08/10000/fb3b8ce9-1cd3-41e9-b27c-9f034d3eea2f.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2017/02/10/10000/4dd59f31-f8f8-4cc3-96a0-f15874cd6046.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2021/12/21/10000/86e75ea1-c19c-4a5f-9bcb-8783672f4b9b.JPG\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2017/02/10/10000/caffb511-b48b-4584-a4a7-272820649a12.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><img src=\"https://image.hanatour.com/usr/cms/resize/400_0/2011/10/20/10000/eb9553f5-07bd-4a75-a10c-855f4db47bad.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p style=\"margin: 0 0 6px 0; display: block;\"><span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #0284c7; background: #e0f2fe; border: 1px solid #bae6fd;\">선택관광</span> <span style=\"display: inline-block; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; border-radius: 4px; margin-right: 6px; vertical-align: middle; line-height: 1.2;color: #d97706; background: #fef3c7; border: 1px solid #fde68a;\">MD추천</span></p><!--20260626000021_custTitle--> <!--20260626000021_custMemo-->\n    \n\n    \n        \n        \n        \n            \n            초콜릿 모양과 색이 닮았다 하여 이름 붙여진 초콜릿 힐\n세계적인 보호 종이자 손바닥만한 크기의 보홀의 인기 스타,  타르시어스 원숭이 (안경 원숭이)\n열대 우림 숲을 배를 타고 가로 지르며, 선상식를 즐기고 원주민 마을도 방문해 보는 코스인 로복(로아이)강 투어까지\n사람들의 손이 아직은 닿지 않은 보홀에서 잊지 못할 대자연의 신비로운 생태 체험 여행을 경험해 보실 수 있습니다.\n<br><b>참고 사항</b><br>※ 보홀 데이투어는 다른 하나투어 고객분들과 조인행사로 진행되며, 현지 일정이나 상황에 따라 투어 진행 날짜가 변경 될 수도 있습니다.\n            \n            \n            <!--20160724001882_optSpc--><span>요금 : 성인 90USD / 아동 90USD<br></span><br><span>소요시간 : 약 5~6시간<br></span><br><span>대체일정 : 선택관광 미참여시에는 개인 자유일정으로 진행되며. 가이드나 인솔자가 동행하지 않습니다.<br></span><br><span>미선택시 가이드동행 : 미동행<br></span><br><!--20160724001882_custTitle--><!--20160724001882_custMemo-->\n    \n<p><!--custTitleGroup--></p><p><!--custMemoGroup--></p><p><!--timeTitleGroup--></p><p></p>"
-        },
-        {
-          "type": "default",
-          "title": "쇼핑 관광",
-          "subtitle": "",
-          "description": "여유시간을 이용한 여행의 색다른 즐거움"
-        },
-        {
-          "type": "default",
-          "title": "석식 특식 (샤브샤브)",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "default",
-          "title": "공항으로 이동",
-          "subtitle": "",
-          "description": ""
-        }
-      ],
-      "hotel": "호텔 확정 예정",
-      "meals": {
-        "breakfast": "리조트식",
-        "lunch": "논끼 도시락 세트",
-        "dinner": "샤브샤브"
-      }
-    },
-    {
-      "day": 5,
-      "date": "2026-09-05",
-      "title": "보홀, 인천",
-      "transport": "항공",
-      "timeline": [
-        {
-          "type": "default",
-          "title": "조식 (기내-불포함(유료제공))",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "물놀이 안전 수칙",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/800_0/2016/10/06/10000/4261f0ea-342a-4cb4-adef-10d7790f98af.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p></p>\n\t\t\n\t\t\t\n\t\t\t\n\t\t\t\n\t\t\t\n\t\t\n\t\t\n\t\t\n \n  <!--custTitle-->\n  \n \n  <!--custMemo-->"
-        }
-      ],
-      "items": [
-        {
-          "type": "default",
-          "title": "조식 (기내-불포함(유료제공))",
-          "subtitle": "",
-          "description": ""
-        },
-        {
-          "type": "location",
-          "title": "물놀이 안전 수칙",
-          "subtitle": "",
-          "description": "<img src=\"https://image.hanatour.com/usr/cms/resize/800_0/2016/10/06/10000/4261f0ea-342a-4cb4-adef-10d7790f98af.jpg\" style=\"width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px; display: block;\"><br><p></p>\n\t\t\n\t\t\t\n\t\t\t\n\t\t\t\n\t\t\t\n\t\t\n\t\t\n\t\t\n \n  <!--custTitle-->\n  \n \n  <!--custMemo-->"
-        }
-      ],
-      "hotel": "호텔 확정 예정",
-      "meals": {
-        "breakfast": "기내-불포함(유료제공)",
-        "lunch": "-",
-        "dinner": "-"
-      }
+      "airline": "아시아나항공",
+      "flightNo": "OZ747",
+      "departureAirport": "인천",
+      "departureTime": "16:30",
+      "arrivalAirport": "푸켓",
+      "arrivalTime": "20:55"
     }
   ],
-  "hotels": [
+  "returnSegments": [
     {
-      "name": "라메디 리조트 보홀",
-      "englishName": "RAMEDE RESORT BOHOL 라메디 리조트 보홀",
-      "address": "",
-      "images": [],
-      "amenities": []
+      "airline": "아시아나항공",
+      "flightNo": "OZ748",
+      "departureAirport": "푸켓",
+      "departureTime": "22:15",
+      "arrivalAirport": "인천",
+      "arrivalTime": "06:35"
     }
   ],
-  "meetingInfo": [
-    {
-      "type": "미팅안내",
-      "location": "인천공항 <b><font>제1여객터미널</font></b> 3층 출국장 <b><font>서편 14번 출입구 하나투어 1-4 </font></b>테이블",
-      "time": "19:00",
-      "description": "",
-      "imageUrl": "https://image.hanatour.com/usr/guide/chance/newmap_ICN_N.jpg"
-    }
+  "hotel": "썬수리 그랜드뷰 풀빌라 4박",
+  "url": "https://prdt.ybtour.co.kr/product/detailPackage?menu=HYM&dspSid=AGIA002&evCd=ATH3014-260725OZ00",
+  "keyPoints": [
+    "~3일차 선택일정 즐기기",
+    "여행의 피로를 풀어줄 \" 마사지체험\" 2회",
+    "허니문 풀빌라 특전 및 다양한 푸켓 디스커버리투어",
+    "플로팅 런치1회 제공",
+    "베스트셀러",
+    "명이상 출발가능",
+    "관광+휴양",
+    "푸켓6일",
+    "호핑투어 포함"
   ],
   "inclusions": [
-    "[교통] 왕복항공권",
-    "[교통] 전용 차량비 : 공항 이동만 차량을 탑승하며, 그 외 모든 이동시에는 현지 대중교통수단인 지프니 혹은 멀티캡을 이용합니다.",
-    "[제세금] 국내공항세",
-    "[제세금] 현지공항세 : 900페소",
-    "[제세금] 관광진흥개발기금",
-    "[제세금] 전쟁보험료",
-    "[제세금] 유류할증료",
-    "[숙박] 숙박비",
-    "[관광] 관광지 입장료",
-    "[여행자보험] 1억원 여행자보험"
+    "항공권 및 전일정 숙박",
+    "여행자 보험"
   ],
   "exclusions": [
-    "[식사] 식사비 : 가격문의 (일정표 미기재 식사)",
-    "[가이드/기사] 가이드/기사 경비 : 인당 USD 50 (성인/아동 동일)",
-    "[기타] 기타 : ■ 본 상품은 순수한 단체관광 목적만을 위한 패키지 상품으로 일정 중 개별적인 활동(친지 방문, 하나투어와 계약되지 않은 업체 조인 등)이 불가합니다. 개별 일정을 원하시는 경우, 패키지 상품이 아닌 자유여행 상품을 이용해 주시기 바랍니다. 또한, 타 업체 이용시 발생한 사고에 대해서는 하나투어가 책임을 지지 않습니다. [국외여행표준약관 12조 6항]에 의거 출발 후 고객의 사정에 의하여 여행요금에 포함된 숙박, 식사, 관광, 미샌딩 서비스, 공항세 등를 제공 받지 못한 경우 그에 상응하는 요금의 환급을 청구 할 수 없습니다."
+    "기사/가이드 경비",
+    "개인 경비"
   ],
-  "keyPoints": [
-    "국내외 배송비 및 관세 포함",
-    "스페셜포함",
-    "기사 경비가 불포함",
-    "에 의거 출발 후 고객의 사정에 의하여 여행요금에 포함",
-    "보홀 알로나 비치 방문",
-    "단체쇼핑센터 방문",
-    "보홀 핫플레이스 알로나 비치 방문",
-    "친지 방문",
-    "아메리카노 또는 소프트드링크 한잔 제공",
-    "특식 3회 제공",
-    "공항세 등를 제공",
-    "팡라오 국제공항",
-    "인천 국제공항",
-    "보홀시티투어",
-    "나만의 디자인 투어",
-    "교환 및 환불 접수는 하나투어",
-    "보홀 시티투어",
-    "JOY 하나투어",
-    "타 업체 이용시 발생한 사고에 대해서는 하나투어",
-    "전신마사지",
-    "다이빙강습",
-    "알로나비치",
-    "본 상품은 순수한 단체관광 목적만을 위한 패키지 상품으로"
-  ]
+  "itinerary": []
 }

@@ -19,51 +19,27 @@ export function formatProductInfo(info: DetailedProductInfo, index?: number): st
     const sanitizeText = (txt: string) => String(txt || '').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&').replace(/&gt;/gi, '>').replace(/&lt;/gi, '<').trim();
 
     if (info.keyPoints && info.keyPoints.length > 0) {
-        r += `\n[상품 포인트]\n`;
-        info.keyPoints.slice(0, 12).forEach(point => {
+        const { formatTagToSentence, cleanAndDeduplicateKeyPoints } = require('./crawlers/url-analysis');
+        
+        // 1. 완성형 문장 변환
+        const formattedList = info.keyPoints.map(point => {
             let cleanPoint = sanitizeText(point).replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}✈🧚🍗♨🍷🏨🚌🌟★♥▶▒◆•●📌🍽🎑🌊🧧🚢✨💡]/gu, '').trim();
-            // 색상 코드(HEX), 브랜드 안내문, 공항명, 공통 유의사항(금제품 반입 등) 필터링
-            const isHexColor = /^[0-9A-Fa-f]{6}$/.test(cleanPoint);
-            const isBrandNotice = cleanPoint.includes('본 상품은') || cleanPoint.includes('모두투어') || cleanPoint.includes('하나투어');
-            const isAirport = cleanPoint.includes('공항') || cleanPoint.includes('경유국가');
-            const isPrecaution = cleanPoint.includes('금제품') || cleanPoint.includes('반입') || cleanPoint.includes('주의사항') || cleanPoint.includes('유의사항') || cleanPoint.includes('준비사항');
-
-            if (cleanPoint && !isHexColor && !isBrandNotice && !isAirport && !isPrecaution && cleanPoint.length > 1) {
-                r += `• ${cleanPoint}\n`;
-            }
+            cleanPoint = cleanPoint.replace(/^[①-⑳\d\.\)\:\-\s📌🏖️📸🏨🍽️💆♀️]+/, '').trim();
+            return formatTagToSentence(cleanPoint);
         });
-    }
 
-    if (info.inclusions && info.inclusions.length > 0) {
-        r += `\n[✅ 포함사항]\n`;
-        info.inclusions.slice(0, 6).forEach(inc => {
-            r += `✓ ${sanitizeText(inc)}\n`;
-        });
-    }
+        // 2. 카테고리 주제 중복 제거
+        const finalKeyPoints = cleanAndDeduplicateKeyPoints(formattedList);
 
-    if (info.exclusions && info.exclusions.length > 0) {
-        r += `\n[❌ 불포함사항]\n`;
-        info.exclusions.slice(0, 6).forEach(exc => {
-            r += `✕ ${sanitizeText(exc)}\n`;
-        });
-    }
-
-    if (info.hotel || (info.hotels && info.hotels.length > 0)) {
-        const hotelStr = info.hotel || info.hotels?.map((h: any) => h.name || h).join(', ');
-        r += `\n[🏨 예정 숙소]\n${hotelStr}\n`;
-    }
-
-    if (info.itinerary && info.itinerary.length > 0) {
-        r += `\n[🗺️ 일자별 핵심 일정 요약]\n`;
-        info.itinerary.forEach((day: any, idx: number) => {
-            const dayNum = day.day || (idx + 1);
-            const spots = (day.items || day.timeline || []).slice(0, 5).map((s: any) => typeof s === 'string' ? sanitizeText(s) : sanitizeText(s.title)).filter(Boolean).join(', ');
-            r += `${dayNum}일차: ${sanitizeText(day.title || '')} ${spots ? `(${spots})` : ''}\n`;
-        });
+        if (finalKeyPoints.length > 0) {
+            r += `\n[상품별 특이사항]\n`;
+            finalKeyPoints.forEach((point: string) => {
+                r += `- ${point}\n`;
+            });
+        }
     }
 
     r += `\n[전문 일정표 보기]\n(${info.url})\n\n`;
-    r += `※ 예약 전 확인사항: 상품가액은 예약 시 출발일에 따라 변동될 수 있으며, 항공 좌석은 예약 시점에 다시 확인해야 합니다.`;
     return r;
 }
 

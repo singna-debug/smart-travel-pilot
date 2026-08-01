@@ -25,6 +25,14 @@ export async function scrapeForConfirmation(url: string): Promise<string | null>
         const page = await browser.newPage();
         await page.setViewport({ width: 1920, height: 1080 });
 
+        // 하나투어 필수 사이트 쿠키 설정
+        if (url.includes('hanatour.com')) {
+            await page.setCookie(
+                { name: 'HT_SITE_ID', value: 'hanatour', domain: '.hanatour.com' },
+                { name: '_siteId', value: 'hanatour', domain: '.hanatour.com' }
+            );
+        }
+
         // [최적화] 이미지, 폰트, 스타일시트 로딩 차단 (텍스트 위주 스캔으로 속도 2배 향상)
         await page.setRequestInterception(true);
         page.on('request', (req) => {
@@ -39,9 +47,10 @@ export async function scrapeForConfirmation(url: string): Promise<string | null>
             }
         });
 
-        // 페이지 이동
-        console.log('[Confirmation/Crawler] Navigating...');
-        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
+        // 페이지 이동 및 렌더링 대기
+        console.log('[Confirmation/Crawler] Navigating to:', url);
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {});
+        await new Promise(r => setTimeout(r, 2000));
 
         // --- 1 & 2. [핵심] 빠른 딥 스크롤 + 버튼 클릭 병행 (최적화 버전) ---
         await page.evaluate(async () => {

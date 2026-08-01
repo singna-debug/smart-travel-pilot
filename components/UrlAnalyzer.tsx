@@ -462,23 +462,69 @@ export default function UrlAnalyzer() {
     };
 
     const handleGreetingCopy = (content: string) => {
-        // 중복 인사말 방지: content에 이미 "안녕하세요"가 포함되어 있는지 확인
-        const hasGreeting = content.includes('안녕하세요') || content.includes('님!');
-        const greeting = hasGreeting ? '' : `안녕하세요. 모두투어 김호기 팀장입니다.\n${customerName || '고객'}님 문의주신 ${destination || '요청하신'} 일정표입니다.\n\n`;
-        const footer = `\n\n※ 추가로 궁금하신 점이나, 더 비교하고 싶으신 상품이 있으시면 편하게 말씀해주세요.\n감사합니다. 김호기 드림\n\n📞 상담 및 문의\n* 담당자: (주)클럽모두투어 김호기\n* 직통전화: 02-951-9004\n* 휴대폰: 010-9307-9004`;
+        // localStorage 설정값 동적 로드 (기본값 설정)
+        let agentName = '담당자';
+        let agencyName = '여행사';
+        let agentPhone = '';
+        let agentMobile = '';
 
-        // 만약 content 내부에 이미 "예약 전 확인사항" 또는 "※" 문구가 있다면 중복 방지를 위해 제거
-        let cleanedContent = content;
-        if (content.includes("예약 전 확인사항")) {
-            cleanedContent = content.split("※")[0].trim();
-        } else if (content.includes("※")) {
-            cleanedContent = content.split("※")[0].trim();
+        let parsedPhoneList: { label: string; num: string }[] = [];
+
+        if (typeof window !== 'undefined') {
+            try {
+                const tenantSettingsStr = localStorage.getItem('tenant_settings');
+                if (tenantSettingsStr) {
+                    const parsed = JSON.parse(tenantSettingsStr);
+                    if (parsed.companyName) agencyName = parsed.companyName;
+                    if (parsed.managerName) agentName = parsed.managerName;
+                    if (parsed.phone) {
+                        agentPhone = parsed.phone;
+                        const items = String(parsed.phone).split('|||');
+                        items.forEach(item => {
+                            if (item.includes(':')) {
+                                const parts = item.split(':');
+                                const label = parts[0].trim();
+                                const num = parts.slice(1).join(':').trim();
+                                if (label && num) parsedPhoneList.push({ label, num });
+                            } else if (item.trim()) {
+                                parsedPhoneList.push({ label: '대표전화', num: item.trim() });
+                            }
+                        });
+                    }
+                }
+            } catch (e) {}
+
+            agentName = localStorage.getItem('agent_name') || localStorage.getItem('user_name') || agentName;
+            agencyName = localStorage.getItem('agency_name') || localStorage.getItem('company_name') || agencyName;
+            agentPhone = localStorage.getItem('agent_phone') || localStorage.getItem('company_phone') || agentPhone;
+            agentMobile = localStorage.getItem('agent_mobile') || localStorage.getItem('user_phone') || agentMobile;
         }
 
-        // 링크 포맷 수정: 서버에서 이미 [원문 일정표 열기]\n(URL) 형식을 제공하므로 그대로 사용
-        const linkFixedContent = cleanedContent;
+        const agentTitle = agencyName ? `${agencyName} ${agentName}` : agentName;
 
-        const fullText = greeting + linkFixedContent + footer;
+        // 중복 인사말 방지
+        const hasGreeting = content.includes('안녕하세요') || content.includes('님!');
+        const greeting = hasGreeting ? '' : `안녕하세요. ${agentTitle}입니다.\n${customerName || '고객'}님 문의주신 ${destination || '요청하신'} 일정표입니다.\n\n`;
+
+        let contactInfo = `📞 상담 및 문의\n* 담당자: ${agencyName} ${agentName}`;
+        if (parsedPhoneList.length > 0) {
+            parsedPhoneList.forEach(p => {
+                contactInfo += `\n* ${p.label}: ${p.num}`;
+            });
+        } else {
+            if (agentMobile) contactInfo += `\n* 대표전화: ${agentMobile}`;
+        }
+
+        const footer = `\n\n※ 추가로 궁금하신 점이나, 더 비교하고 싶으신 상품이 있으시면 편하게 말씀해주세요.\n감사합니다. ${agentName} 드림\n\n${contactInfo}`;
+
+        let cleanedContent = content;
+        if (content.includes("📞 상담 및 문의")) {
+            cleanedContent = content.split("📞 상담 및 문의")[0].trim();
+        } else if (content.includes("※ 추가로 궁금하신 점")) {
+            cleanedContent = content.split("※ 추가로 궁금하신 점")[0].trim();
+        }
+
+        const fullText = greeting + cleanedContent + footer;
         copyToClipboard(fullText);
     };
 
@@ -969,7 +1015,7 @@ export default function UrlAnalyzer() {
                         <div className="result-header">
                             <h4>📄 상품 요약</h4>
                             <div style={{ display: 'flex', gap: '8px' }}>
-                                <button onClick={() => copyToClipboard(singleResult.formatted)} className="action-button">
+                                <button onClick={() => handleGreetingCopy(singleResult.formatted)} className="action-button">
                                     📋 복사
                                 </button>
                                 <button onClick={() => handleGreetingCopy(singleResult.formatted)} className="action-button" style={{ background: 'rgba(0, 212, 170, 0.1)', color: 'var(--accent-primary)', border: '1px solid rgba(0, 212, 170, 0.3)' }}>
@@ -1026,14 +1072,20 @@ export default function UrlAnalyzer() {
                             <div className="product-section" style={{ marginBottom: '16px', background: '#1e293b', padding: '16px', borderRadius: '12px' }}>
                                 <h5 style={{ color: '#cbd5e1', fontSize: '1rem', fontWeight: '600', marginBottom: '12px' }}>상품 포인트</h5>
                                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                    {singleResult.raw.keyPoints.slice(0, 5).map((item: any, i: number) => {
-                                        const cleanText = String(item || '').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}✈🧚🍗♨🍷🏨🚌🌟★♥▶▒◆•●📌🍽🎑🌊🧧🚢✨💡]/gu, '').trim();
-                                        return (
+                                    {(() => {
+                                        const { formatTagToSentence, cleanAndDeduplicateKeyPoints } = require('@/lib/crawlers/url-analysis');
+                                        const formattedList = singleResult.raw.keyPoints.map((item: any) => {
+                                            let cleanText = String(item || '').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}✈🧚🍗♨🍷🏨🚌🌟★♥▶▒◆•●📌🍽🎑🌊🧧🚢✨💡]/gu, '').trim();
+                                            cleanText = cleanText.replace(/^[①-⑳\d\.\)\:\-\s📌🏖️📸🏨🍽️💆♀️]+/, '').trim();
+                                            return formatTagToSentence(cleanText);
+                                        });
+                                        const dedupped = cleanAndDeduplicateKeyPoints(formattedList);
+                                        return dedupped.slice(0, 5).map((cleanText: string, i: number) => (
                                             <li key={i} style={{ marginBottom: '8px', paddingLeft: '14px', borderLeft: '2px solid #38bdf8', color: '#cbd5e1', fontSize: '0.95rem' }}>
                                                 {cleanText}
                                             </li>
-                                        );
-                                    })}
+                                        ));
+                                    })()}
                                 </ul>
                             </div>
                         )}

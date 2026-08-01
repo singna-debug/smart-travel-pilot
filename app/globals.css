@@ -942,13 +942,13 @@ body {
 .activity-header img,
 .day-content img,
 .timeline-item-wrapper img {
-    max-width: 100% !important;
-    width: 100% !important;
-    height: auto !important;
-    border-radius: 8px;
+    max-width: 100%;
+    width: 340px !important;
+    height: 190px !important;
+    border-radius: 10px;
     display: block;
     margin: 8px 0;
-    object-fit: contain;
+    object-fit: cover !important;
 }
 .mc-itinerary {
     overflow: hidden;

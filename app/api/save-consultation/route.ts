@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { appendConsultationToSheet } from '@/lib/google-sheets';
+import { upsertConsultationToSheet } from '@/lib/google-sheets';
 import type { ConsultationData } from '@/types';
 import { calculateAutomationDates, getTodayString } from '@/lib/date-calculator';
 import { crawlTravelProduct } from '@/lib/url-crawler';
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
             visitor_id: body.visitorId || `admin-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
         };
 
-        const success = await appendConsultationToSheet(consultationData, tenantId);
+        const success = await upsertConsultationToSheet(consultationData, tenantId);
 
         if (success) {
             return NextResponse.json({ success: true });

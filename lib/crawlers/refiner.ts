@@ -151,8 +151,14 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
         }
     }
 
-    // 핵심포인트(keyPoints) 보강: Gemini 결과가 부족(10개 미만)할 때 실행하거나 제목 정보를 추가
-    const currentPoints = Array.isArray(refined.keyPoints) ? [...refined.keyPoints] : [];
+    // 핵심포인트(keyPoints) 약관 쓰레기 문구 강력 필터링 및 순수 포인트 보강
+    let currentPoints = Array.isArray(refined.keyPoints) ? [...refined.keyPoints] : [];
+    
+    // 약관/배송비/주의사항 쓰레기 문구 100% 제거
+    currentPoints = currentPoints.filter(pt => {
+        const str = String(pt || '');
+        return !/배송비|관세|환불|마일리지|접수는|항공의|경비|불포함|의거|사정|여행요금|단체|쇼핑센터|흡연|금지된|국가|상품가|유류할증료|취소수수료|스페셜포함|출발\s*후|가이드|기사|현지필수|하나투어|목적만을|공항/i.test(str) && str.length > 2;
+    });
     
     if (currentPoints.length < 10) {
         const points: string[] = [...currentPoints];
@@ -209,17 +215,16 @@ export function refineData(info: DetailedProductInfo, originalText: string, url:
     refined.url = url;
     if (Array.isArray(refined.keyPoints)) {
         const noiseSet = new Set(['ALL포함', '원 포함', '상품특전', '롯데관광 스페셜 특전', '롯데관광이 준비한 특전', '상품 특전', '정보제공', '국외여행상품 정보제공', 'top_banner', 'top_banner input', '한국출발', '크루즈 전세선 20만원할인', 'devSerchCate_Top', '256AC7', 'ffffff', 'app_banner', '_none', 'menu09', 'menu12', 'menu01']);
+        const { formatTagToSentence } = require('./url-analysis');
         
         refined.keyPoints = refined.keyPoints.map((kp: string) => {
             let clean = (kp || '').trim();
-            // 잘린 글자 보정
             if (clean.endsWith('국제공')) clean += '항';
-            return clean;
+            return formatTagToSentence(clean);
         }).filter((clean: string) => {
-            if (clean.length < 5) return false;
+            if (clean.length < 3) return false;
             if (noiseSet.has(clean)) return false;
-            // 이동 / 석식후 / 기사경비불포함 / 공항이동 등 단순 동선 문구 제외
-            if (clean.includes('석식 후') || clean.includes('중식 후') || clean.includes('공항 이동') || clean.includes('기사경비') || clean.includes('관세가 부과')) return false;
+            if (/가축|전염병|현금영수증|할부|제세공과금|특수기호|여행서비스|안전정보|국내여행|해외호텔|배송비|관세|경비|불포함|의거|출발\s*후|사정|요금|스페셜포함|단체쇼핑|친지|환불|타\s*업체|하나투어|목적만을|공항세|쇼핑센터|디자인|석식\s*후|중식\s*후|공항\s*이동/i.test(clean)) return false;
             return true;
         });
     }

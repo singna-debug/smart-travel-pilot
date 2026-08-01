@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllConsultations } from '@/lib/google-sheets';
 import { getTenantIdFromHeaderOrQuery } from '@/lib/tenant';
 
+export const dynamic = 'force-dynamic';
+
 // 상담 목록 조회
 export async function GET(request: NextRequest) {
     try {
@@ -19,13 +21,8 @@ export async function GET(request: NextRequest) {
         // 데이터 병합 및 중복 처리
         const consultationsByDay = new Map<string, any>();
         const normalizePhone = (p: string) => (p || '').replace(/[^0-9]/g, '');
-        const getDay = (ts: string) => {
-            if (!ts) return '';
-            const match = ts.match(/\d{4}-\d{2}-\d{2}/);
-            return match ? match[0] : ts.slice(0, 10);
-        };
 
-        allData.forEach((item, index) => {
+        allData.forEach((item) => {
             const phone = normalizePhone(item.customer.phone);
             const name = (item.customer.name || '').trim();
             
@@ -33,8 +30,9 @@ export async function GET(request: NextRequest) {
             if (name === '고객성함' || phone === '연락처') return;
             if (!name && !phone) return;
 
-            const day = getDay(item.timestamp);
-            const key = item.visitor_id || (phone ? `${phone}-${day}-${index}` : `${name}-${day}-${index}`);
+            // 중복 병합 키: 성함 + (전화번호 또는 목적지)
+            const dest = (item.trip.destination || '').trim();
+            const key = phone ? `${name}-${phone}` : (dest ? `${name}-${dest}` : `${name}`);
 
             if (consultationsByDay.has(key)) {
                 const existing = consultationsByDay.get(key);
