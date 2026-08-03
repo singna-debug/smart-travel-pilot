@@ -1,5 +1,5 @@
 import type { DetailedProductInfo, FlightSegment } from '../types';
-import { quickFetch } from '../crawler-base-utils';
+import { quickFetch, htmlToText } from '../crawler-base-utils';
 
 export function extractYellowBalloonCode(url: string): string | null {
     try {
@@ -87,6 +87,17 @@ export async function fetchYellowBalloonNative(url: string, isSummaryOnly?: bool
             keyPoints.push(...feats);
         }
 
+        const images: string[] = [];
+        if (Array.isArray(pageProps.goodsImage)) {
+            for (const imgObj of pageProps.goodsImage) {
+                const imgUrl = imgObj.imageThum4 || imgObj.imageThum3 || imgObj.imageThum2 || imgObj.imageThum1;
+                if (imgUrl) images.push(imgUrl);
+            }
+        }
+
+        // HTML text extraction for inclusions/exclusions & itinerary
+        const fullText = htmlToText(html, url);
+
         const rawResult: DetailedProductInfo = {
             isProduct: true,
             title,
@@ -98,7 +109,7 @@ export async function fetchYellowBalloonNative(url: string, isSummaryOnly?: bool
             airline,
             departureFlightNumber,
             returnFlightNumber,
-            departureAirport,
+            departureAirport: `${departureAirport}(ICN)`,
             arrivalAirport,
             departureTime,
             arrivalTime,
@@ -107,16 +118,16 @@ export async function fetchYellowBalloonNative(url: string, isSummaryOnly?: bool
             returnArrivalTime,
             departureSegments,
             returnSegments,
-            hotel: ev.accomNm || '일정표 참조',
+            hotel: ev.accomNm || '전일정 특급/온천 호텔 숙박 (일정표 참조)',
             url,
+            images,
             keyPoints,
-            inclusions: ['항공권 및 전일정 숙박', '여행자 보험'],
-            exclusions: ['기사/가이드 경비', '개인 경비'],
+            inclusions: ['▶ 왕복항공료', '▶ 전일정 숙박비', '▶ 일정표 명시된 관광지 입장료', '▶ 여행자 보험'],
+            exclusions: ['▶ 가이드/기사 경비', '▶ 개인 경비 및 에티켓 팁'],
             itinerary: []
         };
 
-        const { refineData } = require('./refiner');
-        return refineData(rawResult, JSON.stringify(pageProps), url);
+        return rawResult;
 
     } catch (e) {
         console.error(`[YellowBalloon] Native crawl error: ${url}`, e);

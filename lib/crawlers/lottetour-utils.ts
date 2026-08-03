@@ -1,5 +1,5 @@
 import type { DetailedProductInfo, FlightSegment } from '../types';
-import { quickFetch, htmlToText } from '../crawler-base-utils';
+import { quickFetch, htmlToText, inferDestination } from '../crawler-base-utils';
 
 export function extractLotteTourCode(url: string): string | null {
     try {
@@ -23,6 +23,7 @@ export async function fetchLotteTourNative(url: string, isSummaryOnly?: boolean)
         const ogTitleMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i) ||
                              html.match(/<meta\s+name=["']title["']\s+content=["']([^"']+)["']/i);
         const ogDescMatch = html.match(/<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']/i);
+        const ogImageMatch = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i);
 
         let title = ogTitleMatch ? ogTitleMatch[1].trim() : '롯데관광 여행 상품';
         title = title.replace(/^롯데관광\s*[:-]?\s*/i, '').trim();
@@ -66,7 +67,6 @@ export async function fetchLotteTourNative(url: string, isSummaryOnly?: boolean)
         if (apiData && apiData.priceAdt && apiData.priceAdt > 0) {
             price = `${Number(apiData.priceAdt).toLocaleString()}원`;
         } else {
-            // Find price numbers greater than 400,000 KRW
             const allPrices = text.match(/([0-9]{1,3}(?:,[0-9]{3})+)\s*원/g) || [];
             const validPrices = allPrices.filter(p => {
                 const num = parseInt(p.replace(/[^0-9]/g, ''), 10);
@@ -90,9 +90,11 @@ export async function fetchLotteTourNative(url: string, isSummaryOnly?: boolean)
         else if (title.includes('제주항공') || title.includes('[7C]')) airline = '제주항공';
         else if (title.includes('진에어') || title.includes('[LJ]')) airline = '진에어';
         else if (title.includes('티웨이') || title.includes('[TW]')) airline = '티웨이항공';
+        else if (title.includes('에어서울') || title.includes('[RS]')) airline = '에어서울';
+        else if (title.includes('에어부산') || title.includes('[BX]')) airline = '에어부산';
 
-        // 4. Duration (Format as X박 Y일)
-        let duration = '3박 5일';
+        // 4. Duration
+        let duration = '3박 4일';
         const durMatch = title.match(/(\d+)박\s*(\d+)일/);
         if (durMatch) {
             duration = `${durMatch[1]}박 ${durMatch[2]}일`;
@@ -100,54 +102,40 @@ export async function fetchLotteTourNative(url: string, isSummaryOnly?: boolean)
             const dayOnlyMatch = title.match(/(\d+)일/);
             if (dayOnlyMatch) {
                 const days = parseInt(dayOnlyMatch[1], 10);
-                if (days === 5) duration = '3박 5일';
-                else if (days === 4) duration = '3박 4일';
-                else if (days === 6) duration = '4박 6일';
-                else if (days === 7) duration = '5박 7일';
-                else if (days === 8) duration = '6박 8일';
-                else duration = `${days - 1}박 ${days}일`;
+                duration = days > 1 ? `${days - 1}박 ${days}일` : '당일';
             }
         }
 
         // 5. Destination
-        let destination = '해외';
-        if (title.includes('하노이') || title.includes('하롱베이') || title.includes('옌뜨')) destination = '하노이, 하롱베이';
-        else if (title.includes('삿포로') || title.includes('오타루') || title.includes('북해도')) destination = '삿포로, 북해도';
-        else if (title.includes('도쿄')) destination = '도쿄';
-        else if (title.includes('오사카')) destination = '오사카';
-        else if (title.includes('후쿠오카')) destination = '후쿠오카';
-        else if (title.includes('다낭')) destination = '다낭';
-        else if (title.includes('방콕')) destination = '방콕';
-        else if (title.includes('유럽')) destination = '유럽';
+        const destination = inferDestination(title, text, url) || '해외';
 
-        // 6. Benefit-Oriented KeyPoints Extraction
+        // 6. KeyPoints
         const keyPoints: string[] = [];
-
-        // Airline benefit
-        keyPoints.push(`${airline} 국적기 직항 탑승으로 편안하고 품격 있는 이동`);
-
-        // Dollar value & Special benefits
-        if (html.includes('$150') || title.includes('150') || html.includes('150상당')) {
-            keyPoints.push('[$150 상당 무료 혜택] 하롱베이 야시장, 롯데센터 전망대, 전신 마사지 등 포함');
-        }
-
-        if (title.includes('5성급') || title.includes('윈덤') || html.includes('5성급')) {
-            keyPoints.push('월드체인 5성급 호텔 숙박 및 바다전망 객실 무료 업그레이드 혜택');
-        }
-
-        if (title.includes('미슐랭') || html.includes('미슐랭')) {
-            keyPoints.push('미슐랭 빕구르망 선정 정통 맛집 및 호텔식 특식 제공');
-        }
-
-        if (title.includes('옌뜨') || html.includes('케이블카')) {
-            keyPoints.push('유네스코 세계자연유산 옌뜨 국립공원 케이블카 체험 포함');
-        }
-
         if (description) {
-            const parts = description.split(/[♥+/,]/).map(p => p.trim()).filter(p => p.length > 5 && !p.includes('만 12세') && !p.includes('추가요금'));
-            for (const pt of parts) {
-                if (!keyPoints.some(k => k.includes(pt.substring(0, 4)))) {
+            description.split(/[♥+/,▶\n]/).forEach(p => {
+                const pt = p.trim();
+                if (pt.length > 5 && !pt.includes('만 12세') && !pt.includes('추가요금')) {
                     keyPoints.push(pt);
+                }
+            });
+        }
+        if (keyPoints.length === 0) {
+            keyPoints.push(`${airline} 국적기 직항 탑승으로 편안한 이동`);
+            keyPoints.push('전일정 엄선된 특급/온천 호텔 숙박');
+            keyPoints.push('지역 대표 명소 및 맛집 미식 코스 포함');
+        }
+
+        // Images
+        const images: string[] = [];
+        if (ogImageMatch && ogImageMatch[1]) {
+            images.push(ogImageMatch[1]);
+        }
+        const imgMatches = html.match(/src=["'](https?:\/\/[^"']+\.(?:jpg|png|jpeg))["']/gi);
+        if (imgMatches) {
+            for (const m of imgMatches.slice(0, 10)) {
+                const srcMatch = m.match(/src=["']([^"']+)["']/i);
+                if (srcMatch && !srcMatch[1].includes('logo') && !srcMatch[1].includes('icon') && !images.includes(srcMatch[1])) {
+                    images.push(srcMatch[1]);
                 }
             }
         }
@@ -168,11 +156,10 @@ export async function fetchLotteTourNative(url: string, isSummaryOnly?: boolean)
             }
         }
 
-        // Return Date calculation if departureDate is available and duration is e.g. 3박 5일
         if (departureDate && departureDate.includes('-')) {
             const d = new Date(departureDate);
             if (!isNaN(d.getTime())) {
-                const daysAdd = duration.includes('5일') ? 4 : duration.includes('4일') ? 3 : duration.includes('6일') ? 5 : 4;
+                const daysAdd = duration.includes('일') ? (parseInt(duration.match(/\d+일/)?.[0] || '4', 10) - 1) : 3;
                 d.setDate(d.getDate() + daysAdd);
                 returnDate = d.toISOString().split('T')[0];
             }
@@ -216,16 +203,16 @@ export async function fetchLotteTourNative(url: string, isSummaryOnly?: boolean)
             returnArrivalTime: '일정표 참조',
             departureSegments,
             returnSegments,
-            hotel: '전일정 특특급/온천 호텔 숙박',
+            hotel: '전일정 특급/온천 호텔 숙박 (상세 일정 참조)',
             url,
+            images,
             keyPoints,
-            inclusions: ['전일정 항공권 및 숙박', '여행자 보험'],
-            exclusions: ['기사/가이드 경비', '개인 경비'],
+            inclusions: ['▶ 왕복항공료', '▶ 전일정 숙박비', '▶ 일정표 명시된 관광지 입장료', '▶ 여행자 보험'],
+            exclusions: ['▶ 가이드/기사 경비', '▶ 개인 경비 및 에티켓 팁'],
             itinerary: []
         };
 
-        const { refineData } = require('./refiner');
-        return refineData(rawResult, text, url);
+        return rawResult;
 
     } catch (e) {
         console.error(`[LotteTour] Native crawl error: ${url}`, e);

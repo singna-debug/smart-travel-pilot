@@ -20,23 +20,17 @@ export async function quickFetch(url: string, retries = 1): Promise<{ html: stri
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 12000); // 12초로 증대
 
+        let originUrl = 'https://www.modetour.com';
+        try {
+            originUrl = new URL(url).origin;
+        } catch (e) {}
+
         const response = await fetch(url, {
             headers: {
                 'User-Agent': getRandomUserAgent(),
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
                 'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache',
-                'Referer': 'https://www.modetour.com/',
-                'Origin': 'https://www.modetour.com',
-                'Sec-Ch-Ua': '"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
-                'Sec-Ch-Ua-Mobile': '?0',
-                'Sec-Ch-Ua-Platform': '"Windows"',
-                'Sec-Fetch-Dest': 'document',
-                'Sec-Fetch-Mode': 'navigate',
-                'Sec-Fetch-Site': 'cross-site',
-                'Sec-Fetch-User': '?1',
-                'Upgrade-Insecure-Requests': '1'
+                'Referer': originUrl + '/',
             },
             signal: controller.signal
         });
