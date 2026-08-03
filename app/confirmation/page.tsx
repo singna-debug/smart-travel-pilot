@@ -1697,7 +1697,7 @@ ${shareUrl}`;
                                     <input
                                         value={day.title || ''}
                                         onChange={e => updateDayTitle(i, e.target.value)}
-                                        placeholder="이동 경로 (예: 인천 → 다낭)"
+                                        placeholder="이동 경로"
                                         style={{ flex: 1, minWidth: 0, fontSize: '1rem', fontWeight: 700, background: 'transparent', border: 'none', color: 'var(--text-primary)', outline: 'none', fontFamily: 'inherit' }}
                                     />
                                 </div>
