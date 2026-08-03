@@ -84,14 +84,17 @@ export async function fetchLotteTourNative(url: string, isSummaryOnly?: boolean)
         }
 
         // 3. Airline Code & Name
-        let airline = '대한항공';
-        if (title.includes('아시아나') || title.includes('[OZ]')) airline = '아시아나항공';
-        else if (title.includes('대한항공') || title.includes('[KE]')) airline = '대한항공';
-        else if (title.includes('제주항공') || title.includes('[7C]')) airline = '제주항공';
-        else if (title.includes('진에어') || title.includes('[LJ]')) airline = '진에어';
-        else if (title.includes('티웨이') || title.includes('[TW]')) airline = '티웨이항공';
-        else if (title.includes('에어서울') || title.includes('[RS]')) airline = '에어서울';
-        else if (title.includes('에어부산') || title.includes('[BX]')) airline = '에어부산';
+        let airline = '';
+        const fullAirText = `${title} ${text}`;
+        if (fullAirText.includes('아시아나') || fullAirText.includes('[OZ]') || fullAirText.includes('OZ')) airline = '아시아나항공';
+        else if (fullAirText.includes('대한항공') || fullAirText.includes('[KE]') || fullAirText.includes('KE')) airline = '대한항공';
+        else if (fullAirText.includes('제주항공') || fullAirText.includes('[7C]')) airline = '제주항공';
+        else if (fullAirText.includes('진에어') || fullAirText.includes('[LJ]')) airline = '진에어';
+        else if (fullAirText.includes('티웨이') || fullAirText.includes('[TW]')) airline = '티웨이항공';
+        else if (fullAirText.includes('에어서울') || fullAirText.includes('[RS]')) airline = '에어서울';
+        else if (fullAirText.includes('에어부산') || fullAirText.includes('[BX]')) airline = '에어부산';
+        else if (fullAirText.includes('비엣젯') || fullAirText.includes('[VJ]')) airline = '비엣젯항공';
+        if (!airline) airline = '대한항공';
 
         // 4. Duration
         let duration = '3박 4일';
