@@ -24,9 +24,9 @@ export async function fetchHanjinTravelNative(url: string, isSummaryOnly: boolea
     let domText = '';
     let extractedImages: string[] = [];
 
-    // Skip Puppeteer on Vercel serverless functions or during fast URL analysis summary mode
+    // HanjinTravel requires Puppeteer for SPA Client-Side Rendering to get real title, price and itinerary
     const isVercel = process.env.VERCEL === '1' || process.env.NEXT_PUBLIC_VERCEL_ENV !== undefined;
-    if (typeof window === 'undefined' && !isVercel && !isSummaryOnly) {
+    if (typeof window === 'undefined' && !isVercel) {
       try {
         console.log('[HanjinTravel] Launching Puppeteer for SPA rendering & Image extraction...');
         const puppeteer = (await import('puppeteer')).default;
@@ -36,20 +36,40 @@ export async function fetchHanjinTravelNative(url: string, isSummaryOnly: boolea
         });
         const page = await browser.newPage();
         await page.setViewport({ width: 1920, height: 1080 });
-        await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 30000 });
-        await new Promise(r => setTimeout(r, 4000));
-
-        // Click all expand accordions
-        await page.evaluate(() => {
-          const buttons = Array.from(document.querySelectorAll('button, a, div, span'));
-          buttons.forEach(b => {
-            const txt = b.textContent || '';
-            if (txt.includes('전체 열기') || txt.includes('일정 전체') || txt.includes('일정 열기') || txt.includes('더보기') || txt.includes('약관 자세히')) {
-              try { (b as HTMLElement).click(); } catch(e) {}
+        // Optimize resource loading for fast URL analysis
+        if (isSummaryOnly) {
+          await page.setRequestInterception(true);
+          page.on('request', (req) => {
+            const resourceType = req.resourceType();
+            if (['image', 'font', 'media'].includes(resourceType)) {
+              req.abort();
+            } else {
+              req.continue();
             }
           });
-        });
-        await new Promise(r => setTimeout(r, 3000));
+        }
+
+        const waitStrategy = isSummaryOnly ? 'domcontentloaded' : 'networkidle2';
+        const waitTimeout = isSummaryOnly ? 8000 : 30000;
+        await page.goto(targetUrl, { waitUntil: waitStrategy, timeout: waitTimeout }).catch(() => null);
+
+        if (isSummaryOnly) {
+          // Fast path for URL analysis summary mode - 1초만대기하여 즉시파싱
+          await new Promise(r => setTimeout(r, 1000));
+        } else {
+          await new Promise(r => setTimeout(r, 3000));
+          // Click all expand accordions
+          await page.evaluate(() => {
+            const buttons = Array.from(document.querySelectorAll('button, a, div, span'));
+            buttons.forEach(b => {
+              const txt = b.textContent || '';
+              if (txt.includes('전체 열기') || txt.includes('일정 전체') || txt.includes('일정 열기') || txt.includes('더보기') || txt.includes('약관 자세히')) {
+                try { (b as HTMLElement).click(); } catch(e) {}
+              }
+            });
+          });
+          await new Promise(r => setTimeout(r, 2000));
+        }
 
         const pageData = await page.evaluate(() => {
           const rawText = document.body ? document.body.innerText : '';
