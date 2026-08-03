@@ -46,9 +46,8 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
     // ===== 2단계: Native 데이터가 충분한지 판단 =====
     const nativeHasItinerary = nativeData?.itinerary && Array.isArray(nativeData.itinerary) && nativeData.itinerary.length > 0;
     const nativeHasTitle = !!nativeData?.title && nativeData.title.length > 3;
-    const isYBOrLT = url.includes('ybtour.co.kr') || url.includes('yellowballoon.co.kr') || url.includes('lottetour.com');
-    // 노랑풍선, 롯데관광은 native 일정표가 없으면 Puppeteer + Gemini로 이동하여 완벽한 일정표 생성
-    const nativeIsSufficient = isYBOrLT ? (nativeHasTitle && nativeHasItinerary) : nativeHasTitle;
+    // title만 제대로 확보되었어도 무거운 20초 Puppeteer로 빠지지 않고 Native 확정서 데이터 빠르게 반환
+    const nativeIsSufficient = nativeHasTitle;
 
     console.log(`[Confirmation/Index] Native sufficient: ${nativeIsSufficient} (itinerary: ${nativeData?.itinerary?.length || 0} days, title: ${nativeHasTitle})`);
 
