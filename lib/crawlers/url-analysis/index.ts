@@ -126,8 +126,14 @@ export function formatTagToSentence(tag: string): string {
     if (clean.endsWith('디너') || clean.endsWith('특식') || clean.endsWith('식사')) return `${clean} 제공`;
     if (clean.endsWith('가든') || clean.endsWith('호텔') || clean.endsWith('리조트')) return `${clean} 투숙`;
     if (clean.endsWith('슬라이드') || clean.endsWith('호핑') || clean.endsWith('크루즈') || clean.endsWith('체험')) return `${clean} 체험`;
+    if (clean === '인생샷') return '인생샷 명소 탐방';
+    if (clean === '소도시여행') return '여유로운 소도시 여행';
+    if (clean === '미식') return '현지 대표 미식 체험';
+    if (clean === '사케') return '유명 사케 양조장 시음';
+    if (clean.endsWith('여행') || clean.endsWith('힐링')) return `${clean} 코스`;
+    if (clean.endsWith('협곡') || clean.endsWith('마을') || clean.endsWith('온천')) return `${clean} 일정`;
 
-    return clean;
+    return `${clean} 포함`;
 }
 
 export function extractRichKeyPointsFromText(text: string): string[] {
@@ -172,7 +178,16 @@ export async function enrichKeyPointsToAtLeastFive(result: DetailedProductInfo, 
     const points: string[] = [];
     const hasSimilar = (kw: string) => points.some(p => p.includes(kw));
 
-    // 1. Extract Rich KeyPoints from Page Original Text if available!
+    // 1. Parsed Existing KeyPoints (prioritize real sentences from API/scraping)
+    if (Array.isArray(result.keyPoints) && result.keyPoints.length > 0) {
+        for (const pt of result.keyPoints) {
+            if (pt && pt.length > 3 && !hasSimilar(pt.substring(0, 4))) {
+                points.push(pt);
+            }
+        }
+    }
+
+    // 2. Extract Rich KeyPoints from Page Original Text if available!
     if (originalText) {
         const richPoints = extractRichKeyPointsFromText(originalText);
         for (const rp of richPoints) {
@@ -183,32 +198,7 @@ export async function enrichKeyPointsToAtLeastFive(result: DetailedProductInfo, 
         }
     }
 
-    // 2. Title Hashtags
-    const hashtags = title.match(/#[^\s#]+/g) || [];
-    for (const tag of hashtags) {
-        const clean = tag.replace(/^#/, '').trim();
-        if (clean.length < 2) continue;
-        if (/PICK|담당자|추천|인기/i.test(clean)) continue;
-        
-        const formatted = formatTagToSentence(clean);
-        if (formatted && !hasSimilar(formatted.substring(0, 4))) {
-            points.push(formatted);
-        }
-        if (points.length >= 8) break;
-    }
-
-    // 3. Parsed Existing KeyPoints (filtered strictly from junk disclaimers)
-    const rawExisting = cleanAndDeduplicateKeyPoints(result.keyPoints);
-    for (const pt of rawExisting) {
-        const formatted = formatTagToSentence(pt);
-        const isJunk = /배송비|관세|환불|마일리지|접수는|항공의|경비|불포함|의거|사정|여행요금|단체|쇼핑센터|흡연|금지된|국가|상품가|유류할증료|취소수수료|스페셜포함|출발\s*후|가이드|기사|현지필수|하나투어|목적만을|공항|경유국가|관광\s*등\s*포함|엄선된\s*호텔/i.test(formatted);
-        if (formatted && !isJunk && formatted.length > 2 && !hasSimilar(formatted.substring(0, 4))) {
-            points.push(formatted);
-        }
-        if (points.length >= 6) break;
-    }
-
-    // 3. Title Hashtags (Fallback if keyPoints are insufficient)
+    // 3. Title Hashtags (Supplement to reach 5 key points)
     if (points.length < 5) {
         const hashtags = title.match(/#[^\s#]+/g) || [];
         for (const tag of hashtags) {
