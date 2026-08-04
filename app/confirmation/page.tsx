@@ -365,7 +365,7 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
                             address: hotelObj.address || '',
                             checkIn: hotelObj.checkIn || formatToHtmlDate(raw.departureDate || ''),
                             checkOut: hotelObj.checkOut || formatToHtmlDate(raw.returnDate || ''),
-                            images: Array.isArray(hotelObj.images) ? hotelObj.images : [],
+                            images: (Array.isArray(hotelObj.images) && hotelObj.images.length > 0) ? hotelObj.images : (Array.isArray(raw.images) ? raw.images : []),
                             amenities: Array.isArray(hotelObj.amenities) ? hotelObj.amenities : []
                         });
                     }
@@ -393,8 +393,9 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
                             const typeVal = (item.type === 'location' || (!isNonSpot(titleStr) && titleStr.length > 1)) ? 'location' : 'default';
 
                             let itemImg = item.image || item.imageUrl || '';
-                            if (!itemImg && Array.isArray(item.images) && item.images.length > 0) {
-                                itemImg = item.images[0];
+                            const itemImages = Array.isArray(item.images) && item.images.length > 0 ? item.images : (itemImg ? [itemImg] : []);
+                            if (!itemImg && itemImages.length > 0) {
+                                itemImg = itemImages[0];
                             }
 
                             return {
@@ -403,7 +404,8 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
                                 description: clean(item.description),
                                 location: clean(item.location),
                                 type: typeVal,
-                                image: itemImg
+                                image: itemImg,
+                                images: itemImages
                             };
                         });
 
@@ -415,9 +417,55 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
                             }];
                         }
 
+                        let transportStr = '';
+                        if (typeof day.transport === 'string') {
+                            transportStr = day.transport;
+                        } else if (day.transport && typeof day.transport === 'object') {
+                            if (day.transport.airline || day.transport.flightNo) {
+                                const parts = [];
+                                if (day.transport.airline) parts.push(day.transport.airline);
+                                if (day.transport.flightNo) parts.push(day.transport.flightNo);
+                                if (day.transport.departureCity && day.transport.arrivalCity) {
+                                    parts.push(`(${day.transport.departureCity} ${day.transport.departureTime || ''} → ${day.transport.arrivalCity} ${day.transport.arrivalTime || ''})`);
+                                }
+                                transportStr = parts.join(' ');
+                            }
+                        } else if (typeof day.transportation === 'string') {
+                            transportStr = day.transportation;
+                        }
+
+                        // day.flight 객체 보장 (ParsedFlightCard에서 렌더링에 사용)
+                        const isDayFirst = day.day === 1 || raw.itinerary.indexOf(day) === 0;
+                        const isDayLast = day.day === raw.itinerary.length || raw.itinerary.indexOf(day) === raw.itinerary.length - 1;
+                        let dayFlightObj = day.flight || day.flightInfo;
+
+                        if (isDayFirst && !dayFlightObj) {
+                            dayFlightObj = {
+                                title: '가는 편',
+                                airline: day.airline || raw.airline || '대한항공',
+                                flightNo: day.departureFlightNumber || raw.departureFlightNumber || raw.flightCode || '',
+                                departureCity: day.departureAirport || raw.departureAirport || '서울(ICN)',
+                                departureTime: day.departureTime || raw.departureTime || '',
+                                arrivalCity: day.arrivalAirport || raw.destination || '',
+                                arrivalTime: day.arrivalTime || raw.arrivalTime || ''
+                            };
+                        } else if (isDayLast && !dayFlightObj) {
+                            dayFlightObj = {
+                                title: '오는 편',
+                                airline: day.airline || raw.airline || '대한항공',
+                                flightNo: day.returnFlightNumber || raw.returnFlightNumber || '',
+                                departureCity: day.returnDepartureAirport || raw.destination || '',
+                                departureTime: day.returnDepartureTime || raw.returnDepartureTime || '',
+                                arrivalCity: day.departureAirport || raw.departureAirport || '서울(ICN)',
+                                arrivalTime: day.returnArrivalTime || raw.returnArrivalTime || ''
+                            };
+                        }
+
                         return {
                             ...day,
                             title: day.title ? clean(day.title) : '',
+                            flight: dayFlightObj,
+                            transport: transportStr,
                             items: finalItems,
                             timeline: finalItems
                         };
@@ -796,7 +844,7 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
         setItinerary(prev => prev.map((day, idx) => idx === dayIdx ? { ...day, [field]: value } : day));
     };
 
-    const updateTimelineItem = (dayIdx: number, itemIdx: number, field: string, value: string) => {
+    const updateTimelineItem = (dayIdx: number, itemIdx: number, field: string, value: any) => {
         setItinerary(prev => prev.map((day, idx) => {
             if (idx !== dayIdx) return day;
             const newTimeline = [...(day.timeline || [])];
@@ -1831,9 +1879,16 @@ ${shareUrl}`;
                                                 </div>
 
                                                 {(() => {
-                                                    const imgList: string[] = item.images && Array.isArray(item.images) && item.images.length > 0
+                                                    const rawImgs: string[] = item.images && Array.isArray(item.images) && item.images.length > 0
                                                         ? item.images
                                                         : (item.image ? [item.image] : []);
+
+                                                    // Filter out video links so they don't show under "일정 이미지"
+                                                    const imgList = rawImgs.filter((u: string) => {
+                                                        if (!u || typeof u !== 'string') return false;
+                                                        const low = u.toLowerCase();
+                                                        return !low.includes('youtube.com') && !low.includes('youtu.be') && !low.includes('vimeo.com') && !low.match(/\.(mp4|webm|mov)$/i) && !low.startsWith('data:video');
+                                                    });
                                                     
                                                     if (imgList.length === 0) {
                                                         return (
@@ -1861,12 +1916,172 @@ ${shareUrl}`;
                                                                             updateTimelineItem(i, idx, 'image', updated[0] || '');
                                                                         }}
                                                                         style={{ position: 'absolute', top: '4px', right: '4px', width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.9)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.5)', zIndex: 2 }}
-                                                                        title="이미지 삭제"
+                                                                        title="삭제"
                                                                     >
                                                                         ✕
                                                                     </button>
                                                                 </div>
                                                             ))}
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </div>
+
+                                            {/* 동영상 관리 섹션: 정적 썸네일 전용 (절대 자동재생/재생 안됨) */}
+                                            <div className="confirm-field" style={{ marginTop: '12px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
+                                                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                                                        🎬 일정 동영상 ({item.videos && Array.isArray(item.videos) ? item.videos.length : (item.videoUrl ? 1 : 0)}개)
+                                                    </span>
+                                                    <div style={{ display: 'flex', gap: '6px' }}>
+                                                        {/* 동영상 파일 직접 업로드 버튼 */}
+                                                        <label
+                                                            style={{
+                                                                fontSize: '0.75rem',
+                                                                padding: '4px 10px',
+                                                                borderRadius: '4px',
+                                                                background: '#8b5cf6',
+                                                                color: '#ffffff',
+                                                                cursor: 'pointer',
+                                                                fontWeight: 'bold',
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                gap: '4px'
+                                                            }}
+                                                        >
+                                                            📹 동영상 업로드
+                                                            <input
+                                                                type="file"
+                                                                accept="video/*"
+                                                                multiple
+                                                                style={{ display: 'none' }}
+                                                                onChange={(e) => {
+                                                                    const files = Array.from(e.target.files || []);
+                                                                    if (files.length === 0) return;
+                                                                    const currentVideos = item.videos && Array.isArray(item.videos) ? item.videos : (item.videoUrl ? [item.videoUrl] : []);
+                                                                    
+                                                                    let readCount = 0;
+                                                                    const newBase64s: string[] = [];
+                                                                    files.forEach((file) => {
+                                                                        const reader = new FileReader();
+                                                                        reader.onload = (event) => {
+                                                                            if (event.target?.result) {
+                                                                                newBase64s.push(String(event.target.result));
+                                                                            }
+                                                                            readCount++;
+                                                                            if (readCount === files.length) {
+                                                                                const updated = [...currentVideos, ...newBase64s];
+                                                                                updateTimelineItem(i, idx, 'videos', updated);
+                                                                                updateTimelineItem(i, idx, 'videoUrl', updated[0]);
+                                                                            }
+                                                                        };
+                                                                        reader.readAsDataURL(file);
+                                                                    });
+                                                                    e.target.value = '';
+                                                                }}
+                                                            />
+                                                        </label>
+
+                                                        {/* 동영상 URL / 유튜브 링크 추가 버튼 */}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const url = prompt('유튜브 URL 또는 동영상(MP4) 링크를 입력하세요:');
+                                                                if (url && url.trim()) {
+                                                                    let cleanVUrl = url.trim();
+                                                                    if (cleanVUrl.includes('youtube.com/watch?v=')) {
+                                                                        cleanVUrl = cleanVUrl.replace('watch?v=', 'embed/');
+                                                                    } else if (cleanVUrl.includes('youtu.be/')) {
+                                                                        cleanVUrl = cleanVUrl.replace('youtu.be/', 'www.youtube.com/embed/');
+                                                                    }
+                                                                    const currentVideos = item.videos && Array.isArray(item.videos) ? item.videos : (item.videoUrl ? [item.videoUrl] : []);
+                                                                    const updated = [...currentVideos, cleanVUrl];
+                                                                    updateTimelineItem(i, idx, 'videos', updated);
+                                                                    updateTimelineItem(i, idx, 'videoUrl', updated[0]);
+                                                                }
+                                                            }}
+                                                            style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '4px', background: 'rgba(139, 92, 246, 0.2)', color: '#a78bfa', border: '1px solid rgba(139, 92, 246, 0.4)', cursor: 'pointer', fontWeight: 'bold' }}
+                                                        >
+                                                            🔗 동영상 URL 추가
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {(() => {
+                                                    const videoList: string[] = item.videos && Array.isArray(item.videos) && item.videos.length > 0
+                                                        ? item.videos
+                                                        : (item.videoUrl ? [item.videoUrl] : (item.video ? [item.video] : []));
+                                                    
+                                                    if (videoList.length === 0) {
+                                                        return (
+                                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic', padding: '4px 0' }}>
+                                                                등록된 동영상이 없습니다.
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    const getYouTubeThumbnail = (vUrl: string): string | null => {
+                                                        if (!vUrl || typeof vUrl !== 'string') return null;
+                                                        const clean = vUrl.trim();
+                                                        const ytMatch = clean.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([^"&?\/\s]{11})/i);
+                                                        if (ytMatch && ytMatch[1]) {
+                                                            return `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
+                                                        }
+                                                        return null;
+                                                    };
+
+                                                    return (
+                                                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '8px' }}>
+                                                            {videoList.map((vUrl: string, vIdx: number) => {
+                                                                const ytThumb = getYouTubeThumbnail(vUrl);
+                                                                const isDirect = vUrl.match(/\.(mp4|webm|mov)$/i) || vUrl.startsWith('data:video');
+
+                                                                return (
+                                                                    <div key={vIdx} style={{ position: 'relative', width: '160px', height: '95px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(139, 92, 246, 0.4)', background: '#0f172a', boxShadow: '0 2px 6px rgba(0,0,0,0.3)' }}>
+                                                                        {ytThumb ? (
+                                                                            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                                                                                <img
+                                                                                    src={ytThumb}
+                                                                                    alt={`유튜브 썸네일 ${vIdx + 1}`}
+                                                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                                                                    onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                                                                                />
+                                                                                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.25)', pointerEvents: 'none' }}>
+                                                                                    <div style={{ width: '34px', height: '24px', borderRadius: '6px', background: '#ff0000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px' }}>
+                                                                                        ▶
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : isDirect ? (
+                                                                            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                                                                                <video src={vUrl} preload="metadata" style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }} />
+                                                                                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.25)', pointerEvents: 'none' }}>
+                                                                                    <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'rgba(139, 92, 246, 0.9)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>
+                                                                                        ▶
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #1e1b4b 0%, #31104b 100%)', color: '#c084fc', padding: '6px', textAlign: 'center' }}>
+                                                                                <span style={{ fontSize: '1.4rem', marginBottom: '2px' }}>🎬</span>
+                                                                                <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>동영상 썸네일</span>
+                                                                            </div>
+                                                                        )}
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                const updated = videoList.filter((_, k) => k !== vIdx);
+                                                                                updateTimelineItem(i, idx, 'videos', updated);
+                                                                                updateTimelineItem(i, idx, 'videoUrl', updated[0] || '');
+                                                                            }}
+                                                                            style={{ position: 'absolute', top: '4px', right: '4px', width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.95)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.5)', zIndex: 3 }}
+                                                                            title="동영상 삭제"
+                                                                        >
+                                                                            ✕
+                                                                        </button>
+                                                                    </div>
+                                                                );
+                                                            })}
                                                         </div>
                                                     );
                                                 })()}

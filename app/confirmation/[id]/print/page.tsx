@@ -112,6 +112,139 @@ const formatDestination = (destStr?: string | null) => {
     return `${list[0]} 외 ${list.length - 1}곳`;
 };
 
+// HTML 블록에서 <img>/<video> 및 순수 동영상 링크를 뽑아내고, 남은 텍스트는 그대로 반환한다.
+// (인쇄용 화면은 이미지/동영상을 항상 별도의 2열 그리드로 렌더링하기 위해 본문에서 분리해둔다)
+function extractMediaFromHtml(html?: string): { text: string; images: string[]; videos: string[] } {
+    let text = html || '';
+    const images: string[] = [];
+    const videos: string[] = [];
+
+    text = text
+        .replace(/<a[^>]+href="#none"[^>]*>([\s\S]*?)<\/a>/gi, '')
+        .replace(/<span[^>]+class="blind"[^>]*>([\s\S]*?)<\/span>/gi, '')
+        .replace(/<div[^>]+class="controller"[^>]*>([\s\S]*?)<\/div>/gi, '')
+        .replace(/이전다음/gi, '');
+
+    text = text.replace(/<video[^>]*>[\s\S]*?<\/video>/gi, (block: string) => {
+        const srcMatch = block.match(/src=["']([^"']+)["']/i);
+        if (srcMatch) videos.push(srcMatch[1]);
+        return '';
+    });
+
+    text = text.replace(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi, (_m: string, src: string) => {
+        images.push(src);
+        return '';
+    });
+
+    const linkMatches = text.match(/https?:\/\/[^\s"'<>]+\.(?:mp4|webm|mov)|https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be|vimeo\.com)[^\s"'<>]+/gi);
+    if (linkMatches) {
+        linkMatches.forEach((m: string) => {
+            videos.push(m);
+            text = text.replace(m, '');
+        });
+    }
+
+    return { text, images, videos };
+}
+
+function parsePrintVideo(url: string): { kind: 'youtube' | 'vimeo' | 'file' | 'other'; thumb?: string; embedUrl: string } | null {
+    if (!url || typeof url !== 'string') return null;
+    const clean = url.trim();
+    if (!clean) return null;
+
+    const ytMatch = clean.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([^"&?\/\s]{11})/i);
+    if (ytMatch && ytMatch[1]) {
+        return { kind: 'youtube', thumb: `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`, embedUrl: clean };
+    }
+
+    const vimeoMatch = clean.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+    if (vimeoMatch && vimeoMatch[1]) {
+        return { kind: 'vimeo', thumb: `https://vumbnail.com/${vimeoMatch[1]}.jpg`, embedUrl: clean };
+    }
+
+    if (clean.match(/\.(mp4|webm|mov)$/i) || clean.startsWith('data:video')) {
+        return { kind: 'file', embedUrl: clean };
+    }
+
+    if (clean.startsWith('http://') || clean.startsWith('https://')) {
+        return { kind: 'other', embedUrl: clean };
+    }
+
+    return null;
+}
+
+// 인쇄용에는 원본 개수와 상관없이 이미지/동영상을 합쳐 최대 2개까지만, 항상 한 줄(2열)로만 보여준다.
+// (많으면 앞의 2개만 노출하고 나머지는 인쇄물에서 생략한다. 1개면 2칸 중 1칸 크기 그대로 유지된다)
+// 동영상은 재생 플레이어를 심지 않고 썸네일 + 재생 아이콘으로만 표시한다.
+const PRINT_MEDIA_LIMIT = 2;
+
+function PrintMediaGrid({ images, videos }: { images: string[]; videos: string[] }) {
+    const limitedImages = (images || []).slice(0, PRINT_MEDIA_LIMIT);
+    const remainingSlots = PRINT_MEDIA_LIMIT - limitedImages.length;
+
+    const parsedVideos = remainingSlots > 0
+        ? (videos || [])
+            .slice(0, remainingSlots)
+            .map(parsePrintVideo)
+            .filter((v): v is NonNullable<ReturnType<typeof parsePrintVideo>> => Boolean(v))
+        : [];
+
+    if (limitedImages.length === 0 && parsedVideos.length === 0) return null;
+
+    return (
+        <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '8px',
+            marginTop: '8px',
+            marginBottom: '8px'
+        }}>
+            {limitedImages.map((url, idx) => (
+                <img
+                    key={`img-${idx}`}
+                    src={url}
+                    alt="일정 이미지"
+                    style={{ width: '100%', aspectRatio: '16 / 10', objectFit: 'cover', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'block' }}
+                />
+            ))}
+            {parsedVideos.map((v, idx) => (
+                <div
+                    key={`vid-${idx}`}
+                    style={{ position: 'relative', width: '100%', aspectRatio: '16 / 10', borderRadius: '10px', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#0f172a' }}
+                >
+                    {v.kind === 'file' ? (
+                        <video
+                            src={v.embedUrl}
+                            muted
+                            playsInline
+                            preload="metadata"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        />
+                    ) : v.thumb ? (
+                        <img
+                            src={v.thumb}
+                            alt="동영상 썸네일"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+                        />
+                    ) : null}
+                    <div style={{
+                        position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: 'rgba(0,0,0,0.25)'
+                    }}>
+                        <div style={{
+                            width: '38px', height: '38px', borderRadius: '50%', background: 'rgba(255,255,255,0.92)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="#0f172a"><polygon points="6 3 20 12 6 21 6 3" /></svg>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: boolean }) {
     const params = useParams();
     const router = useRouter();
@@ -309,7 +442,12 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
 
     const getExtraTransportation = (day: any) => {
         if (!day) return null;
-        if (day.transport && day.transport !== '해당없음' && day.transport !== 'null') return day.transport;
+        if (typeof day.transport === 'string' && day.transport !== '해당없음' && day.transport !== 'null') return day.transport;
+        if (day.transport && typeof day.transport === 'object') {
+            if (day.transport.airline || day.transport.flightNo) {
+                return `${day.transport.airline || ''} ${day.transport.flightNo || ''}`.trim();
+            }
+        }
         if (day.flight && day.flight.airline) {
             return `항공이동 (${day.flight.airline} ${day.flight.flightNo || ''})`;
         }
@@ -591,6 +729,82 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
 
                                         {/* 일정 본문 */}
                                         <div className="pc-day-body">
+                                            {/* 항공 카드 렌더링 (1일차 가는 편, 마지막 일차 오는 편) */}
+                                            {(() => {
+                                                const isFirst = idx === 0;
+                                                const isLast = idx === (itinerary.length - 1);
+                                                if (!isFirst && !isLast) return null;
+                                                let flightInfo = day.flight || day.flightInfo;
+                                                if (isFirst) {
+                                                    if (!flightInfo || String(flightInfo.title || '').includes('오는') || (!flightInfo.flightNo && !flightInfo.departureTime)) {
+                                                        flightInfo = {
+                                                            airline: day.airline || doc.flight?.airline || '대한항공',
+                                                            flightNo: day.departureFlightNumber || doc.flight?.departureFlightNumber || doc.flight?.flightCode || '',
+                                                            departureCity: day.departureAirport || doc.flight?.departureAirport || '서울(ICN)',
+                                                            departureTime: day.departureTime || doc.flight?.departureTime || '',
+                                                            arrivalCity: day.arrivalAirport || doc.flight?.arrivalAirport || '',
+                                                            arrivalTime: day.arrivalTime || doc.flight?.arrivalTime || ''
+                                                        };
+                                                    }
+                                                    if (!flightInfo.flightNo && !flightInfo.departureTime) return null;
+                                                    return (
+                                                        <div style={{ marginBottom: '16px' }}>
+                                                            <div style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)', color: '#fff', padding: '8px 14px', borderRadius: '10px', fontWeight: 800, fontSize: '0.9rem', marginBottom: '8px' }}>
+                                                                가는 편
+                                                            </div>
+                                                            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                <div style={{ textAlign: 'left' }}>
+                                                                    <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700 }}>{flightInfo.departureCity || '서울(ICN)'}</div>
+                                                                    <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0f172a' }}>{flightInfo.departureTime}</div>
+                                                                </div>
+                                                                <div style={{ textAlign: 'center' }}>
+                                                                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#2563eb' }}>{flightInfo.airline} {flightInfo.flightNo}</div>
+                                                                    <div style={{ height: '1px', background: '#3b82f6', margin: '4px 0', width: '80px' }}></div>
+                                                                </div>
+                                                                <div style={{ textAlign: 'right' }}>
+                                                                    <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700 }}>{flightInfo.arrivalCity || '도착지'}</div>
+                                                                    <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0f172a' }}>{flightInfo.arrivalTime}</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+                                                if (isLast) {
+                                                    if (!flightInfo || String(flightInfo.title || '').includes('가는') || (!flightInfo.flightNo && !flightInfo.departureTime)) {
+                                                        flightInfo = {
+                                                            airline: day.airline || doc.flight?.airline || '대한항공',
+                                                            flightNo: day.returnFlightNumber || doc.flight?.returnFlightNumber || '',
+                                                            departureCity: day.returnDepartureAirport || doc.flight?.returnDepartureAirport || day.arrivalAirport || '',
+                                                            departureTime: day.returnDepartureTime || doc.flight?.returnDepartureTime || '',
+                                                            arrivalCity: day.departureAirport || doc.flight?.departureAirport || '서울(ICN)',
+                                                            arrivalTime: day.returnArrivalTime || doc.flight?.returnArrivalTime || ''
+                                                        };
+                                                    }
+                                                    if (!flightInfo.flightNo && !flightInfo.departureTime) return null;
+                                                    return (
+                                                        <div style={{ marginBottom: '16px' }}>
+                                                            <div style={{ background: 'linear-gradient(135deg, #581c87 0%, #7c3aed 100%)', color: '#fff', padding: '8px 14px', borderRadius: '10px', fontWeight: 800, fontSize: '0.9rem', marginBottom: '8px' }}>
+                                                                오는 편
+                                                            </div>
+                                                            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                <div style={{ textAlign: 'left' }}>
+                                                                    <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700 }}>{flightInfo.departureCity || '출발지'}</div>
+                                                                    <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0f172a' }}>{flightInfo.departureTime}</div>
+                                                                </div>
+                                                                <div style={{ textAlign: 'center' }}>
+                                                                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#7c3aed' }}>{flightInfo.airline} {flightInfo.flightNo}</div>
+                                                                    <div style={{ height: '1px', background: '#7c3aed', margin: '4px 0', width: '80px' }}></div>
+                                                                </div>
+                                                                <div style={{ textAlign: 'right' }}>
+                                                                    <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700 }}>{flightInfo.arrivalCity || '서울(ICN)'}</div>
+                                                                    <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0f172a' }}>{flightInfo.arrivalTime}</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
                                             
                                             {/* HTML 콘텐츠 랜더링 */}
                                             {hasTimeline ? (
@@ -598,27 +812,12 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
                                                     {day.timeline!.map((item: any, i: number) => {
                                                         let cleanDesc = item.description || '';
 
-                                                        // 1. Safeguard: Remove Swiper navigation controls and "이전다음" text
-                                                        cleanDesc = cleanDesc
-                                                            .replace(/<a[^>]+href="#none"[^>]*>([\s\S]*?)<\/a>/gi, '')
-                                                            .replace(/<span[^>]+class="blind"[^>]*>([\s\S]*?)<\/span>/gi, '')
-                                                            .replace(/<div[^>]+class="controller"[^>]*>([\s\S]*?)<\/div>/gi, '')
-                                                            .replace(/이전다음/gi, '')
-                                                            .trim();
+                                                        // 1. HTML 본문에서 이미지/동영상을 분리 추출 (Swiper 컨트롤 등도 함께 제거)
+                                                        const extracted = extractMediaFromHtml(cleanDesc);
+                                                        cleanDesc = extracted.text;
 
-                                                        // 2. Extract images
-                                                        const imgMatches = cleanDesc.match(/<img[^>]+src="([^">]+)"[^>]*>/gi) || [];
-                                                        const imageUrls: string[] = [];
-
-                                                        if (imgMatches.length > 0) {
-                                                            imgMatches.forEach((m: string) => {
-                                                                const srcMatch = m.match(/src="([^">]+)"/i);
-                                                                if (srcMatch) imageUrls.push(srcMatch[1]);
-                                                            });
-                                                            cleanDesc = cleanDesc.replace(/<img[^>]+>/gi, '');
-                                                        }
-
-                                                        // 2-1. Fallback: Check item.images or item.image if no HTML img tags extracted
+                                                        // 2. 구조화된 item.images / item.image 필드 병합 (본문에서 못 뽑은 경우 대비)
+                                                        const imageUrls: string[] = [...extracted.images];
                                                         if (imageUrls.length === 0) {
                                                             if (Array.isArray(item.images) && item.images.length > 0) {
                                                                 item.images.forEach((imgUrl: any) => {
@@ -630,6 +829,13 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
                                                                 imageUrls.push(item.image);
                                                             }
                                                         }
+
+                                                        // 2-1. 구조화된 item.videos / item.videoUrl / item.video 필드 병합
+                                                        const videoUrls: string[] = [...extracted.videos];
+                                                        const structuredVideos: any[] = Array.isArray(item.videos) ? item.videos : (item.videoUrl ? [item.videoUrl] : (item.video ? [item.video] : []));
+                                                        structuredVideos.forEach((v: any) => {
+                                                            if (typeof v === 'string' && v.trim() && !videoUrls.includes(v)) videoUrls.push(v);
+                                                        });
 
                                                         // 3. Format and collapse duplicate spacing/newlines for ALL descriptions
                                                         cleanDesc = cleanDesc
@@ -648,34 +854,8 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
                                                                     <span dangerouslySetInnerHTML={{ __html: cleanupHtml(item.title) }} />
                                                                     {item.subtitle && <span className="pc-timeline-subtitle">(<span dangerouslySetInnerHTML={{ __html: cleanupHtml(item.subtitle) }} />)</span>}
                                                                 </div>
-                                                                
-                                                                {imageUrls.length > 0 && (
-                                                                    <div style={{ 
-                                                                        display: imageUrls.length === 1 ? 'block' : 'grid', 
-                                                                        gridTemplateColumns: imageUrls.length > 1 ? `repeat(${Math.min(imageUrls.length, 2)}, 1fr)` : 'none',
-                                                                        gap: '8px', 
-                                                                        marginTop: '8px', 
-                                                                        marginBottom: '8px',
-                                                                        width: 'calc(100% - 20px)',
-                                                                        marginLeft: '20px'
-                                                                    }}>
-                                                                        {imageUrls.map((url, uidx) => (
-                                                                            <img 
-                                                                                key={uidx} 
-                                                                                src={url} 
-                                                                                style={{ 
-                                                                                    width: '100%', 
-                                                                                    aspectRatio: '16 / 10', 
-                                                                                    objectFit: 'cover', 
-                                                                                    borderRadius: '10px', 
-                                                                                    display: 'block',
-                                                                                    border: '1px solid #e2e8f0'
-                                                                                }} 
-                                                                                alt="일정 이미지" 
-                                                                            />
-                                                                        ))}
-                                                                    </div>
-                                                                )}
+
+                                                                <PrintMediaGrid images={imageUrls} videos={videoUrls} />
 
                                                                 {cleanDesc && (
                                                                     <div 
@@ -694,26 +874,36 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
                                                         let cleanText = line.trim();
                                                         if (!cleanText) return null;
                                                         
-                                                        let processedText = cleanupHtml(cleanText);
-                                                        const hasImage = processedText.toLowerCase().includes('<img');
-                                                        
-                                                        if (!hasImage) {
+                                                        const { text: strippedText, images: lineImages, videos: lineVideos } = extractMediaFromHtml(cleanText);
+                                                        let processedText = cleanupHtml(strippedText);
+                                                        const hasMedia = lineImages.length > 0 || lineVideos.length > 0;
+
+                                                        if (!hasMedia) {
                                                             processedText = processedText.replace(/(이동|구경|감상|산책|관람|방문|체크인|진행|제공|이용|탑승|출발|도착|해산|귀환|관광|쇼핑|체험|시식|식사|숙박|휴식)합니다\.?$/, '$1');
                                                         }
-                                                        
+
                                                         return (
                                                             <div key={ai} className="pc-timeline-item" style={{ borderBottom: 'none', padding: '4px 0' }}>
                                                                 <div className="pc-timeline-desc" style={{ margin: 0, display: 'flex', gap: '8px' }}>
-                                                                    <span style={{ marginTop: '2px', flexShrink: 0 }}>{hasImage ? '🖼️' : '•'}</span>
-                                                                    <div style={{ flex: 1, wordBreak: 'break-word' }} dangerouslySetInnerHTML={{ __html: processedText }} />
+                                                                    <span style={{ marginTop: '2px', flexShrink: 0 }}>{hasMedia ? '🖼️' : '•'}</span>
+                                                                    <div style={{ flex: 1, wordBreak: 'break-word' }}>
+                                                                        {processedText.trim() && <div dangerouslySetInnerHTML={{ __html: processedText }} />}
+                                                                        <PrintMediaGrid images={lineImages} videos={lineVideos} />
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         )
                                                     })}
                                                 </div>
-                                            ) : (day.description || day.content) ? (
-                                                <div className="pc-day-desc" dangerouslySetInnerHTML={{ __html: cleanupHtml(day.description || day.content || '') }} />
-                                            ) : (
+                                            ) : (day.description || day.content) ? (() => {
+                                                const { text: dayText, images: dayImages, videos: dayVideos } = extractMediaFromHtml(day.description || day.content || '');
+                                                return (
+                                                    <div className="pc-day-desc">
+                                                        <div dangerouslySetInnerHTML={{ __html: cleanupHtml(dayText) }} />
+                                                        <PrintMediaGrid images={dayImages} videos={dayVideos} />
+                                                    </div>
+                                                );
+                                            })() : (
                                                 <p className="pc-empty-day">자유 일정 또는 전일 휴식 일정입니다.</p>
                                             )}
 

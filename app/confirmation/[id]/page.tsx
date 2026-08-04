@@ -9,7 +9,7 @@ const COUNTRY_CITY_MAP: Record<string, string> = {
     '리스본': 'LIS', '아테네': 'ATH', '이스탄불': 'IST',
     '두바이': 'DXB', '아부다비': 'AUH', '도하': 'DOH', '무스카트': 'MCT',
     '타슈켄트': 'TAS', '알마티': 'ALA',
-    
+
     // 🌍 국가 대응 (안전망)
     '체코': 'PRG', '체코공화국': 'PRG', '오스트리아': 'VIE', '헝가리': 'BUD', '스위스': 'ZRH',
     '영국': 'LHR', '프랑스': 'CDG', '독일': 'FRA', '이탈리아': 'FCO', '스페인': 'MAD'
@@ -31,15 +31,15 @@ const TIMEZONE_OFFSETS: Record<string, number> = {
 const getKSTOffset = (cityName?: string) => {
     if (!cityName) return 0;
     const cleanName = cityName.replace(/[()]/g, '').trim();
-    
+
     // 1. 코드로 직접 매핑 (PRG 등)
     const upperCode = cleanName.toUpperCase();
     if (TIMEZONE_OFFSETS[upperCode]) return TIMEZONE_OFFSETS[upperCode];
-    
+
     // 2. 도시명/국가명으로 코드 찾기 (프라하 -> PRG, 체코 -> PRG)
     const code = CITY_CODE_MAP[cleanName] || COUNTRY_CITY_MAP[cleanName];
     if (code && TIMEZONE_OFFSETS[code]) return TIMEZONE_OFFSETS[code];
-    
+
     return 0;
 };
 
@@ -93,19 +93,19 @@ function safeStr(val: any): string {
 const formatBulletPoints = (text: string) => {
     if (!text) return null;
     const cleanText = safeStr(text);
-    
+
     // Split by common delimiters like " - " or newline followed by "-" or "* " or "· "
     const parts = cleanText
         .split(/[\r\n]+|(?:\s+|^)-\s+|(?:\s+|^)\*\s+|(?:\s+|^)·\s+/)
         .map(p => p.trim())
         .filter(p => p.length > 0);
-        
+
     if (parts.length <= 1) {
         const inlineParts = cleanText
             .split(/\s+-\s+/)
             .map(p => p.trim())
             .filter(p => p.length > 0);
-            
+
         if (inlineParts.length > 1) {
             let prefix = '';
             let listContent = inlineParts;
@@ -115,7 +115,7 @@ const formatBulletPoints = (text: string) => {
                 prefix = inlineParts[0];
                 listContent = inlineParts.slice(1);
             }
-            
+
             return (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {prefix && <div style={{ fontWeight: 700, fontSize: '0.8rem', opacity: 0.9 }}>{prefix}</div>}
@@ -129,17 +129,17 @@ const formatBulletPoints = (text: string) => {
                 </div>
             );
         }
-        
+
         return <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.5, wordBreak: 'keep-all' }}>{cleanText}</p>;
     }
-    
+
     let prefix = '';
     let listContent = parts;
     if (!cleanText.startsWith('-') && !cleanText.startsWith('*') && !cleanText.startsWith('·') && (parts[0].endsWith(':') || parts[0].includes('면세 한도') || parts[0].includes('유의사항'))) {
         prefix = parts[0];
         listContent = parts.slice(1);
     }
-    
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {prefix && <div style={{ fontWeight: 700, fontSize: '0.8rem', opacity: 0.9 }}>{prefix}</div>}
@@ -162,7 +162,7 @@ const renderFormattedText = (text: string) => {
     if (!text) return null;
     const cleanText = safeStr(text);
     const lines = cleanText.split('\n');
-    
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {lines.map((line, idx) => {
@@ -219,48 +219,48 @@ const renderFormattedText = (text: string) => {
 
 const WeatherIcon = ({ description }: { description: string }) => {
     const d = description || '';
-    
+
     // Icon mapping logic
     if (d.includes('맑음') || d.includes('태양') || d.includes('화창')) {
         return (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+                <circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" />
             </svg>
         );
     }
     if (d.includes('비') || d.includes('소나기') || d.includes('강수')) {
         return (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /><path d="M16 14v6" /><path d="M8 14v6" /><path d="M12 16v6" />
             </svg>
         );
     }
     if (d.includes('눈') || d.includes('빙판')) {
         return (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M8 15h.01"/><path d="M8 19h.01"/><path d="M12 17h.01"/><path d="M12 21h.01"/><path d="M16 15h.01"/><path d="M16 19h.01"/>
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /><path d="M8 15h.01" /><path d="M8 19h.01" /><path d="M12 17h.01" /><path d="M12 21h.01" /><path d="M16 15h.01" /><path d="M16 19h.01" />
             </svg>
         );
     }
     if (d.includes('천둥') || d.includes('번개')) {
         return (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m13 10-4 6h3v4l4-6h-3v-4Z"/>
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /><path d="m13 10-4 6h3v4l4-6h-3v-4Z" />
             </svg>
         );
     }
     if (d.includes('흐림') || d.includes('구름') || d.includes('안개')) {
         return (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17.5 19x"/><path d="M17.5 19c2.31 0 4.19-1.88 4.19-4.19 0-1.89-1.25-3.48-2.96-3.98A5.95 5.95 0 0 0 19 9c0-3.31-2.69-6-6-6-2.5 0-4.66 1.54-5.52 3.73A4.54 4.54 0 0 0 2 11c0 2.49 2.01 4.5 4.5 4.5h11"/>
+                <path d="M17.5 19x" /><path d="M17.5 19c2.31 0 4.19-1.88 4.19-4.19 0-1.89-1.25-3.48-2.96-3.98A5.95 5.95 0 0 0 19 9c0-3.31-2.69-6-6-6-2.5 0-4.66 1.54-5.52 3.73A4.54 4.54 0 0 0 2 11c0 2.49 2.01 4.5 4.5 4.5h11" />
             </svg>
         );
     }
-    
+
     // Default: Cloudy
     return (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M17.5 19x"/><path d="M17.5 19c2.31 0 4.19-1.88 4.19-4.19 0-1.89-1.25-3.48-2.96-3.98A5.95 5.95 0 0 0 19 9c0-3.31-2.69-6-6-6-2.5 0-4.66 1.54-5.52 3.73A4.54 4.54 0 0 0 2 11c0 2.49 2.01 4.5 4.5 4.5h11"/>
+            <path d="M17.5 19x" /><path d="M17.5 19c2.31 0 4.19-1.88 4.19-4.19 0-1.89-1.25-3.48-2.96-3.98A5.95 5.95 0 0 0 19 9c0-3.31-2.69-6-6-6-2.5 0-4.66 1.54-5.52 3.73A4.54 4.54 0 0 0 2 11c0 2.49 2.01 4.5 4.5 4.5h11" />
         </svg>
     );
 };
@@ -319,13 +319,13 @@ const GuideAccordion = ({
     children: React.ReactNode;
 }) => {
     return (
-        <div 
+        <div
             className={`mc-section guide-accordion ${isOpen ? 'open' : ''}`}
-            style={{ 
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)', 
-                border: '1px solid #f1f5f9', 
+            style={{
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+                border: '1px solid #f1f5f9',
                 borderRadius: '16px',
-                marginBottom: '16px' 
+                marginBottom: '16px'
             }}
         >
             <div className="ga-header" onClick={() => onToggle(id)}>
@@ -357,6 +357,96 @@ const cleanupHtml = (html: string | undefined): string => {
         .replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"')
         .replace(/&amp;/g, '&');
+};
+
+// 초고속 동영상 카드 (YouTube 퍼사드: 0ms 초고속 CDN 썸네일 노출 후 클릭 시 재생)
+const VideoCard = ({ v }: { v: { type: 'iframe' | 'video'; url: string; ytId?: string } }) => {
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    if (v.type === 'video') {
+        return (
+            <div style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', background: '#000', position: 'relative', aspectRatio: '16/9' }}>
+                <video src={v.url} controls preload="metadata" playsInline style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            </div>
+        );
+    }
+
+    if (v.ytId) {
+        const thumbUrl = `https://img.youtube.com/vi/${v.ytId}/hqdefault.jpg`;
+        if (!isPlaying) {
+            return (
+                <div
+                    onClick={() => setIsPlaying(true)}
+                    style={{
+                        width: '100%',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        background: '#000',
+                        position: 'relative',
+                        aspectRatio: '16/9',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
+                        border: '1px solid #e2e8f0'
+                    }}
+                >
+                    <img
+                        src={thumbUrl}
+                        alt="동영상 썸네일"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                    <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'rgba(0, 0, 0, 0.25)',
+                        transition: 'background 0.2s ease'
+                    }}>
+                        <div style={{
+                            width: '64px',
+                            height: '44px',
+                            borderRadius: '12px',
+                            background: '#ff0000',
+                            color: '#ffffff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 4px 12px rgba(255, 0, 0, 0.4)'
+                        }}>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="#ffffff">
+                                <polygon points="6 3 20 12 6 21 6 3" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', background: '#000', position: 'relative', aspectRatio: '16/9' }}>
+                <iframe
+                    src={`${v.url}?autoplay=1`}
+                    style={{ width: '100%', height: '100%', border: 'none' }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="youtube-video"
+                />
+            </div>
+        );
+    }
+
+    return (
+        <div style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', background: '#000', position: 'relative', aspectRatio: '16/9' }}>
+            <iframe
+                src={v.url}
+                style={{ width: '100%', height: '100%', border: 'none' }}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title="iframe-video"
+            />
+        </div>
+    );
 };
 
 const TimelineItem = ({ item }: { item: any }) => {
@@ -427,7 +517,7 @@ const TimelineItem = ({ item }: { item: any }) => {
 
     // Extract img tags from description to render them outside clamped container
     let cleanDesc = item.description || '';
-    
+
     // 1. Safeguard: Remove Swiper navigation controls and "이전다음" text
     cleanDesc = cleanDesc
         .replace(/<a[^>]+href="#none"[^>]*>([\s\S]*?)<\/a>/gi, '')
@@ -481,10 +571,10 @@ const TimelineItem = ({ item }: { item: any }) => {
         <div className="timeline-item-wrapper" style={{ display: 'flex', gap: '14px', marginBottom: '24px', position: 'relative' }}>
             {/* 좌측 타임라인 라인 및 아이콘 */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '24px', flexShrink: 0 }}>
-                <div style={{ 
-                    width: isLocation ? '24px' : '10px', 
-                    height: isLocation ? '24px' : '10px', 
-                    borderRadius: '50%', 
+                <div style={{
+                    width: isLocation ? '24px' : '10px',
+                    height: isLocation ? '24px' : '10px',
+                    borderRadius: '50%',
                     background: isLocation ? 'transparent' : '#cbd5e1',
                     display: 'flex',
                     alignItems: 'center',
@@ -505,18 +595,18 @@ const TimelineItem = ({ item }: { item: any }) => {
 
             {/* 우측 콘텐츠 영역 */}
             <div style={{ flex: 1, paddingTop: isLocation ? '2px' : '0', minWidth: 0, overflow: 'hidden' }}>
-                <div 
-                    style={{ 
-                        fontSize: '0.95rem', 
-                        fontWeight: 700, 
-                        color: '#1e293b', 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                <div
+                    style={{
+                        fontSize: '0.95rem',
+                        fontWeight: 700,
+                        color: '#1e293b',
+                        display: 'flex',
+                        alignItems: 'center',
                         flexWrap: 'wrap',
                         gap: '6px',
                         cursor: needsCollapse ? 'pointer' : 'default',
                         lineHeight: 1.4
-                    }} 
+                    }}
                     onClick={() => needsCollapse && setIsExpanded(!isExpanded)}
                 >
                     <span dangerouslySetInnerHTML={{ __html: cleanupHtml(item.title) }} />
@@ -535,7 +625,7 @@ const TimelineItem = ({ item }: { item: any }) => {
                     ))}
                     {isLocation && <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 400, marginLeft: '2px' }}>›</span>}
                 </div>
-                
+
                 {item.subtitle && (
                     <div style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600, marginTop: '4px', lineHeight: 1.4 }}>
                         <span dangerouslySetInnerHTML={{ __html: cleanupHtml(item.subtitle) }} />
@@ -544,43 +634,62 @@ const TimelineItem = ({ item }: { item: any }) => {
 
                 {/* 관광지 제목 바로 아래 1:1 슬라이더 및 클릭 확대 */}
                 {(() => {
-                    const allImages: string[] = [...imageUrls];
-                    if (item.image && !allImages.includes(item.image)) allImages.unshift(item.image);
+                    const isVideoUrl = (url: string) => {
+                        if (!url || typeof url !== 'string') return true;
+                        const u = url.toLowerCase();
+                        return u.includes('youtube.com') || u.includes('youtu.be') || u.includes('vimeo.com') ||
+                               Boolean(u.match(/\.(mp4|webm|mov)$/i)) || u.startsWith('data:video') ||
+                               u.includes('btn_') || u.includes('icon_') || u.includes('circle.png');
+                    };
+
+                    const rawImages: string[] = [...imageUrls];
+                    if (item.image && !rawImages.includes(item.image)) rawImages.unshift(item.image);
                     if (item.images && Array.isArray(item.images)) {
                         item.images.forEach((img: string) => {
-                            if (img && !allImages.includes(img)) allImages.push(img);
+                            if (img && !rawImages.includes(img)) rawImages.push(img);
                         });
                     }
+
+                    // Strict filtering to ensure ONLY valid image URLs are rendered in <img> tags
+                    const allImages = rawImages.filter(url => {
+                        if (!url || typeof url !== 'string' || url.trim().length < 8) return false;
+                        if (isVideoUrl(url)) return false;
+                        if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:image')) return false;
+                        return true;
+                    });
 
                     if (allImages.length === 0) return null;
 
                     return (
-                        <div style={{ 
-                            display: 'flex', 
-                            gap: '10px', 
-                            overflowX: 'auto', 
-                            padding: '8px 0 10px 0', 
+                        <div style={{
+                            display: 'flex',
+                            gap: '10px',
+                            overflowX: 'auto',
+                            padding: '8px 0 10px 0',
                             marginTop: '8px',
                             scrollSnapType: 'x mandatory',
-                            WebkitOverflowScrolling: 'touch'
+                            WebkitOverflowScrolling: 'touch',
+                            justifyContent: allImages.length === 1 ? 'center' : 'flex-start'
                         }}>
                             {allImages.map((url, uidx) => (
-                                <img 
-                                    key={uidx} 
-                                    src={url} 
-                                    style={{ 
-                                        width: '340px',
+                                <img
+                                    key={uidx}
+                                    src={url}
+                                    style={{
+                                        width: '100%',
+                                        maxWidth: '340px',
                                         height: '190px',
-                                        objectFit: 'cover', 
-                                        borderRadius: '12px', 
+                                        objectFit: 'cover',
+                                        borderRadius: '12px',
                                         display: 'block',
                                         border: '1px solid #e2e8f0',
                                         boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                                         cursor: 'pointer',
-                                        scrollSnapAlign: 'start',
-                                        flexShrink: 0
-                                    }} 
-                                    alt="일정 이미지" 
+                                        scrollSnapAlign: 'center',
+                                        flexShrink: 0,
+                                        margin: allImages.length === 1 ? '0 auto' : '0'
+                                    }}
+                                    alt="일정 이미지"
                                     onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
@@ -594,15 +703,74 @@ const TimelineItem = ({ item }: { item: any }) => {
                     );
                 })()}
 
+                {/* 동영상 (유튜브 / MP4 / iframe) 렌더링 */}
+                {(() => {
+                    const rawVideos: string[] = Array.isArray(item.videos) ? [...item.videos] : (item.videoUrl ? [item.videoUrl] : (item.video ? [item.video] : []));
+                    
+                    // Check item.images, item.description, item.subtitle for video links
+                    const candidates = [
+                        ...(item.images && Array.isArray(item.images) ? item.images : []),
+                        item.image,
+                        item.description,
+                        item.subtitle
+                    ];
 
+                    candidates.forEach((u: any) => {
+                        if (typeof u === 'string') {
+                            const matches = u.match(/(https?:\/\/[^\s"'<>]+\.(?:mp4|webm|mov)|https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be|vimeo\.com)[^\s"'<>]+)/gi);
+                            if (matches) {
+                                matches.forEach(m => {
+                                    if (!rawVideos.includes(m)) rawVideos.push(m);
+                                });
+                            }
+                        }
+                    });
+
+                    const parseVideoUrl = (url: string) => {
+                        if (!url || typeof url !== 'string') return null;
+                        const clean = url.trim();
+
+                        const ytMatch = clean.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([^"&?\/\s]{11})/i);
+                        if (ytMatch && ytMatch[1]) {
+                            return { type: 'iframe' as const, url: `https://www.youtube.com/embed/${ytMatch[1]}`, ytId: ytMatch[1] };
+                        }
+
+                        const vimeoMatch = clean.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+                        if (vimeoMatch && vimeoMatch[1]) {
+                            return { type: 'iframe' as const, url: `https://player.vimeo.com/video/${vimeoMatch[1]}` };
+                        }
+
+                        if (clean.match(/\.(mp4|webm|mov)$/i) || clean.startsWith('data:video')) {
+                            return { type: 'video' as const, url: clean };
+                        }
+
+                        if ((clean.startsWith('http://') || clean.startsWith('https://')) && !clean.includes('lottetour.com')) {
+                            return { type: 'iframe' as const, url: clean };
+                        }
+
+                        return null;
+                    };
+
+                    const validVideos = rawVideos.map(v => parseVideoUrl(v)).filter(Boolean) as { type: 'iframe' | 'video'; url: string; ytId?: string }[];
+
+                    if (validVideos.length === 0) return null;
+
+                    return (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+                            {validVideos.map((v, vi) => (
+                                <VideoCard key={vi} v={v} />
+                            ))}
+                        </div>
+                    );
+                })()}
 
                 {cleanDesc && (
                     <div style={{ marginTop: '6px', position: 'relative' }}>
-                        <div 
+                        <div
                             ref={contentRef}
-                            style={{ 
-                                fontSize: '0.82rem', 
-                                color: '#64748b', 
+                            style={{
+                                fontSize: '0.82rem',
+                                color: '#64748b',
                                 lineHeight: '1.6',
                                 overflow: 'hidden',
                                 display: '-webkit-box',
@@ -614,15 +782,15 @@ const TimelineItem = ({ item }: { item: any }) => {
                             dangerouslySetInnerHTML={{ __html: cleanupHtml(cleanDesc) }}
                         />
                         {needsCollapse && (
-                            <div 
+                            <div
                                 onClick={() => setIsExpanded(!isExpanded)}
-                                style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: '4px', 
-                                    fontSize: '0.75rem', 
-                                    color: '#94a3b8', 
-                                    marginTop: '6px', 
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    fontSize: '0.75rem',
+                                    color: '#94a3b8',
+                                    marginTop: '6px',
                                     cursor: 'pointer',
                                     fontWeight: 600
                                 }}
@@ -856,14 +1024,14 @@ const simplifyDestination = (dest: any) => {
 const cleanWeatherDesc = (desc: any, destination: any) => {
     if (!desc) return '정보 없음';
     let clean = String(desc);
-    
+
     // 1. 여행지 관련 단어(국가, 도시)가 포함된 경우 제거
     if (destination) {
         const destStr = String(destination);
         const destParts = destStr.split(/[\s,·\(\)]+/).filter(p => p.length > 1);
         destParts.forEach(part => {
-             const regex = new RegExp(`\\s*${part}\\s*`, 'gi');
-             clean = clean.replace(regex, ' ').trim();
+            const regex = new RegExp(`\\s*${part}\\s*`, 'gi');
+            clean = clean.replace(regex, ' ').trim();
         });
     }
 
@@ -902,7 +1070,7 @@ const cleanWeatherDesc = (desc: any, destination: any) => {
 
     // 3. 마지막 정제
     clean = clean.replace(/[,\s·\-:;]+$/g, '').replace(/^[,\s·\-:;]+/g, '').replace(/\s+/g, ' ').trim();
-    
+
     // 특수 케이스: '구름 조금 흐림' -> '구름 조금'
     if (clean.includes('구름 조금') && clean.includes('흐림')) {
         clean = '구름 조금';
@@ -912,16 +1080,20 @@ const cleanWeatherDesc = (desc: any, destination: any) => {
 };
 
 const getExtraTransportation = (day: any) => {
-    // 1. 크롤러에서 추출한 transport 필드 우선 (기존 유저 데이터 호환)
-    if (day.transport) return day.transport;
-    
+    if (typeof day?.transport === 'string' && day.transport !== '해당없음' && day.transport !== 'null') return day.transport;
+    if (day?.transport && typeof day.transport === 'object') {
+        if (day.transport.airline || day.transport.flightNo) {
+            return `${day.transport.airline || ''} ${day.transport.flightNo || ''}`.trim();
+        }
+    }
+
     // 2. 구형 데이터 transportation 매핑 하위 호환
-    if (day.transportation) {
+    if (day?.transportation && typeof day.transportation === 'string') {
         const matchOld = day.transportation.match(/비행기\s*([A-Z0-9]*)\s*\((.+?)\s+(\d{2}:\d{2})\s*출발,\s*(.+?)\s+(\d{2}:\d{2})\s*도착,\s*(.+?)\s*소요\)(?:,\s*(.+))?/);
         const matchNew = day.transportation.match(/([가-힣a-zA-Z]+항공|[가-힣a-zA-Z]+에어)\s*([A-Za-z0-9]+)?,\s*출발\s*(\d{2}:\d{2}),\s*도착\s*(\d{2}:\d{2}),\s*소요(?:시간)?\s*(.+)/);
-        
+
         if (matchOld) {
-            return matchOld[7] ? matchOld[7] : null; 
+            return matchOld[7] ? matchOld[7] : null;
         } else if (matchNew) {
             return null;
         }
@@ -932,30 +1104,30 @@ const getExtraTransportation = (day: any) => {
 
 const getAirlineInfo = (codeOrName: string) => {
     if (!codeOrName) return { name: '항공편', logoUrl: null, color: '#3b82f6' };
-    
+
     const cleanInput = codeOrName.replace(/\s+/g, '').toUpperCase();
-    
+
     // 1. Check if first 2 characters match airline code (e.g. EK, SK, KE)
     const code2 = cleanInput.slice(0, 2);
     if (AIRLINE_MAP[code2]) return AIRLINE_MAP[code2];
-    
+
     // 2. Check if name matches (ignoring spaces)
-    const byName = Object.values(AIRLINE_MAP).find(v => {
-        const cleanName = v.name.replace(/\s+/g, '').toUpperCase();
+    const byName = Object.values(AIRLINE_MAP).find((v: any) => {
+        const cleanName = (v?.name || '').replace(/\s+/g, '').toUpperCase();
         return cleanInput.includes(cleanName) || cleanName.includes(cleanInput);
     });
     if (byName) return byName;
-    
+
     // 3. Fallback to extracting airline code from flight number (e.g. SK988 -> SK)
     const flightCodeMatch = codeOrName.match(/([A-Z0-9]{2})[0-9]+/i);
     if (flightCodeMatch) {
         const code = flightCodeMatch[1].toUpperCase();
         if (AIRLINE_MAP[code]) return AIRLINE_MAP[code];
     }
-    
+
     return { name: codeOrName, logoUrl: null, color: '#3b82f6' };
 };
-const ParsedFlightCard = ({ day, isFirst, isLast }: { day: any, isFirst: boolean, isLast: boolean }) => {
+const ParsedFlightCard = ({ day, isFirst, isLast, docFlight }: { day: any, isFirst: boolean, isLast: boolean, docFlight?: any }) => {
     // 1일차(가는편)나 마지막일차가 아니면 일정표 내부 항공 카드 미출력
     if (!isFirst && !isLast) return null;
 
@@ -963,14 +1135,14 @@ const ParsedFlightCard = ({ day, isFirst, isLast }: { day: any, isFirst: boolean
 
     // 1일차는 무조건 가는 편 항공 정보만 노출
     if (isFirst) {
-        if (!flightInfo || String(flightInfo.title || '').includes('오는')) {
+        if (!flightInfo || String(flightInfo.title || '').includes('오는') || (!flightInfo.flightNo && !flightInfo.departureTime)) {
             flightInfo = {
-                airline: day.airline || '항공사',
-                flightNo: day.departureFlightNumber || '',
-                departureCity: day.departureAirport || '인천',
-                departureTime: day.departureTime || '',
-                arrivalCity: day.arrivalAirport || '',
-                arrivalTime: day.arrivalTime || ''
+                airline: day.airline || docFlight?.airline || '대한항공',
+                flightNo: day.departureFlightNumber || docFlight?.departureFlightNumber || docFlight?.flightCode || '',
+                departureCity: day.departureAirport || docFlight?.departureAirport || '서울(ICN)',
+                departureTime: day.departureTime || docFlight?.departureTime || '',
+                arrivalCity: day.arrivalAirport || docFlight?.arrivalAirport || '',
+                arrivalTime: day.arrivalTime || docFlight?.arrivalTime || ''
             };
         }
         if (!flightInfo.flightNo && !flightInfo.departureTime) return null;
@@ -979,14 +1151,14 @@ const ParsedFlightCard = ({ day, isFirst, isLast }: { day: any, isFirst: boolean
 
     // 마지막일차는 무조건 오는 편 항공 정보만 노출
     if (isLast) {
-        if (!flightInfo || String(flightInfo.title || '').includes('가는')) {
+        if (!flightInfo || String(flightInfo.title || '').includes('가는') || (!flightInfo.flightNo && !flightInfo.departureTime)) {
             flightInfo = {
-                airline: day.airline || '항공사',
-                flightNo: day.returnFlightNumber || '',
-                departureCity: day.returnDepartureAirport || '',
-                departureTime: day.returnDepartureTime || '',
-                arrivalCity: day.departureAirport || '인천',
-                arrivalTime: day.returnArrivalTime || ''
+                airline: day.airline || docFlight?.airline || '대한항공',
+                flightNo: day.returnFlightNumber || docFlight?.returnFlightNumber || '',
+                departureCity: day.returnDepartureAirport || docFlight?.returnDepartureAirport || day.arrivalAirport || '',
+                departureTime: day.returnDepartureTime || docFlight?.returnDepartureTime || '',
+                arrivalCity: day.departureAirport || docFlight?.departureAirport || '서울(ICN)',
+                arrivalTime: day.returnArrivalTime || docFlight?.returnArrivalTime || ''
             };
         }
         if (!flightInfo.flightNo && !flightInfo.departureTime) return null;
@@ -1046,13 +1218,13 @@ const getDepartureKST = (arrTimeKST: string, durationStr: string) => {
 const LayoverConnector = ({ duration }: { duration: string }) => (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '2px 0' }}>
         <div style={{ width: '2px', height: '14px', background: 'repeating-linear-gradient(to bottom, #cbd5e1 0, #cbd5e1 3px, transparent 3px, transparent 6px)' }}></div>
-        <div style={{ 
-            background: '#f1f5f9', 
-            color: '#475569', 
+        <div style={{
+            background: '#f1f5f9',
+            color: '#475569',
             border: '1px solid #e2e8f0',
-            fontSize: '0.72rem', 
-            fontWeight: 600, 
-            padding: '3px 10px', 
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            padding: '3px 10px',
             borderRadius: '12px',
             margin: '2px 0',
             display: 'inline-flex',
@@ -1201,10 +1373,10 @@ const FlightSegmentCard = ({ segment, dateStr, isLastSegment }: { segment: any, 
                     <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', marginTop: '2px', letterSpacing: '-0.02em', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', gap: '2px' }}>
                         <span>{segment.arrivalTime}</span>
                         {dayOffsets.local > 0 && (
-                            <span style={{ 
-                                fontSize: '0.72rem', 
-                                color: '#ef4444', 
-                                fontWeight: 800, 
+                            <span style={{
+                                fontSize: '0.72rem',
+                                color: '#ef4444',
+                                fontWeight: 800,
                                 verticalAlign: 'super',
                                 marginTop: '-2px'
                             }}>
@@ -1226,17 +1398,17 @@ const FlightSegmentCard = ({ segment, dateStr, isLastSegment }: { segment: any, 
 const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, dateStr?: string, title?: string }) => {
     const segments = flightInfo.segments && flightInfo.segments.length > 0 ? flightInfo.segments : [flightInfo];
     const isOutbound = title === '가는 편';
-    
+
     // 강렬하고 선명한 헤더 스타일
     const headerBg = isOutbound ? 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)' : 'linear-gradient(135deg, #581c87 0%, #7c3aed 100%)';
 
     return (
         <div style={{ marginTop: '12px', marginBottom: '24px' }}>
             {title && (
-                <div style={{ 
+                <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justify: 'space-between',
+                    justifyContent: 'space-between',
                     background: headerBg,
                     color: '#ffffff',
                     padding: '10px 16px',
@@ -1249,9 +1421,9 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
                             {title}
                         </span>
                         {dateStr && (
-                            <span style={{ 
-                                fontSize: '0.9rem', 
-                                fontWeight: 600, 
+                            <span style={{
+                                fontSize: '0.9rem',
+                                fontWeight: 600,
                                 color: 'rgba(255, 255, 255, 0.95)'
                             }}>
                                 {formatDateStr(dateStr)}
@@ -1260,14 +1432,14 @@ const UnifiedFlightCard = ({ flightInfo, dateStr, title }: { flightInfo: any, da
                     </div>
                 </div>
             )}
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {segments.map((seg: any, idx: number) => (
                     <Fragment key={idx}>
-                        <FlightSegmentCard 
-                            segment={seg} 
-                            dateStr={undefined} 
-                            isLastSegment={idx === segments.length - 1} 
+                        <FlightSegmentCard
+                            segment={seg}
+                            dateStr={undefined}
+                            isLastSegment={idx === segments.length - 1}
                         />
                         {idx < segments.length - 1 && (
                             <LayoverConnector duration={seg.layoverDuration || '정보 없음'} />
@@ -1311,7 +1483,7 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [viewerFile, setViewerFile] = useState<any>(null); // {url: string, name: string}
-    
+
     // 가이드 섹션 스크롤용 Refs
     const weatherRef = useRef<HTMLDivElement>(null);
     const clothingRef = useRef<HTMLDivElement>(null);
@@ -1329,7 +1501,7 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
             // 해당 섹션 아코디언이 닫혀있다면 엽니다.
             setExpandedSections(prev => ({ ...prev, [sectionId]: true }));
         }
-        
+
         // 아코디언이 열리는 애니메이션 시간을 고려하여 약간의 지연 후 스크롤
         setTimeout(() => {
             if (ref.current) {
@@ -1345,11 +1517,11 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
         }, 150);
     };
 
-    const currencyKoMap: Record<string, string> = { 
-        VND: '베트남', JPY: '일본', USD: '미국', EUR: '유럽', PHP: '필리핀', 
-        THB: '태국', TWD: '대만', CNY: '중국', HKD: '홍콩', SGD: '싱가포르', 
-        IDR: '인도네시아', MYR: '말레이시아', DKK: '덴마크', NOK: '노르웨이', 
-        SEK: '스웨덴', ISK: '아이슬란드', GBP: '영국', CHF: '스위스' 
+    const currencyKoMap: Record<string, string> = {
+        VND: '베트남', JPY: '일본', USD: '미국', EUR: '유럽', PHP: '필리핀',
+        THB: '태국', TWD: '대만', CNY: '중국', HKD: '홍콩', SGD: '싱가포르',
+        IDR: '인도네시아', MYR: '말레이시아', DKK: '덴마크', NOK: '노르웨이',
+        SEK: '스웨덴', ISK: '아이슬란드', GBP: '영국', CHF: '스위스'
     };
 
     const [brandName, setBrandName] = useState('CLUBMODE TRAVEL');
@@ -1408,7 +1580,7 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
     useEffect(() => {
         if (!doc?.secondaryResearch?.currency) return;
         const cur = doc.secondaryResearch.currency;
-        
+
         // 통화 목록 추출 (targetCodes가 없으면 localCurrency에서 파싱)
         let codes = cur.targetCodes || [];
         if (codes.length === 0 && cur.localCurrency) {
@@ -1428,7 +1600,7 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
     // 환율 가져오기 (선택된 통화가 바뀔 때마다)
     useEffect(() => {
         if (!targetCurrency) return;
-        
+
         // 통화 코드 세척 (설명이 포함된 경우 대비: "DKK (덴마크)" -> "DKK")
         // 쉼표로 연결된 경우 첫 번째 것만 취함
         const cleanCode = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
@@ -1437,14 +1609,14 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
         setRateLoading(true);
         fetch(`/api/exchange-rate?from=KRW&to=${cleanCode}`)
             .then(r => r.json())
-            .then(json => { 
+            .then(json => {
                 if (json.success) {
-                    setExchangeRate(json.data.rate); 
+                    setExchangeRate(json.data.rate);
                 } else {
                     setExchangeRate(null);
                 }
             })
-            .catch(() => { 
+            .catch(() => {
                 setExchangeRate(null);
             })
             .finally(() => setRateLoading(false));
@@ -1587,7 +1759,7 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
         doc.trip.childCount = doc.trip.childCount || 0;
         doc.trip.infantCount = doc.trip.infantCount || 0;
         doc.trip.travelers = Array.isArray(doc.trip.travelers) ? doc.trip.travelers : [];
-        
+
         doc.flight = doc.flight || {};
         doc.flight.airline = doc.flight.airline || '';
         doc.flight.departureTime = doc.flight.departureTime || '';
@@ -1599,10 +1771,10 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
         doc.flight.returnFlightNumber = doc.flight.returnFlightNumber || '';
         doc.flight.returnArrivalTime = doc.flight.returnArrivalTime || '';
         doc.flight.returnSegments = Array.isArray(doc.flight.returnSegments) ? doc.flight.returnSegments : [];
-        
+
         doc.customer = doc.customer || {};
         doc.customer.name = doc.customer.name || '';
-        
+
         doc.itinerary = Array.isArray(doc.itinerary) ? doc.itinerary : [];
         // Ensure day objects are safe
         doc.itinerary.forEach((day: any) => {
@@ -1613,13 +1785,13 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                 day.meals = day.meals || {};
             }
         });
-        
+
         doc.hotels = Array.isArray(doc.hotels) ? doc.hotels : [];
         doc.meetingInfo = Array.isArray(doc.meetingInfo) ? doc.meetingInfo : [];
         doc.inclusions = Array.isArray(doc.inclusions) ? doc.inclusions : [];
         doc.exclusions = Array.isArray(doc.exclusions) ? doc.exclusions : [];
         doc.files = Array.isArray(doc.files) ? doc.files : [];
-        
+
         doc.secondaryResearch = doc.secondaryResearch || {};
         const sr = doc.secondaryResearch;
         sr.baggage = sr.baggage || {};
@@ -1653,9 +1825,9 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                         <span className="badge-dot"></span>
                         {doc.status}
                     </div>
-                    <a 
-                        href={isDummy ? `/dummy/confirmation/${id}/print` : `/confirmation/${id}/print`} 
-                        target="_blank" 
+                    <a
+                        href={isDummy ? `/dummy/confirmation/${id}/print` : `/confirmation/${id}/print`}
+                        target="_blank"
                         rel="noopener noreferrer"
                         style={{
                             display: 'inline-flex',
@@ -1723,7 +1895,7 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                                 </div>
                                 <div className="mc-info-item">
                                     <span className="info-label">여행 기간</span>
-                                    <span className="info-value">{doc.trip.duration || `${itinerary.length-1}박 ${itinerary.length}일`}</span>
+                                    <span className="info-value">{doc.trip.duration || (doc.itinerary?.length ? `${doc.itinerary.length - 1}박 ${doc.itinerary.length}일` : '')}</span>
                                 </div>
                                 <div className="mc-info-item">
                                     <span className="info-label">연락처</span>
@@ -1776,7 +1948,7 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px' }}>
                                     {doc.flight.departureTime && (
-                                        <UnifiedFlightCard 
+                                        <UnifiedFlightCard
                                             title="가는 편"
                                             dateStr={doc.trip.departureDate}
                                             flightInfo={{
@@ -1785,34 +1957,34 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                                                 departureCity: simplifyDestination(doc.flight.departureAirport),
                                                 departureTime: doc.flight.departureTime,
                                                 arrivalCity: simplifyDestination(
-                                                    (doc.flight as any).arrivalAirport || 
-                                                    (doc.itinerary[0] as any)?.flight?.arrivalCity || 
+                                                    (doc.flight as any).arrivalAirport ||
+                                                    (doc.itinerary[0] as any)?.flight?.arrivalCity ||
                                                     doc.trip.destination
                                                 ),
                                                 arrivalTime: doc.flight.arrivalTime,
                                                 duration: (doc.flight as any).departureDuration || (doc.itinerary[0] as any)?.flight?.duration,
                                                 segments: (Array.isArray(doc.flight.departureSegments) && doc.flight.departureSegments.length > 1) ? doc.flight.departureSegments : undefined
-                                            }} 
+                                            }}
                                         />
                                     )}
                                     {doc.flight.returnDepartureTime && (
-                                        <UnifiedFlightCard 
+                                        <UnifiedFlightCard
                                             title="오는 편"
                                             dateStr={doc.trip.returnDate}
                                             flightInfo={{
                                                 airline: doc.flight.airline,
                                                 flightNo: doc.flight.returnFlightNumber,
                                                 departureCity: simplifyDestination(
-                                                    (doc.flight as any).returnDepartureAirport || 
-                                                    (doc.itinerary[doc.itinerary.length-1] as any)?.flight?.departureCity || 
+                                                    (doc.flight as any).returnDepartureAirport ||
+                                                    (doc.itinerary[doc.itinerary.length - 1] as any)?.flight?.departureCity ||
                                                     doc.trip.destination
                                                 ),
                                                 departureTime: doc.flight.returnDepartureTime,
                                                 arrivalCity: simplifyDestination(doc.flight.departureAirport),
                                                 arrivalTime: doc.flight.returnArrivalTime,
-                                                duration: (doc.flight as any).returnDuration || (doc.itinerary[doc.itinerary.length-1] as any)?.flight?.duration,
+                                                duration: (doc.flight as any).returnDuration || (doc.itinerary[doc.itinerary.length - 1] as any)?.flight?.duration,
                                                 segments: (Array.isArray(doc.flight.returnSegments) && doc.flight.returnSegments.length > 1) ? doc.flight.returnSegments : undefined
-                                            }} 
+                                            }}
                                         />
                                     )}
                                 </div>
@@ -1935,7 +2107,7 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                         {/* 호텔 요약 카드 (다중 지원 - 기본 접힘) */}
                         {doc.hotels && doc.hotels.length > 0 ? (
                             <div className="mc-section" style={{ padding: isHotelCollapsed ? '16px' : '16px 16px 12px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                <div 
+                                <div
                                     onClick={() => setIsHotelCollapsed(!isHotelCollapsed)}
                                     style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', width: '100%', minHeight: '24px', margin: 0 }}
                                 >
@@ -1981,78 +2153,101 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                                 <div className="mc-itinerary">
                                     {doc.itinerary.map((day: any, i: number) => {
                                         const isOpen = expandedDays[i] !== false; // 기본: 열림
-                                        
-                                        const formatDateShort = (dateStr: string) => {
-                                            if (!dateStr || dateStr.toLowerCase().includes('nan') || dateStr.toLowerCase().includes('undefined')) return '';
-                                            return dateStr;
-                                        };
+
+                                        const rawDayNum = String(day.day || (i + 1)).replace(/일차/g, '');
+                                        const dayLabel = `${rawDayNum}일차`;
+
+                                        // 날짜 계산 (출발일 기준)
+                                        let computedDateStr = day.date || '';
+                                        if (!computedDateStr && doc.trip?.departureDate) {
+                                            try {
+                                                const depD = new Date(doc.trip.departureDate);
+                                                if (!isNaN(depD.getTime())) {
+                                                    depD.setDate(depD.getDate() + i);
+                                                    const mm = String(depD.getMonth() + 1).padStart(2, '0');
+                                                    const dd = String(depD.getDate()).padStart(2, '0');
+                                                    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                                                    computedDateStr = `${mm}.${dd}(${dayNames[depD.getDay()]})`;
+                                                }
+                                            } catch (e) {
+                                                // ignore
+                                            }
+                                        }
+
+                                        const dayHeaderTitle = computedDateStr || (day.title && !day.title.includes('일정') ? day.title : `${dayLabel} 일정`);
 
                                         return (
                                             <div key={i} className={`mc-day-card ${isOpen ? 'open' : 'closed'}`}>
                                                 <div className="day-header" onClick={() => toggleDay(i)} style={{ padding: 0, display: 'flex', alignItems: 'stretch', minHeight: '56px', borderBottom: '1px solid #f1f5f9' }}>
-                                                    {day.title && day.title.trim() ? (
-                                                        <>
-                                                            <div className="day-number" style={{ background: '#475569', color: '#fff', padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '2px', minWidth: '76px', flexShrink: 0, textAlign: 'center' }}>
-                                                                <span style={{ fontSize: '0.85rem', fontWeight: 800 }}>{day.day || (i + 1)}일차</span>
-                                                                {formatDateShort(day.date) && <span style={{ fontSize: '0.68rem', color: '#cbd5e1', fontWeight: 500 }}>{formatDateShort(day.date)}</span>}
-                                                            </div>
-                                                            <div style={{ flex: 1, padding: '10px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2px', minWidth: 0 }}>
-                                                                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>{day.title}</div>
-                                                                <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                                    {((day.timeline || []).filter((item: any) => item.title && !item.title.includes('조식') && !item.title.includes('중식') && !item.title.includes('석식')).map((item: any) => item.title).join(', ')) || '상세내용을 확인해보세요'}
-                                                                </div>
-                                                            </div>
-                                                        </>
-                                                    ) : (
-                                                        <div style={{ flex: 1, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                                                            <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#1d4ed8' }}>{day.day || (i + 1)}일차</span>
-                                                            <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#334155' }}>{formatDateShort(day.date)}</span>
+                                                    <div className="day-number" style={{ background: '#475569', color: '#fff', padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '2px', minWidth: '76px', flexShrink: 0, textAlign: 'center' }}>
+                                                        <span style={{ fontSize: '0.85rem', fontWeight: 800 }}>{dayLabel}</span>
+                                                    </div>
+                                                    <div style={{ flex: 1, padding: '10px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2px', minWidth: 0 }}>
+                                                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>{dayHeaderTitle}</div>
+                                                        <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                            {((day.timeline || []).filter((item: any) => item.title && !item.title.includes('조식') && !item.title.includes('중식') && !item.title.includes('석식')).map((item: any) => item.title).join(', ')) || '상세내용을 확인해보세요'}
                                                         </div>
-                                                    )}
+                                                    </div>
                                                     <div className={`day-chevron ${isOpen ? 'open' : ''}`} style={{ alignSelf: 'center', marginRight: '16px' }}>›</div>
                                                 </div>
 
                                                 {isOpen && (
                                                     <div className="day-body">
-                                                        <ParsedFlightCard 
-                                                            day={day} 
-                                                            isFirst={i === 0} 
-                                                            isLast={i === doc.itinerary.length - 1} 
-                                                        />
+                                                        {/* 1일차 가는 편 항공 카드는 상단 노출 */}
+                                                        {i === 0 && (
+                                                            <ParsedFlightCard
+                                                                day={day}
+                                                                isFirst={true}
+                                                                isLast={false}
+                                                                docFlight={doc.flight}
+                                                            />
+                                                        )}
                                                         <div className="day-content" style={{ marginTop: '16px' }}>
                                                             {day.timeline && Array.isArray(day.timeline) && day.timeline.length > 0 ? (
                                                                 <div className="timeline-list" style={{ paddingLeft: '4px' }}>
                                                                     {day.timeline
-                                                                        .filter((item: any) => item.type !== 'flight' && !(item.badges && item.badges.includes('항공편')))
+                                                                        .filter((item: any) => {
+                                                                            if (item.type === 'flight' || (item.badges && item.badges.includes('항공편'))) return false;
+                                                                            const t = String(item.title || '').trim();
+                                                                            if (t === '현지' || t === '한국' || t.startsWith('현지 >') || t.startsWith('한국 >')) return false;
+                                                                            
+                                                                            const desc = String(item.description || item.desc || '').trim();
+                                                                            const imgs = (item.images && Array.isArray(item.images) ? item.images : (item.image ? [item.image] : [])).filter((u: string) => u && typeof u === 'string' && u.trim().length > 8 && !u.includes('youtube.com') && !u.includes('youtu.be') && !u.includes('vimeo.com') && !u.match(/\.(mp4|webm|mov)$/i));
+                                                                            const vids = (item.videos && Array.isArray(item.videos) ? item.videos : (item.videoUrl ? [item.videoUrl] : [])).filter((u: string) => u && typeof u === 'string' && u.trim().length > 8);
+
+                                                                            if ((t === '동영상' || t === '[관광정보] 동영상') && !desc && imgs.length === 0 && vids.length === 0) {
+                                                                                return false;
+                                                                            }
+                                                                            return true;
+                                                                        })
                                                                         .map((item: any, ti: number) => (
-                                                                        <TimelineItem key={ti} item={item} />
-                                                                    ))}
+                                                                            <TimelineItem key={ti} item={item} />
+                                                                        ))}
                                                                 </div>
                                                             ) : day.activities && Array.isArray(day.activities) ? (
                                                                 <div className="activity-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                                                     {day.activities.flatMap((act: string) => act.split('\n')).map((line: string, ai: number) => {
                                                                         let cleanText = line.trim();
                                                                         if (!cleanText) return null;
-                                                                        
+
                                                                         const hasImage = cleanText.toLowerCase().includes('<img');
-                                                                        
-                                                                        // 개조식 명사형 종결 변환 (하위 호환용, 단 이미지가 없을 때만 적용)
+
                                                                         if (!hasImage) {
                                                                             cleanText = cleanText.replace(/(이동|구경|감상|산책|관람|방문|체크인|진행|제공|이용|탑승|출발|도착|해산|귀환|관광|쇼핑|체험|시식|식사|숙박|휴식)합니다\.?$/, '$1');
                                                                             cleanText = cleanText.replace(/(을|를)\s*가집니다\.?$/, ' 진행');
                                                                         }
                                                                         cleanText = cleanText.trim();
-                                                                        
+
                                                                         return (
                                                                             <div key={ai} className="day-activity-item" style={{ display: 'flex', gap: '10px', alignItems: hasImage ? 'flex-start' : 'center' }}>
                                                                                 <div className="activity-icon-wrap" style={{ fontSize: '0.85rem', flexShrink: 0, marginTop: '2px', width: '20px', textAlign: 'center' }}>
                                                                                     {hasImage ? '🖼️' : '•'}
                                                                                 </div>
                                                                                 <div className="activity-text" style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                                                                                    <div 
-                                                                                        className="activity-header itinerary-img-fix" 
+                                                                                    <div
+                                                                                        className="activity-header itinerary-img-fix"
                                                                                         style={{ fontSize: '0.88rem', color: '#1e293b', lineHeight: 1.6, overflowWrap: 'break-word', wordBreak: 'break-word' }}
-                                                                                        dangerouslySetInnerHTML={{ __html: cleanupHtml(cleanText) }} 
+                                                                                        dangerouslySetInnerHTML={{ __html: cleanupHtml(cleanText) }}
                                                                                     />
                                                                                 </div>
                                                                             </div>
@@ -2064,12 +2259,24 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                                                             )}
                                                         </div>
 
+                                                        {/* 마지막일차 오는 편 항공 카드는 일정표 바로 아래 & 예정호텔 상단에 노출 */}
+                                                        {i === doc.itinerary.length - 1 && (
+                                                            <div style={{ marginTop: '16px' }}>
+                                                                <ParsedFlightCard
+                                                                    day={day}
+                                                                    isFirst={false}
+                                                                    isLast={true}
+                                                                    docFlight={doc.flight}
+                                                                />
+                                                            </div>
+                                                        )}
+
                                                         {/* 하단 통합 정보 박스 (숙소/식사/교통) */}
                                                         <div className="day-summary-box" style={{ marginTop: '20px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                                             {(day.hotel || day.hotelDetails?.name) && (
                                                                 <div className="summary-row" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                                                                     <div className="summary-icon" style={{ marginTop: '2px' }}>
-                                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>
+                                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 4v16" /><path d="M2 8h18a2 2 0 0 1 2 2v10" /><path d="M2 17h20" /><path d="M6 8v9" /></svg>
                                                                     </div>
                                                                     <div className="summary-content" style={{ flex: 1 }}>
                                                                         <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '2px' }}>예정호텔</div>
@@ -2077,26 +2284,10 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                                                                     </div>
                                                                 </div>
                                                             )}
-                                                            {day.meals && (
-                                                                <div className="summary-row" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                                                                    <div className="summary-icon" style={{ marginTop: '2px' }}>
-                                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
-                                                                    </div>
-                                                                    <div className="summary-content" style={{ flex: 1 }}>
-                                                                        <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '2px' }}>식사</div>
-                                                                        <div style={{ fontSize: '0.85rem', color: '#1e293b', fontWeight: 500, lineHeight: 1.4, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                                                            {day.meals.breakfast && <div>조식: {day.meals.breakfast}</div>}
-                                                                            {day.meals.lunch && <div>중식: {day.meals.lunch}</div>}
-                                                                            {day.meals.dinner && <div>석식: {day.meals.dinner}</div>}
-                                                                            {(!day.meals.breakfast || day.meals.breakfast === '불포함') && (!day.meals.lunch || day.meals.lunch === '불포함') && (!day.meals.dinner || day.meals.dinner === '불포함') && <div>현지 자유식</div>}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            )}
                                                             {getExtraTransportation(day) && (
                                                                 <div className="summary-row" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                                                                     <div className="summary-icon" style={{ marginTop: '2px' }}>
-                                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+                                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6v6" /><path d="M15 6v6" /><path d="M2 12h19.6" /><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3" /><circle cx="7" cy="18" r="2" /><circle cx="17" cy="18" r="2" /></svg>
                                                                     </div>
                                                                     <div className="summary-content" style={{ flex: 1 }}>
                                                                         <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '2px' }}>교통</div>
@@ -2108,14 +2299,14 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
 
                                                         {/* 일별 유의사항 */}
                                                         {day.dailyNotices && day.dailyNotices.length > 0 && (
-                                                                <div className="day-notices">
-                                                                    {day.dailyNotices.map((note: string, ni: number) => (
-                                                                        <div key={ni} className="day-notice-item">
-                                                                            <span className="dn-bullet">안내</span> {note}
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            )}
+                                                            <div className="day-notices">
+                                                                {day.dailyNotices.map((note: string, ni: number) => (
+                                                                    <div key={ni} className="day-notice-item">
+                                                                        <span className="dn-bullet">안내</span> {note}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
@@ -2124,1017 +2315,1017 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
                                 </div>
                             </div>
                         )}
-                    </>
-                )}
-
-                {/* ============================== 3. 필요서류 ============================== */}
-                {activeTab === '필요서류' && (
-                    <>
-                        <div className="mc-section">
-                            <div className="mc-section-title">
-                                <span className="sec-icon">📎</span> 필수 전자 서류
-                            </div>
-                            {doc.files && doc.files.length > 0 ? (
-                                <div className="mc-file-list">
-                                    {doc.files.map(f => (
-                                        <button
-                                            key={f.id}
-                                            onClick={() => handleFileAction(f)}
-                                            className="mc-file-btn"
-                                            style={{
-                                                cursor: 'pointer',
-                                                userSelect: 'none',
-                                                WebkitTapHighlightColor: 'transparent',
-                                                border: 'none',
-                                                background: 'none',
-                                                textAlign: 'left',
-                                                padding: 0,
-                                                width: '100%'
-                                            }}
-                                        >
-                                            <span className="file-icon">
-                                                {f.type === 'boarding_pass' ? '🎫' :
-                                                    f.type === 'visa' ? '📋' :
-                                                        f.type === 'insurance' ? '🛡️' : '📄'}
-                                            </span>
-                                            <div className="file-info">
-                                                <div className="file-name">{f.label || f.name}</div>
-                                                <div className="file-desc">{f.name}</div>
-                                            </div>
-                                            <span className="file-view-btn">보기</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="mc-file-empty">
-                                    <div className="file-empty-icon">📂</div>
-                                    <div className="file-empty-text">아직 등록된 서류가 없습니다</div>
-                                    <div className="file-empty-sub">보딩패스, 비자, 보험증권 등은<br />출발 전 이곳에 업데이트됩니다.</div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* 입국 및 비자/세관 정보 */}
-                        {doc.secondaryResearch?.customs && (
-                            <div className="mc-section" style={{ background: 'transparent', boxShadow: 'none', padding: 0 }}>
-                                <div className="mc-section-title" style={{ paddingLeft: '4px', marginBottom: '14px' }}>
-                                    <span className="sec-icon">🛂</span> 국가별 입국 & 비자/세관 가이드
-                                </div>
-
-                                 {/* (1) 국가별 핵심 경보 (식품류 등) */}
-                                 {doc.secondaryResearch.customs.majorAlert?.title && (
-                                     <div style={{ marginBottom: '16px', border: '1.5px solid #fecaca', background: '#fff', padding: '16px', borderRadius: '16px', boxShadow: '0 4px 6px rgba(239, 68, 68, 0.03)' }}>
-                                         <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#dc2626', marginBottom: '8px', textAlign: 'center' }}>
-                                             🚨 {safeStr(doc.secondaryResearch.customs.majorAlert.title)}
-                                         </div>
-                                         <div style={{ fontSize: '0.8rem', color: '#7f1d1d', lineHeight: 1.5, marginBottom: '10px', textAlign: 'center', wordBreak: 'keep-all' }}>
-                                             {safeStr(doc.secondaryResearch.customs.majorAlert.content)}
-                                         </div>
-                                         {doc.secondaryResearch.customs.majorAlert.penalty && (
-                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#dc2626', fontSize: '0.75rem', fontWeight: 700, background: '#fef2f2', padding: '6px 10px', borderRadius: '8px', border: '1px solid #fee2e2' }}>
-                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                                                 {safeStr(doc.secondaryResearch.customs.majorAlert.penalty)}
-                                             </div>
-                                         )}
-                                     </div>
-                                 )}
-
-                                 {/* (2) 사전 입국 준비 및 비자/ETA 퀵링크 */}
-                                 {doc.secondaryResearch.customs.links && doc.secondaryResearch.customs.links.length > 0 && (
-                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
-                                         {doc.secondaryResearch.customs.links.map((link: any, li: number) => (
-                                             <div key={li} style={{ border: '1.5px solid #005a96', borderRadius: '16px', overflow: 'hidden', background: '#fff', boxShadow: '0 4px 8px rgba(0, 90, 150, 0.03)' }}>
-                                                 <div style={{ background: '#005a96', padding: '10px 16px', display: 'flex', alignItems: 'center', color: '#fff', gap: '10px' }}>
-                                                     <span style={{ background: '#fff', color: '#005a96', padding: '3px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                                         {link.type === 'visa' ? '비자/ETA' : (link.type === 'customs' ? '세관신고' : '입국신고')}
-                                                     </span>
-                                                     <span style={{ fontSize: '0.88rem', fontWeight: 800, lineHeight: 1.3, wordBreak: 'keep-all' }}>{safeStr(link.label)}</span>
-                                                 </div>
-                                                 <div style={{ padding: '14px' }}>
-                                                     <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '12px', marginBottom: '10px' }}>
-                                                         <div style={{ fontSize: '0.78rem', color: '#334155', lineHeight: 1.5, wordBreak: 'keep-all' }}>
-                                                             {safeStr(link.description)}
-                                                         </div>
-                                                     </div>
-                                                     {link.howTo && (
-                                                         <div style={{ marginBottom: '10px' }}>
-                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0284c7', fontSize: '0.78rem', fontWeight: 800, marginBottom: '2px' }}>
-                                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                                                 신청 및 준비 방법
-                                                             </div>
-                                                             <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4, wordBreak: 'keep-all' }}>
-                                                                 {safeStr(link.howTo)}
-                                                             </div>
-                                                         </div>
-                                                     )}
-                                                     <a
-                                                         href={link.url}
-                                                         target="_blank"
-                                                         rel="noopener noreferrer"
-                                                         style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(to right, #00ace2, #008ebc)', color: '#fff', padding: '10px', borderRadius: '10px', fontWeight: 800, gap: '6px', fontSize: '0.82rem', boxShadow: '0 4px 8px rgba(0, 172, 226, 0.1)' }}
-                                                     >
-                                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                                                         공식 사이트 바로가기
-                                                     </a>
-                                                 </div>
-                                             </div>
-                                         ))}
-                                     </div>
-                                 )}
-
-                                 {/* (3) 면세 한도 & 여권 유의사항 */}
-                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
-                                     <div style={{ background: '#f0f9ff', border: '1.5px solid #bae6fd', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 6px rgba(14, 165, 233, 0.03)' }}>
-                                         <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0369a1', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> 면세 한도
-                                         </div>
-                                         <div style={{ fontSize: '0.8rem', color: '#075985', lineHeight: 1.5 }}>
-                                             {formatBulletPoints(doc.secondaryResearch.customs.dutyFree)}
-                                         </div>
-                                     </div>
-                                     <div style={{ background: '#f5f3ff', border: '1.5px solid #ddd6fe', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 6px rgba(124, 58, 237, 0.03)' }}>
-                                         <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#6d28d9', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg> 여권 유의사항
-                                         </div>
-                                         <div style={{ fontSize: '0.8rem', color: '#5b21b6', lineHeight: 1.5 }}>
-                                             {formatBulletPoints(doc.secondaryResearch.customs.passportNote)}
-                                         </div>
-                                     </div>
-                                </div>
-
-                                 {/* (4) 입국 절차 */}
-                                 {doc.secondaryResearch.customs.arrivalProcedure && doc.secondaryResearch.customs.arrivalProcedure.steps?.length > 0 && (
-                                     <div style={{ marginBottom: '16px', border: '1.5px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.01)' }}>
-                                         <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
-                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                                             <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1e293b' }}>{safeStr(doc.secondaryResearch.customs.arrivalProcedure.title || '입국 절차')}</span>
-                                         </div>
-                                         <div style={{ padding: '14px' }}>
-                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                                 {doc.secondaryResearch.customs.arrivalProcedure.steps.map((st: any, i: number) => (
-                                                     <div key={i} style={{ display: 'flex', gap: '10px' }}>
-                                                         <div style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 800, flexShrink: 0, marginTop: '2px' }}>{i + 1}</div>
-                                                         <div>
-                                                             <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', marginBottom: '2px' }}>{safeStr(st.step)}</div>
-                                                             <div style={{ fontSize: '0.75rem', color: '#64748b', lineHeight: 1.4, wordBreak: 'keep-all' }}>{safeStr(st.description)}</div>
-                                                         </div>
-                                                     </div>
-                                                 ))}
-                                             </div>
-                                         </div>
-                                     </div>
-                                 )}
-
-                                 {/* (5) 미성년자 자녀 입국 규정 */}
-                                 {(doc.secondaryResearch.customs.minorEntry || doc.secondaryResearch.customs.minorDetail) && (
-                                     <div style={{ marginBottom: '16px', background: '#fffde7', border: '1.5px solid #fef08a', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 2px 6px rgba(254, 240, 138, 0.1)' }}>
-                                         <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '6px', color: '#854d0e', borderBottom: '1px solid #fef9c3', background: '#fefcbf' }}>
-                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
-                                             <span style={{ fontSize: '0.82rem', fontWeight: 800 }}>미성년자 동반 입국 규정</span>
-                                         </div>
-                                         <div style={{ padding: '14px' }}>
-                                             {doc.secondaryResearch.customs.minorEntry && (
-                                                 <div style={{ fontSize: '0.78rem', color: '#713f12', lineHeight: 1.5, marginBottom: '8px', wordBreak: 'keep-all' }}>
-                                                     {safeStr(doc.secondaryResearch.customs.minorEntry)}
-                                                 </div>
-                                             )}
-                                             {doc.secondaryResearch.customs.minorDetail && (
-                                                 <div style={{ background: '#fff', border: '1px solid #fef9c3', borderRadius: '10px', padding: '10px', borderLeft: '4px solid #facc15' }}>
-                                                     <div style={{ color: '#854d0e', fontSize: '0.75rem', lineHeight: 1.4, display: 'flex', gap: '6px' }}>
-                                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0, marginTop: '2px' }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                                                         <span style={{ wordBreak: 'keep-all' }}>{safeStr(doc.secondaryResearch.customs.minorDetail)}</span>
-                                                     </div>
-                                                 </div>
-                                             )}
-                                         </div>
-                                     </div>
-                                 )}
-
-                                 {/* (6) 반입 금지/제한 품목 */}
-                                 {doc.secondaryResearch.customs.prohibitedItems && doc.secondaryResearch.customs.prohibitedItems.length > 0 && (
-                                     <div style={{ marginBottom: '16px', border: '1.5px solid #fee2e2', background: '#fff5f5', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 2px 6px rgba(239, 68, 68, 0.01)' }}>
-                                         <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid #fde2e2', background: '#fee2e2' }}>
-                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
-                                             <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#dc2626' }}>반입 금지 및 제한 품목</span>
-                                         </div>
-                                         <div style={{ padding: '14px' }}>
-                                             {doc.secondaryResearch.customs.prohibitedItems.map((pi: any, pii: number) => (
-                                                 <div key={pii} style={{ marginBottom: '10px' }}>
-                                                     <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#991b1b', marginBottom: '4px' }}>{safeStr(pi.category)}</div>
-                                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                                                         {pi.items.map((it: any, iti: number) => (
-                                                             <span key={iti} style={{ fontSize: '0.72rem', background: '#fff', color: '#dc2626', border: '1px solid #fee2e2', padding: '3px 8px', borderRadius: '20px', fontWeight: 700 }}>
-                                                                 {safeStr(it)}
-                                                             </span>
-                                                         ))}
-                                                     </div>
-                                                 </div>
-                                             ))}
-                                         </div>
-                                     </div>
-                                 )}
-                            </div>
-                        )}
-                    </>
-                )}
-
-                {/* ============================== 4. 준비물 ============================== */}
-                {activeTab === '준비물' && (
-                    <>
-                        <div className="mc-section">
-                            <div className="mc-section-title">
-                                <span className="sec-icon">✅</span> 준비물 체크리스트
-                                {realChecklistItems.length > 0 && (
-                                    <span className="checklist-progress">
-                                        {checkedCount}/{realChecklistItems.length}
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* 진행상태 바 */}
-                            {realChecklistItems.length > 0 && (
-                                <div className="checklist-progress-bar">
-                                    <div
-                                        className="checklist-progress-fill"
-                                        style={{ width: `${(checkedCount / realChecklistItems.length) * 100}%` }}
-                                    />
-                                </div>
-                            )}
-
-                            {checklistItems.length > 0 ? (
-                                <ul className="mc-checklist-interactive">
-                                    {checklistItems.map((item, i) => {
-                                        const key = `cl-${i}`;
-                                        const checked = !!checkedItems[key];
-                                        if (!item.trim()) {
-                                            return <li key={i} style={{ listStyle: 'none', height: '14px' }} />;
-                                        }
-                                        return (
-                                            <li
-                                                key={i}
-                                                className={`checklist-item ${checked ? 'checked' : ''}`}
-                                                onClick={() => toggleCheck(key)}
-                                            >
-                                                <span className="check-box">{checked ? '✅' : '⬜'}</span>
-                                                <span className="check-text">{item}</span>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            ) : (
-                                <div className="mc-empty-notice">준비물 목록이 없습니다.</div>
-                            )}
-                        </div>
-                    </>
-                )}
-
-                {/* ============================== 5. 안내사항 ============================== */}
-                {activeTab === '안내사항' && (
-                    <>
-                        {/* 포함/불포함 */}
-                        {(doc.inclusions.length > 0 || doc.exclusions.length > 0) && (
-                            <div className="mc-section">
-                                <div className="mc-section-title">
-                                    <span className="sec-icon">📌</span> 포함 · 불포함 사항
-                                </div>
-                                {doc.inclusions.length > 0 && (
-                                    <div className="mc-include-list" style={{ marginBottom: '12px' }}>
-                                        <div style={{ fontSize: '0.75rem', color: '#22c55e', fontWeight: 600, marginBottom: '4px' }}>포함사항</div>
-                                        {doc.inclusions.map((item, i) => (
-                                            <div key={i} className="mc-include-item included">
-                                                <span className="inc-icon">✅</span> {item}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                {doc.exclusions.length > 0 && (
-                                    <div className="mc-include-list">
-                                        <div style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 600, marginBottom: '4px' }}>불포함사항</div>
-                                        {doc.exclusions.map((item, i) => (
-                                            <div key={i} className="mc-include-item excluded">
-                                                <span className="inc-icon">❌</span> {item}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                            </>
                         )}
 
-                        {/* 취소 규정 */}
-                        {doc.cancellationPolicy && (Array.isArray(doc.cancellationPolicy) ? doc.cancellationPolicy.length > 0 : String(doc.cancellationPolicy).trim().length > 0) && (
-                            <div className="mc-section">
-                                <div className="mc-section-title">
-                                    <span className="sec-icon">⚠️</span> 취소 · 환불 규정
-                                </div>
-                                <div className="mc-policy-text" style={{ whiteSpace: 'pre-line', lineHeight: 1.8, fontSize: '0.87rem', color: '#334155' }}>
-                                    {Array.isArray(doc.cancellationPolicy)
-                                        ? doc.cancellationPolicy.join('\n\n')
-                                        : String(doc.cancellationPolicy)}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 추가 안내 */}
-                        {doc.notices && (
-                            <div className="mc-section">
-                                <div className="mc-section-title">
-                                    <span className="sec-icon">💡</span> 추가 안내
-                                </div>
-                                <div className="mc-policy-text">{doc.notices}</div>
-                            </div>
-                        )}
-                    </>
-                )}
-                {/* ============================== 6. 날씨 ============================== */}
-                {activeTab === '날씨' && doc.secondaryResearch && (() => {
-                    const sr = doc.secondaryResearch;
-                    return (
-                        <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
-                            {sr.weather?.summary && (
-                                <div className="mc-section" style={{ margin: '0 0 16px 0' }}>
+                        {/* ============================== 3. 필요서류 ============================== */}
+                        {activeTab === '필요서류' && (
+                            <>
+                                <div className="mc-section">
                                     <div className="mc-section-title">
-                                        <span className="sec-icon">☀️</span> 현지 날씨 & 기후 요약
+                                        <span className="sec-icon">📎</span> 필수 전자 서류
                                     </div>
-                                    <p style={{ fontSize: '0.9rem', color: '#334155', lineHeight: 1.6, wordBreak: 'keep-all', margin: 0 }}>
-                                        {safeStr(sr.weather?.summary)}
-                                    </p>
+                                    {doc.files && doc.files.length > 0 ? (
+                                        <div className="mc-file-list">
+                                            {doc.files.map(f => (
+                                                <button
+                                                    key={f.id}
+                                                    onClick={() => handleFileAction(f)}
+                                                    className="mc-file-btn"
+                                                    style={{
+                                                        cursor: 'pointer',
+                                                        userSelect: 'none',
+                                                        WebkitTapHighlightColor: 'transparent',
+                                                        border: 'none',
+                                                        background: 'none',
+                                                        textAlign: 'left',
+                                                        padding: 0,
+                                                        width: '100%'
+                                                    }}
+                                                >
+                                                    <span className="file-icon">
+                                                        {f.type === 'boarding_pass' ? '🎫' :
+                                                            f.type === 'visa' ? '📋' :
+                                                                f.type === 'insurance' ? '🛡️' : '📄'}
+                                                    </span>
+                                                    <div className="file-info">
+                                                        <div className="file-name">{f.label || f.name}</div>
+                                                        <div className="file-desc">{f.name}</div>
+                                                    </div>
+                                                    <span className="file-view-btn">보기</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="mc-file-empty">
+                                            <div className="file-empty-icon">📂</div>
+                                            <div className="file-empty-text">아직 등록된 서류가 없습니다</div>
+                                            <div className="file-empty-sub">보딩패스, 비자, 보험증권 등은<br />출발 전 이곳에 업데이트됩니다.</div>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
 
-                            {/* 일별 예보 카드 */}
-                            {sr.weather?.forecast && sr.weather.forecast.length > 0 && (
-                                <div className="mc-section" style={{ background: 'transparent', boxShadow: 'none', padding: 0, margin: 0 }}>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '4px' }}>
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                        일별 기온 및 날씨
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '12px', WebkitOverflowScrolling: 'touch', paddingLeft: '4px', paddingRight: '4px' }}>
-                                        {sr.weather.forecast.map((day: any, i: number) => {
-                                            let displayDate = day.date;
-                                            try {
-                                                if (doc.trip.departureDate) {
-                                                    const d = new Date(doc.trip.departureDate);
-                                                    d.setDate(d.getDate() + i);
-                                                    const month = d.getMonth() + 1;
-                                                    const date = d.getDate();
-                                                    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-                                                    const dayName = dayNames[d.getDay()];
-                                                    displayDate = `${month}.${date} (${dayName})`;
-                                                }
-                                            } catch (e) {}
+                                {/* 입국 및 비자/세관 정보 */}
+                                {doc.secondaryResearch?.customs && (
+                                    <div className="mc-section" style={{ background: 'transparent', boxShadow: 'none', padding: 0 }}>
+                                        <div className="mc-section-title" style={{ paddingLeft: '4px', marginBottom: '14px' }}>
+                                            <span className="sec-icon">🛂</span> 국가별 입국 & 비자/세관 가이드
+                                        </div>
 
-                                            return (
-                                                <div key={i} style={{ 
-                                                    minWidth: '165px', 
-                                                    background: 'rgba(15, 23, 42, 0.9)', 
-                                                    backdropFilter: 'blur(10px)',
-                                                    borderRadius: '22px', 
-                                                    padding: '24px 16px 20px', 
-                                                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center',
-                                                    textAlign: 'center',
-                                                    minHeight: '265px',
-                                                    height: '265px'
-                                                }}>
-                                                    <div style={{ height: '82px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                                                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', marginBottom: '4px', letterSpacing: '-0.02em' }}>{i + 1}일차</div>
-                                                        <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>{displayDate}</div>
-                                                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500, opacity: 0.9 }}>
-                                                            {`(${String(day.location || simplifyDestination(doc.trip.destination)).replace(/[\(\)]/g, '')})`}
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div style={{ 
-                                                        flex: 1, 
-                                                        display: 'flex', 
-                                                        alignItems: 'center', 
-                                                        justifyContent: 'center', 
-                                                        width: '100%',
-                                                        margin: '10px 0'
-                                                    }}>
-                                                        <div style={{ transform: 'scale(1.65)' }}>
-                                                            <WeatherIcon description={cleanWeatherDesc(day.description, doc.trip.destination)} />
-                                                        </div>
-                                                    </div>
-
-                                                    <div style={{ 
-                                                        height: '42px', 
-                                                        fontSize: '0.82rem', 
-                                                        color: '#e2e8f0', 
-                                                        fontWeight: 500, 
-                                                        lineHeight: 1.4,
-                                                        wordBreak: 'keep-all',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        width: '100%',
-                                                        padding: '0 4px',
-                                                        marginBottom: '10px'
-                                                    }}>
-                                                        {cleanWeatherDesc(day.description, doc.trip.destination)}
-                                                    </div>
-                                                    
-                                                    <div style={{ 
-                                                        display: 'flex', 
-                                                        alignItems: 'baseline', 
-                                                        gap: '8px',
-                                                        paddingBottom: '4px'
-                                                    }}>
-                                                        <span style={{ fontSize: '1.35rem', fontWeight: 900, color: '#fff' }}>{String(day.tempMax ?? '').replace(/[^0-9.-]/g, '')}°</span>
-                                                        <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'rgba(148, 163, 184, 0.7)' }}>/ {String(day.tempMin ?? '').replace(/[^0-9.-]/g, '')}°</span>
-                                                    </div>
+                                        {/* (1) 국가별 핵심 경보 (식품류 등) */}
+                                        {doc.secondaryResearch.customs.majorAlert?.title && (
+                                            <div style={{ marginBottom: '16px', border: '1.5px solid #fecaca', background: '#fff', padding: '16px', borderRadius: '16px', boxShadow: '0 4px 6px rgba(239, 68, 68, 0.03)' }}>
+                                                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#dc2626', marginBottom: '8px', textAlign: 'center' }}>
+                                                    🚨 {safeStr(doc.secondaryResearch.customs.majorAlert.title)}
                                                 </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    );
-                })()}
-                {activeTab === '날씨' && !doc.secondaryResearch && (
-                    <div className="mc-section">
-                        <div className="mc-empty-guide">
-                            <span style={{ fontSize: '2.5rem' }}>🔬</span>
-                            <p style={{ fontWeight: 600, fontSize: '1rem' }}>날씨 정보가 아직 준비되지 않았습니다.</p>
-                        </div>
-                    </div>
-                )}
-
-                {/* ============================== 7. 복장 ============================== */}
-                {activeTab === '복장' && doc.secondaryResearch && (() => {
-                    const sr = doc.secondaryResearch;
-                    return (
-                        <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
-                            {sr.weather?.clothingTips && sr.weather.clothingTips.length > 0 && (
-                                <div className="mc-section" style={{ background: 'transparent', boxShadow: 'none', padding: 0, margin: '0 0 20px 0' }}>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '4px' }}>
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.62 1.96v.18A2 2 0 0 0 3 7.5V19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7.5a2 2 0 0 0 1-1.9v-.18a2 2 0 0 0-1.62-1.96Z"></path><path d="M12 21V7"></path><path d="M16 21V11"></path><path d="M8 21V11"></path></svg>
-                                        상세기후 및 복장 가이드
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                                        {sr.weather.clothingTips.map((tip: any, i: number) => {
-                                            const getIcon = (title: string) => {
-                                                if (title.includes('상의') || title.includes('외투')) return '🧥';
-                                                if (title.includes('하의')) return '👖';
-                                                if (title.includes('신발')) return '👟';
-                                                return '🎒';
-                                            };
-                                            return (
-                                                <div key={i} style={{ background: '#fff', padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                        <span style={{ fontSize: '1rem' }}>{getIcon(tip.title)}</span>
-                                                        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1e293b' }}>{tip.title}</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#7f1d1d', lineHeight: 1.5, marginBottom: '10px', textAlign: 'center', wordBreak: 'keep-all' }}>
+                                                    {safeStr(doc.secondaryResearch.customs.majorAlert.content)}
+                                                </div>
+                                                {doc.secondaryResearch.customs.majorAlert.penalty && (
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#dc2626', fontSize: '0.75rem', fontWeight: 700, background: '#fef2f2', padding: '6px 10px', borderRadius: '8px', border: '1px solid #fee2e2' }}>
+                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                                        {safeStr(doc.secondaryResearch.customs.majorAlert.penalty)}
                                                     </div>
-                                                    <div style={{ fontSize: '0.8rem', color: '#475569', lineHeight: 1.6, wordBreak: 'keep-all', fontWeight: 500 }}>
-                                                        {tip.content.split('. ').map((s: string, idx: number) => (
-                                                            <div key={idx} style={{ marginBottom: '4px', display: 'flex', gap: '4px' }}>
-                                                                <span style={{ color: '#94a3b8' }}>•</span>
-                                                                <span>{s.trim()}{!s.trim().endsWith('.') && s.trim().length > 0 ? '.' : ''}</span>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* (2) 사전 입국 준비 및 비자/ETA 퀵링크 */}
+                                        {doc.secondaryResearch.customs.links && doc.secondaryResearch.customs.links.length > 0 && (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
+                                                {doc.secondaryResearch.customs.links.map((link: any, li: number) => (
+                                                    <div key={li} style={{ border: '1.5px solid #005a96', borderRadius: '16px', overflow: 'hidden', background: '#fff', boxShadow: '0 4px 8px rgba(0, 90, 150, 0.03)' }}>
+                                                        <div style={{ background: '#005a96', padding: '10px 16px', display: 'flex', alignItems: 'center', color: '#fff', gap: '10px' }}>
+                                                            <span style={{ background: '#fff', color: '#005a96', padding: '3px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                                                                {link.type === 'visa' ? '비자/ETA' : (link.type === 'customs' ? '세관신고' : '입국신고')}
+                                                            </span>
+                                                            <span style={{ fontSize: '0.88rem', fontWeight: 800, lineHeight: 1.3, wordBreak: 'keep-all' }}>{safeStr(link.label)}</span>
+                                                        </div>
+                                                        <div style={{ padding: '14px' }}>
+                                                            <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '12px', marginBottom: '10px' }}>
+                                                                <div style={{ fontSize: '0.78rem', color: '#334155', lineHeight: 1.5, wordBreak: 'keep-all' }}>
+                                                                    {safeStr(link.description)}
+                                                                </div>
+                                                            </div>
+                                                            {link.howTo && (
+                                                                <div style={{ marginBottom: '10px' }}>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0284c7', fontSize: '0.78rem', fontWeight: 800, marginBottom: '2px' }}>
+                                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                                                        신청 및 준비 방법
+                                                                    </div>
+                                                                    <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4, wordBreak: 'keep-all' }}>
+                                                                        {safeStr(link.howTo)}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            <a
+                                                                href={link.url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(to right, #00ace2, #008ebc)', color: '#fff', padding: '10px', borderRadius: '10px', fontWeight: 800, gap: '6px', fontSize: '0.82rem', boxShadow: '0 4px 8px rgba(0, 172, 226, 0.1)' }}
+                                                            >
+                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                                                공식 사이트 바로가기
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* (3) 면세 한도 & 여권 유의사항 */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
+                                            <div style={{ background: '#f0f9ff', border: '1.5px solid #bae6fd', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 6px rgba(14, 165, 233, 0.03)' }}>
+                                                <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0369a1', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> 면세 한도
+                                                </div>
+                                                <div style={{ fontSize: '0.8rem', color: '#075985', lineHeight: 1.5 }}>
+                                                    {formatBulletPoints(doc.secondaryResearch.customs.dutyFree)}
+                                                </div>
+                                            </div>
+                                            <div style={{ background: '#f5f3ff', border: '1.5px solid #ddd6fe', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 6px rgba(124, 58, 237, 0.03)' }}>
+                                                <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#6d28d9', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg> 여권 유의사항
+                                                </div>
+                                                <div style={{ fontSize: '0.8rem', color: '#5b21b6', lineHeight: 1.5 }}>
+                                                    {formatBulletPoints(doc.secondaryResearch.customs.passportNote)}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* (4) 입국 절차 */}
+                                        {doc.secondaryResearch.customs.arrivalProcedure && doc.secondaryResearch.customs.arrivalProcedure.steps?.length > 0 && (
+                                            <div style={{ marginBottom: '16px', border: '1.5px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.01)' }}>
+                                                <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1e293b' }}>{safeStr(doc.secondaryResearch.customs.arrivalProcedure.title || '입국 절차')}</span>
+                                                </div>
+                                                <div style={{ padding: '14px' }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                        {doc.secondaryResearch.customs.arrivalProcedure.steps.map((st: any, i: number) => (
+                                                            <div key={i} style={{ display: 'flex', gap: '10px' }}>
+                                                                <div style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 800, flexShrink: 0, marginTop: '2px' }}>{i + 1}</div>
+                                                                <div>
+                                                                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', marginBottom: '2px' }}>{safeStr(st.step)}</div>
+                                                                    <div style={{ fontSize: '0.75rem', color: '#64748b', lineHeight: 1.4, wordBreak: 'keep-all' }}>{safeStr(st.description)}</div>
+                                                                </div>
                                                             </div>
                                                         ))}
                                                     </div>
                                                 </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            )}
+                                            </div>
+                                        )}
 
-                            {/* 최종 요약 */}
-                            {sr.weather?.packingSummary && (
-                                <div style={{ background: '#eff6ff', border: '1px solid #dbeafe', borderRadius: '12px', padding: '14px', display: 'flex', gap: '12px', alignItems: 'center', margin: 0 }}>
-                                    <div style={{ fontSize: '1.2rem' }}>🎒</div>
-                                    <div style={{ fontSize: '0.82rem', color: '#1e40af', fontWeight: 600, lineHeight: 1.5, wordBreak: 'keep-all' }}>
-                                        {safeStr(sr.weather?.packingSummary)}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    );
-                })()}
-                {activeTab === '복장' && !doc.secondaryResearch && (
-                    <div className="mc-section">
-                        <div className="mc-empty-guide">
-                            <span style={{ fontSize: '2.5rem' }}>🧥</span>
-                            <p style={{ fontWeight: 600, fontSize: '1rem' }}>복장 정보가 아직 준비되지 않았습니다.</p>
-                        </div>
-                    </div>
-                )}
+                                        {/* (5) 미성년자 자녀 입국 규정 */}
+                                        {(doc.secondaryResearch.customs.minorEntry || doc.secondaryResearch.customs.minorDetail) && (
+                                            <div style={{ marginBottom: '16px', background: '#fffde7', border: '1.5px solid #fef08a', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 2px 6px rgba(254, 240, 138, 0.1)' }}>
+                                                <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '6px', color: '#854d0e', borderBottom: '1px solid #fef9c3', background: '#fefcbf' }}>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                                                    <span style={{ fontSize: '0.82rem', fontWeight: 800 }}>미성년자 동반 입국 규정</span>
+                                                </div>
+                                                <div style={{ padding: '14px' }}>
+                                                    {doc.secondaryResearch.customs.minorEntry && (
+                                                        <div style={{ fontSize: '0.78rem', color: '#713f12', lineHeight: 1.5, marginBottom: '8px', wordBreak: 'keep-all' }}>
+                                                            {safeStr(doc.secondaryResearch.customs.minorEntry)}
+                                                        </div>
+                                                    )}
+                                                    {doc.secondaryResearch.customs.minorDetail && (
+                                                        <div style={{ background: '#fff', border: '1px solid #fef9c3', borderRadius: '10px', padding: '10px', borderLeft: '4px solid #facc15' }}>
+                                                            <div style={{ color: '#854d0e', fontSize: '0.75rem', lineHeight: 1.4, display: 'flex', gap: '6px' }}>
+                                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0, marginTop: '2px' }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                                                <span style={{ wordBreak: 'keep-all' }}>{safeStr(doc.secondaryResearch.customs.minorDetail)}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
 
-                {/* ============================== 8. 환전/로밍 ============================== */}
-                {activeTab === '환전/로밍' && doc.secondaryResearch && (() => {
-                    const sr = doc.secondaryResearch;
-                    return (
-                        <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
-                            {/* 환전 정보 카드 */}
-                            {sr.currency && (
-                                <div className="mc-section" style={{ margin: '0 0 16px 0' }}>
+                                        {/* (6) 반입 금지/제한 품목 */}
+                                        {doc.secondaryResearch.customs.prohibitedItems && doc.secondaryResearch.customs.prohibitedItems.length > 0 && (
+                                            <div style={{ marginBottom: '16px', border: '1.5px solid #fee2e2', background: '#fff5f5', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 2px 6px rgba(239, 68, 68, 0.01)' }}>
+                                                <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid #fde2e2', background: '#fee2e2' }}>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                                                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#dc2626' }}>반입 금지 및 제한 품목</span>
+                                                </div>
+                                                <div style={{ padding: '14px' }}>
+                                                    {doc.secondaryResearch.customs.prohibitedItems.map((pi: any, pii: number) => (
+                                                        <div key={pii} style={{ marginBottom: '10px' }}>
+                                                            <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#991b1b', marginBottom: '4px' }}>{safeStr(pi.category)}</div>
+                                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                                {pi.items.map((it: any, iti: number) => (
+                                                                    <span key={iti} style={{ fontSize: '0.72rem', background: '#fff', color: '#dc2626', border: '1px solid #fee2e2', padding: '3px 8px', borderRadius: '20px', fontWeight: 700 }}>
+                                                                        {safeStr(it)}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {/* ============================== 4. 준비물 ============================== */}
+                        {activeTab === '준비물' && (
+                            <>
+                                <div className="mc-section">
                                     <div className="mc-section-title">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> 환전 가이드
-                                    </div>
-                                    <div className="currency-tip-cards" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                        {sr.currency.calculationTip && (
-                                            <div className="currency-tip-card highlight" style={{ background: '#eff6ff', border: '1px solid #dbeafe', padding: '14px', borderRadius: '10px' }}>
-                                                <div className="ct-title" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e40af', marginBottom: '6px' }}>간편 환산법</div>
-                                                <p style={{ fontSize: '0.8rem', color: '#1e40af', lineHeight: 1.5, margin: 0 }}>{safeStr(sr.currency.calculationTip)}</p>
-                                                <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '6px', lineHeight: 1.4 }}>
-                                                    *정확한 현재 환율이 아닌, 현지에서 체감 물가를 빠르게 계산하기 위한 대략적인 암산법입니다.
-                                                </div>
-                                            </div>
-                                        )}
-                                        
-                                        {sr.currency.exchangeTip && (
-                                            <div className="currency-tip-card" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '14px', borderRadius: '10px' }}>
-                                                <div className="ct-title" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', marginBottom: '6px' }}>환전 팁</div>
-                                                <ul className="guide-list-wrap" style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-                                                    {safeStr(sr.currency.exchangeTip).split(/[\n·\-\*]/).filter(t => t.trim().length > 1).map((text, i) => (
-                                                        <li key={i} className="guide-list-item" style={{ position: 'relative', paddingLeft: '14px', fontSize: '0.8rem', color: '#475569', lineHeight: 1.5, marginBottom: '4px' }}>
-                                                            <span style={{ position: 'absolute', left: 0, color: '#94a3b8' }}>•</span>
-                                                            {text.trim()}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
-
-                                        {sr.currency.tipCulture && (
-                                            <div className="currency-tip-card" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '14px', borderRadius: '10px' }}>
-                                                <div className="ct-title" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', marginBottom: '6px' }}>팁 문화</div>
-                                                <ul className="guide-list-wrap" style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-                                                    {safeStr(sr.currency.tipCulture).split(/[\n·\-\*]/).filter(t => t.trim().length > 1).map((text, i) => (
-                                                        <li key={i} className="guide-list-item" style={{ position: 'relative', paddingLeft: '14px', fontSize: '0.8rem', color: '#475569', lineHeight: 1.5, marginBottom: '4px' }}>
-                                                            <span style={{ position: 'absolute', left: 0, color: '#94a3b8' }}>•</span>
-                                                            {text.trim()}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
+                                        <span className="sec-icon">✅</span> 준비물 체크리스트
+                                        {realChecklistItems.length > 0 && (
+                                            <span className="checklist-progress">
+                                                {checkedCount}/{realChecklistItems.length}
+                                            </span>
                                         )}
                                     </div>
-                                </div>
-                            )}
 
-                            {/* 환전 계산기 위젯 */}
-                            {sr.currency && (
-                                <div className="mc-calc-widget mc-section" style={{ margin: '0 0 16px 0' }}>
-                                    <div className="mc-calc-title" style={{ fontSize: '0.9rem', fontWeight: 700, color: '#334155', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><line x1="16" y1="10" x2="16" y2="10.01"></line><line x1="12" y1="10" x2="12" y2="10.01"></line><line x1="8" y1="10" x2="8" y2="10.01"></line><line x1="12" y1="14" x2="12" y2="14.01"></line><line x1="8" y1="14" x2="8" y2="14.01"></line><line x1="12" y1="18" x2="12" y2="18.01"></line><line x1="8" y1="18" x2="8" y2="18.01"></line></svg>
-                                        실시간 환전 계산기
-                                    </div>
-                                    
-                                    {(() => {
-                                        const cur = sr.currency;
-                                        let codes = cur?.targetCodes || [];
-                                        if (codes.length === 0 && cur?.localCurrency) {
-                                            const matches = cur.localCurrency.match(/[A-Z]{3}/g);
-                                            if (matches) codes = Array.from(new Set(matches));
-                                        }
-                                        
-                                        if (codes.length <= 1) return null;
-
-                                        return (
-                                            <div style={{ marginBottom: '16px' }}>
-                                                <select
-                                                    value={targetCurrency}
-                                                    onChange={(e) => {
-                                                        setTargetCurrency(e.target.value);
-                                                        setCalcAmount('');
-                                                    }}
-                                                    style={{
-                                                        width: '100%',
-                                                        padding: '12px 16px',
-                                                        borderRadius: '12px',
-                                                        fontSize: '0.9rem',
-                                                        fontWeight: 600,
-                                                        border: '1.5px solid #e2e8f0',
-                                                        background: '#fff',
-                                                        color: '#1e293b',
-                                                        cursor: 'pointer',
-                                                        appearance: 'none',
-                                                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E")`,
-                                                        backgroundRepeat: 'no-repeat',
-                                                        backgroundPosition: 'right 12px center',
-                                                        backgroundSize: '16px',
-                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
-                                                    }}
-                                                >
-                                                    {codes.map((code: string) => {
-                                                        const cleanCode = code.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
-                                                        return (
-                                                            <option key={code} value={code}>
-                                                                {cleanCode}{currencyKoMap[cleanCode] ? ` (${currencyKoMap[cleanCode]})` : ''}
-                                                                {code.includes('(') && !currencyKoMap[cleanCode] ? ` ${code.substring(code.indexOf('('))}` : ''}
-                                                            </option>
-                                                        );
-                                                    })}
-                                                </select>
-                                            </div>
-                                        );
-                                    })()}
-
-                                    {rateLoading ? (
-                                        <div style={{ textAlign: 'center', padding: '20px', opacity: 0.6 }}>환율 로딩 중...</div>
-                                    ) : exchangeRate ? (
-                                        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                            <div className="mc-calc-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                                                <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569' }}>
-                                                    {(() => {
-                                                        const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
-                                                        return calcDirection === 'krwToTarget' ? 'KRW' : clean;
-                                                    })()}
-                                                    <span className="mc-calc-sublabel" style={{ fontSize: '0.72rem', color: '#94a3b8', marginLeft: '4px' }}>({(() => {
-                                                        const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
-                                                        return calcDirection === 'krwToTarget' ? '원' : (currencyKoMap[clean] || '현지 화폐');
-                                                    })()})</span>
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    value={calcAmount}
-                                                    onChange={e => setCalcAmount(e.target.value)}
-                                                    placeholder="금액 입력"
-                                                    className="mc-calc-input"
-                                                    style={{ border: 'none', background: 'transparent', textAlign: 'right', fontSize: '1rem', fontWeight: 700, color: '#1e293b', width: '60%', outline: 'none' }}
-                                                />
-                                            </div>
-
+                                    {/* 진행상태 바 */}
+                                    {realChecklistItems.length > 0 && (
+                                        <div className="checklist-progress-bar">
                                             <div
-                                                className="mc-calc-arrow-float"
-                                                onClick={() => {
-                                                    setCalcDirection(prev => prev === 'krwToTarget' ? 'targetToKrw' : 'krwToTarget');
-                                                    setCalcAmount('');
-                                                }}
-                                                style={{ alignSelf: 'center', cursor: 'pointer', background: '#f1f5f9', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', margin: '4px 0' }}
-                                            >
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline><polyline points="5 12 12 5 19 12"></polyline></svg>
-                                            </div>
-
-                                            <div className="mc-calc-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                                                <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569' }}>
-                                                    {(() => {
-                                                        const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
-                                                        return calcDirection === 'krwToTarget' ? clean : 'KRW';
-                                                    })()}
-                                                    <span className="mc-calc-sublabel" style={{ fontSize: '0.72rem', color: '#94a3b8', marginLeft: '4px' }}>({(() => {
-                                                        const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
-                                                        return calcDirection === 'krwToTarget' ? (currencyKoMap[clean] || '현지 화폐') : '원';
-                                                    })()})</span>
-                                                </label>
-                                                <div className="mc-calc-result" style={{ fontSize: '1rem', fontWeight: 700, color: '#0ea5e9' }}>
-                                                    {calcAmount ? (
-                                                        calcDirection === 'krwToTarget'
-                                                            ? (parseFloat(calcAmount) * exchangeRate).toLocaleString(undefined, { maximumFractionDigits: 0 })
-                                                            : (parseFloat(calcAmount) / exchangeRate).toLocaleString(undefined, { maximumFractionDigits: 0 })
-                                                    ) : '0'}
-                                                </div>
-                                            </div>
-                                            <div className="mc-calc-rate" style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'right', marginTop: '4px' }}>
-                                                기준 환율: 1 KRW = {exchangeRate.toFixed(6)} {(() => {
-                                                    return targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
-                                                })()}
-                                            </div>
+                                                className="checklist-progress-fill"
+                                                style={{ width: `${(checkedCount / realChecklistItems.length) * 100}%` }}
+                                            />
                                         </div>
+                                    )}
+
+                                    {checklistItems.length > 0 ? (
+                                        <ul className="mc-checklist-interactive">
+                                            {checklistItems.map((item, i) => {
+                                                const key = `cl-${i}`;
+                                                const checked = !!checkedItems[key];
+                                                if (!item.trim()) {
+                                                    return <li key={i} style={{ listStyle: 'none', height: '14px' }} />;
+                                                }
+                                                return (
+                                                    <li
+                                                        key={i}
+                                                        className={`checklist-item ${checked ? 'checked' : ''}`}
+                                                        onClick={() => toggleCheck(key)}
+                                                    >
+                                                        <span className="check-box">{checked ? '✅' : '⬜'}</span>
+                                                        <span className="check-text">{item}</span>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
                                     ) : (
-                                        <div style={{ textAlign: 'center', padding: '20px', opacity: 0.6 }}>환율 정보를 불러올 수 없습니다.</div>
+                                        <div className="mc-empty-notice">준비물 목록이 없습니다.</div>
                                     )}
                                 </div>
-                            )}
+                            </>
+                        )}
 
-                            {/* 로밍 및 통신 */}
-                            {sr.roaming && (
-                                <div className="mc-section" style={{ margin: 0 }}>
-                                    <div className="mc-section-title">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg> 로밍 · 통신
-                                    </div>
-                                    <div className="mc-roaming-grid">
-                                        <div className="mc-roaming-header-banner" style={{ background: '#f1f5f9', padding: '8px 12px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg> 통신 환경 안내
+                        {/* ============================== 5. 안내사항 ============================== */}
+                        {activeTab === '안내사항' && (
+                            <>
+                                {/* 포함/불포함 */}
+                                {(doc.inclusions.length > 0 || doc.exclusions.length > 0) && (
+                                    <div className="mc-section">
+                                        <div className="mc-section-title">
+                                            <span className="sec-icon">📌</span> 포함 · 불포함 사항
                                         </div>
-                                        <p className="mc-roaming-subtitle" style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '14px', lineHeight: 1.5, margin: '0 0 12px 0' }}>
-                                            {sr.roaming.description || `${safeStr(doc.trip.destination).split(' ').pop()}은(는) 주요 관광지와 리조트 내에서 사용이 원활합니다. 출국 전 데이터 로밍 차단 또는 로밍 요금제 신청이 필수입니다.`}
-                                        </p>
-                                        <div className="roaming-option-cards" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                            <div className="roaming-opt-card" style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: '#fff', border: '1px solid #e2e8f0', padding: '14px', borderRadius: '12px' }}>
-                                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%' }}>
-                                                    <div className="r-opt-badge" style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800 }}>1</div>
-                                                    <strong style={{ fontSize: '0.85rem', color: '#1e293b' }}>통신사 데이터 로밍 (가장 편리)</strong>
-                                                </div>
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', width: '100%' }}>
-                                                    <div style={{ background: '#f8fafc', padding: '8px 2px', borderRadius: '10px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
-                                                        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>SKT</div>
-                                                        <a href="tel:02-6343-9000" style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '2px' }}>02-6343-9000</a>
-                                                        <a href="tel:1599-2011" style={{ display: 'block', fontSize: '0.65rem', color: '#64748b', textDecoration: 'none' }}>1599-2011</a>
+                                        {doc.inclusions.length > 0 && (
+                                            <div className="mc-include-list" style={{ marginBottom: '12px' }}>
+                                                <div style={{ fontSize: '0.75rem', color: '#22c55e', fontWeight: 600, marginBottom: '4px' }}>포함사항</div>
+                                                {doc.inclusions.map((item, i) => (
+                                                    <div key={i} className="mc-include-item included">
+                                                        <span className="inc-icon">✅</span> {item}
                                                     </div>
-                                                    <div style={{ background: '#f8fafc', padding: '8px 2px', borderRadius: '10px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
-                                                        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>KT</div>
-                                                        <a href="tel:02-2190-0901" style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '2px' }}>02-2190-0901</a>
-                                                        <a href="tel:1588-0608" style={{ display: 'block', fontSize: '0.65rem', color: '#64748b', textDecoration: 'none' }}>1588-0608</a>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {doc.exclusions.length > 0 && (
+                                            <div className="mc-include-list">
+                                                <div style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 600, marginBottom: '4px' }}>불포함사항</div>
+                                                {doc.exclusions.map((item, i) => (
+                                                    <div key={i} className="mc-include-item excluded">
+                                                        <span className="inc-icon">❌</span> {item}
                                                     </div>
-                                                    <div style={{ background: '#f8fafc', padding: '8px 2px', borderRadius: '10px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
-                                                        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>LG U+</div>
-                                                        <a href="tel:02-3416-7010" style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '2px' }}>02-3416-7010</a>
-                                                        <a href="tel:1544-0010" style={{ display: 'block', fontSize: '0.65rem', color: '#64748b', textDecoration: 'none' }}>1544-0010</a>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* 취소 규정 */}
+                                {doc.cancellationPolicy && (Array.isArray(doc.cancellationPolicy) ? doc.cancellationPolicy.length > 0 : String(doc.cancellationPolicy).trim().length > 0) && (
+                                    <div className="mc-section">
+                                        <div className="mc-section-title">
+                                            <span className="sec-icon">⚠️</span> 취소 · 환불 규정
+                                        </div>
+                                        <div className="mc-policy-text" style={{ whiteSpace: 'pre-line', lineHeight: 1.8, fontSize: '0.87rem', color: '#334155' }}>
+                                            {Array.isArray(doc.cancellationPolicy)
+                                                ? doc.cancellationPolicy.join('\n\n')
+                                                : String(doc.cancellationPolicy)}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* 추가 안내 */}
+                                {doc.notices && (
+                                    <div className="mc-section">
+                                        <div className="mc-section-title">
+                                            <span className="sec-icon">💡</span> 추가 안내
+                                        </div>
+                                        <div className="mc-policy-text">{doc.notices}</div>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                        {/* ============================== 6. 날씨 ============================== */}
+                        {activeTab === '날씨' && doc.secondaryResearch && (() => {
+                            const sr = doc.secondaryResearch;
+                            return (
+                                <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
+                                    {sr.weather?.summary && (
+                                        <div className="mc-section" style={{ margin: '0 0 16px 0' }}>
+                                            <div className="mc-section-title">
+                                                <span className="sec-icon">☀️</span> 현지 날씨 & 기후 요약
+                                            </div>
+                                            <p style={{ fontSize: '0.9rem', color: '#334155', lineHeight: 1.6, wordBreak: 'keep-all', margin: 0 }}>
+                                                {safeStr(sr.weather?.summary)}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* 일별 예보 카드 */}
+                                    {sr.weather?.forecast && sr.weather.forecast.length > 0 && (
+                                        <div className="mc-section" style={{ background: 'transparent', boxShadow: 'none', padding: 0, margin: 0 }}>
+                                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '4px' }}>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                일별 기온 및 날씨
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '12px', WebkitOverflowScrolling: 'touch', paddingLeft: '4px', paddingRight: '4px' }}>
+                                                {sr.weather.forecast.map((day: any, i: number) => {
+                                                    let displayDate = day.date;
+                                                    try {
+                                                        if (doc.trip.departureDate) {
+                                                            const d = new Date(doc.trip.departureDate);
+                                                            d.setDate(d.getDate() + i);
+                                                            const month = d.getMonth() + 1;
+                                                            const date = d.getDate();
+                                                            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                                                            const dayName = dayNames[d.getDay()];
+                                                            displayDate = `${month}.${date} (${dayName})`;
+                                                        }
+                                                    } catch (e) { }
+
+                                                    return (
+                                                        <div key={i} style={{
+                                                            minWidth: '165px',
+                                                            background: 'rgba(15, 23, 42, 0.9)',
+                                                            backdropFilter: 'blur(10px)',
+                                                            borderRadius: '22px',
+                                                            padding: '24px 16px 20px',
+                                                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            alignItems: 'center',
+                                                            textAlign: 'center',
+                                                            minHeight: '265px',
+                                                            height: '265px'
+                                                        }}>
+                                                            <div style={{ height: '82px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                                                                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', marginBottom: '4px', letterSpacing: '-0.02em' }}>{i + 1}일차</div>
+                                                                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>{displayDate}</div>
+                                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500, opacity: 0.9 }}>
+                                                                    {`(${String(day.location || simplifyDestination(doc.trip.destination)).replace(/[\(\)]/g, '')})`}
+                                                                </div>
+                                                            </div>
+
+                                                            <div style={{
+                                                                flex: 1,
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                width: '100%',
+                                                                margin: '10px 0'
+                                                            }}>
+                                                                <div style={{ transform: 'scale(1.65)' }}>
+                                                                    <WeatherIcon description={cleanWeatherDesc(day.description, doc.trip.destination)} />
+                                                                </div>
+                                                            </div>
+
+                                                            <div style={{
+                                                                height: '42px',
+                                                                fontSize: '0.82rem',
+                                                                color: '#e2e8f0',
+                                                                fontWeight: 500,
+                                                                lineHeight: 1.4,
+                                                                wordBreak: 'keep-all',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                width: '100%',
+                                                                padding: '0 4px',
+                                                                marginBottom: '10px'
+                                                            }}>
+                                                                {cleanWeatherDesc(day.description, doc.trip.destination)}
+                                                            </div>
+
+                                                            <div style={{
+                                                                display: 'flex',
+                                                                alignItems: 'baseline',
+                                                                gap: '8px',
+                                                                paddingBottom: '4px'
+                                                            }}>
+                                                                <span style={{ fontSize: '1.35rem', fontWeight: 900, color: '#fff' }}>{String(day.tempMax ?? '').replace(/[^0-9.-]/g, '')}°</span>
+                                                                <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'rgba(148, 163, 184, 0.7)' }}>/ {String(day.tempMin ?? '').replace(/[^0-9.-]/g, '')}°</span>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })()}
+                        {activeTab === '날씨' && !doc.secondaryResearch && (
+                            <div className="mc-section">
+                                <div className="mc-empty-guide">
+                                    <span style={{ fontSize: '2.5rem' }}>🔬</span>
+                                    <p style={{ fontWeight: 600, fontSize: '1rem' }}>날씨 정보가 아직 준비되지 않았습니다.</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ============================== 7. 복장 ============================== */}
+                        {activeTab === '복장' && doc.secondaryResearch && (() => {
+                            const sr = doc.secondaryResearch;
+                            return (
+                                <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
+                                    {sr.weather?.clothingTips && sr.weather.clothingTips.length > 0 && (
+                                        <div className="mc-section" style={{ background: 'transparent', boxShadow: 'none', padding: 0, margin: '0 0 20px 0' }}>
+                                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '4px' }}>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.62 1.96v.18A2 2 0 0 0 3 7.5V19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7.5a2 2 0 0 0 1-1.9v-.18a2 2 0 0 0-1.62-1.96Z"></path><path d="M12 21V7"></path><path d="M16 21V11"></path><path d="M8 21V11"></path></svg>
+                                                상세기후 및 복장 가이드
+                                            </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                                {sr.weather.clothingTips.map((tip: any, i: number) => {
+                                                    const getIcon = (title: string) => {
+                                                        if (title.includes('상의') || title.includes('외투')) return '🧥';
+                                                        if (title.includes('하의')) return '👖';
+                                                        if (title.includes('신발')) return '👟';
+                                                        return '🎒';
+                                                    };
+                                                    return (
+                                                        <div key={i} style={{ background: '#fff', padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                <span style={{ fontSize: '1rem' }}>{getIcon(tip.title)}</span>
+                                                                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1e293b' }}>{tip.title}</div>
+                                                            </div>
+                                                            <div style={{ fontSize: '0.8rem', color: '#475569', lineHeight: 1.6, wordBreak: 'keep-all', fontWeight: 500 }}>
+                                                                {tip.content.split('. ').map((s: string, idx: number) => (
+                                                                    <div key={idx} style={{ marginBottom: '4px', display: 'flex', gap: '4px' }}>
+                                                                        <span style={{ color: '#94a3b8' }}>•</span>
+                                                                        <span>{s.trim()}{!s.trim().endsWith('.') && s.trim().length > 0 ? '.' : ''}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 최종 요약 */}
+                                    {sr.weather?.packingSummary && (
+                                        <div style={{ background: '#eff6ff', border: '1px solid #dbeafe', borderRadius: '12px', padding: '14px', display: 'flex', gap: '12px', alignItems: 'center', margin: 0 }}>
+                                            <div style={{ fontSize: '1.2rem' }}>🎒</div>
+                                            <div style={{ fontSize: '0.82rem', color: '#1e40af', fontWeight: 600, lineHeight: 1.5, wordBreak: 'keep-all' }}>
+                                                {safeStr(sr.weather?.packingSummary)}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })()}
+                        {activeTab === '복장' && !doc.secondaryResearch && (
+                            <div className="mc-section">
+                                <div className="mc-empty-guide">
+                                    <span style={{ fontSize: '2.5rem' }}>🧥</span>
+                                    <p style={{ fontWeight: 600, fontSize: '1rem' }}>복장 정보가 아직 준비되지 않았습니다.</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ============================== 8. 환전/로밍 ============================== */}
+                        {activeTab === '환전/로밍' && doc.secondaryResearch && (() => {
+                            const sr = doc.secondaryResearch;
+                            return (
+                                <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
+                                    {/* 환전 정보 카드 */}
+                                    {sr.currency && (
+                                        <div className="mc-section" style={{ margin: '0 0 16px 0' }}>
+                                            <div className="mc-section-title">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> 환전 가이드
+                                            </div>
+                                            <div className="currency-tip-cards" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                {sr.currency.calculationTip && (
+                                                    <div className="currency-tip-card highlight" style={{ background: '#eff6ff', border: '1px solid #dbeafe', padding: '14px', borderRadius: '10px' }}>
+                                                        <div className="ct-title" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e40af', marginBottom: '6px' }}>간편 환산법</div>
+                                                        <p style={{ fontSize: '0.8rem', color: '#1e40af', lineHeight: 1.5, margin: 0 }}>{safeStr(sr.currency.calculationTip)}</p>
+                                                        <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '6px', lineHeight: 1.4 }}>
+                                                            *정확한 현재 환율이 아닌, 현지에서 체감 물가를 빠르게 계산하기 위한 대략적인 암산법입니다.
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                {sr.roaming.carriers && (
-                                                    <div style={{ fontSize: '0.72rem', color: '#64748b', background: '#f1f5f9', padding: '6px 10px', borderRadius: '8px', marginTop: '4px', lineHeight: 1.4 }}>
-                                                        <strong>💡 현지 통신사 파트너:</strong> {sr.roaming.carriers}
+                                                )}
+
+                                                {sr.currency.exchangeTip && (
+                                                    <div className="currency-tip-card" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '14px', borderRadius: '10px' }}>
+                                                        <div className="ct-title" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', marginBottom: '6px' }}>환전 팁</div>
+                                                        <ul className="guide-list-wrap" style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                                                            {safeStr(sr.currency.exchangeTip).split(/[\n·\-\*]/).filter(t => t.trim().length > 1).map((text, i) => (
+                                                                <li key={i} className="guide-list-item" style={{ position: 'relative', paddingLeft: '14px', fontSize: '0.8rem', color: '#475569', lineHeight: 1.5, marginBottom: '4px' }}>
+                                                                    <span style={{ position: 'absolute', left: 0, color: '#94a3b8' }}>•</span>
+                                                                    {text.trim()}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+
+                                                {sr.currency.tipCulture && (
+                                                    <div className="currency-tip-card" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '14px', borderRadius: '10px' }}>
+                                                        <div className="ct-title" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', marginBottom: '6px' }}>팁 문화</div>
+                                                        <ul className="guide-list-wrap" style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                                                            {safeStr(sr.currency.tipCulture).split(/[\n·\-\*]/).filter(t => t.trim().length > 1).map((text, i) => (
+                                                                <li key={i} className="guide-list-item" style={{ position: 'relative', paddingLeft: '14px', fontSize: '0.8rem', color: '#475569', lineHeight: 1.5, marginBottom: '4px' }}>
+                                                                    <span style={{ position: 'absolute', left: 0, color: '#94a3b8' }}>•</span>
+                                                                    {text.trim()}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
                                                     </div>
                                                 )}
                                             </div>
-                                            
-                                            <div className="roaming-opt-card" style={{ display: 'flex', gap: '10px', background: '#fff', border: '1px solid #e2e8f0', padding: '12px 14px', borderRadius: '12px', alignItems: 'center' }}>
-                                                <div className="r-opt-badge" style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800, flexShrink: 0 }}>2</div>
-                                                <div className="r-opt-body" style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    <strong style={{ fontSize: '0.82rem', color: '#1e293b' }}>현지 유심 (USIM)</strong>
-                                                    <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>현지 번호 제공, 한국 사전 구매 권장</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="roaming-opt-card" style={{ display: 'flex', gap: '10px', background: '#fff', border: '1px solid #e2e8f0', padding: '12px 14px', borderRadius: '12px', alignItems: 'center' }}>
-                                                <div className="r-opt-badge" style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800, flexShrink: 0 }}>3</div>
-                                                <div className="r-opt-body" style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    <strong style={{ fontSize: '0.82rem', color: '#1e293b' }}>E-심 (eSIM)</strong>
-                                                    <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>QR코드로 간편 개통 (지원 단말기 확인 요망)</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="roaming-opt-card" style={{ display: 'flex', gap: '10px', background: '#fff', border: '1px solid #e2e8f0', padding: '12px 14px', borderRadius: '12px', alignItems: 'center' }}>
-                                                <div className="r-opt-badge" style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800, flexShrink: 0 }}>4</div>
-                                                <div className="r-opt-body" style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    <strong style={{ fontSize: '0.82rem', color: '#1e293b' }}>와이파이 도시락</strong>
-                                                    <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>가족 단위 기기 여러 대 연결 추천</span>
-                                                </div>
-                                            </div>
                                         </div>
-
-                                        <div className="roaming-tip-box" style={{ background: '#eff6ff', borderRadius: '10px', padding: '12px', marginTop: '12px', fontSize: '0.8rem', color: '#1e3a8a', lineHeight: 1.5 }}>
-                                            <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> 유심/eSIM 추천
-                                            </strong>
-                                            {safeStr(sr.roaming.simEsim) || '그랩(Grab) 호출이나 길찾기 시 데이터가 필요하므로 유심이나 로밍 준비를 추천합니다.'}
-                                        </div>
-
-                                        {sr.roaming.roamingTip && (
-                                            <div className="roaming-tip-box" style={{ background: '#fffbeb', borderRadius: '10px', padding: '12px', marginTop: '10px', fontSize: '0.8rem', color: '#92400e', lineHeight: 1.5, border: '1px solid #fef3c7' }}>
-                                                <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg> 통신 이용 꿀팁
-                                                </strong>
-                                                {sr.roaming.roamingTip}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    );
-                })()}
-                {activeTab === '환전/로밍' && !doc.secondaryResearch && (
-                    <div className="mc-section">
-                        <div className="mc-empty-guide">
-                            <span style={{ fontSize: '2.5rem' }}>💸</span>
-                            <p style={{ fontWeight: 600, fontSize: '1rem' }}>환전/로밍 정보가 아직 준비되지 않았습니다.</p>
-                        </div>
-                    </div>
-                )}
-
-                {/* ============================== 9. 관광지 ============================== */}
-                {activeTab === '관광지' && doc.secondaryResearch && (() => {
-                    const sr = doc.secondaryResearch;
-                    return (
-                        <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
-                            <div style={{ 
-                                marginBottom: '20px', 
-                                background: '#f1f5f9', 
-                                padding: '12px 16px', 
-                                borderRadius: '12px', 
-                                fontSize: '0.8rem', 
-                                color: '#64748b', 
-                                lineHeight: 1.5,
-                                display: 'flex',
-                                gap: '8px',
-                                alignItems: 'flex-start'
-                            }}>
-                                <span style={{ flexShrink: 0, fontSize: '0.9rem' }}>💡</span>
-                                <span>아래 내용은 해당 도시의 주요 명소를 소개하는 가이드이며, 실제 확정된 일정상 방문지 구성과는 차이가 있을 수 있습니다.</span>
-                            </div>
-
-                            {/* 첫 번째 랜드마크: 히어로 카드 */}
-                            {sr.landmarks?.[0] && (
-                                <div className="landmark-hero" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '20px', overflow: 'hidden', marginBottom: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', margin: '0' }}>
-                                    {sr.landmarks[0].imageUrl && (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img src={sr.landmarks[0].imageUrl} alt={safeStr(sr.landmarks[0].name)} className="landmark-hero-img" style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
                                     )}
-                                    <div className="landmark-hero-info" style={{ padding: '20px' }}>
-                                        <h4 style={{ margin: '0 0 4px 0', fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>{safeStr(sr.landmarks[0].name)}</h4>
-                                        {sr.landmarks[0].nameLocal && <span className="landmark-local" style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', marginBottom: '10px', fontWeight: 500 }}>{safeStr(sr.landmarks[0].nameLocal)}</span>}
-                                        <p style={{ margin: 0, fontSize: '0.88rem', color: '#475569', lineHeight: 1.6, wordBreak: 'keep-all' }}>{safeStr(sr.landmarks[0].description)}</p>
-                                    </div>
-                                </div>
-                            )}
-                            {/* 나머지 랜드마크: 그리드 카드 */}
-                            <div className="landmark-grid" style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
-                                {sr.landmarks?.slice(1).map((lm: any, i: number) => (
-                                    <div key={i} className="landmark-card" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-                                        {lm.imageUrl && (
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            <img src={lm.imageUrl} alt={safeStr(lm.name)} className="landmark-card-img" style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
-                                        )}
-                                        <div className="landmark-card-body" style={{ padding: '20px' }}>
-                                            <h4 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>{safeStr(lm.name)}</h4>
-                                            {lm.nameLocal && <span className="landmark-local-sm" style={{ display: 'block', fontSize: '0.78rem', color: '#64748b', marginBottom: '8px', fontWeight: 500 }}>{safeStr(lm.nameLocal)}</span>}
-                                            <p style={{ margin: 0, fontSize: '0.85rem', color: '#475569', lineHeight: 1.6, wordBreak: 'keep-all' }}>{safeStr(lm.description)}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    );
-                })()}
-                {activeTab === '관광지' && !doc.secondaryResearch && (
-                    <div className="mc-section">
-                        <div className="mc-empty-guide">
-                            <span style={{ fontSize: '2.5rem' }}>🗺️</span>
-                            <p style={{ fontWeight: 600, fontSize: '1rem' }}>관광지 정보가 아직 준비되지 않았습니다.</p>
-                        </div>
-                    </div>
-                )}
 
-                {/* ============================== 10. 기타 ============================== */}
-                {activeTab === '기타' && doc.secondaryResearch?.customGuides && doc.secondaryResearch.customGuides.length > 0 && (
-                    <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
-                        {doc.secondaryResearch.customGuides.map((guide: any, gi: number) => (
-                            <GuideAccordion
-                                key={gi}
-                                id={`customGuide-${gi}`}
-                                title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg> {safeStr(guide.topic)}</>}
-                                isOpen={expandedSections[`customGuide-${gi}`] || false}
-                                onToggle={toggleSection}
-                            >
-                                {guide.sections?.map((sec: any, si: number) => (
-                                    <div key={si} className="custom-sub-section" style={{ marginBottom: '20px' }}>
-                                        <h4 className="css-title" style={{ fontSize: '0.9rem', fontWeight: 800, color: '#1e293b', margin: '0 0 10px 0', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>{safeStr(sec.title)}</h4>
+                                    {/* 환전 계산기 위젯 */}
+                                    {sr.currency && (
+                                        <div className="mc-calc-widget mc-section" style={{ margin: '0 0 16px 0' }}>
+                                            <div className="mc-calc-title" style={{ fontSize: '0.9rem', fontWeight: 700, color: '#334155', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><line x1="16" y1="10" x2="16" y2="10.01"></line><line x1="12" y1="10" x2="12" y2="10.01"></line><line x1="8" y1="10" x2="8" y2="10.01"></line><line x1="12" y1="14" x2="12" y2="14.01"></line><line x1="8" y1="14" x2="8" y2="14.01"></line><line x1="12" y1="18" x2="12" y2="18.01"></line><line x1="8" y1="18" x2="8" y2="18.01"></line></svg>
+                                                실시간 환전 계산기
+                                            </div>
 
-                                        {/* steps 타입 */}
-                                        {sec.type === 'steps' && sec.steps && (
-                                            <div className="css-steps" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                                {sec.steps.map((s: any, idx: number) => (
-                                                    <div key={idx} className="css-step" style={{ display: 'flex', gap: '10px' }}>
-                                                        <div className="css-step-num" style={{ background: '#e2e8f0', color: '#475569', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800, flexShrink: 0 }}>{idx + 1}</div>
-                                                        <div>
-                                                            <div className="css-step-label" style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '2px' }}>{safeStr(s.step)}</div>
-                                                            <div className="css-step-detail" style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>{safeStr(s.detail)}</div>
+                                            {(() => {
+                                                const cur = sr.currency;
+                                                let codes = cur?.targetCodes || [];
+                                                if (codes.length === 0 && cur?.localCurrency) {
+                                                    const matches = cur.localCurrency.match(/[A-Z]{3}/g);
+                                                    if (matches) codes = Array.from(new Set(matches));
+                                                }
+
+                                                if (codes.length <= 1) return null;
+
+                                                return (
+                                                    <div style={{ marginBottom: '16px' }}>
+                                                        <select
+                                                            value={targetCurrency}
+                                                            onChange={(e) => {
+                                                                setTargetCurrency(e.target.value);
+                                                                setCalcAmount('');
+                                                            }}
+                                                            style={{
+                                                                width: '100%',
+                                                                padding: '12px 16px',
+                                                                borderRadius: '12px',
+                                                                fontSize: '0.9rem',
+                                                                fontWeight: 600,
+                                                                border: '1.5px solid #e2e8f0',
+                                                                background: '#fff',
+                                                                color: '#1e293b',
+                                                                cursor: 'pointer',
+                                                                appearance: 'none',
+                                                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E")`,
+                                                                backgroundRepeat: 'no-repeat',
+                                                                backgroundPosition: 'right 12px center',
+                                                                backgroundSize: '16px',
+                                                                boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                                                            }}
+                                                        >
+                                                            {codes.map((code: string) => {
+                                                                const cleanCode = code.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
+                                                                return (
+                                                                    <option key={code} value={code}>
+                                                                        {cleanCode}{currencyKoMap[cleanCode] ? ` (${currencyKoMap[cleanCode]})` : ''}
+                                                                        {code.includes('(') && !currencyKoMap[cleanCode] ? ` ${code.substring(code.indexOf('('))}` : ''}
+                                                                    </option>
+                                                                );
+                                                            })}
+                                                        </select>
+                                                    </div>
+                                                );
+                                            })()}
+
+                                            {rateLoading ? (
+                                                <div style={{ textAlign: 'center', padding: '20px', opacity: 0.6 }}>환율 로딩 중...</div>
+                                            ) : exchangeRate ? (
+                                                <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    <div className="mc-calc-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                                                        <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569' }}>
+                                                            {(() => {
+                                                                const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
+                                                                return calcDirection === 'krwToTarget' ? 'KRW' : clean;
+                                                            })()}
+                                                            <span className="mc-calc-sublabel" style={{ fontSize: '0.72rem', color: '#94a3b8', marginLeft: '4px' }}>({(() => {
+                                                                const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
+                                                                return calcDirection === 'krwToTarget' ? '원' : (currencyKoMap[clean] || '현지 화폐');
+                                                            })()})</span>
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            value={calcAmount}
+                                                            onChange={e => setCalcAmount(e.target.value)}
+                                                            placeholder="금액 입력"
+                                                            className="mc-calc-input"
+                                                            style={{ border: 'none', background: 'transparent', textAlign: 'right', fontSize: '1rem', fontWeight: 700, color: '#1e293b', width: '60%', outline: 'none' }}
+                                                        />
+                                                    </div>
+
+                                                    <div
+                                                        className="mc-calc-arrow-float"
+                                                        onClick={() => {
+                                                            setCalcDirection(prev => prev === 'krwToTarget' ? 'targetToKrw' : 'krwToTarget');
+                                                            setCalcAmount('');
+                                                        }}
+                                                        style={{ alignSelf: 'center', cursor: 'pointer', background: '#f1f5f9', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', margin: '4px 0' }}
+                                                    >
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline><polyline points="5 12 12 5 19 12"></polyline></svg>
+                                                    </div>
+
+                                                    <div className="mc-calc-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                                                        <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569' }}>
+                                                            {(() => {
+                                                                const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
+                                                                return calcDirection === 'krwToTarget' ? clean : 'KRW';
+                                                            })()}
+                                                            <span className="mc-calc-sublabel" style={{ fontSize: '0.72rem', color: '#94a3b8', marginLeft: '4px' }}>({(() => {
+                                                                const clean = targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
+                                                                return calcDirection === 'krwToTarget' ? (currencyKoMap[clean] || '현지 화폐') : '원';
+                                                            })()})</span>
+                                                        </label>
+                                                        <div className="mc-calc-result" style={{ fontSize: '1rem', fontWeight: 700, color: '#0ea5e9' }}>
+                                                            {calcAmount ? (
+                                                                calcDirection === 'krwToTarget'
+                                                                    ? (parseFloat(calcAmount) * exchangeRate).toLocaleString(undefined, { maximumFractionDigits: 0 })
+                                                                    : (parseFloat(calcAmount) / exchangeRate).toLocaleString(undefined, { maximumFractionDigits: 0 })
+                                                            ) : '0'}
                                                         </div>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        )}
+                                                    <div className="mc-calc-rate" style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'right', marginTop: '4px' }}>
+                                                        기준 환율: 1 KRW = {exchangeRate.toFixed(6)} {(() => {
+                                                            return targetCurrency.split(/[\s\(\),]/)[0].toUpperCase().replace(/[^A-Z]/g, '');
+                                                        })()}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div style={{ textAlign: 'center', padding: '20px', opacity: 0.6 }}>환율 정보를 불러올 수 없습니다.</div>
+                                            )}
+                                        </div>
+                                    )}
 
-                                        {/* table 타입 */}
-                                        {sec.type === 'table' && sec.headers && sec.rows && (
-                                            <div className="css-table-wrap" style={{ overflowX: 'auto' }}>
-                                                <table className="css-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left' }}>
-                                                    <thead><tr style={{ background: '#f8fafc' }}>{sec.headers.map((h: any, hi: number) => <th key={hi} style={{ padding: '8px 10px', borderBottom: '1.5px solid #e2e8f0', fontWeight: 700, color: '#475569' }}>{safeStr(h)}</th>)}</tr></thead>
-                                                    <tbody>
-                                                        {sec.rows.map((row: any, ri: number) => (
-                                                            <tr key={ri} style={{ borderBottom: '1px solid #f1f5f9' }}>{row.map((c: any, ci: number) => <td key={ci} style={{ padding: '8px 10px', color: '#475569' }}>{safeStr(c)}</td>)}</tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
+                                    {/* 로밍 및 통신 */}
+                                    {sr.roaming && (
+                                        <div className="mc-section" style={{ margin: 0 }}>
+                                            <div className="mc-section-title">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg> 로밍 · 통신
                                             </div>
-                                        )}
+                                            <div className="mc-roaming-grid">
+                                                <div className="mc-roaming-header-banner" style={{ background: '#f1f5f9', padding: '8px 12px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg> 통신 환경 안내
+                                                </div>
+                                                <p className="mc-roaming-subtitle" style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '14px', lineHeight: 1.5, margin: '0 0 12px 0' }}>
+                                                    {sr.roaming.description || `${safeStr(doc.trip.destination).split(' ').pop()}은(는) 주요 관광지와 리조트 내에서 사용이 원활합니다. 출국 전 데이터 로밍 차단 또는 로밍 요금제 신청이 필수입니다.`}
+                                                </p>
+                                                <div className="roaming-option-cards" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                    <div className="roaming-opt-card" style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: '#fff', border: '1px solid #e2e8f0', padding: '14px', borderRadius: '12px' }}>
+                                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%' }}>
+                                                            <div className="r-opt-badge" style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800 }}>1</div>
+                                                            <strong style={{ fontSize: '0.85rem', color: '#1e293b' }}>통신사 데이터 로밍 (가장 편리)</strong>
+                                                        </div>
+                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', width: '100%' }}>
+                                                            <div style={{ background: '#f8fafc', padding: '8px 2px', borderRadius: '10px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                                                                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>SKT</div>
+                                                                <a href="tel:02-6343-9000" style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '2px' }}>02-6343-9000</a>
+                                                                <a href="tel:1599-2011" style={{ display: 'block', fontSize: '0.65rem', color: '#64748b', textDecoration: 'none' }}>1599-2011</a>
+                                                            </div>
+                                                            <div style={{ background: '#f8fafc', padding: '8px 2px', borderRadius: '10px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                                                                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>KT</div>
+                                                                <a href="tel:02-2190-0901" style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '2px' }}>02-2190-0901</a>
+                                                                <a href="tel:1588-0608" style={{ display: 'block', fontSize: '0.65rem', color: '#64748b', textDecoration: 'none' }}>1588-0608</a>
+                                                            </div>
+                                                            <div style={{ background: '#f8fafc', padding: '8px 2px', borderRadius: '10px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                                                                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>LG U+</div>
+                                                                <a href="tel:02-3416-7010" style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textDecoration: 'none', marginBottom: '2px' }}>02-3416-7010</a>
+                                                                <a href="tel:1544-0010" style={{ display: 'block', fontSize: '0.65rem', color: '#64748b', textDecoration: 'none' }}>1544-0010</a>
+                                                            </div>
+                                                        </div>
+                                                        {sr.roaming.carriers && (
+                                                            <div style={{ fontSize: '0.72rem', color: '#64748b', background: '#f1f5f9', padding: '6px 10px', borderRadius: '8px', marginTop: '4px', lineHeight: 1.4 }}>
+                                                                <strong>💡 현지 통신사 파트너:</strong> {sr.roaming.carriers}
+                                                            </div>
+                                                        )}
+                                                    </div>
 
-                                        {/* list 타입 */}
-                                        {sec.type === 'list' && sec.items && (
-                                            <ul className="css-list" style={{ margin: 0, paddingLeft: '20px', fontSize: '0.82rem', color: '#475569', lineHeight: 1.6 }}>
-                                                {sec.items.map((item: any, ii: number) => <li key={ii} style={{ marginBottom: '4px' }}>{safeStr(item)}</li>)}
-                                            </ul>
-                                        )}
+                                                    <div className="roaming-opt-card" style={{ display: 'flex', gap: '10px', background: '#fff', border: '1px solid #e2e8f0', padding: '12px 14px', borderRadius: '12px', alignItems: 'center' }}>
+                                                        <div className="r-opt-badge" style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800, flexShrink: 0 }}>2</div>
+                                                        <div className="r-opt-body" style={{ display: 'flex', flexDirection: 'column' }}>
+                                                            <strong style={{ fontSize: '0.82rem', color: '#1e293b' }}>현지 유심 (USIM)</strong>
+                                                            <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>현지 번호 제공, 한국 사전 구매 권장</span>
+                                                        </div>
+                                                    </div>
 
-                                        {/* text 타입 */}
-                                        {sec.type === 'text' && sec.content && (
-                                            <div className="css-text" style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6 }}>
-                                                {renderFormattedText(sec.content)}
+                                                    <div className="roaming-opt-card" style={{ display: 'flex', gap: '10px', background: '#fff', border: '1px solid #e2e8f0', padding: '12px 14px', borderRadius: '12px', alignItems: 'center' }}>
+                                                        <div className="r-opt-badge" style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800, flexShrink: 0 }}>3</div>
+                                                        <div className="r-opt-body" style={{ display: 'flex', flexDirection: 'column' }}>
+                                                            <strong style={{ fontSize: '0.82rem', color: '#1e293b' }}>E-심 (eSIM)</strong>
+                                                            <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>QR코드로 간편 개통 (지원 단말기 확인 요망)</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="roaming-opt-card" style={{ display: 'flex', gap: '10px', background: '#fff', border: '1px solid #e2e8f0', padding: '12px 14px', borderRadius: '12px', alignItems: 'center' }}>
+                                                        <div className="r-opt-badge" style={{ background: '#0284c7', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800, flexShrink: 0 }}>4</div>
+                                                        <div className="r-opt-body" style={{ display: 'flex', flexDirection: 'column' }}>
+                                                            <strong style={{ fontSize: '0.82rem', color: '#1e293b' }}>와이파이 도시락</strong>
+                                                            <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>가족 단위 기기 여러 대 연결 추천</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="roaming-tip-box" style={{ background: '#eff6ff', borderRadius: '10px', padding: '12px', marginTop: '12px', fontSize: '0.8rem', color: '#1e3a8a', lineHeight: 1.5 }}>
+                                                    <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> 유심/eSIM 추천
+                                                    </strong>
+                                                    {safeStr(sr.roaming.simEsim) || '그랩(Grab) 호출이나 길찾기 시 데이터가 필요하므로 유심이나 로밍 준비를 추천합니다.'}
+                                                </div>
+
+                                                {sr.roaming.roamingTip && (
+                                                    <div className="roaming-tip-box" style={{ background: '#fffbeb', borderRadius: '10px', padding: '12px', marginTop: '10px', fontSize: '0.8rem', color: '#92400e', lineHeight: 1.5, border: '1px solid #fef3c7' }}>
+                                                        <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg> 통신 이용 꿀팁
+                                                        </strong>
+                                                        {sr.roaming.roamingTip}
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })()}
+                        {activeTab === '환전/로밍' && !doc.secondaryResearch && (
+                            <div className="mc-section">
+                                <div className="mc-empty-guide">
+                                    <span style={{ fontSize: '2.5rem' }}>💸</span>
+                                    <p style={{ fontWeight: 600, fontSize: '1rem' }}>환전/로밍 정보가 아직 준비되지 않았습니다.</p>
+                                </div>
+                            </div>
+                        )}
 
-                                        {/* route 타입 */}
-                                        {sec.type === 'route' && sec.route && (
-                                            <div className="css-route" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px' }}>
-                                                {sec.route.map((r: any, ri: number) => (
-                                                    <span key={ri} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                                                        <span className="css-route-badge" style={{ background: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600 }}>{safeStr(r)}</span>
-                                                        {ri < (sec.route?.length || 0) - 1 && <span className="css-route-arrow" style={{ color: '#94a3b8', fontSize: '0.8rem' }}>→</span>}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
+                        {/* ============================== 9. 관광지 ============================== */}
+                        {activeTab === '관광지' && doc.secondaryResearch && (() => {
+                            const sr = doc.secondaryResearch;
+                            return (
+                                <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
+                                    <div style={{
+                                        marginBottom: '20px',
+                                        background: '#f1f5f9',
+                                        padding: '12px 16px',
+                                        borderRadius: '12px',
+                                        fontSize: '0.8rem',
+                                        color: '#64748b',
+                                        lineHeight: 1.5,
+                                        display: 'flex',
+                                        gap: '8px',
+                                        alignItems: 'flex-start'
+                                    }}>
+                                        <span style={{ flexShrink: 0, fontSize: '0.9rem' }}>💡</span>
+                                        <span>아래 내용은 해당 도시의 주요 명소를 소개하는 가이드이며, 실제 확정된 일정상 방문지 구성과는 차이가 있을 수 있습니다.</span>
                                     </div>
-                                ))}
-                            </GuideAccordion>
-                        ))}
-                    </div>
-                )}
-                {activeTab === '기타' && (!doc.secondaryResearch?.customGuides || doc.secondaryResearch.customGuides.length === 0) && (
-                    <div className="mc-section">
-                        <div className="mc-empty-guide">
-                            <span style={{ fontSize: '2.5rem' }}>🗂️</span>
-                            <p style={{ fontWeight: 600, fontSize: '1rem' }}>추가 가이드 정보가 없습니다.</p>
-                        </div>
-                    </div>
-                )}
-            </div>
 
-            {/* 하단 액션 바 */}
-            <div className="mc-bottom-bar">
-                <a href={`tel:${(doc as any).agencyPhone || '010-9307-9004'}`} className="mc-action-btn kakao" style={{ flex: 2 }}>
-                    상담원 연결
-                </a>
-                <button className="mc-action-btn share" onClick={handleShare}>
-                    공유
-                </button>
-            </div>
-
-            {/* 숙소 상세 모달 */}
-            {showHotelModal && doc && (doc.hotels?.[selectedHotelIdx] || (doc as any).hotel) && (
-                <div className="mc-modal-overlay" onClick={() => setShowHotelModal(false)}>
-                    <div className="mc-modal" onClick={e => e.stopPropagation()}>
-                        <div className="mc-modal-header">
-                            <h2>호텔 상세정보</h2>
-                            <button className="mc-modal-close" onClick={() => setShowHotelModal(false)}>✕</button>
-                        </div>
-                        <div className="mc-modal-body">
-                            {(() => {
-                                const h = (doc?.hotels?.[selectedHotelIdx] || (doc as any)?.hotel);
-                                if (!h) return null;
-                                return (
-                                    <>
-                                        <div className="mcm-hotel-name">{h.name}</div>
-                                        {h.address && (
-                                            <div className="mcm-hotel-address" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
-                                                <span>📍 {h.address}</span>
-                                                <a
-                                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${h.name} ${h.address}`)}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 600, whiteSpace: 'nowrap', textDecoration: 'none', border: '1px solid #0ea5e9', padding: '2px 8px', borderRadius: '4px' }}
-                                                >
-                                                    지도보기
-                                                </a>
+                                    {/* 첫 번째 랜드마크: 히어로 카드 */}
+                                    {sr.landmarks?.[0] && (
+                                        <div className="landmark-hero" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '20px', overflow: 'hidden', marginBottom: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', margin: '0' }}>
+                                            {sr.landmarks[0].imageUrl && (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img src={sr.landmarks[0].imageUrl} alt={safeStr(sr.landmarks[0].name)} className="landmark-hero-img" style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+                                            )}
+                                            <div className="landmark-hero-info" style={{ padding: '20px' }}>
+                                                <h4 style={{ margin: '0 0 4px 0', fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>{safeStr(sr.landmarks[0].name)}</h4>
+                                                {sr.landmarks[0].nameLocal && <span className="landmark-local" style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', marginBottom: '10px', fontWeight: 500 }}>{safeStr(sr.landmarks[0].nameLocal)}</span>}
+                                                <p style={{ margin: 0, fontSize: '0.88rem', color: '#475569', lineHeight: 1.6, wordBreak: 'keep-all' }}>{safeStr(sr.landmarks[0].description)}</p>
                                             </div>
-                                        )}
-                                        <div className="mcm-times">
-                                            {h.checkIn && <span>체크인: {h.checkIn}</span>}
-                                            {h.checkOut && <span> | 체크아웃: {h.checkOut}</span>}
                                         </div>
-                                        {h.amenities && (Array.isArray(h.amenities) ? h.amenities.length > 0 : String(h.amenities).length > 0) && (
-                                            <div className="mch-amenities">
-                                                {(Array.isArray(h.amenities) ? (h.amenities.length === 1 && h.amenities[0].includes(',') ? h.amenities[0].split(',') : h.amenities) : String(h.amenities).split(',')).map((am: string, i: number) => (
-                                                    <span key={i} className="mc-chip">{am.trim()}</span>
+                                    )}
+                                    {/* 나머지 랜드마크: 그리드 카드 */}
+                                    <div className="landmark-grid" style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
+                                        {sr.landmarks?.slice(1).map((lm: any, i: number) => (
+                                            <div key={i} className="landmark-card" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+                                                {lm.imageUrl && (
+                                                    // eslint-disable-next-line @next/next/no-img-element
+                                                    <img src={lm.imageUrl} alt={safeStr(lm.name)} className="landmark-card-img" style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
+                                                )}
+                                                <div className="landmark-card-body" style={{ padding: '20px' }}>
+                                                    <h4 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>{safeStr(lm.name)}</h4>
+                                                    {lm.nameLocal && <span className="landmark-local-sm" style={{ display: 'block', fontSize: '0.78rem', color: '#64748b', marginBottom: '8px', fontWeight: 500 }}>{safeStr(lm.nameLocal)}</span>}
+                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#475569', lineHeight: 1.6, wordBreak: 'keep-all' }}>{safeStr(lm.description)}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })()}
+                        {activeTab === '관광지' && !doc.secondaryResearch && (
+                            <div className="mc-section">
+                                <div className="mc-empty-guide">
+                                    <span style={{ fontSize: '2.5rem' }}>🗺️</span>
+                                    <p style={{ fontWeight: 600, fontSize: '1rem' }}>관광지 정보가 아직 준비되지 않았습니다.</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ============================== 10. 기타 ============================== */}
+                        {activeTab === '기타' && doc.secondaryResearch?.customGuides && doc.secondaryResearch.customGuides.length > 0 && (
+                            <div className="mc-guide-container" style={{ padding: '0 12px 40px' }}>
+                                {doc.secondaryResearch.customGuides.map((guide: any, gi: number) => (
+                                    <GuideAccordion
+                                        key={gi}
+                                        id={`customGuide-${gi}`}
+                                        title={<><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sec-icon-svg"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg> {safeStr(guide.topic)}</>}
+                                        isOpen={expandedSections[`customGuide-${gi}`] || false}
+                                        onToggle={toggleSection}
+                                    >
+                                        {guide.sections?.map((sec: any, si: number) => (
+                                            <div key={si} className="custom-sub-section" style={{ marginBottom: '20px' }}>
+                                                <h4 className="css-title" style={{ fontSize: '0.9rem', fontWeight: 800, color: '#1e293b', margin: '0 0 10px 0', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>{safeStr(sec.title)}</h4>
+
+                                                {/* steps 타입 */}
+                                                {sec.type === 'steps' && sec.steps && (
+                                                    <div className="css-steps" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                        {sec.steps.map((s: any, idx: number) => (
+                                                            <div key={idx} className="css-step" style={{ display: 'flex', gap: '10px' }}>
+                                                                <div className="css-step-num" style={{ background: '#e2e8f0', color: '#475569', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800, flexShrink: 0 }}>{idx + 1}</div>
+                                                                <div>
+                                                                    <div className="css-step-label" style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '2px' }}>{safeStr(s.step)}</div>
+                                                                    <div className="css-step-detail" style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>{safeStr(s.detail)}</div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {/* table 타입 */}
+                                                {sec.type === 'table' && sec.headers && sec.rows && (
+                                                    <div className="css-table-wrap" style={{ overflowX: 'auto' }}>
+                                                        <table className="css-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left' }}>
+                                                            <thead><tr style={{ background: '#f8fafc' }}>{sec.headers.map((h: any, hi: number) => <th key={hi} style={{ padding: '8px 10px', borderBottom: '1.5px solid #e2e8f0', fontWeight: 700, color: '#475569' }}>{safeStr(h)}</th>)}</tr></thead>
+                                                            <tbody>
+                                                                {sec.rows.map((row: any, ri: number) => (
+                                                                    <tr key={ri} style={{ borderBottom: '1px solid #f1f5f9' }}>{row.map((c: any, ci: number) => <td key={ci} style={{ padding: '8px 10px', color: '#475569' }}>{safeStr(c)}</td>)}</tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                )}
+
+                                                {/* list 타입 */}
+                                                {sec.type === 'list' && sec.items && (
+                                                    <ul className="css-list" style={{ margin: 0, paddingLeft: '20px', fontSize: '0.82rem', color: '#475569', lineHeight: 1.6 }}>
+                                                        {sec.items.map((item: any, ii: number) => <li key={ii} style={{ marginBottom: '4px' }}>{safeStr(item)}</li>)}
+                                                    </ul>
+                                                )}
+
+                                                {/* text 타입 */}
+                                                {sec.type === 'text' && sec.content && (
+                                                    <div className="css-text" style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6 }}>
+                                                        {renderFormattedText(sec.content)}
+                                                    </div>
+                                                )}
+
+                                                {/* route 타입 */}
+                                                {sec.type === 'route' && sec.route && (
+                                                    <div className="css-route" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px' }}>
+                                                        {sec.route.map((r: any, ri: number) => (
+                                                            <span key={ri} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                                                <span className="css-route-badge" style={{ background: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600 }}>{safeStr(r)}</span>
+                                                                {ri < (sec.route?.length || 0) - 1 && <span className="css-route-arrow" style={{ color: '#94a3b8', fontSize: '0.8rem' }}>→</span>}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </GuideAccordion>
+                                ))}
+                            </div>
+                        )}
+                        {activeTab === '기타' && (!doc.secondaryResearch?.customGuides || doc.secondaryResearch.customGuides.length === 0) && (
+                            <div className="mc-section">
+                                <div className="mc-empty-guide">
+                                    <span style={{ fontSize: '2.5rem' }}>🗂️</span>
+                                    <p style={{ fontWeight: 600, fontSize: '1rem' }}>추가 가이드 정보가 없습니다.</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                {/* 하단 액션 바 */}
+                <div className="mc-bottom-bar">
+                    <a href={`tel:${(doc as any).agencyPhone || '010-9307-9004'}`} className="mc-action-btn kakao" style={{ flex: 2 }}>
+                        상담원 연결
+                    </a>
+                    <button className="mc-action-btn share" onClick={handleShare}>
+                        공유
+                    </button>
+                </div>
+
+                {/* 숙소 상세 모달 */}
+                {showHotelModal && doc && (doc.hotels?.[selectedHotelIdx] || (doc as any).hotel) && (
+                    <div className="mc-modal-overlay" onClick={() => setShowHotelModal(false)}>
+                        <div className="mc-modal" onClick={e => e.stopPropagation()}>
+                            <div className="mc-modal-header">
+                                <h2>호텔 상세정보</h2>
+                                <button className="mc-modal-close" onClick={() => setShowHotelModal(false)}>✕</button>
+                            </div>
+                            <div className="mc-modal-body">
+                                {(() => {
+                                    const h = (doc?.hotels?.[selectedHotelIdx] || (doc as any)?.hotel);
+                                    if (!h) return null;
+                                    return (
+                                        <>
+                                            <div className="mcm-hotel-name">{h.name}</div>
+                                            {h.address && (
+                                                <div className="mcm-hotel-address" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                                                    <span>📍 {h.address}</span>
+                                                    <a
+                                                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${h.name} ${h.address}`)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 600, whiteSpace: 'nowrap', textDecoration: 'none', border: '1px solid #0ea5e9', padding: '2px 8px', borderRadius: '4px' }}
+                                                    >
+                                                        지도보기
+                                                    </a>
+                                                </div>
+                                            )}
+                                            <div className="mcm-times">
+                                                {h.checkIn && <span>체크인: {h.checkIn}</span>}
+                                                {h.checkOut && <span> | 체크아웃: {h.checkOut}</span>}
+                                            </div>
+                                            {h.amenities && (Array.isArray(h.amenities) ? h.amenities.length > 0 : String(h.amenities).length > 0) && (
+                                                <div className="mch-amenities">
+                                                    {(Array.isArray(h.amenities) ? (h.amenities.length === 1 && h.amenities[0].includes(',') ? h.amenities[0].split(',') : h.amenities) : String(h.amenities).split(',')).map((am: string, i: number) => (
+                                                        <span key={i} className="mc-chip">{am.trim()}</span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            <div className="mcm-images">
+                                                {h.images?.map((img: string, i: number) => (
+                                                    <img key={i} src={img.startsWith('[IMG: ') ? img.replace('[IMG: ', '').replace(']', '') : img} alt={`Hotel ${i}`} style={{ width: '100%', borderRadius: '12px', marginBottom: '10px' }} />
                                                 ))}
                                             </div>
-                                        )}
-                                        <div className="mcm-images">
-                                            {h.images?.map((img: string, i: number) => (
-                                                <img key={i} src={img.startsWith('[IMG: ') ? img.replace('[IMG: ', '').replace(']', '') : img} alt={`Hotel ${i}`} style={{ width: '100%', borderRadius: '12px', marginBottom: '10px' }} />
-                                            ))}
-                                        </div>
-                                    </>
-                                );
-                            })()}
+                                        </>
+                                    );
+                                })()}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            {/* 일정 이미지 확대 보기 모달 (PinchZoomModal 활용) */}
-            {modalImageUrl && (
-                <PinchZoomModal 
-                    src={modalImageUrl} 
-                    onClose={() => setModalImageUrl(null)} 
-                />
-            )}
-            {/* 미팅 안내 이미지 모달 */}
-            {selectedImage && <PinchZoomModal src={selectedImage} onClose={() => setSelectedImage(null)} />}
-            {/* 서류 뷰어 모달 (전체 화면 통합 뷰어) */}
-            {viewerFile && (
-                <PinchZoomModal
-                    src={viewerFile.url}
-                    onClose={() => setViewerFile(null)}
-                    isPdf={!isImageFile(viewerFile.url, viewerFile.name)}
-                    footer={(
-                        <button
-                            className="mcv-download-btn"
-                            onClick={() => handleFileDownload(viewerFile.url, viewerFile.name)}
-                        >
-                            ⬇ 원본 파일 저장
-                        </button>
-                    )}
-                />
-            )}
-        </div>
-    );
+                {/* 일정 이미지 확대 보기 모달 (PinchZoomModal 활용) */}
+                {modalImageUrl && (
+                    <PinchZoomModal
+                        src={modalImageUrl}
+                        onClose={() => setModalImageUrl(null)}
+                    />
+                )}
+                {/* 미팅 안내 이미지 모달 */}
+                {selectedImage && <PinchZoomModal src={selectedImage} onClose={() => setSelectedImage(null)} />}
+                {/* 서류 뷰어 모달 (전체 화면 통합 뷰어) */}
+                {viewerFile && (
+                    <PinchZoomModal
+                        src={viewerFile.url}
+                        onClose={() => setViewerFile(null)}
+                        isPdf={!isImageFile(viewerFile.url, viewerFile.name)}
+                        footer={(
+                            <button
+                                className="mcv-download-btn"
+                                onClick={() => handleFileDownload(viewerFile.url, viewerFile.name)}
+                            >
+                                ⬇ 원본 파일 저장
+                            </button>
+                        )}
+                    />
+                )}
+            </div>
+            );
 }
