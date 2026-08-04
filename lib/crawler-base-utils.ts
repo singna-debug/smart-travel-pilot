@@ -208,7 +208,8 @@ ${contextOrPrompt.substring(0, 30000)}
                         contents: [{ parts: [{ text: prompt }] }],
                         generationConfig: {
                             responseMimeType: "application/json",
-                            temperature: 0.2
+                            temperature: 0.2,
+                            thinkingConfig: { thinkingBudget: 0 }
                         }
                     })
                 });

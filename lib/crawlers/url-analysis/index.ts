@@ -70,6 +70,9 @@ export function cleanAndDeduplicateKeyPoints(keyPoints: string[] | undefined): s
         if (noEmoji.includes('환영합니다') || noEmoji.includes('어서오세요') || noEmoji.includes('안내드립니다') || noEmoji.includes('참고사항') || noEmoji.includes('유의사항') || noEmoji.includes('만 12세') || noEmoji.includes('만 2세') || noEmoji.includes('독실료') || noEmoji.includes('추가요금') || noEmoji.includes('체험형 :') || noEmoji.includes('국외여행상품')) {
             continue;
         }
+        // 운영성 문구(최소 출발 인원 조건 등) 및 원문 줄바꿈 잘림으로 앞부분이 잘려나간 조각 제외
+        if (/최소인원|모객기준|명\s*이상.*출발|출발.*명\s*이상/.test(noEmoji)) continue;
+        if (/^(명|이상|출발가능|이상\s*출발가능)\s*(포함|제공)?$/.test(noEmoji)) continue;
 
         // 카테고리별 주제 중복 체크 (스피드보트/해양, 호텔/숙소, 마사지, 맛집/식사 등 주제당 단 1개만 허용)
         const categories = [
@@ -110,7 +113,7 @@ export function cleanAndDeduplicateKeyPoints(keyPoints: string[] | undefined): s
     return cleaned.slice(0, 8);
 }
 
-export function formatTagToSentence(tag: string): string {
+export function formatTagToSentence(tag: string, variantIdx: number = 0): string {
     if (!tag) return '';
     let clean = tag.replace(/^#/, '').trim();
     clean = clean.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}✈🧚🍗♨🍷🏨🚌🌟★♥▶▒◆•●📌🍽🌊🚢✨💡]/gu, '').trim();
@@ -122,18 +125,27 @@ export function formatTagToSentence(tag: string): string {
         return clean;
     }
 
-    if (clean.endsWith('투어') || clean.endsWith('관광')) return `${clean} 포함`;
-    if (clean.endsWith('디너') || clean.endsWith('특식') || clean.endsWith('식사')) return `${clean} 제공`;
-    if (clean.endsWith('가든') || clean.endsWith('호텔') || clean.endsWith('리조트')) return `${clean} 투숙`;
-    if (clean.endsWith('슬라이드') || clean.endsWith('호핑') || clean.endsWith('크루즈') || clean.endsWith('체험')) return `${clean} 체험`;
+    // 접미사 매칭용: "온천2박", "호핑1일" 처럼 뒤에 붙은 숫자/수량 단위를 떼고 핵심 단어로 판단
+    const core = clean.replace(/\d+\s*(박|일|인실|인승|인|회|시간)$/, '');
+
+    if (/투어|관광/.test(core)) return `${clean} 포함`;
+    if (/디너|특식|식사|가이세키|코스요리|정식|뷔페|요리/.test(core)) return `${clean} 제공`;
+    if (/가든|호텔|리조트|료칸/.test(core)) return `${clean} 투숙`;
+    if (/슬라이드|호핑|크루즈|체험/.test(core)) return `${clean} 체험`;
     if (clean === '인생샷') return '인생샷 명소 탐방';
     if (clean === '소도시여행') return '여유로운 소도시 여행';
     if (clean === '미식') return '현지 대표 미식 체험';
     if (clean === '사케') return '유명 사케 양조장 시음';
-    if (clean.endsWith('여행') || clean.endsWith('힐링')) return `${clean} 코스`;
-    if (clean.endsWith('협곡') || clean.endsWith('마을') || clean.endsWith('온천')) return `${clean} 일정`;
+    if (/여행|힐링/.test(core)) return `${clean} 코스`;
+    if (/협곡|마을|온천|화산|폭포|해변|비치|전망대|산책/.test(core)) {
+        const spotSuffixes = [' 일정', ' 탐방 코스', ' 방문 일정'];
+        return `${clean}${spotSuffixes[variantIdx % spotSuffixes.length]}`;
+    }
+    if (/쇼핑|아울렛|면세/.test(core)) return `${clean} 자유시간`;
 
-    return `${clean} 포함`;
+    // 어떤 카테고리에도 안 걸리는 태그(주로 지명/명소)는 매번 "포함"만 반복되지 않도록 순환 표현 사용
+    const fallbackSuffixes = [' 포함', ' 명소 탐방', ' 일정 포함', ' 코스 구성'];
+    return `${clean}${fallbackSuffixes[variantIdx % fallbackSuffixes.length]}`;
 }
 
 export function extractRichKeyPointsFromText(text: string): string[] {
@@ -201,12 +213,12 @@ export async function enrichKeyPointsToAtLeastFive(result: DetailedProductInfo, 
     // 3. Title Hashtags (Supplement to reach 5 key points)
     if (points.length < 5) {
         const hashtags = title.match(/#[^\s#]+/g) || [];
-        for (const tag of hashtags) {
-            const clean = tag.replace(/^#/, '').trim();
+        for (let i = 0; i < hashtags.length; i++) {
+            const clean = hashtags[i].replace(/^#/, '').trim();
             if (clean.length < 2) continue;
-            if (/PICK|담당자|추천|인기/i.test(clean)) continue;
-            
-            const formatted = formatTagToSentence(clean);
+            if (/PICK|담당자|추천|인기|^TOP$|^BEST$|^HOT$|^NEW$|^MD$|^VIP$|핫딜|특가|얼리버드/i.test(clean)) continue;
+
+            const formatted = formatTagToSentence(clean, i);
             if (formatted && !hasSimilar(formatted.substring(0, 4))) {
                 points.push(formatted);
             }
