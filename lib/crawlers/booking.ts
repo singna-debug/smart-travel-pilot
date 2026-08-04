@@ -8,7 +8,7 @@ import { scrapeWithBrowser } from '../browser-crawler';
  * 예약 상세 정보 추출 (부킹 모드)
  * 항공 스케줄, 취소 규정, 불포함 사항 등 상세 데이터를 추출합니다.
  */
-export async function crawlForBooking(url: string): Promise<DetailedProductInfo | null> {
+export async function crawlForBooking(url: string, apiKey?: string | null): Promise<DetailedProductInfo | null> {
     console.log(`[BookingCrawler] Start. URL=${url}`);
 
     // [개정] 속도 최적화: skipHtml: true로 설정하여 불필요한 브라우저 크롤러 실행을 방지하고 Native API만 사용하여 3초 내 응답 보장
@@ -37,7 +37,7 @@ ${nativeData ? `--- [중요: Native API 데이터] ---\n${JSON.stringify(nativeD
 ${text.substring(0, 1000)}`;
 
     // 3. AI 분석 실행
-    const result = await analyzeWithGemini(prompt, url, false, nextData);
+    const result = await analyzeWithGemini(prompt, url, false, nextData, apiKey);
     console.log(`[BookingCrawler] Gemini Analysis Result:`, result ? 'Success' : 'Failed');
     
     // 최종 데이터 조합 (Native 우선 전략)

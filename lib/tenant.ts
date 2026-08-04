@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from './supabase';
 
 export const DEFAULT_TENANT_ID = 'default_tenant';
 
@@ -67,6 +68,36 @@ export function getTenantApiKeys(tenantId: string, customSettings?: { googleSpre
     geminiApiKey: customSettings?.geminiApiKey?.trim() || null,
     isDefaultOwner: false
   };
+}
+
+/**
+ * 실제 크롤러/AI 호출부에서 사용할 테넌트별 Gemini API 키 조회.
+ * 사장님 계정(default_tenant)은 [설정]에 입력한 키가 있으면 그것을, 없으면 서버 .env의 키를 사용.
+ * 신규 가입 사용자는 오직 본인이 [설정]에서 등록한 키만 사용 (서버 기본 키로 폴백하지 않음).
+ */
+export async function getGeminiApiKeyForTenant(tenantId: string): Promise<string | null> {
+  let dbKey: string | null = null;
+
+  if (supabaseAdmin) {
+    try {
+      const { data } = await supabaseAdmin
+        .from('tenant_settings')
+        .select('gemini_api_key')
+        .eq('tenant_id', tenantId)
+        .single();
+      dbKey = data?.gemini_api_key?.trim() || null;
+    } catch (e) {
+      // 설정이 없는 신규 사용자 등: 조회 실패는 무시하고 null 처리
+    }
+  }
+
+  if (dbKey) return dbKey;
+
+  if (tenantId === DEFAULT_TENANT_ID) {
+    return process.env.GEMINI_API_KEY?.trim() || process.env.NEXT_PUBLIC_GEMINI_API_KEY?.trim() || null;
+  }
+
+  return null;
 }
 
 /**

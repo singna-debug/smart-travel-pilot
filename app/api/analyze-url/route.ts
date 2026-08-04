@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { crawlTravelProduct, formatProductInfo, generateRecommendation, compareProducts, htmlToText, crawlForConfirmation, crawlForBooking, crawlForReservationGuide } from '@/lib/url-crawler';
+import { getTenantIdFromHeaderOrQuery, getGeminiApiKeyForTenant } from '@/lib/tenant';
 import type { TravelProductInfo, DetailedProductInfo } from '@/types';
 
 // URL 분석 API (단일 및 다중 URL 지원) - Departure date 2026-08-02 & recursion fix applied
@@ -13,9 +14,12 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { url, urls, text, nextData, texts, nextDatas, preAnalyzedData, source, mode } = body;
 
+        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const apiKey = await getGeminiApiKeyForTenant(tenantId);
+
         // 단일 URL
         if (url && !urls) {
-            return await analyzeSingleUrl(url, source || mode, text, nextData, body.html);
+            return await analyzeSingleUrl(url, source || mode, text, nextData, body.html, apiKey);
         }
 
         // 다중 URL (미리 분석된 데이터가 있는 경우 - Edge API 경유)
@@ -25,7 +29,7 @@ export async function POST(request: NextRequest) {
 
         // 다중 URL (기본 모드)
         if (urls && Array.isArray(urls)) {
-            return await analyzeMultipleUrls(urls, texts, nextDatas, body.htmls, mode);
+            return await analyzeMultipleUrls(urls, texts, nextDatas, body.htmls, mode, apiKey);
         }
 
         return NextResponse.json(
@@ -41,20 +45,20 @@ export async function POST(request: NextRequest) {
     }
 }
 
-async function analyzeSingleUrl(url: string, source: string | undefined, text?: string, nextData?: string, html?: string) {
+async function analyzeSingleUrl(url: string, source: string | undefined, text?: string, nextData?: string, html?: string, apiKey?: string | null) {
     console.log('[API] analyzeSingleUrl started', { url, source, hasText: !!text, hasHtml: !!html });
-    
+
     try {
         let effectiveMode = source || 'normal';
         if (effectiveMode === 'deep') effectiveMode = 'confirmation';
-        
+
         console.log(`[API] Processing single url directly. Mode: ${effectiveMode}`);
-        
+
         let info: DetailedProductInfo | null = null;
-        
+
         if (effectiveMode === 'confirmation') {
             const { crawlForConfirmation } = await import('@/lib/crawlers/confirmation');
-            info = await crawlForConfirmation(url, text, nextData);
+            info = await crawlForConfirmation(url, text, nextData, apiKey);
         } else {
             const { crawlForUrlAnalysis } = await import('@/lib/crawlers/url-analysis');
             info = await crawlForUrlAnalysis(url);
@@ -65,7 +69,7 @@ async function analyzeSingleUrl(url: string, source: string | undefined, text?: 
             if (effectiveMode !== 'confirmation') {
                 try {
                     const { enrichKeyPointsToAtLeastFive } = await import('@/lib/crawlers/url-analysis');
-                    const enrichedPoints = await enrichKeyPointsToAtLeastFive(info);
+                    const enrichedPoints = await enrichKeyPointsToAtLeastFive(info, undefined, apiKey);
                     if (enrichedPoints && enrichedPoints.length > 0) {
                         info.keyPoints = enrichedPoints;
                     }
@@ -91,7 +95,7 @@ async function analyzeSingleUrl(url: string, source: string | undefined, text?: 
     }
 }
 
-async function analyzeMultipleUrls(urls: string[], texts?: (string | null)[], nextDatas?: (string | null)[], htmls?: (string | null)[], mode?: string) {
+async function analyzeMultipleUrls(urls: string[], texts?: (string | null)[], nextDatas?: (string | null)[], htmls?: (string | null)[], mode?: string, apiKey?: string | null) {
     // URL 유효성 검사
     const validInputs = urls.map((url, i) => ({
         url,
@@ -118,7 +122,7 @@ async function analyzeMultipleUrls(urls: string[], texts?: (string | null)[], ne
 
             if (input.text) {
                 console.log(`[API] Multi-Analyze [${index + 1}] 최적화 모드`);
-                info = await crawlForConfirmation(input.url, input.text, input.nextData || undefined);
+                info = await crawlForConfirmation(input.url, input.text, input.nextData || undefined, apiKey);
             } else if (input.html) {
                 console.log(`[API] Multi-Analyze [${index + 1}] 호환 모드`);
                 const fullText = htmlToText(input.html, input.url);
@@ -131,22 +135,22 @@ async function analyzeMultipleUrls(urls: string[], texts?: (string | null)[], ne
                         nextData = input.html.substring(jsonStart, jsonEnd);
                     }
                 }
-                info = await crawlForConfirmation(input.url, fullText, nextData);
+                info = await crawlForConfirmation(input.url, fullText, nextData, apiKey);
             } else {
                 console.log(`[API] Multi-Analyze [${index + 1}] 1단계 모드 (Mode: ${mode})`);
                 switch (mode) {
                     case 'booking':
-                        info = await crawlForBooking(input.url);
+                        info = await crawlForBooking(input.url, apiKey);
                         break;
                     case 'reservation_guide':
-                        info = await crawlForReservationGuide(input.url);
+                        info = await crawlForReservationGuide(input.url, apiKey);
                         break;
                     case 'confirmation':
                     case 'deep':
-                        info = await crawlForConfirmation(input.url);
+                        info = await crawlForConfirmation(input.url, undefined, undefined, apiKey);
                         break;
                     default:
-                        info = await crawlTravelProduct(input.url);
+                        info = await crawlTravelProduct(input.url, undefined, apiKey);
                 }
             }
 

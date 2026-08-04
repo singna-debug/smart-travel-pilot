@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { formatProductInfo, crawlForConfirmation, crawlTravelProduct, crawlForBooking, crawlForReservationGuide } from '@/lib/url-crawler';
+import { getTenantIdFromHeaderOrQuery, getGeminiApiKeyForTenant } from '@/lib/tenant';
 
 export const preferredRegion = 'icn1';
 export const runtime = 'nodejs';
@@ -13,7 +14,7 @@ const VERSION = "2026-03-23-V13-STABLE";
 export async function POST(req: NextRequest) {
     try {
         const { url, mode = 'normal', source } = await req.json();
-        
+
         // 하위 호환성 유지
         let effectiveMode = mode;
         if (mode === 'deep' || mode === 'confirmation' || source === 'confirmation') {
@@ -26,20 +27,23 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, error: 'URL이 필요합니다.' });
         }
 
+        const tenantId = getTenantIdFromHeaderOrQuery(req);
+        const apiKey = await getGeminiApiKeyForTenant(tenantId);
+
         let result = null;
         switch (effectiveMode) {
             case 'confirmation':
             case 'deep':
-                result = await crawlForConfirmation(url);
+                result = await crawlForConfirmation(url, undefined, undefined, apiKey);
                 break;
             case 'booking':
-                result = await crawlForBooking(url);
+                result = await crawlForBooking(url, apiKey);
                 break;
             case 'reservation_guide':
-                result = await crawlForReservationGuide(url);
+                result = await crawlForReservationGuide(url, apiKey);
                 break;
             default:
-                result = await crawlTravelProduct(url);
+                result = await crawlTravelProduct(url, undefined, apiKey);
         }
 
         if (!result) {

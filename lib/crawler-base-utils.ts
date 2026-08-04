@@ -149,8 +149,8 @@ URL: "${url}"
     return `${metadata}\n\n${cleanBody.substring(0, 40000)}`;
 }
 
-export async function analyzeWithGemini(contextOrPrompt: string, url: string, isSummaryOnly = false, nextData?: string): Promise<DetailedProductInfo | null> {
-    const rawKeys = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY || '';
+export async function analyzeWithGemini(contextOrPrompt: string, url: string, isSummaryOnly = false, nextData?: string, apiKeyOverride?: string | null): Promise<DetailedProductInfo | null> {
+    const rawKeys = apiKeyOverride || process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY || '';
     const apiKeys = rawKeys.split(',').map(k => k.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
     if (apiKeys.length === 0) return null;
 

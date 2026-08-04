@@ -185,7 +185,7 @@ export function extractRichKeyPointsFromText(text: string): string[] {
     return points;
 }
 
-export async function enrichKeyPointsToAtLeastFive(result: DetailedProductInfo, originalText?: string): Promise<string[]> {
+export async function enrichKeyPointsToAtLeastFive(result: DetailedProductInfo, originalText?: string, apiKey?: string | null): Promise<string[]> {
     const title = result.title || '';
     const points: string[] = [];
     const hasSimilar = (kw: string) => points.some(p => p.includes(kw));
@@ -312,7 +312,7 @@ export async function enrichKeyPointsToAtLeastFive(result: DetailedProductInfo, 
     "포인트 5"
   ]
 }`;
-        const aiResult = await analyzeWithGemini(prompt, result.title || '', false);
+        const aiResult = await analyzeWithGemini(prompt, result.title || '', false, undefined, apiKey);
         if (aiResult) {
             let parsedPoints: string[] = [];
             if (Array.isArray(aiResult.keyPoints) && aiResult.keyPoints.length > 0) {

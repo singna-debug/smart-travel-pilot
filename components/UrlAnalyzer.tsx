@@ -165,9 +165,13 @@ export default function UrlAnalyzer() {
                     console.log('[UrlAnalyzer] 예약 상품 자동 분석 시작 (Booking Mode)');
                     setAnalysisStep('예약 정보 추출 중...');
                     try {
+                        const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
                         const res = await fetch(isDummy ? '/api/dummy/crawl-analyze' : '/api/crawl-analyze', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: {
+                                'Content-Type': 'application/json',
+                                ...(tenantId ? { 'x-tenant-id': tenantId } : {})
+                            },
                             body: JSON.stringify({ url: confirmedProduct, mode: 'booking' })
                         });
                         const data = await res.json();
@@ -346,10 +350,14 @@ export default function UrlAnalyzer() {
 
         try {
             const apiUrl = isDummy ? '/api/dummy/analyze-url' : '/api/analyze-url';
+            const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(tenantId ? { 'x-tenant-id': tenantId } : {})
+                },
                 body: JSON.stringify({ url: singleUrl, mode: 'normal' }),
             });
 
@@ -402,9 +410,13 @@ export default function UrlAnalyzer() {
         setCompareResult(null);
 
         try {
+            const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
             const response = await fetch(isDummy ? '/api/dummy/analyze-url' : '/api/analyze-url', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(tenantId ? { 'x-tenant-id': tenantId } : {})
+                },
                 body: JSON.stringify({ urls: validUrls }),
             });
             const textResponse = await response.text();

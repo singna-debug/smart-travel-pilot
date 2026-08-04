@@ -8,7 +8,7 @@ import { scrapeWithBrowser } from '../browser-crawler';
  * 예약 안내 멘트 제작용 정보 추출 (예약안내모드)
  * 가격, 일정, 포함/불포함 핵심 사항을 고객 안내용으로 추출합니다.
  */
-export async function crawlForReservationGuide(url: string): Promise<DetailedProductInfo | null> {
+export async function crawlForReservationGuide(url: string, apiKey?: string | null): Promise<DetailedProductInfo | null> {
     console.log(`[ReservationGuideCrawler] Start. URL=${url}`);
 
     // 1. 데이터 확보
@@ -59,7 +59,7 @@ ${nativeData ? `--- [Native API 정보] ---\n${JSON.stringify(nativeData)}\n` : 
 ${text.substring(0, 25000)}`;
 
     // 3. AI 분석 실행
-    const result = await analyzeWithGemini(prompt, url, false, nextData);
+    const result = await analyzeWithGemini(prompt, url, false, nextData, apiKey);
     
     // 최종 결과 객체 준비
     let finalInfo: DetailedProductInfo | null = result;

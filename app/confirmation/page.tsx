@@ -106,6 +106,13 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
     const getApiUrl = (path: string) => {
         return isDummy ? `/api/dummy${path}` : `/api${path}`;
     };
+    const getAuthHeaders = (): Record<string, string> => {
+        const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+        return {
+            'Content-Type': 'application/json',
+            ...(tenantId ? { 'x-tenant-id': tenantId } : {})
+        };
+    };
     // 고객 검색
     const [customerQuery, setCustomerQuery] = useState('');
     const [customerResults, setCustomerResults] = useState<ConsultationData[]>([]);
@@ -291,7 +298,7 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
 
             const res = await fetch(apiUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ url: productUrl, mode: 'confirmation' }),
             });
 
@@ -550,7 +557,7 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
 
             const res = await fetch(getApiUrl('/confirmation/secondary-research'), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({
                     destination: targetDest,
                     airline: targetAirline,
@@ -762,7 +769,7 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
 
             const res = await fetch(getApiUrl('/confirmation/secondary-research'), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({
                     destination,
                     airline,
@@ -809,7 +816,7 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
 
             const res = await fetch(getApiUrl('/confirmation/secondary-research'), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({
                     destination,
                     airline,

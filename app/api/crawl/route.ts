@@ -1,6 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { crawlTravelProduct } from '@/lib/url-crawler';
+import { getTenantIdFromHeaderOrQuery, getGeminiApiKeyForTenant } from '@/lib/tenant';
 
 export async function POST(request: NextRequest) {
     try {
@@ -10,7 +11,10 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'URL is required' }, { status: 400 });
         }
 
-        const productInfo = await crawlTravelProduct(url);
+        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const apiKey = await getGeminiApiKeyForTenant(tenantId);
+
+        const productInfo = await crawlTravelProduct(url, undefined, apiKey);
 
         if (!productInfo) {
             return NextResponse.json({ error: 'Failed to crawl product' }, { status: 500 });

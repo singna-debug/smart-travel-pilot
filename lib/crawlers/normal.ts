@@ -7,7 +7,7 @@ import { scrapeWithBrowser } from '../browser-crawler';
 /**
  * 일반 URL 분석 (노멀 모드)
  */
-export async function crawlTravelProduct(url: string, source?: string): Promise<DetailedProductInfo | null> {
+export async function crawlTravelProduct(url: string, source?: string, apiKey?: string | null): Promise<DetailedProductInfo | null> {
     console.log(`[NormalCrawler] Start. URL=${url}`);
     const isVercel = process.env.VERCEL === '1';
 
@@ -65,7 +65,7 @@ export async function crawlTravelProduct(url: string, source?: string): Promise<
     }
 
     // 4. Gemini 분석 (최적화된 프롬프트 사용 - 초경량 모드인 경우 1~2초 소요)
-    const aiResult = await analyzeWithGemini(contextText, url, true, finalNextData);
+    const aiResult = await analyzeWithGemini(contextText, url, true, finalNextData, apiKey);
     
     if (aiResult) {
         const merged = { ...aiResult };

@@ -13,7 +13,7 @@ import { mergeNativeData, logDiagnostic } from './utils';
  * 핵심 원칙: Native API 데이터가 충분하면 Gemini를 거치지 않고 직접 사용.
  * Gemini를 통과시키면 할루시네이션이 발생하므로, AI는 최후의 수단으로만 사용.
  */
-export async function crawlForConfirmation(url: string, providedText?: string, providedNextData?: string): Promise<DetailedProductInfo | null> {
+export async function crawlForConfirmation(url: string, providedText?: string, providedNextData?: string, apiKey?: string | null): Promise<DetailedProductInfo | null> {
     console.log(`[Confirmation/Index] Start. URL=${url}, hasProvidedText: ${!!providedText}`);
 
     let text = providedText || '';
@@ -135,7 +135,7 @@ export async function crawlForConfirmation(url: string, providedText?: string, p
     --- [Page Scraped Content] ---
     ${cleanText.substring(0, 50000)}`;
 
-    const result = await analyzeWithGemini(fullPrompt, url, false, nextData);
+    const result = await analyzeWithGemini(fullPrompt, url, false, nextData, apiKey);
     console.log(`[Confirmation/Index] Gemini Result:`, result ? 'Success' : 'Failed');
 
     // 결과 로그

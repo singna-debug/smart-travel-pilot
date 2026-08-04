@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { crawlForConfirmation, htmlToText } from '@/lib/url-crawler';
+import { getTenantIdFromHeaderOrQuery, getGeminiApiKeyForTenant } from '@/lib/tenant';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // 60초까지 연장 (Vercel Pro 플랜 지원)
@@ -18,12 +19,15 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'URL이 필요합니다.' }, { status: 400 });
         }
 
+        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const apiKey = await getGeminiApiKeyForTenant(tenantId);
+
         let result: any = null;
 
         if (text) {
             // [최적화 모드] 정제된 텍스트와 nextData를 직접 분석
             console.log('[ConfirmAnalyze] 2단계(최적화) 모드: 전달된 텍스트 분석 시작');
-            result = await crawlForConfirmation(url, text, nextData);
+            result = await crawlForConfirmation(url, text, nextData, apiKey);
         } else if (html) {
             // [호환 모드] HTML 분석
             console.log('[ConfirmAnalyze] 2단계(호환) 모드: 전달된 HTML 분석 시작');
@@ -38,11 +42,11 @@ export async function POST(request: NextRequest) {
                     parsedNextData = html.substring(jsonStart, jsonEnd);
                 }
             }
-            result = await crawlForConfirmation(url, fullText, parsedNextData);
+            result = await crawlForConfirmation(url, fullText, parsedNextData, apiKey);
         } else {
             // [1단계 모드] 기존 방식
             console.log('[ConfirmAnalyze] 1단계 모드: 직접 크롤링 및 분석 시작');
-            result = await crawlForConfirmation(url);
+            result = await crawlForConfirmation(url, undefined, undefined, apiKey);
         }
 
         if (!result) {
