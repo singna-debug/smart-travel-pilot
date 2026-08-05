@@ -6,7 +6,7 @@ import { ConsultationData } from '@/types';
 /**
  * 한국 시간(KST) 기준으로 오늘 날짜를 Date 객체로 반환
  */
-function getTodayKSTDate(): Date {
+export function getTodayKSTDate(): Date {
     const now = new Date();
     const utc = now.getTime() + now.getTimezoneOffset() * 60000;
     return new Date(utc + 9 * 60 * 60000);
@@ -15,8 +15,15 @@ function getTodayKSTDate(): Date {
 /**
  * 한국 시간(KST) 기준으로 오늘 날짜를 YYYY-MM-DD 형식으로 반환
  */
-function getTodayKST(): string {
+export function getTodayKST(): string {
     return format(getTodayKSTDate(), 'yyyy-MM-dd');
+}
+
+/**
+ * 한국 시간(KST) 기준 현재 시각을 'HH:mm'으로 반환
+ */
+export function getNowKSTTime(): string {
+    return format(getTodayKSTDate(), 'HH:mm');
 }
 
 /**

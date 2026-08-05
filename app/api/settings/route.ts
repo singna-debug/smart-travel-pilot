@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
                         telegramBotToken: data.telegram_bot_token || local.telegramBotToken || (tenantId === DEFAULT_TENANT_ID ? process.env.TELEGRAM_BOT_TOKEN?.trim() || '' : ''),
                         telegramChatId: data.telegram_chat_id || local.telegramChatId || (tenantId === DEFAULT_TENANT_ID ? process.env.TELEGRAM_CHAT_ID?.trim() || '' : ''),
                         telegramNotifyEnabled: data.telegram_notify_enabled ?? local.telegramNotifyEnabled ?? true,
+                        telegramNotifyTime: data.telegram_notify_time || local.telegramNotifyTime || '08:00',
                     }
                 });
             }
@@ -67,6 +68,7 @@ export async function GET(request: NextRequest) {
                     telegramBotToken: local.telegramBotToken || process.env.TELEGRAM_BOT_TOKEN?.trim() || '',
                     telegramChatId: local.telegramChatId || process.env.TELEGRAM_CHAT_ID?.trim() || '',
                     telegramNotifyEnabled: local.telegramNotifyEnabled ?? true,
+                    telegramNotifyTime: local.telegramNotifyTime || '08:00',
                 }
             });
         }
@@ -103,6 +105,7 @@ export async function GET(request: NextRequest) {
                         telegramBotToken: data.telegram_bot_token || local.telegramBotToken || '',
                         telegramChatId: data.telegram_chat_id || local.telegramChatId || '',
                         telegramNotifyEnabled: data.telegram_notify_enabled ?? local.telegramNotifyEnabled ?? true,
+                        telegramNotifyTime: data.telegram_notify_time || local.telegramNotifyTime || '08:00',
                     }
                 });
             }
@@ -128,6 +131,7 @@ export async function GET(request: NextRequest) {
                 telegramBotToken: local.telegramBotToken || '',
                 telegramChatId: local.telegramChatId || '',
                 telegramNotifyEnabled: local.telegramNotifyEnabled ?? true,
+                telegramNotifyTime: local.telegramNotifyTime || '08:00',
             }
         });
     } catch (error: any) {
@@ -198,6 +202,7 @@ export async function POST(request: NextRequest) {
             telegramBotToken: body.telegramBotToken || '',
             telegramChatId: body.telegramChatId || '',
             telegramNotifyEnabled: body.telegramNotifyEnabled ?? true,
+            telegramNotifyTime: body.telegramNotifyTime || '08:00',
             telegramWebhookSecret: webhookSecret || '',
         });
         // 주의: 여기서 process.env.TELEGRAM_BOT_TOKEN을 덮어쓰면 서버 프로세스를 공유하는
@@ -222,6 +227,7 @@ export async function POST(request: NextRequest) {
             telegram_bot_token: body.telegramBotToken || null,
             telegram_chat_id: body.telegramChatId || null,
             telegram_notify_enabled: body.telegramNotifyEnabled ?? true,
+            telegram_notify_time: body.telegramNotifyTime || '08:00',
             telegram_webhook_secret: webhookSecret || null,
             updated_at: new Date().toISOString(),
         };
@@ -240,6 +246,7 @@ export async function POST(request: NextRequest) {
             delete upsertData.telegram_bot_token;
             delete upsertData.telegram_chat_id;
             delete upsertData.telegram_notify_enabled;
+            delete upsertData.telegram_notify_time;
             delete upsertData.telegram_webhook_secret;
             const retryRes = await supabaseAdmin
                 .from('tenant_settings')

@@ -13,6 +13,7 @@ export interface LocalTenantSettings {
     telegramBotToken?: string;
     telegramChatId?: string;
     telegramNotifyEnabled?: boolean;
+    telegramNotifyTime?: string;
     telegramWebhookSecret?: string;
     geminiApiKey?: string;
     [key: string]: any;
@@ -99,6 +100,8 @@ export interface TelegramTenantConfig {
     managerName?: string;
     notifyEnabled: boolean;
     webhookSecret?: string;
+    notifyTime: string; // 'HH:mm' (KST 기준), 기본 08:00
+    lastNotifiedDate?: string; // 'YYYY-MM-DD' - 오늘 이미 발송했는지 중복 방지용
 }
 
 /**
@@ -113,7 +116,7 @@ export async function getAllTelegramTenantConfigs(): Promise<TelegramTenantConfi
         if (supabaseAdmin) {
             const { data, error } = await supabaseAdmin
                 .from('tenant_settings')
-                .select('tenant_id, telegram_bot_token, telegram_chat_id, telegram_notify_enabled, telegram_webhook_secret, manager_name');
+                .select('tenant_id, telegram_bot_token, telegram_chat_id, telegram_notify_enabled, telegram_webhook_secret, telegram_notify_time, telegram_last_notified_date, manager_name');
             if (!error && data) {
                 data.forEach((row: any) => {
                     if (row.telegram_bot_token && row.telegram_chat_id) {
@@ -124,6 +127,8 @@ export async function getAllTelegramTenantConfigs(): Promise<TelegramTenantConfi
                             managerName: row.manager_name || undefined,
                             notifyEnabled: row.telegram_notify_enabled ?? true,
                             webhookSecret: row.telegram_webhook_secret || undefined,
+                            notifyTime: row.telegram_notify_time || '08:00',
+                            lastNotifiedDate: row.telegram_last_notified_date || undefined,
                         });
                     }
                 });
@@ -148,6 +153,8 @@ export async function getAllTelegramTenantConfigs(): Promise<TelegramTenantConfi
                         managerName: s.managerName || undefined,
                         notifyEnabled: s.telegramNotifyEnabled ?? true,
                         webhookSecret: s.telegramWebhookSecret || undefined,
+                        notifyTime: s.telegramNotifyTime || '08:00',
+                        lastNotifiedDate: s.telegramLastNotifiedDate || undefined,
                     });
                 }
             });
@@ -164,11 +171,30 @@ export async function getAllTelegramTenantConfigs(): Promise<TelegramTenantConfi
                 botToken: envToken,
                 chatId: envChatId,
                 notifyEnabled: true,
+                notifyTime: '08:00',
             });
         }
     }
 
     return Array.from(results.values());
+}
+
+/**
+ * 테넌트의 아침 브리핑을 오늘 날짜로 발송 완료 처리합니다. (중복 발송 방지)
+ */
+export async function markTenantNotifiedToday(tenantId: string, dateStr: string): Promise<void> {
+    try {
+        const { supabaseAdmin } = await import('./supabase');
+        if (supabaseAdmin) {
+            await supabaseAdmin
+                .from('tenant_settings')
+                .update({ telegram_last_notified_date: dateStr })
+                .eq('tenant_id', tenantId);
+        }
+    } catch (e) {
+        console.error('[TelegramTenantConfig] markTenantNotifiedToday error:', e);
+    }
+    saveLocalSettings(tenantId, { telegramLastNotifiedDate: dateStr } as LocalTenantSettings);
 }
 
 /**

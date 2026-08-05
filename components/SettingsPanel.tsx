@@ -20,6 +20,7 @@ interface TenantSettings {
   telegramBotToken?: string;
   telegramChatId?: string;
   telegramNotifyEnabled?: boolean;
+  telegramNotifyTime?: string;
 }
 
 const defaultSettings: TenantSettings = {
@@ -39,6 +40,7 @@ const defaultSettings: TenantSettings = {
   telegramBotToken: '',
   telegramChatId: '',
   telegramNotifyEnabled: true,
+  telegramNotifyTime: '08:00',
 };
 
 export default function SettingsPanel() {
@@ -607,7 +609,7 @@ export default function SettingsPanel() {
                 />
               </div>
 
-              <div className="settings-form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px' }}>
+              <div className="settings-form-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: '10px', marginTop: '12px' }}>
                 <input
                   type="checkbox"
                   id="telegramNotifyEnabled"
@@ -619,6 +621,22 @@ export default function SettingsPanel() {
                 <label htmlFor="telegramNotifyEnabled" style={{ fontSize: '0.9rem', color: '#e2e8f0', cursor: 'pointer' }}>
                   🔔 매일 아침 업무 알림 및 주요 이벤트 텔레그램 수신 활성화
                 </label>
+              </div>
+
+              <div className="settings-form-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: '10px', marginTop: '12px' }}>
+                <label htmlFor="telegramNotifyTime" style={{ fontSize: '0.9rem', color: '#e2e8f0', whiteSpace: 'nowrap' }}>
+                  ⏰ 업무 브리핑 알림 시간
+                </label>
+                <input
+                  type="time"
+                  id="telegramNotifyTime"
+                  name="telegramNotifyTime"
+                  className="settings-input"
+                  value={settings.telegramNotifyTime || '08:00'}
+                  onChange={handleChange}
+                  style={{ width: '140px' }}
+                  disabled={!(settings.telegramNotifyEnabled ?? true)}
+                />
               </div>
 
               <div className="settings-actions-row" style={{ marginTop: '16px' }}>
