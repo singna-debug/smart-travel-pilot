@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateConsultationConfirmation } from '@/lib/google-sheets';
 import { crawlForBooking } from '@/lib/url-crawler';
+import { getTenantIdFromHeaderOrQuery } from '@/lib/tenant';
 
 /**
  * POST /api/consultations/confirm
@@ -12,6 +13,7 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { rowIndex, sheetName, confirmedProductUrl, reservationNumber } = body;
+        const tenantId = getTenantIdFromHeaderOrQuery(request);
 
         if (!rowIndex || !confirmedProductUrl) {
             return NextResponse.json(
@@ -117,7 +119,8 @@ export async function POST(request: NextRequest) {
                 happyCall,
                 reservationNumber,
             },
-            sheetName
+            sheetName,
+            tenantId
         );
 
         if (success) {

@@ -17,6 +17,9 @@ interface TenantSettings {
   geminiApiKey: string;
   kakaoChannelId: string;
   kakaoTalkId: string;
+  telegramBotToken?: string;
+  telegramChatId?: string;
+  telegramNotifyEnabled?: boolean;
 }
 
 const defaultSettings: TenantSettings = {
@@ -33,6 +36,9 @@ const defaultSettings: TenantSettings = {
   geminiApiKey: '',
   kakaoChannelId: '',
   kakaoTalkId: '',
+  telegramBotToken: '',
+  telegramChatId: '',
+  telegramNotifyEnabled: true,
 };
 
 export default function SettingsPanel() {
@@ -50,7 +56,9 @@ export default function SettingsPanel() {
   const [testState, setTestState] = useState<{
     google: 'idle' | 'testing' | 'success' | 'fail';
     api: 'idle' | 'testing' | 'success' | 'fail';
-  }>({ google: 'idle', api: 'idle' });
+    telegram: 'idle' | 'testing' | 'success' | 'fail';
+  }>({ google: 'idle', api: 'idle', telegram: 'idle' });
+  const [telegramTestMsg, setTelegramTestMsg] = useState<string>('');
 
   useEffect(() => {
     setIsMounted(true);
@@ -75,8 +83,17 @@ export default function SettingsPanel() {
         });
         const data = await res.json();
         if (data.success && data.settings) {
-          setSettings(data.settings);
-          localStorage.setItem('tenant_settings', JSON.stringify(data.settings));
+          const savedStr = localStorage.getItem('tenant_settings');
+          let saved: any = {};
+          if (savedStr) { try { saved = JSON.parse(savedStr); } catch (e) {} }
+
+          const merged = {
+            ...data.settings,
+            telegramBotToken: data.settings.telegramBotToken || saved.telegramBotToken || '',
+            telegramChatId: data.settings.telegramChatId || saved.telegramChatId || '',
+          };
+          setSettings(merged);
+          localStorage.setItem('tenant_settings', JSON.stringify(merged));
         }
       } catch (e) {
         const saved = localStorage.getItem('tenant_settings');
@@ -155,6 +172,36 @@ export default function SettingsPanel() {
     }, 1500);
   };
 
+  const handleTestTelegram = async () => {
+    if (!settings.telegramBotToken || !settings.telegramChatId) {
+      setTelegramTestMsg('Bot Token과 Chat ID를 모두 입력해주세요.');
+      setTestState(prev => ({ ...prev, telegram: 'fail' }));
+      return;
+    }
+    setTestState(prev => ({ ...prev, telegram: 'testing' }));
+    try {
+      const res = await fetch('/api/telegram/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          telegramBotToken: settings.telegramBotToken,
+          telegramChatId: settings.telegramChatId,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTestState(prev => ({ ...prev, telegram: 'success' }));
+        setTelegramTestMsg(data.message || '텔레그램 테스트 메시지가 성공적으로 발송되었습니다.');
+      } else {
+        setTestState(prev => ({ ...prev, telegram: 'fail' }));
+        setTelegramTestMsg(data.error || '텔레그램 테스트 발송에 실패했습니다.');
+      }
+    } catch (e: any) {
+      setTestState(prev => ({ ...prev, telegram: 'fail' }));
+      setTelegramTestMsg('서버와 통신할 수 없습니다.');
+    }
+  };
+
   if (!isMounted) return null;
 
   return (
@@ -176,7 +223,7 @@ export default function SettingsPanel() {
           className={`settings-tab ${activeTab === 'api' ? 'active' : ''}`}
           onClick={() => setActiveTab('api')}
         >
-          🤖 AI & 카카오 API
+          🤖 AI & 카카오 / 텔레그램 API
         </button>
       </div>
 
@@ -515,6 +562,88 @@ export default function SettingsPanel() {
                 <X size={20} /> API 테스트 실패: 키를 확인해주세요.
               </div>
             )}
+
+            <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+              <h3 className="settings-label" style={{ fontSize: '1.1rem', fontWeight: '700', color: '#00d4aa', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                📱 텔레그램 알림봇 설정
+              </h3>
+
+              <div className="settings-notice-banner" style={{
+                background: 'rgba(0, 212, 170, 0.08)',
+                border: '1px solid rgba(0, 212, 170, 0.25)',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                marginBottom: '20px',
+                color: '#a7f3d0',
+                fontSize: '0.85rem',
+                lineHeight: '1.5'
+              }}>
+                <strong>💡 텔레그램 알림봇 연동 방법:</strong><br />
+                1. 텔레그램 앱에서 <strong>@BotFather</strong> 검색 ➔ <code>/newbot</code> 입력하여 나만의 봇 생성 (발급된 HTTP API Token 입력)<br />
+                2. 생성된 봇에게 아무 메시지나 보낸 후, <strong>@userinfobot</strong>을 통해 본인의 <strong>Chat ID</strong> 확인 입력
+              </div>
+
+              <div className="settings-form-group">
+                <label className="settings-label">텔레그램 Bot Token</label>
+                <input 
+                  type="text" 
+                  name="telegramBotToken"
+                  className="settings-input" 
+                  value={settings.telegramBotToken || ''}
+                  onChange={handleChange}
+                  placeholder="예: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+                />
+              </div>
+
+              <div className="settings-form-group">
+                <label className="settings-label">텔레그램 Chat ID</label>
+                <input 
+                  type="text" 
+                  name="telegramChatId"
+                  className="settings-input" 
+                  value={settings.telegramChatId || ''}
+                  onChange={handleChange}
+                  placeholder="예: 123456789 또는 -10012345678"
+                />
+              </div>
+
+              <div className="settings-form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px' }}>
+                <input
+                  type="checkbox"
+                  id="telegramNotifyEnabled"
+                  name="telegramNotifyEnabled"
+                  checked={settings.telegramNotifyEnabled ?? true}
+                  onChange={(e) => setSettings(prev => ({ ...prev, telegramNotifyEnabled: e.target.checked }))}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#00d4aa' }}
+                />
+                <label htmlFor="telegramNotifyEnabled" style={{ fontSize: '0.9rem', color: '#e2e8f0', cursor: 'pointer' }}>
+                  🔔 매일 아침 업무 알림 및 주요 이벤트 텔레그램 수신 활성화
+                </label>
+              </div>
+
+              <div className="settings-actions-row" style={{ marginTop: '16px' }}>
+                <button 
+                  type="button" 
+                  className="settings-btn-secondary" 
+                  onClick={handleTestTelegram} 
+                  disabled={testState.telegram === 'testing'}
+                  style={{ borderColor: '#00d4aa', color: '#00d4aa' }}
+                >
+                  {testState.telegram === 'testing' ? <><Loader2 size={18} className="settings-spin" /> 메시지 발송 중...</> : '📱 텔레그램 테스트 메시지 전송'}
+                </button>
+              </div>
+
+              {testState.telegram === 'success' && (
+                <div className="settings-test-result success fade-in" style={{ marginTop: '12px' }}>
+                  <Check size={20} /> {telegramTestMsg || '텔레그램 메시지가 전송되었습니다!'}
+                </div>
+              )}
+              {testState.telegram === 'fail' && (
+                <div className="settings-test-result fail fade-in" style={{ marginTop: '12px' }}>
+                  <X size={20} /> {telegramTestMsg || '텔레그램 연동 실패: Bot Token과 Chat ID를 확인해주세요.'}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

@@ -411,7 +411,7 @@ export default function MessageTemplateCreator() {
             case 'remind':
                 text = `✈️ [${companyName}] 상담 상품 리마인드 (담당: ${AGENT_NAME})
 
-안녕하세요, ${name}(${phone})님! ${companyName} ${AGENT_NAME}입니다. 😊
+안녕하세요, ${name}님! ${companyName} ${AGENT_NAME}입니다. 😊
 일전에 상담 도와드린 ${dest ? dest + ' ' : ''}여행 상품은 잘 확인해 보셨을까요?
 
 🔗 기존 안내한 일정 URL : ${url || '(일정표 링크)'}
@@ -544,7 +544,7 @@ ${getContactFooter()}`;
             case 'dotcom':
                 text = `✈️  여행 예약 안내
 
-${name}(${phone}) 고객님, 안녕하세요! 😊
+${name} 고객님, 안녕하세요! 😊
 이번 여행의 담당자로 배정된 ${companyName} ${AGENT_NAME}입니다.
 
 신속한 예약을 위해 현재 항공, 호텔 확인 중이며,

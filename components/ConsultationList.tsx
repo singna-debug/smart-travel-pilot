@@ -113,10 +113,11 @@ export default function ConsultationList({ title, data, emptyMessage = "해당�
         }
 
         const updateUrl = isDummy ? '/api/dummy/consultations' : '/api/consultations';
+        const tenantId = (typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null) || 'default_tenant';
         try {
             const response = await fetch(updateUrl, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
                 body: JSON.stringify({
                     rowIndex: item.sheetRowIndex,
                     sheetName: item.sheetName,

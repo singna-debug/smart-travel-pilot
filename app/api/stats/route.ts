@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
         // 날짜 파싱 헬퍼
         const parseD = (dStr?: string | null) => {
             if (!dStr) return null;
-            const cleanStr = dStr.replace('(완료)', '').trim().replace(' ', 'T');
+            // 주의: 시트에서 읽어온 타임스탬프는 시/분/초가 0으로 패딩되지 않을 수 있어
+            // (예: "2026-08-05 9:56:23") 공백을 'T'로 바꾸면 엄격한 ISO 파서가 적용되어
+            // 한 자리 시각에서 Invalid Date가 됨. new Date()의 관대한 파싱을 그대로 사용.
+            const cleanStr = dStr.replace('(완료)', '').trim();
             const d = new Date(cleanStr);
             if (isNaN(d.getTime())) return null;
             return startOfDay(d);

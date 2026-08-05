@@ -58,15 +58,34 @@ export async function updateSession(request: NextRequest) {
       return supabaseResponse
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  try {
+    const {
+      data: { user },
+      error
+    } = await supabase.auth.getUser()
 
-  // 로그인하지 않은 사용자가 보호된 페이지에 접근할 때
-  if (!user) {
+    if (error || !user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      const response = NextResponse.redirect(url)
+      // 만약 세션/리프레시 토큰이 유효하지 않으면 관련 브라우저 쿠키를 삭제하여 콘솔 에러 및 무한 루프 방지
+      request.cookies.getAll().forEach(c => {
+        if (c.name.includes('auth-token') || c.name.startsWith('sb-')) {
+          response.cookies.delete(c.name)
+        }
+      })
+      return response
+    }
+  } catch (err) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    return NextResponse.redirect(url)
+    const response = NextResponse.redirect(url)
+    request.cookies.getAll().forEach(c => {
+      if (c.name.includes('auth-token') || c.name.startsWith('sb-')) {
+        response.cookies.delete(c.name)
+      }
+    })
+    return response
   }
 
   return supabaseResponse

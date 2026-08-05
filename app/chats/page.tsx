@@ -130,9 +130,10 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
         }
 
         try {
+            const tenantId = (typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null) || 'default_tenant';
             const res = await fetch(getApiUrl('/consultations'), {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
                 body: JSON.stringify({
                     rowIndex: chat.sheetRowIndex,
                     sheetName: chat.sheetName,
@@ -253,9 +254,10 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
 
         setUpdating(chat.id);
         try {
+            const tenantId = (typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null) || 'default_tenant';
             const response = await fetch(getApiUrl('/consultations'), {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
                 body: JSON.stringify({
                     rowIndex: chat.sheetRowIndex,
                     status: newStatus,
@@ -305,9 +307,10 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
         setConfirming(true);
 
         try {
+            const tenantId = (typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null) || 'default_tenant';
             const response = await fetch(getApiUrl('/consultations/confirm'), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
                 body: JSON.stringify({
                     rowIndex: chat.sheetRowIndex,
                     sheetName: chat.sheetName,
@@ -418,13 +421,15 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
         let successCount = 0;
         let failCount = 0;
 
+        const tenantId = (typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null) || 'default_tenant';
+
         // 1. 시트에 있는 항목들 삭제 (행 인덱스 내림차순 정렬)
         const sortedSheetItems = [...sheetItems].sort((a, b) => (b.sheetRowIndex || 0) - (a.sheetRowIndex || 0));
 
         for (const chat of sortedSheetItems) {
             try {
                 const url = getApiUrl(`/consultations?rowIndex=${chat.sheetRowIndex}${chat.sheetName ? `&sheetName=${encodeURIComponent(chat.sheetName)}` : ''}`);
-                const response = await fetch(url, { method: 'DELETE' });
+                const response = await fetch(url, { method: 'DELETE', headers: { 'x-tenant-id': tenantId } });
                 const data = await response.json();
                 if (data.success) {
                     successCount++;

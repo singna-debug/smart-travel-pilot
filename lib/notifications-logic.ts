@@ -22,15 +22,16 @@ function getTodayKST(): string {
 /**
  * 오늘 처리해야 할 업무(알림) 목록을 가져오고 메시지를 구성합니다.
  */
-export async function getTodayNotificationMessage(): Promise<string | null> {
+export async function getTodayNotificationMessage(tenantId: string = 'default_tenant'): Promise<string | null> {
     try {
-        const consultations = await getAllConsultations(true); // 강제 리프레시
+        const consultations = await getAllConsultations(true, tenantId); // 강제 리프레시
         const today = getTodayKST();
         const todayObj = startOfDay(getTodayKSTDate());
 
         const parseD = (dStr?: string | null) => {
             if (!dStr) return null;
-            const cleanStr = dStr.replace('(완료)', '').trim().replace(' ', 'T');
+            // 시각이 한 자리(예: "9:56:23")면 'T'로 바꿔 엄격 ISO 파싱 시 Invalid Date가 되므로 그대로 파싱
+            const cleanStr = dStr.replace('(완료)', '').trim();
             const d = new Date(cleanStr);
             if (isNaN(d.getTime())) return null;
             return startOfDay(d);

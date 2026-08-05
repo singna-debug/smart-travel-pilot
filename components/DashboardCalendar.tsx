@@ -83,6 +83,9 @@ function parseToYmd(dateStr?: string | null): string | null {
 // 쌤플 담당자 목록 (실제 지정이 없을 때 순환 맵핑용)
 const MOCK_MANAGERS = ['김담당', '박팀장', '이과장', '정대리', '최실장'];
 
+// 예약이 아직 확정되지 않은 상태 (출발일이 입력돼 있어도 확정된 일정이 아님)
+const UNCONFIRMED_STATUSES = ['상담중', '견적제공', '취소', '취소/보류', '상담완료'];
+
 // 구글 시트/대시보드 실데이터 파싱 함수
 function parseConsultationsToEvents(consultations: ConsultationData[]): CalendarEvent[] {
   const events: CalendarEvent[] = [];
@@ -92,12 +95,13 @@ function parseConsultationsToEvents(consultations: ConsultationData[]): Calendar
     const customerName = c.customer?.name || '고객';
     const dest = c.trip?.destination || c.trip?.product_name || '여행';
     const uniqueId = `${customerName}-${index}`;
+    const isConfirmed = !UNCONFIRMED_STATUSES.includes((c.automation?.status || '').trim());
 
     // 담당자 파싱 (데이터에 지정되어 있으면 사용, 없으면 데모용 분배)
     const managerName = (c as any).manager || (c as any).managerName || MOCK_MANAGERS[index % MOCK_MANAGERS.length];
 
-    // 1. 고객 출발일
-    const depYmd = parseToYmd(c.trip?.departure_date);
+    // 1. 고객 출발일 (예약확정 이후 상태에서만 표시 - 상담중 단계는 출발일이 미확정 견적일 뿐)
+    const depYmd = isConfirmed ? parseToYmd(c.trip?.departure_date) : null;
     if (depYmd) {
       events.push({
         id: `${uniqueId}-dep`,
@@ -355,11 +359,21 @@ export default function DashboardCalendar({ consultations, lists, isLoading }: D
     if (consultations && consultations.length > 0) {
       allConsultations = consultations;
     } else if (lists) {
+      // lists의 각 버킷(리마인드/선금/잔금/출발안내 등)은 서로 배타적이지 않아
+      // 동일 상담 건이 여러 버킷에 동시에 속할 수 있음. 그대로 합치면 같은 건이
+      // 중복 집계되어 출발/리마인드 등 캘린더 뱃지가 중복 표시되므로 고유 키로 dedupe.
+      const seen = new Map<string, ConsultationData>();
       Object.values(lists).forEach(arr => {
         if (Array.isArray(arr)) {
-          allConsultations.push(...arr);
+          arr.forEach((c: any) => {
+            const key = c.visitor_id
+              ? `vid:${c.visitor_id}`
+              : `${c.customer?.name || ''}-${c.customer?.phone || ''}-${c.trip?.destination || ''}-${c.trip?.departure_date || ''}`;
+            if (!seen.has(key)) seen.set(key, c);
+          });
         }
       });
+      allConsultations = Array.from(seen.values());
     }
 
     if (allConsultations.length > 0) {

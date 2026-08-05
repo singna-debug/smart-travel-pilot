@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteConsultationFromSheet, updateConsultationStatus, updateConsultationField } from '@/lib/google-sheets';
+import { getTenantIdFromHeaderOrQuery } from '@/lib/tenant';
 
 // 상담 개별 필드 업데이트 (PATCH)
 export async function PATCH(request: NextRequest) {
     try {
         const body = await request.json();
         const { rowIndex, field, value, sheetName } = body;
+        const tenantId = getTenantIdFromHeaderOrQuery(request);
 
         if (!rowIndex || !field) {
             return NextResponse.json(
@@ -14,7 +16,7 @@ export async function PATCH(request: NextRequest) {
             );
         }
 
-        const success = await updateConsultationField(rowIndex, field, value ?? '', sheetName);
+        const success = await updateConsultationField(rowIndex, field, value ?? '', sheetName, tenantId);
 
         if (success) {
             return NextResponse.json({ success: true, message: `${field} 업데이트 완료` });
@@ -38,6 +40,7 @@ export async function PUT(request: NextRequest) {
     try {
         const body = await request.json();
         const { sessionId, rowIndex, status, sheetName } = body;
+        const tenantId = getTenantIdFromHeaderOrQuery(request);
 
         if (!rowIndex || !status) {
             return NextResponse.json(
@@ -47,7 +50,7 @@ export async function PUT(request: NextRequest) {
         }
 
         // Google Sheets 상태 업데이트
-        const success = await updateConsultationStatus(rowIndex, status, sheetName);
+        const success = await updateConsultationStatus(rowIndex, status, sheetName, tenantId);
 
         if (success) {
             return NextResponse.json({
@@ -76,6 +79,7 @@ export async function DELETE(request: NextRequest) {
         const rowIndex = searchParams.get('rowIndex');
         const sheetName = searchParams.get('sheetName');
         const sessionId = searchParams.get('sessionId');
+        const tenantId = getTenantIdFromHeaderOrQuery(request);
 
         if (!rowIndex) {
             return NextResponse.json(
@@ -87,7 +91,7 @@ export async function DELETE(request: NextRequest) {
         const rowNum = parseInt(rowIndex, 10);
 
         // Google Sheets에서 삭제
-        const success = await deleteConsultationFromSheet(rowNum, sheetName || undefined);
+        const success = await deleteConsultationFromSheet(rowNum, sheetName || undefined, tenantId);
 
         if (success) {
             return NextResponse.json({

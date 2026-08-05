@@ -1431,13 +1431,12 @@ export async function getAllMessages(): Promise<any[]> {
 /**
  * Google Sheets에서 특정 행을 삭제합니다.
  */
-export async function deleteConsultationFromSheet(rowIndex: number, sheetName?: string): Promise<boolean> {
+export async function deleteConsultationFromSheet(rowIndex: number, sheetName?: string, tenantId: string = 'default_tenant'): Promise<boolean> {
     try {
-        const sheets = getGoogleSheetsClient();
-        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
+        const { sheets, spreadsheetId: sheetId } = await getSheetsConfigForTenant(tenantId);
 
         if (!sheetId) {
-            console.error('GOOGLE_SHEET_ID가 설정되지 않았습니다.');
+            console.error('스프레드시트 ID가 설정되지 않았습니다.');
             return false;
         }
 
@@ -1479,13 +1478,12 @@ export async function deleteConsultationFromSheet(rowIndex: number, sheetName?: 
  * Google Sheets에서 특정 상담의 상태를 업데이트합니다.
  * 상태가 '상담중', '견적제공', '취소' 등으로 변경되면 예약 관련 정보(Q, R, S열)를 자동으로 비웁니다.
  */
-export async function updateConsultationStatus(rowIndex: number, status: string, sheetName?: string): Promise<boolean> {
+export async function updateConsultationStatus(rowIndex: number, status: string, sheetName?: string, tenantId: string = 'default_tenant'): Promise<boolean> {
     try {
-        const sheets = getGoogleSheetsClient();
-        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
+        const { sheets, spreadsheetId: sheetId } = await getSheetsConfigForTenant(tenantId);
 
         if (!sheetId) {
-            console.error('GOOGLE_SHEET_ID가 설정되지 않았습니다.');
+            console.error('스프레드시트 ID가 설정되지 않았습니다.');
             return false;
         }
 
@@ -1589,11 +1587,12 @@ export async function updateConsultationField(
     rowIndex: number,
     field: string,
     value: string,
-    sheetName?: string
+    sheetName?: string,
+    tenantId: string = 'default_tenant'
 ): Promise<boolean> {
     try {
         if (field === 'status') {
-            return await updateConsultationStatus(rowIndex, value, sheetName);
+            return await updateConsultationStatus(rowIndex, value, sheetName, tenantId);
         }
 
         const column = FIELD_TO_COLUMN[field];
@@ -1609,8 +1608,7 @@ export async function updateConsultationField(
             finalValue = autoFormatDateString(value);
         }
 
-        const sheets = getGoogleSheetsClient();
-        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
+        const { sheets, spreadsheetId: sheetId } = await getSheetsConfigForTenant(tenantId);
         if (!sheetId) return false;
 
         const targetSheetName = sheetName || '시트1';
@@ -1658,14 +1656,14 @@ export async function updateConsultationConfirmation(
         happyCall: string;
         reservationNumber?: string;
     },
-    sheetName?: string
+    sheetName?: string,
+    tenantId: string = 'default_tenant'
 ): Promise<boolean> {
     try {
-        const sheets = getGoogleSheetsClient();
-        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
+        const { sheets, spreadsheetId: sheetId } = await getSheetsConfigForTenant(tenantId);
 
         if (!sheetId) {
-            console.error('GOOGLE_SHEET_ID가 설정되지 않았습니다.');
+            console.error('스프레드시트 ID가 설정되지 않았습니다.');
             return false;
         }
 
@@ -1715,10 +1713,9 @@ export async function updateConsultationConfirmation(
     }
 }
 
-export async function updateConfirmationLink(rowIndex: number, link: string, sheetName?: string): Promise<boolean> {
+export async function updateConfirmationLink(rowIndex: number, link: string, sheetName?: string, tenantId: string = 'default_tenant'): Promise<boolean> {
     try {
-        const sheets = getGoogleSheetsClient();
-        const sheetId = cleanEnv('GOOGLE_SHEET_ID');
+        const { sheets, spreadsheetId: sheetId } = await getSheetsConfigForTenant(tenantId);
 
         if (!sheetId) return false;
 

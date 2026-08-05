@@ -1,76 +1,699 @@
 {
   "isProduct": true,
-  "title": "【100%출발확정】항공문의必【청록빛여름】 노보리베츠ㆍ도야ㆍ삿포로ㆍ오타루 4일▶ALL포함+도야호유람선+대게 무제한+불꽃놀이+삿포로맥주축제",
-  "destination": "삿포로, 북해도",
-  "price": "2,499,000원",
-  "departureDate": "2026-07-30",
-  "returnDate": "2026-08-02",
+  "title": "●◆★출발확정★▶Y26 新상품◀[품격][KE/비즈니스 클래스][PRIVATE TOUR]『운무 속 비밀의 길』 장가계+무한(야경투어) 5일 ▶하워드 존슨(디럭스룸) X 크라운 플라자 [5大 VIP 패스]",
+  "destination": "중국 (장가계)",
+  "price": "4,300,000원",
+  "departureDate": "2026-08-07",
+  "returnDate": "2026-08-10",
   "duration": "3박 4일",
   "airline": "대한항공",
-  "departureFlightNumber": "",
-  "returnFlightNumber": "",
+  "departureFlightNumber": "KE165",
+  "returnFlightNumber": "KE166",
   "departureAirport": "서울(ICN)",
-  "arrivalAirport": "삿포로, 북해도",
-  "departureTime": "일정표 참조",
-  "arrivalTime": "일정표 참조",
-  "returnDepartureAirport": "삿포로, 북해도",
-  "returnDepartureTime": "일정표 참조",
-  "returnArrivalTime": "일정표 참조",
+  "arrivalAirport": "중국 (장가계)",
+  "departureTime": "06:00",
+  "arrivalTime": "08:40",
+  "returnDepartureAirport": "중국 (장가계)",
+  "returnDepartureTime": "12:15",
+  "returnArrivalTime": "16:00",
   "departureSegments": [
     {
       "airline": "대한항공",
-      "flightNo": "",
-      "departureAirport": "인천",
-      "departureTime": "일정표 참조",
-      "arrivalAirport": "삿포로, 북해도",
-      "arrivalTime": "일정표 참조"
+      "flightNo": "KE165",
+      "departureAirport": "인천(ICN)",
+      "departureTime": "06:00",
+      "arrivalAirport": "중국 (장가계)",
+      "arrivalTime": "08:40"
     }
   ],
   "returnSegments": [
     {
       "airline": "대한항공",
-      "flightNo": "",
-      "departureAirport": "삿포로, 북해도",
-      "departureTime": "일정표 참조",
-      "arrivalAirport": "인천",
-      "arrivalTime": "일정표 참조"
+      "flightNo": "KE166",
+      "departureAirport": "중국 (장가계)",
+      "departureTime": "12:15",
+      "arrivalAirport": "인천(ICN)",
+      "arrivalTime": "16:00"
     }
   ],
-  "hotel": "전일정 특특급/온천 호텔 숙박",
-  "url": "https://www.lottetour.com/evtDetail/826/856/1034/1037?evtCd=D03A260730OZ005#n",
+  "hotel": "하워드 존슨 네오달 리조트(HOWARD JOHNSON NEODALLE RESORT ZHANGJIAJIE)",
+  "url": "https://www.lottetour.com/evtDetail/826/858/1079/5499?evtCd=C03A260807KE012",
+  "images": [
+    "https://dimgcdn.lottetour.com/TN/15/15573d44468e1d488e6205ad5c729480.tn.210x140.png",
+    "https://dimgcdn.lottetour.com/TN/3d/3d4e511fb88907f2d70504f59e62fe2f.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/30/30c05e194440fa4f128c389bd34a5721.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/f7/f7f8594fc8b155eab4b96b2d970c6460.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/02/02f7bb4c85088d95686a30e02b6efb35.tn.210x140.jpeg",
+    "https://dimgcdn.lottetour.com/TN/9b/9bc0146619c9b1dbb14fb598c4ed1978.tn.210x140.jpeg",
+    "https://dimgcdn.lottetour.com/TN/8a/8aff435940c7c3634409d67b101aa2fe.tn.210x140.jpeg",
+    "https://dimgcdn.lottetour.com/TN/85/855e05cc7e68c91cd096ed961ea44dbf.tn.210x140.jpeg",
+    "https://dimgcdn.lottetour.com/TN/6b/6ba268178f7af8ad8ae1e7cd0af27cb5.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/b7/b73a7e0d8de08a00747e92f09aecd05c.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/e0/e05d062b20db718c7400dd411fb725ff.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/8e/8ec503d051c27d44206e5337526b8c62.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/99/99cc5ea5872f5b970db945dbc1da54bd.tn.210x140.JPG",
+    "https://dimgcdn.lottetour.com/TN/db/dbf1cc2bb42613ddd3a1b9e340f3a151.tn.210x140.png",
+    "https://dimgcdn.lottetour.com/TN/5d/5de9518af24036d41bbc5659426d3c4e.tn.210x140.png",
+    "https://dimgcdn.lottetour.com/TN/b6/b6c84e0c5f547d712e9b7d1548ef64d5.tn.210x140.png",
+    "https://dimgcdn.lottetour.com/TN/4f/4f6f1ec4dd6fbfce42b9c25b4f4a2893.tn.210x140.JPG",
+    "https://dimgcdn.lottetour.com/TN/d3/d38556e595af8ff64a3bf08433f9f47d.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/41/41b1ae878f0d66898a1230a7d593430b.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/a7/a7e1d20cc270dcefa5be9d673caadef6.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/5f/5f56954b5f5b6b1c2926502bfbf9a87c.tn.210x140.JPG",
+    "https://dimgcdn.lottetour.com/TN/37/372682924964ce4683e5226a724f5f64.tn.210x140.png",
+    "https://dimgcdn.lottetour.com/TN/3f/3f204795e2afa31c34c6a45f1a2f676b.tn.210x140.JPG",
+    "https://dimgcdn.lottetour.com/TN/0d/0d7693d1d53476fcf47774d8b5fd7c86.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/15/155dcc201ced3de263a41960f3a95d75.tn.210x140.jpeg",
+    "https://dimgcdn.lottetour.com/TN/3d/3d0a137dbfac86f889dc3d6c042d12ff.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/c8/c8860c86acca11df64f3e4c930d91c57.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/5e/5e57a4231f4eeb7311b023eb8fc4499f.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/d4/d4d1fa2dd69396e0264e3c56417cf57f.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/cc/cc344454b28daacd63a1833b374a2e6c.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/05/056005de343acbb989830750db8462f0.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/04/047ae4b3f15a18bc985ae42b339c5e4e.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/c1/c1cf44acc4446beb25429a661a2c43a4.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/95/95aa6a56ca86e8a7a8bf15faca7e0e3c.tn.210x140.JPG",
+    "https://dimgcdn.lottetour.com/TN/59/59eb2beed5deca0b99d156223c455e5a.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/76/763a6db3da151b447e75fd8f76f32ccc.tn.210x140.JPG",
+    "https://dimgcdn.lottetour.com/TN/fa/fa9d3cf2706912a60f1544c3fa4e4b37.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/0d/0da06b4879f645a0dd6c088499c3660b.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/ca/cab3ff2570476f5753edd82962f61bc3.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/68/687ee048f59946eb9df8930cae7446a7.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/35/35b293ccd4d18214c886c3f5fba136ef.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/b2/b2d9ef50c3adc9641853ac4ef7b2faa3.tn.210x140.JPG",
+    "https://dimgcdn.lottetour.com/TN/43/431b0c1b9aee42009eec1ffa7f059098.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/60/600a3754a3666a40e7d7a038a4fd07e1.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/f0/f013661aeb2b495cf1bd130d4c7473d8.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/2c/2c6808cb65e84c471c178470416ada05.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/2f/2feb7ee01526eee9e30e1f6421bc08b6.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/bc/bc95b575f32bc5afb1263fa28cd1c6b5.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/22/22781d781df14cf80f197c986d768f9f.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/03/038f385130abb2e1852886a11e23588f.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/51/51ef89b630d5ae9284c898cc11576af6.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/d3/d3263cd1b69386d41838c1532176bebd.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/a6/a6d5b5d4d41f6af8514c02ce084d24bf.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/3d/3dffa4173a58d1a528edf584476615c5.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/14/1426c9bb753125530fe929a3ad1ceb61.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/81/815c1cd88cc6ef7d98677b6abbc08584.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/ea/ea4fb2aa943ac1c130b86cc77bba23f4.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/26/26becb70a9cd7ab531d9ac488452f7be.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/70/70f151ff9d56d92560b5cdb6378dac28.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/d3/d3f112c3b99f972589b703dcc16cd1df.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/86/868d8849133c33e2324b7b215e05af2d.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/ae/aea65164d80ee7675db5895f809c3a0d.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/3b/3bfeccbfe8a178d97858f46a1987347d.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/a6/a6992516d74a306966ba7b0f1f1d9449.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/00/00ea4915fb5d2341b0655818675646cd.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/0b/0b4c7e844650e3d26567da8571f40d0b.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/b2/b2a5b517f3a068086a7f8c8a39278469.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/8c/8c37b30f5a08721de9bc7890eb3dd7aa.tn.210x140.jpeg",
+    "https://dimgcdn.lottetour.com/TN/b1/b172bfc20223ea911d595287ea3af903.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/d9/d940fe8d8fc0a8a450c58b1713de632d.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/03/038f616569455c38188dbcd8b95243b1.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/0a/0a3a10dd46a50494d9200254349d0849.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/72/72634b9d5d516ac6281559fe681afb31.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/c2/c2f65a65243dc85c896ef115c1d6b9b7.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/56/560ad8b45107f1a2e3e591a6052374d0.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/e4/e40118369757e3db30205dab0c10f504.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/52/526ec13e9d734c97e0cb2c6ed59faa36.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/36/36c97fe5b0e1d9a87ea9c90d4caba587.tn.210x140.jpeg",
+    "https://dimgcdn.lottetour.com/TN/0a/0a1011e3e0b735763eb88e7916d0f0e3.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/57/5718bb032b15cf952829ce9cdfa378d9.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/2f/2f22cca8d751f5957bae863413eac090.tn.210x140.jpeg",
+    "https://dimgcdn.lottetour.com/TN/b6/b6a618f400f9d86c84099547d837fff1.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/a1/a1f05790fcdc96f31c9dfb4df280de9f.tn.210x140.jpeg",
+    "https://dimgcdn.lottetour.com/TN/f1/f19b7a5461d9dd161e1e2aa1b4c1aa91.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/ba/bab2afc1f4eea3a022a004025833ed2e.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/3e/3eb3520f65b8591cb6c8598f5c54e090.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/52/5206916444fddfea9e1a7c2dc73dfe45.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/0d/0d53f07f433b18077f36e1682c8c33b8.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/db/db25233abfb22137e5e9f01ae10cd7fe.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/79/79f0bc642f8052163dc79b93fc8e4066.tn.210x140.png",
+    "https://dimgcdn.lottetour.com/TN/2a/2a9afa5359a9d339f305d4ad18284d64.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/ef/ef5182e934d319ba073d7364a5358555.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/f5/f5a394e134a9431cd224296df0562e68.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/6a/6ab57eb6bc0da0144f338bd7b702ee5f.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/a5/a5aa8d18e4c1928be553ae1dc0c92b9d.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/e5/e57736cb7f2e1adb4f8b49d2094e85e2.tn.210x140.jpeg",
+    "https://dimgcdn.lottetour.com/TN/30/304d429532bcc5daa4857dba5e65ab66.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/68/68f0bde9689ba2d6cfbefec759ddc397.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/e5/e5f8ad6e91235dce2de365d6c782b3bd.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/67/67d35f2667c93c5c0173e97eae35f5e5.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/88/88adc2e22d05f3815668f26f608bdb24.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/b8/b8ce1df8a47986cd7cf2adc7c4893d66.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/5b/5b24a9a7fb1dfb3e1bc030a04fa739de.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/b6/b6179609d0ad79bd93467b29830c10eb.tn.210x140.JPG",
+    "https://dimgcdn.lottetour.com/TN/ad/adba092d843f3baece584195d7b7f02d.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/82/822f04e507c6ec620cfef8706c5679d0.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/e3/e3efbbfc73a331a396d78edac35a8672.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/18/18a6f00346791dd9c532742c16dc5f39.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/46/46f597cab7e205c092f432859af31088.tn.210x140.jpeg",
+    "https://dimgcdn.lottetour.com/TN/24/24862744999252cac37e1c57f2cddf7a.tn.210x140.jpeg",
+    "https://dimgcdn.lottetour.com/TN/0c/0c8e975783e4f796c6fdd70a68065544.tn.210x140.jpeg",
+    "https://dimgcdn.lottetour.com/TN/9e/9e297ba84db3c912c2f7d87df111a950.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/0e/0ebebac252161daf780f2ba36985b643.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/55/55ae8686134e2c8d635ce6106ccfbba4.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/35/354ba591ef01cc61102bebaac4f77a2b.tn.210x140.jpg",
+    "https://dimgcdn.lottetour.com/TN/43/4329982bfbeac30e95348ede2f7aa314.tn.720x480.jpeg",
+    "https://dimgcdn.lottetour.com/TN/bd/bd961d00ba7e6a5b28fc247a3187aef2.tn.720x480.jpeg",
+    "https://dimgcdn.lottetour.com/TN/0f/0faba5651a30c8ef9ebe4d3a33b494dd.tn.720x480.jpg",
+    "https://dimgcdn.lottetour.com/TN/d3/d302e35e6d3c7205ea311d0433a73feb.tn.720x480.jpg",
+    "https://dimgcdn.lottetour.com/TN/28/281883cfbafa6c85c03e48a8aab694d1.tn.720x480.jpeg",
+    "https://dimgcdn.lottetour.com/TN/95/952fbfee12b1d5863bb7c63012006432.tn.720x480.jpg",
+    "https://dimgcdn.lottetour.com/TN/29/29e6496118257daf7cff85daa3934c92.tn.720x480.jpg",
+    "https://dimgcdn.lottetour.com/TN/8b/8beae72daeecc7817bd4cd1ba5bfc25a.tn.720x480.jpg",
+    "https://dimgcdn.lottetour.com/TN/ee/ee8a310bd6b44c916c99051edbcc8e2d.tn.720x480.jpg"
+  ],
+  "meetingInfo": [
+    {
+      "type": "미팅장소",
+      "title": "공항 미팅 및 수속 안내",
+      "time": "06:00",
+      "location": "인천공항 T2 A존 06:00",
+      "description": "◆ 시간: 출발 3시간 전\n◆ 장소: 인천국제공항 제2여객터미널 3층, A 7,8번 카운터 옆 롯데관광 전용 데스크 (1번 출입구 오른쪽 여행사 카운터 內)\n◆ 준비물: 여권 (유효기간이 6개월 이상 남은 여권)\n☎ 인천공항 비상연락처: 010-9492-4542 (공항 관련 문의만 가능)\n★★ 출입국 신고서는 미팅 시 배부되오니, 안내된 시간에 맞춰 참석해 주시기 바랍니다. ★★\n※ 탑승 수속 마감 시간 내에 수속을 완료하지 못하실 경우, 출국이 거절될 수 있습니다. \n※ 좌석 배정은 항공사의 고유 권한으로 선착순으로 배정되며, 상황에 따라 일행과 떨어진 좌석이 배정될 수 있습니다. \n※ 웹 체크인 불가할 경우, 공항에서 진행해 주시기 바랍니다.",
+      "imageUrl": "https://image1.lottetour.com/static/meetingimg/ICN_T2_A.jpg"
+    }
+  ],
   "keyPoints": [
-    "대한항공 국적기 직항 탑승으로 편안하고 품격 있는 이동",
-    "초록빛 자연의 아름다움을 간직한 북해도의 여름 풍경 만끽",
-    "유서깊은 온천호텔 2박 포함",
-    "삿포로 낭만 산책 포함",
-    "여유로운 동선 포함",
-    "를 한번에 돌아볼 수 있는 롯데관광 특별상품  ALL포함",
-    "홋카이도 명물 대게 특식을 포함",
-    "b전일정 조식포함",
-    "쇼핑정보  일정에 포함",
-    "유류할증료 포함",
-    "추가비용없음  전일정 특급호텔 숙박",
-    "등록된 여행자에게 방문 포함",
-    "b소프트 아이스크린 1인1개 제공",
-    "쿠폰 1인1개 제공",
-    "엑스트라베드 제공",
-    "소재지 등 파악을 용이하게 하여 보다 효율적 영사 조력 제공",
-    "북해도 대표관광지 포함",
-    "b조금 더 특별한 여름 포함",
-    "s평균 기온 포함",
-    "년 7월 포함",
-    "s청정 자연 북해도s 포함",
-    "r100 포함",
-    "아름다운 자연을 마주하는 여름 청정여행s",
-    "초록빛 자연 속 온천 즐기기"
+    "대한항공 이용 직항 및 대표 명소 일정 포함",
+    "전일정 엄선된 숙박 및 현지 특식 포함",
+    "전문 가이드 동행 및 주요 관광지 입장료 포함"
   ],
   "inclusions": [
-    "전일정 항공권 및 숙박",
-    "여행자 보험"
+    "▶ 왕복항공료",
+    "▶ 전일정 숙박비",
+    "▶ 일정표 명시된 관광지 입장료",
+    "▶ 여행자 보험"
   ],
   "exclusions": [
-    "기사/가이드 경비",
-    "개인 경비"
+    "▶ 가이드/기사 경비",
+    "▶ 개인 경비 및 에티켓 팁"
   ],
-  "itinerary": []
+  "itinerary": [
+    {
+      "day": "1일차",
+      "date": "",
+      "title": "1일차 일정",
+      "transportation": null,
+      "transport": {
+        "flightNo": "KE165",
+        "airline": "대한항공",
+        "departureCity": "인천",
+        "departureTime": "06:00",
+        "arrivalCity": "중국 (장가계)",
+        "arrivalTime": "08:40"
+      },
+      "timeline": [
+        {
+          "type": "location",
+          "title": "[관광정보] 대한항공 프레스티지석 (기재: A330-300)",
+          "description": "프레스티지석 전용 체크인 카운터를 이용하여 빠르고 여유로운 수속이 가능합니다. (인천공항 제2 여객터미널 A 체크인 카운터)\n우선 탑승과 수하물 처리 서비스로 공항 내 이동 시간을 최소화하고, 탑승 전부터 프리미엄 여정을 시작하실 수 있습니다.\n또한 프레스티지 라운지 이용이 가능하여 출발 전 편안한 휴식을 즐기실 수 있습니다.\n- 동편 우측: 253번 탑승구 맞은편 위층(4F)\n- 서편 가든: 218번 탑승구 맞은편 위층(4F)\n- 동편 가든: 281번 탑승구 맞은편 위층(4F)\n기내에서는 비즈니스 클래스만의 차별화된 프리미엄 경험이 이어집니다.\n180° 완전 평면 침대형 좌석에서 편안한 휴식을 취할 수 있으며, 15.4인치 대형 모니터로 나만의 영화관 같은 엔터테인먼트를 즐기실 수 있습니다.\n여기에 주요리와 최고급 와인이 제공되는 하늘 위 미식 서비스까지 더해져, 이동의 순간마저 품격 있는 경험으로 완성됩니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/15/15573d44468e1d488e6205ad5c729480.tn.210x140.png",
+            "https://dimgcdn.lottetour.com/TN/3d/3d4e511fb88907f2d70504f59e62fe2f.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/30/30c05e194440fa4f128c389bd34a5721.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/f7/f7f8594fc8b155eab4b96b2d970c6460.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] ★롯데관광 특전 - 무선 수신기★",
+          "description": "업계 최초로 무선 수신기를 도입해, 이동 중에도 가이드의 설명과 안내를 또렷하게 들을 수 있습니다. 혼잡한 관광지나 소음이 큰 장소에서도 중요한 정보를 놓치지 않아 일정 이해도가 높아지고, 단체 이동 시에도 소통이 원활해 더욱 안전하고 쾌적한 여행이 가능합니다. 특히 뒤쪽에 위치해도 동일한 음질로 안내를 받을 수 있어, 전 일정 내내 편안하게 장가계를 즐기실 수 있습니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/02/02f7bb4c85088d95686a30e02b6efb35.tn.210x140.jpeg",
+            "https://dimgcdn.lottetour.com/TN/9b/9bc0146619c9b1dbb14fb598c4ed1978.tn.210x140.jpeg",
+            "https://dimgcdn.lottetour.com/TN/8a/8aff435940c7c3634409d67b101aa2fe.tn.210x140.jpeg",
+            "https://dimgcdn.lottetour.com/TN/85/855e05cc7e68c91cd096ed961ea44dbf.tn.210x140.jpeg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 무한",
+          "description": "호북성(후베이성)의 성도이자 중국 육대 도시 중 하나로, 중국 중부의 공업·금융·상업·과학·문화·교육의 중심지입니다. 무한은 동서로는 상하이와 충칭, 남북으로는 베이징과 광저우를 잇는 교통 요지로, 예로부터 ‘구성통구(九省通衢)’라 불렸습니다. 1852년 태평천국 운동과 1911년 신해혁명의 무대가 되었을 만큼 역사적 흐름 속에서도 늘 중요한 역할을 담당해 왔습니다.\n도시에는 100여 개의 호수와 완만한 산세, 그리고 뜨거운 여름으로 대표되는 독특한 자연환경이 있습니다. 자연경관뿐 아니라, 초(楚)나라 문화와 노자·장자의 철학 사상이 어우러진 인문적 매력도 깊습니다.\n주요 명소로는 황학루(黃鶴樓), 동호(東湖), 무한장강대교(武漢長江大橋), 신해혁명 무창기 기념관, 보통사(寶通寺), 귀원사(歸元寺), 고금대(古琴台), 청천각(晴川閣) 등이 있습니다.\n오늘날 무한은 전통과 현대가 조화된 도시 풍경 속에서, 오래된 건축물과 세련된 도시 감성을 함께 느낄 수 있는 곳입니다. 특히 강변 산책로, 개성 있는 카페 거리, 그리고 현지 특색이 살아 있는 음식 문화로 젊은 세대에게도 트렌디한 여행지로 각광받고 있습니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/6b/6ba268178f7af8ad8ae1e7cd0af27cb5.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/b7/b73a7e0d8de08a00747e92f09aecd05c.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/e0/e05d062b20db718c7400dd411fb725ff.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/8e/8ec503d051c27d44206e5337526b8c62.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[식당정보] 크라운 플라자",
+          "description": "5성급 크라운 플라자 호텔 내에 자리한 고풍스러운 레스토랑입니다. 깔끔하면서도 세련된 분위기 속에서 편안한 식사를 즐기실 수 있으며, 정제된 인테리어와 클래식한 무드가 어우러져 단순한 식사를 넘어 한층 특별한 다이닝 경험을 제공합니다.\n주요 메뉴: 각종 볶음요리\r\n 상세보기",
+          "images": [],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 장가계",
+          "description": "“사람이 태어나 장가계에 가보지 않았다면, 백 세가 되어도 어찌 늙었다 할 수 있겠는가? (人生不到張家界, 百歲豈能稱老翁)”\n이 말처럼, 장가계는 신선이 산다는 표현이 어울릴 만큼 아름답고 신비로운 곳입니다.\n장가계의 핵심 관광지인 무릉원(武陵源)은 가장 높은 봉우리가 1334m, 전체 면적은 264㎢에 달하며 크게 국가삼림공원(張家界森林公園), 삭계구(索溪谷), 천자산(天子山) 등 세 개의 풍경구로 이루어져 있습니다. 오염되지 않은 생태계가 그대로 보존되어 있어, 이곳을 찾은 사람들은 장가계의 웅장하면서도 신비로운 산세에 감탄을 금치 못합니다. 그 경이로움으로 인해 학자들은 이곳을 ‘대자연의 미궁’, ‘지구의 기념물’이라 부르기도 합니다.\n탁월한 자연경관 덕분에 1982년 중국 최초의 국가삼림공원으로 지정되었고, 1988년 국가 중요 자연풍경구, 1992년에는 UNESCO 세계자연유산으로 등재되었습니다.\n그야말로, 한 번쯤 꼭 가봐야 할 지상 최고의 비경이라 할 수 있습니다.\r\n 상세보기",
+          "images": [],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[식당정보] 황금성 - 소고기 모둠구이",
+          "description": "무릉원 핵심 관광지에 위치한 고급 한식당으로, 깔끔한 실내와 320석 규모, 5개 단독룸에서 쾌적하게 식사하실 수 있습니다. 전문 셰프가 엄선한 신선한 식재료로 본연의 맛을 살린 다양한 요리를 제공합니다.\n주요메뉴 : 소고기 및 돼지고기 모둠구이 / 장어구이 / 소고기 버섯샤브샤브 / 삼겹살 무제한 / 산나물 야채 영양비빔밥 등\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/99/99cc5ea5872f5b970db945dbc1da54bd.tn.210x140.JPG",
+            "https://dimgcdn.lottetour.com/TN/db/dbf1cc2bb42613ddd3a1b9e340f3a151.tn.210x140.png",
+            "https://dimgcdn.lottetour.com/TN/5d/5de9518af24036d41bbc5659426d3c4e.tn.210x140.png",
+            "https://dimgcdn.lottetour.com/TN/b6/b6c84e0c5f547d712e9b7d1548ef64d5.tn.210x140.png"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[숙박정보] 하워드 존슨 네오달 리조트(HOWARD JOHNSON NEODALLE RESORT ZHANGJIAJIE)",
+          "description": "■ 호텔 소개\n장가계 하워드 존슨 네오달 리조트는 장가계 지역 최고 수준의 시설을 갖춘 월드체인 호텔로, 자연의 아름다움과 현대적 안락함을 동시에 누릴 수 있는 최적의 휴식처입니다.\n무릉원 풍경구 중심에 자리해 주요 관광지 접근성이 탁월하며, 다양한 부대시설과 세심한 서비스로 여행의 만족도를 한층 높여드립니다.\n특히 스위트룸 투숙객 전용 조식당을 별도로 운영하여, 보다 쾌적하고 여유로운 분위기에서 조식을 즐기실 수 있습니다.\n■ 스위트룸 객실 크기: 72㎡ | 2-3,5-7층\n■ 부대시설: 카페, 레스토랑, BAR, 실내수영장, 헬스장, 세탁 서비스, 회의실, 다목적실, 키즈 클럽 등\n■ 객실시설: TV, 냉장고, 에어컨, 책상, 의자, 옷장, 암막커튼, 욕조, 헤어드라이기, 슬리퍼, 무료 생수, 각종 세면도구 등\n■ 총 객실 수 : 719개\r\n 상세보기",
+          "images": [],
+          "videos": []
+        }
+      ],
+      "hotel": "하워드 존슨 네오달 리조트(HOWARD JOHNSON NEODALLE RESORT ZHANGJIAJIE)",
+      "meals": {
+        "breakfast": "기내식",
+        "lunch": "크라운 플라자 호텔 - 호텔 현지식 (룸 배정)",
+        "dinner": "황금성 - 소고기 모둠구이"
+      }
+    },
+    {
+      "day": "2일차",
+      "date": "",
+      "title": "2일차 일정",
+      "transportation": "전용차량",
+      "timeline": [
+        {
+          "type": "location",
+          "title": "[식당정보] 하이디라오",
+          "description": "해저로는 1994년 사천성 젠양시 에서 설립되어 거의 30년의 역사를 가지고 있습니다.\n브랜드는 주로 샤브샤브를 운영하고 산업 공급망 시스템을 구축하기 위해 노력하며 시장과 고객의 검사를 거쳐 \n해저로는 신용도가 높고 각 지역의 샤브샤브 특성을 통합한 고품질 샤브샤브 브랜드를 성공적으로 구축했습니다.\n2022년 12월 31일 현재 중국 본토에는 1349개의 해저로 레스토랑이 있고 홍콩, 마카오, 대만에는 22개의 레스토랑이 있고,\n중화 전체 해저로 레스토랑은 2억 7600만 명 이상의 고객을 서비스하고 있으며 1억 1600만 명 이상의 회원이 등록되어 있어 중국 요리의 '선두자'입니다. \r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/5f/5f56954b5f5b6b1c2926502bfbf9a87c.tn.210x140.JPG",
+            "https://dimgcdn.lottetour.com/TN/37/372682924964ce4683e5226a724f5f64.tn.210x140.png",
+            "https://dimgcdn.lottetour.com/TN/3f/3f204795e2afa31c34c6a45f1a2f676b.tn.210x140.JPG",
+            "https://dimgcdn.lottetour.com/TN/0d/0d7693d1d53476fcf47774d8b5fd7c86.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 천문산",
+          "description": "중국 최고의 절경 장가계, 장가계를 대표하는 천문산은 \"하늘로 통하는 문이라는 산\"으로 정상에 위치한 천문동을 세계 곡예 비행대회에서 동시에 2대의 비행기가 통과하면서 유명해졌으며 2005년도에 산 정상까지 연결되는 세계에서 가장 긴 케이블카 (7.45km / 편도 약 40분 소요)가 개통되어서 장가계 시내에서부터 전망대까지 한번에 오를 수 있게 되었습니다.\n장가계 시내에서도 날씨만 좋으면 하늘을 향해 뚫려있는 천문동을 볼 수 있으며 절벽으로 둘러싸인 산세와 과학으론 설명되지 않는 동굴의 신비함이 더해져 ‘장가계의 혼’으로 불리고 있습니다.\n▶ 일정 요약 \n천문산 케이블카 탑승 편도(25분) → 유리잔도+귀곡잔도 관광(60분) → 천문산사+근처 휴식(20분) → 천문산 동선 코스(40분) → 에스컬레이터 하행 층 12개(45분) → 천문동 광장 자유시간(15분) → 쾌속 케이블카 편도(10분)\n▶ 총 소요 시간 : 약 3시간 30분 소요\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/15/155dcc201ced3de263a41960f3a95d75.tn.210x140.jpeg",
+            "https://dimgcdn.lottetour.com/TN/3d/3d0a137dbfac86f889dc3d6c042d12ff.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/c8/c8860c86acca11df64f3e4c930d91c57.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/5e/5e57a4231f4eeb7311b023eb8fc4499f.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 천문산 케이블카",
+          "description": "장가계 시내에서 1500m 지점에 위치한 천문산 전망대를 연결하는 세계 최장 케이블카로 독일, 프랑스, 스위스 3개국의 기술로 만들었다고 합니다.\n7.45km를 30분 넘게 이동하는데 수직으로 치고 올라 갈때는 숨이 멈추는듯 아찔한 순간을 잊을 수 없습니다.\n여유를 부리는 편안한 마음이라면 아마 신선이 되어 하늘을 나는 듯한 귀한 체험을 할 수 있을 겁니다.\r\n 상세보기",
+          "images": [],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 귀곡잔도+유리잔도",
+          "description": "천문산의 귀곡잔도는 해발 1430m 절벽에 1.6㎞의 길을 10년 넘게 공사하여 2008년 4월 개통하였습니다.\n귀신이 다니는 골짜기의 좁은 길이란 뜻을 가지고 있는 코스로 천문산 케이블카 정상정류장 부근 산의 가장자리를 따라 한 바퀴 빙 도는 잔도를 만들었습니다.\n잔도란 절벽에 구멍을 뚫어 받침대를 박은 후 그 위에 길을 놓은 것으로 절벽을 따라 걸으며 스릴을 느끼는 코스입니다.\n잔도의 입구에는 중국스러운 붉은색 천에 소원을 적은 매듭이 있습니다.\n절벽에서 보는 풍광은 안 보면 평생 후회할 만큼 장관으로 수많은 관광객들이 엇갈려 걸을 때면 절대 안쪽 길을 양보하지 않는다고 합니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/c8/c8860c86acca11df64f3e4c930d91c57.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/d4/d4d1fa2dd69396e0264e3c56417cf57f.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/5e/5e57a4231f4eeb7311b023eb8fc4499f.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/cc/cc344454b28daacd63a1833b374a2e6c.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 천문산 동선코스",
+          "description": "천문산 케이블카 정상에서 동쪽으로 이어진 코스로, 나무잔도와 유리잔도를 지나 천문동을 좀 더 높은 위치에서 전망할 수 있는 코스입니다. \n산 정상 주변 보행로의 동쪽 구간으로, 전체 길이는 3.7㎞입니다.\n천문산 자연 생태의 핵심 보호구역이며, 1,000m 높이의 절벽 위 잔도 및 공포감과 자극을 주는 유리잔도가 동선에도 있습니다. \n관광객은 원시림과 같은 숲과 기암괴석, 그리고 나무들의 수려한 아름다움을 감상할 수 있습니다. \n낭떠러지를 따라서 돌을 깔아 만든 길을 걷게되는데 걷다 보면 시야가 활짝 열리면서 천문산 동선잔도에 도달하게 됩니다. \n천문산에 올라 그 절경에 감탄하여 하늘을 보면서 감사기도를 했다는 전설이 있을 정도로 아름다운 곳입니다.\r\n 상세보기",
+          "images": [],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 천문동",
+          "description": "천문동은 천문산 중턱에 형성된 세계 최대 규모의 자연 석문으로, 이름 그대로 ‘하늘로 통하는 문’을 의미합니다. 약 2억 5천만 년 전 지각운동과 침식 작용으로 산 중턱이 무너지며 형성되었으며, 높이 약 131.5m, 폭 57m, 깊이 60m에 달하는 거대한 규모를 자랑합니다.\n산허리를 따라 이어지는 99개의 굽이진 도로와 하늘로 이어지는 999개의 계단은 천문동의 백미로, 마치 하늘에 오르는 듯한 장엄한 체험을 선사합니다. 또한 천문산 정상에는 절벽 가장자리를 따라 조성된 유리하늘길(Glass Skywalk)이 있어, 약 1,400m 높이의 절벽 위에서 장가계 시내와 웅장한 산세를 한눈에 내려다볼 수 있습니다.\n1999년에는 러시아 전투기 조종사들이 천문동을 실제로 통과 비행해 전 세계의 주목을 받았으며, 이후 윙슈트 비행대회 등 다양한 국제 행사가 개최되었습니다.\n현재 천문동은 천문산 국가삼림공원의 핵심 관광지로, 장가계를 대표하는 명소로 손꼽힙니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/15/155dcc201ced3de263a41960f3a95d75.tn.210x140.jpeg",
+            "https://dimgcdn.lottetour.com/TN/05/056005de343acbb989830750db8462f0.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/04/047ae4b3f15a18bc985ae42b339c5e4e.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/c1/c1cf44acc4446beb25429a661a2c43a4.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[식당정보] 유람식당 - 소갈비찜",
+          "description": "2017년 2월 OPEN한 식당으로 한국 정통식 분의기를 현대식에 맞게 인테리어하여 깔끔하고 음식맛도 좋습니다. \n3NO상품과 품격상품 특식(누룽지 닭백숙, 두부, 파전, 밑반찬 등) ※ 4개의 룸에 약 300명정도 수용 가능합니다.\n장가계에서 잊지 못할 맛과 추억 그리고 차별화된 서비스를 제공하며, 고객만족과 감동을 선사하는 것을 목표로 하는 식당입니다.\n5성급 호텔인 블루베이 호텔 2층에 위치하고 있습니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/95/95aa6a56ca86e8a7a8bf15faca7e0e3c.tn.210x140.JPG",
+            "https://dimgcdn.lottetour.com/TN/59/59eb2beed5deca0b99d156223c455e5a.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/76/763a6db3da151b447e75fd8f76f32ccc.tn.210x140.JPG",
+            "https://dimgcdn.lottetour.com/TN/fa/fa9d3cf2706912a60f1544c3fa4e4b37.tn.210x140.jpg"
+          ],
+          "videos": []
+        }
+      ],
+      "hotel": "및 식사",
+      "meals": {
+        "breakfast": "호텔식",
+        "lunch": "하이디라오 - 중국식 샤브샤브",
+        "dinner": "유람식당 - 소갈비찜"
+      }
+    },
+    {
+      "day": "3일차",
+      "date": "",
+      "title": "3일차 일정",
+      "transportation": "전용차량",
+      "timeline": [
+        {
+          "type": "location",
+          "title": "[관광정보] 천자산 케이블카",
+          "description": "천자산 케이블카는 홍콩안달 국제회사에서 만든 케이블카로 전체 길이가 2,084m이며, 상하 높이 차는 692m입니다. \n보통 한 대의 케이블카에 6명 정도가 탈 수 있으며, 전체적으로는 한 시간에 총 960명의 승객을 수송할 수 있습니다. 운행시간은 편도의 경우 6분 26초이지만, 날씨에 따라 다소 변동이 있을 수 있습니다. 천자산의 가장 높은 곳을 등정하는데 도움을 주는 케이블카는 천자산의 전체적인 절경을 감상할 수 있습니다. \n어필봉이나 양가계를 감상하기 위해서는 반드시 케이블카를 타야하며, 창밖으로 보이는 아찔한 광경은 탄성을 자아냅니다. \n기괴한 암석과 천자산의 절경을 빠른 시간 내에 훑을 수 있으며, 케이블카 내에서는 한국어 안내방송이 나옵니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/0d/0da06b4879f645a0dd6c088499c3660b.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/ca/cab3ff2570476f5753edd82962f61bc3.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/68/687ee048f59946eb9df8930cae7446a7.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/b2/b2d9ef50c3adc9641853ac4ef7b2faa3.tn.210x140.JPG"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 하룡공원",
+          "description": "중국의 10대 원수중의 한 명인 하룡을 기념하기 위해 세워진 곳입니다. \n항일시대 인민해방군 영웅 중 한명인 하룡장군이 이곳 토가족 출신으로 문화혁명 때 숙청됐다가 등소평 시대에 다시 복원되었습니다. \n하룡은 모택동과 같이 중국의 문화 혁명을 일으킨 공헌도가 큰 사람입니다. 공원 내에서 가장 눈에 띄는 것은 동으로 된 하룡동상이며, 그 외에도 병기관, 하룡 전시관 등이 있습니다. 동상의 높이는 6.5m이고, 무게가 9톤으로 현재 중국에서 가장 큰 동상입니다. 또한 공원 입구에 있는 \"하룡공원\"이라는 네 글자의 이름은 1995년 3월에 강택민 총서기가 직접 쓴 것입니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/43/431b0c1b9aee42009eec1ffa7f059098.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/60/600a3754a3666a40e7d7a038a4fd07e1.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/f0/f013661aeb2b495cf1bd130d4c7473d8.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/2c/2c6808cb65e84c471c178470416ada05.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 어필봉",
+          "description": "세 개의 봉우리가 구름과 하늘은 가리키고 있으며 높고 낮음이 들쑥날쑥 하면서도 잘 어울립니다.\n흙이 없는 돌 봉우리 위에 푸른 소나무가 자라서 마치 붓을 거꾸로 꽂아 놓은 것 같습니다. \n전해지는 바에 의하면 전쟁에서 패배한 이후 천자를 향해 황제가 쓰던 붓을 던졌다고 해서 ‘어필봉’이라는 이름이 붙여졌다고 합니다. 후대의 각색이 분명하겠지만 무엇보다 어떻게 바람이 봉우리를 이렇게 깎아낼 수 있는지가 더 궁금함을 자아냅니다. \n어필봉은 무릉원의 수많은 봉우리 중에서도 걸출한 대표로 뽑힙니다. 봉우리 끝에 자라난 소나무들은 더욱더 놀랍고 경이로우며, 사시사철 안개가 끼어 척박한 바위 틈에서도 꿋꿋히 자라난 것 같아 감탄이 나오는 풍경입니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/2f/2feb7ee01526eee9e30e1f6421bc08b6.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/bc/bc95b575f32bc5afb1263fa28cd1c6b5.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/22/22781d781df14cf80f197c986d768f9f.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/03/038f385130abb2e1852886a11e23588f.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 선녀산화",
+          "description": "천자산 자연보호구에 위치한 풍경구로서 석봉이 운단에 서 있고, 산 아래와 산 허리에 야생꽃이 목화밭처럼 펼쳐져 있습니다. \n매년 봄과 여름이 되면 천풍이 불고 구름이 표류하는데 그 모양이 선녀와 같다고 해서 이름이 붙여졌으며, 천대서해의 맞은 편 계곡에선 선녀가 꽃바구니를 들고 세상에 꽃을 뿌리는 형상같다하여 ‘선녀산화’라고 불리웁니다.\n주변에 크고 작은 수백 개의 봉우리가 솟아 있으며, 특히 겨울철 설경은 세계에서 손 꼽히는 절경 중 하나입니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/51/51ef89b630d5ae9284c898cc11576af6.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/d3/d3263cd1b69386d41838c1532176bebd.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/a6/a6d5b5d4d41f6af8514c02ce084d24bf.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/3d/3dffa4173a58d1a528edf584476615c5.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 원가계",
+          "description": "장가계국가삼림공원 내에 위치해 있는 장가계의 절경 중의 하나로 천하제일교(天下第一僑), 미혼대 등 비경으로 유명한 명소. 백룡엘리베이터로 이름난 곳이기도 합니다. 원가계의 산세는 가파름이 아니라 그냥 세워놓은 성냥개비처럼 오뚝 솟아있습니다. \n하늘에 닿을 듯 불쑥불쑥 솟은 높은 산! 아슬아슬하게 켜켜이 쌓인 기암괴석이 만들어 낸 절묘한 산세! 흙 한줌 풀 씨 하나 없을 것 같은 그 봉우리 꼭대기엔 모진 생명력을 형상화 한 듯 가지 늘인 푸른 소나무가 있습니다. 정말 솜씨 좋은 화가가 그럴싸한 상상력을 바탕으로 멋진 붓놀림을 곁들여 그려낸 한 점 산수화라고 불립니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/14/1426c9bb753125530fe929a3ad1ceb61.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/81/815c1cd88cc6ef7d98677b6abbc08584.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/ea/ea4fb2aa943ac1c130b86cc77bba23f4.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/26/26becb70a9cd7ab531d9ac488452f7be.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 천하제일교",
+          "description": "천하제일교는 1400여 년의 오랜 세월 동안 수차례의 지각변동과 기후의 영향으로 절벽 위에 이어져 있습니다. \n300m 높이의 바위 돌을 너비 2m, 길이 2m의 돌판이 이어주고 있는데, 말 그대로 절벽위의 다리이기 때문에 아찔합니다.\n두 개의 바위가 커다란 석판으로 천연 연결된 것이 마치 인공적으로 만든 것 같은데 다리 위를 거닐다 보면 구름 위를 나는 듯싶어 신화에서 신선이 살던 하늘나라로 온 것만 같은 느낌을 줍니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/70/70f151ff9d56d92560b5cdb6378dac28.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/d3/d3f112c3b99f972589b703dcc16cd1df.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/86/868d8849133c33e2324b7b215e05af2d.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/ae/aea65164d80ee7675db5895f809c3a0d.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 미혼대",
+          "description": "협곡에서 솟은 바위 봉우리가 인간의 넋을 빼앗을 정도로 아름답다는 미혼대에서 내려다보는 원가계의 절경은 한 폭의 산수화 같다. 높이 500m에 달하는 뾰족바위 수백 개가 버티고 있는 형상이 마치 하늘에서 맨해튼의 고층빌딩을 보는 것 과 같다. 바위틈에 뿌리를 내린 소나무가 아슬아슬하게 절벽에 걸려 있고, 봉우리 아래로는 끝이 보이지 않는 협곡이 병풍의 그림처럼 펼쳐진다. 천자산에 위치하고 있으며 크게 두 부분으로 나누어진다. 불규칙적으로 솟아있는 석봉들이 안개에 싸여있는 모습과 기암절벽은 탄성을 자아내게 만든다. 특히 비가 온 다음 날씨가 맑아질 경우 운무를 감상할 수 있다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/14/1426c9bb753125530fe929a3ad1ceb61.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/3b/3bfeccbfe8a178d97858f46a1987347d.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/a6/a6992516d74a306966ba7b0f1f1d9449.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/00/00ea4915fb5d2341b0655818675646cd.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 천연장성",
+          "description": "날선 바위들이 켜켜이 솟아올라 2중, 3중 성벽을 이루는 ‘천연장성’은 양가계 풍경구를 대표하는 압도적 비경입니다. ‘자연이 만든 거대한 성’이라는 뜻처럼, 높고 낮은 봉우리들이 조화를 이루며 마치 어떤 침입도 막아낼 듯한 천하의 요새를 펼쳐 보입니다.\n견고한 바위 장벽 너머로 펼쳐지는 탁 트인 풍경은 폐쇄된 듯한 바위 성벽과 대비되어 더욱 웅장한 아름다움을 완성합니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/0b/0b4c7e844650e3d26567da8571f40d0b.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/b2/b2a5b517f3a068086a7f8c8a39278469.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/8c/8c37b30f5a08721de9bc7890eb3dd7aa.tn.210x140.jpeg",
+            "https://dimgcdn.lottetour.com/TN/b1/b172bfc20223ea911d595287ea3af903.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 백룡 엘리베이터",
+          "description": "장가계 국가삼림공원의 수요사문에 위치하여 있습니다. 수직높이가 335m, 운항고도가 313m이며 그중 156m는 수직동굴이고 171m는 산 측면에 붙은 수직 강철구조로 구성되어 있습니다. 3대의 엘리베이터가 나란히 운행하면서 삼림공원, 금편계곡, 수요사문으로부터 원가계, 오룡채, 천자산을 연결시키는 중요한 교통수단이 되었으며, 백룡엘리베이터는 세계에서 제일 높은 100％ 투명도의 관광전용 엘리베이터이자, 세계에서 제일 높은 2층으로 된 관광전용 엘리베이터입니다. \n또한 제일 크고 가장 빠른 엘리베이터이며,1초에 3m씩 하강하며 기네스 세계 기록에 수록된 곳이기도 합니다. 아주 빠르게 하강하지만 그 순간에 볼 수 있는 주변 경관이 아주 아름답습니다. \r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/d9/d940fe8d8fc0a8a450c58b1713de632d.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/03/038f616569455c38188dbcd8b95243b1.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/0a/0a3a10dd46a50494d9200254349d0849.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/72/72634b9d5d516ac6281559fe681afb31.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 무릉선경 LED 돔시어터",
+          "description": "무릉선경 LED 돔시어터는 무릉원에 위치한 2026년 신규 개관 시설로, 세계적인 자연문화유산의 아름다움과 무형문화유산의 가치를 첨단 미디어 기술로 재해석한 몰입형 체험 공간입니다.\n풍부한 문화적 스토리를 바탕으로 최첨단 몰입형 영상 기술을 접목해, 마치 꿈속을 여행하는 듯한 특별한 경험을 선사합니다.\n영상과 사운드, 움직임이 결합된 다중감각형 연출은 실제 그 공간에 들어와 있는 듯한 압도적인 몰입감을 선사합니다. 또한 무릉비경에 담긴 문화적 이야기와 무형문화유산의 섬세한 예술 세계가 빛과 영상으로 구현되어, 단순한 관람을 넘어 문화의 깊이를 마음으로 느끼는 특별한 여정으로 이어집니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/c2/c2f65a65243dc85c896ef115c1d6b9b7.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/56/560ad8b45107f1a2e3e591a6052374d0.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/e4/e40118369757e3db30205dab0c10f504.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/52/526ec13e9d734c97e0cb2c6ed59faa36.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[식당정보] 해피상서",
+          "description": "장가계 유명 체인점으로, 유기농 식품들을 사용하며 한국 사람들 입에 맞는 현지식을 제공합니다. \n한국인 뿐만 아니라 중국 현지인들에게도 인기가 많은 식당으로 한국인들이 방문할 때에는 한국 입맛에 맞추어 향신료를 적게 사용하거나 뺀 중국 현지식을 제공합니다.\n● 주요메뉴 : 감자채볶음, 마늘쫑볶음, 마파두부, 계란탕, 과일 등\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/36/36c97fe5b0e1d9a87ea9c90d4caba587.tn.210x140.jpeg",
+            "https://dimgcdn.lottetour.com/TN/0a/0a1011e3e0b735763eb88e7916d0f0e3.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/57/5718bb032b15cf952829ce9cdfa378d9.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/2f/2f22cca8d751f5957bae863413eac090.tn.210x140.jpeg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 십리화랑",
+          "description": "십리화랑은 글자 그대로 풀이하면 '산수화의 10리 화랑'이라는 뜻인데, 하천을 건너며 수많은 기이한 풍경을 보게 됩니다. \n10리가 조금 넘는 5㎞ 길이의 좁은 협곡에 줄지어 선 봉우리와 암석 그리고 주변에 우거진 나무들을 감상할 수 있습니다.\n5㎞의 협곡 양쪽으로 수풀이 무성하게 자라 있고, 기이한 봉우리와 암석이 각양 각색의 형상을 띤 채 하천을 따라 펼쳐지는 모습은 한 폭의 긴 두루마리로 된 거대한 산수화처럼 보입니다.\n모든 봉우리가 무언가를 닮아서 노인봉, 삼자매봉 등 나름의 이름이 붙었으며 협곡 사이를 다니는 모노레일을 타거나 걸을 수 있습니다.\n● 모노레일 편도탑승시간 : 약 15분 \r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/b6/b6a618f400f9d86c84099547d837fff1.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/a1/a1f05790fcdc96f31c9dfb4df280de9f.tn.210x140.jpeg",
+            "https://dimgcdn.lottetour.com/TN/f1/f19b7a5461d9dd161e1e2aa1b4c1aa91.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/ba/bab2afc1f4eea3a022a004025833ed2e.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 금편계곡",
+          "description": "장가계 삼림공원의 동부에 위치해 있고, 금편이라는 이름은 금편암을 지나서 흐른다는 데에서 지어졌습니다. \n서쪽으로는 비파계로 모여들고, 동쪽으로는 삭계로 들어가는 한 줄기의 깊고 고요한 협곡입니다. \n뱀처럼 꼬불꼬불하게 늘어서 있는 돌길은 전체 길이가 20㎞로, 통과하는 데 약 2시간30분 정도가 소요됩니다.길옆에 천여 개의 봉우리가 솟아 있고, 수풀이 무성하게 자라 있어서 공기가 상쾌하며 한적하다. 이 곳에는 많은 진귀한 나무와 꽃, 풀, 살구나무, 해당화 등이 자라고 있어서 관광객들에 많은 볼거리를 제공한다. 장가계 풍경구 내에 위치 금편계의 이름은 장가계의 심볼인 관광지의 금편석에서 붙여졌다. 노마완부터 수요사문까지의 총 길이는 7.5㎞이고 눈앞에 펼쳐지는 석주와 위험한 봉우리는 연달아 우뚝우뚝 솟아있습니다. 또 계곡 구석구석을 흐르는 계곡 물은 흘러 모여서 작은 호수와 폭포를 이루고 있으며 고묵과 기이한 꽃들, 그리고 희귀한 동식물들이 아름답고 아늑한 생태환경을 이루고 있어서 세상에서 제일 큰 협곡으로 알려져 있습니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/3e/3eb3520f65b8591cb6c8598f5c54e090.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/52/5206916444fddfea9e1a7c2dc73dfe45.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/0d/0d53f07f433b18077f36e1682c8c33b8.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/db/db25233abfb22137e5e9f01ae10cd7fe.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[식당정보] 황금성 - 장어구이",
+          "description": "무릉원 핵심 관광지에 위치한 고급 한식당으로, 깔끔한 실내와 320석 규모, 5개 단독룸에서 쾌적하게 식사하실 수 있습니다. 전문 셰프가 엄선한 신선한 식재료로 본연의 맛을 살린 다양한 요리를 제공합니다.\n주요메뉴 : 소고기 및 돼지고기 모둠구이 / 장어구이 / 소고기 버섯샤브샤브 / 삼겹살 무제한 / 산나물 야채 영양비빔밥 등\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/b6/b6c84e0c5f547d712e9b7d1548ef64d5.tn.210x140.png",
+            "https://dimgcdn.lottetour.com/TN/79/79f0bc642f8052163dc79b93fc8e4066.tn.210x140.png",
+            "https://dimgcdn.lottetour.com/TN/db/dbf1cc2bb42613ddd3a1b9e340f3a151.tn.210x140.png",
+            "https://dimgcdn.lottetour.com/TN/2a/2a9afa5359a9d339f305d4ad18284d64.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 천고정쇼",
+          "description": "장가계 억만년의 역사문화와 전설을 요약하여 표현되는 공연으로 3,000명 관광객이 동시에 관람 가능한 천고정은 300여명의 공연 연기자, 최신식 조명을 이용한 특수효과, 3,000톤의 물이 쏟아지는 모습, 매 순간 바뀌는 초대형 LED영상, 30여개 새로운 음향설비와 조명 투입으로 이루어진 무대공연, 장가계 역사와 경연의 화려함, 웅장함을 동시에 즐겨볼 수 있는 공연입니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/ef/ef5182e934d319ba073d7364a5358555.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/f5/f5a394e134a9431cd224296df0562e68.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/6a/6ab57eb6bc0da0144f338bd7b702ee5f.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/a5/a5aa8d18e4c1928be553ae1dc0c92b9d.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 발+전신마사지",
+          "description": "여행의 피로를 말끔하게 씻어주는 중국 발+전신마사지 체험\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/e5/e57736cb7f2e1adb4f8b49d2094e85e2.tn.210x140.jpeg",
+            "https://dimgcdn.lottetour.com/TN/30/304d429532bcc5daa4857dba5e65ab66.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/68/68f0bde9689ba2d6cfbefec759ddc397.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/e5/e5f8ad6e91235dce2de365d6c782b3bd.tn.210x140.jpg"
+          ],
+          "videos": []
+        }
+      ],
+      "hotel": "및 식사",
+      "meals": {
+        "breakfast": "호텔식",
+        "lunch": "해피상서 - 호남요리",
+        "dinner": "황금성 - 장어구이"
+      }
+    },
+    {
+      "day": "4일차",
+      "date": "",
+      "title": "4일차 일정",
+      "transportation": "전용차량",
+      "timeline": [
+        {
+          "type": "location",
+          "title": "[식당정보] 황금성 - 소고기 버섯샤브샤브",
+          "description": "무릉원 핵심 관광지에 위치한 고급 한식당으로, 깔끔한 실내와 320석 규모, 5개 단독룸에서 쾌적하게 식사하실 수 있습니다. 전문 셰프가 엄선한 신선한 식재료로 본연의 맛을 살린 다양한 요리를 제공합니다.\n주요메뉴 : 소고기 및 돼지고기 모둠구이 / 장어구이 / 소고기 버섯샤브샤브 / 삼겹살 무제한 / 산나물 야채 영양비빔밥 등\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/b6/b6c84e0c5f547d712e9b7d1548ef64d5.tn.210x140.png",
+            "https://dimgcdn.lottetour.com/TN/79/79f0bc642f8052163dc79b93fc8e4066.tn.210x140.png",
+            "https://dimgcdn.lottetour.com/TN/db/dbf1cc2bb42613ddd3a1b9e340f3a151.tn.210x140.png",
+            "https://dimgcdn.lottetour.com/TN/b6/b6179609d0ad79bd93467b29830c10eb.tn.210x140.JPG"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 대협곡+유리대교(VR 포함)",
+          "description": "대협곡은 세계 자연 유산지인 무릉원에 위치하고 있습니다. 협곡의 길이는 3.5㎞, 최고 높이는 400m로 나무산책길 따라 내려오는 코스로 총 6개의 폭포가 있어 경치를 보며 걷기 좋은 길입니다. 대협곡에 위치한 유리대교는 2015년 12월 준공되었으며, 세계에서 가장 길고 세계에서 가장 높은 유리다리입니다. \n대협곡+유리대교 코스는 교각없이 설치된 유리다리 (길이 460m) 와 대협곡 유람선 코스를 모두 즐기는 대협곡 완전체 코스이며, 유리다리를 편도로 지나 엘리베이터를 타고 내려와 한시간 여의 산책코스를 지나 배를 타는 코스입니다.\n장가계 대표 힐링 관광코스로, 원시 산림 속에서 흘러나오는 맑은 산소를 즐기며 한 폭의 아름다운 병풍화 속의 주인이 될 수 있습니다.\n▶일정 요약\n유리대교(30분) → 유리잔도(10분) → 중간 엘리베이터 → 대리석 미끄럼틀 하산(5분) → 유람선(20분)→ 대협곡(50분) →뱃놀이(20분) → 출구 이동 \n▶총 소요 시간 : 약 2시간 30분 ~ 3시간 소요\n★ 장가계 대리석 미끄럼틀 이용 시 주의사항★\n- 핸드폰, 카메라, 모자 등 떨어질 수 있는 물건은 사전에 가방에 보관\n- 탑승 전 보호 슬라이딩 매트나 장갑 착용\n- 손을 튀어나오게 하거나 갑작스런 움직임 금지\n※ 안전하고 원활한 일정을 위해 현지 상황에 따라 일정이나 소요 시간이 일부 조정될 수 있습니다. 고객님의 너그러운 양해를 부탁드립니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/ad/adba092d843f3baece584195d7b7f02d.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/82/822f04e507c6ec620cfef8706c5679d0.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/e3/e3efbbfc73a331a396d78edac35a8672.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/18/18a6f00346791dd9c532742c16dc5f39.tn.210x140.jpg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[관광정보] 강한로",
+          "description": "무한의 대표 보행자 거리이자 쇼핑 명소인 강한로는 겉보기엔 현대적인 거리 같지만, 곳곳에 유럽풍 근대 건축물이 늘어서 있어 독특한 분위기를 자아냅니다. 과거 조계지였던 이곳에는 은행, 교회, 옛 우체국 등 고풍스러운 건물이 보존되어 있어 거닐기만 해도 시간 여행을 떠나는 듯한 기분을 느낄 수 있습니다.\n낮에는 쇼핑과 미식, 밤에는 야경과 거리 공연을 즐길 수 있어 머무는 시간이 아깝지 않은 명소입니다.\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/e0/e05d062b20db718c7400dd411fb725ff.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/46/46f597cab7e205c092f432859af31088.tn.210x140.jpeg",
+            "https://dimgcdn.lottetour.com/TN/24/24862744999252cac37e1c57f2cddf7a.tn.210x140.jpeg",
+            "https://dimgcdn.lottetour.com/TN/0c/0c8e975783e4f796c6fdd70a68065544.tn.210x140.jpeg"
+          ],
+          "videos": []
+        },
+        {
+          "type": "location",
+          "title": "[숙박정보] 크라운 플라자 우한 톈허 공항 바이 IHG ― SUITE ROOM(CROWNE PLAZA WUHAN TIANHE AIRPORT BY IHG)",
+          "description": "■ 호텔 소개\nIHG 계열의 5성급 월드체인 호텔로 무한 국제공항과 인접해 이동의 편리함과 고급스러운 휴식을 동시에 제공하는 최적의 공간입니다.\n공항과 바로 연결된 뛰어난 접근성을 자랑하며, 비즈니스 출장객과 환승 여행객 모두에게 효율적이고 쾌적한 숙박 경험을 선사합니다.\n모던하고 세련된 객실과 다양한 부대시설을 갖추고 있으며, 전문적인 서비스와 여유로운 분위기로 여행의 피로를 말끔히 풀어드립니다.\n또한 레스토랑과 라운지 공간에서는 수준 높은 다이닝과 휴식을 즐길 수 있어, 짧은 체류에도 만족스러운 시간을 보내실 수 있습니다.\n■ 2025년 오픈\n■ 스위트룸 객실 크기: 101~126㎡\n■ 부대시설: 레스토랑, 이그제큐티브 라운지, 실내 수영장, 헬스장, 회의실, 다목적실, 세탁 서비스 등 \n■ 객실시설: TV, 에어컨, 소파, 옷장, 책상, 암막 커튼, 가운, 슬리퍼, 헤어드라이기, 무료 생수, 각종 세면도구 등\r\n 상세보기",
+          "images": [
+            "https://dimgcdn.lottetour.com/TN/9e/9e297ba84db3c912c2f7d87df111a950.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/0e/0ebebac252161daf780f2ba36985b643.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/55/55ae8686134e2c8d635ce6106ccfbba4.tn.210x140.jpg",
+            "https://dimgcdn.lottetour.com/TN/35/354ba591ef01cc61102bebaac4f77a2b.tn.210x140.jpg"
+          ],
+          "videos": []
+        }
+      ],
+      "hotel": "크라운 플라자 우한 톈허 공항 바이 IHG ― SUITE ROOM(CROWNE PLAZA WUHAN TIANHE AIRPORT BY IHG)",
+      "meals": {
+        "breakfast": "호텔식",
+        "lunch": "황금성 - 소고기 버섯샤브샤브",
+        "dinner": "녹초지 - 호남요리"
+      }
+    },
+    {
+      "day": "5일차",
+      "date": "",
+      "title": "5일차 일정",
+      "transportation": null,
+      "transport": {
+        "flightNo": "KE166",
+        "airline": "대한항공",
+        "departureCity": "중국 (장가계)",
+        "departureTime": "12:15",
+        "arrivalCity": "인천",
+        "arrivalTime": "16:00"
+      },
+      "timeline": [
+        {
+          "type": "location",
+          "title": "무한",
+          "description": "",
+          "images": []
+        },
+        {
+          "type": "default",
+          "title": "● 호텔 조식 후 공항으로 이동 [전용버스, 약 30분 소요]",
+          "description": "",
+          "images": []
+        },
+        {
+          "type": "location",
+          "title": "대한항공",
+          "description": "◈운항소요시간◈ 【2시간 45분 소요】",
+          "images": []
+        },
+        {
+          "type": "location",
+          "title": "인천",
+          "description": "롯데관광 과 함께 즐거운 여행이 되셨기 바랍니다.",
+          "images": []
+        },
+        {
+          "type": "location",
+          "title": "현지",
+          "description": "(화) 12:15",
+          "images": []
+        },
+        {
+          "type": "location",
+          "title": "한국",
+          "description": "(화) 16:00",
+          "images": []
+        }
+      ],
+      "hotel": "및 식사",
+      "meals": {
+        "breakfast": "호텔식",
+        "lunch": "기내식",
+        "dinner": "불포함"
+      }
+    }
+  ]
 }
