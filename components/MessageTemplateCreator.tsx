@@ -43,7 +43,9 @@ interface ProductInfo {
     specialTerms?: string;
 }
 
-type TemplateType = 'remind' | 'booking' | 'dotcom' | 'balance' | 'ticket' | 'confirmation' | 'pre_4w' | 'departure' | 'happy_call' | 'china_barcode';
+type BuiltinTemplateType = 'remind' | 'booking' | 'dotcom' | 'balance' | 'ticket' | 'confirmation' | 'pre_4w' | 'departure' | 'happy_call' | 'china_barcode';
+// 커스텀 멘트는 'custom:<id>' 형태의 키를 사용
+type TemplateType = BuiltinTemplateType | string;
 
 export interface FeeItem {
     id: string;
@@ -53,7 +55,75 @@ export interface FeeItem {
     applyType: 'per_person' | 'total';
 }
 
-const TEMPLATE_LABELS: Record<TemplateType, { label: string; icon: string }> = {
+// 사용자가 직접 만든 멘트 템플릿 (또는 빌트인 멘트의 문구 오버라이드)
+export interface CustomTemplate {
+    id: string;
+    label: string;
+    icon: string;
+    content: string; // {{고객명}} 같은 변수를 포함한 원본 텍스트
+    sortOrder: number;
+    builtinKey?: string | null; // 값이 있으면 빌트인 멘트(BuiltinTemplateType)의 문구 오버라이드
+}
+
+// 커스텀 멘트 본문에서 사용할 수 있는 변수 목록 (자동 치환). 카테고리별로 접어서 보여줌.
+// 기본 변수는 새 커스텀 멘트/모든 빌트인 멘트에서 공통으로 쓸 수 있고,
+// 그 외 카테고리는 특정 빌트인 멘트(예약결제, 잔금안내 등)에서만 실제로 값이 채워진다.
+const VARIABLE_GROUPS: { title: string; vars: { key: string; label: string }[] }[] = [
+    {
+        title: '기본 (모든 멘트 공통)',
+        vars: [
+            { key: '고객명', label: '고객명' },
+            { key: '연락처', label: '고객 연락처' },
+            { key: '목적지', label: '여행지/목적지' },
+            { key: '상품명', label: '상품명' },
+            { key: '출발일', label: '출발일' },
+            { key: '귀국일', label: '귀국일' },
+            { key: '상품URL', label: '상품 URL' },
+            { key: '예약번호', label: '예약번호' },
+            { key: '회사명', label: '회사명' },
+            { key: '담당자', label: '담당자명' },
+        ],
+    },
+    {
+        title: '예약 및 결제 전용',
+        vars: [
+            { key: '오늘날짜', label: '오늘 날짜' },
+            { key: '일행수문구', label: '일행 수 문구' },
+            { key: '항공사', label: '항공사' },
+            { key: '항공편안내', label: '항공편 안내' },
+            { key: '상품가안내', label: '상품가 안내(계산결과)' },
+            { key: '불포함', label: '불포함 사항' },
+            { key: '계약금', label: '계약금 문구' },
+            { key: '추가할인내역', label: '추가/할인 내역' },
+            { key: '최종잔금', label: '최종 잔금' },
+            { key: '가상계좌', label: '가상계좌' },
+            { key: '예금주', label: '예금주' },
+            { key: '특별약관', label: '취소 특별약관' },
+            { key: '연락처푸터', label: '상담 및 문의 푸터' },
+        ],
+    },
+    {
+        title: '잔금 안내 전용',
+        vars: [
+            { key: '상품총액', label: '상품 총액' },
+            { key: '인원', label: '인원 수' },
+            { key: '기납계약금', label: '기납 계약금' },
+            { key: '납부기한', label: '납부 기한' },
+        ],
+    },
+    {
+        title: '기타 (확정서/해피콜 등)',
+        vars: [
+            { key: '확정서링크', label: '확정서 링크' },
+            { key: '후기링크', label: '후기 작성 링크' },
+        ],
+    },
+];
+
+// 하위 호환용: '기본' 그룹만 필요한 곳에서 사용
+const CUSTOM_TEMPLATE_VARIABLES = VARIABLE_GROUPS[0].vars;
+
+const TEMPLATE_LABELS: Record<BuiltinTemplateType, { label: string; icon: string }> = {
     remind: { label: '리마인드', icon: '⏰' },
     booking: { label: '예약 및 결제', icon: '✅' },
     dotcom: { label: '닷컴안내', icon: '🌐' },
@@ -67,6 +137,364 @@ const TEMPLATE_LABELS: Record<TemplateType, { label: string; icon: string }> = {
 };
 
 const DEFAULT_AGENT_NAME = '김호기';
+
+// 빌트인 멘트별 기본 템플릿 원문 ({{변수}} 토큰 포함).
+// 사용자가 ✏️ 수정 후 저장하면 이 기본값 대신 저장된 오버라이드가 사용된다.
+const BUILTIN_TEMPLATE_DEFAULTS: Record<BuiltinTemplateType, string> = {
+    remind: `✈️ [{{회사명}}] 상담 상품 리마인드 (담당: {{담당자}})
+
+안녕하세요, {{고객명}}님! {{회사명}} {{담당자}}입니다. 😊
+일전에 상담 도와드린 {{목적지}}여행 상품은 잘 확인해 보셨을까요?
+
+🔗 기존 안내한 일정 URL : {{상품URL}}
+
+상품을 살펴보시다 더 궁금하신 점이나 조정이 필요한 부분이 있으시면 언제든 편하게 말씀해 주세요. {{고객명}}님께 가장 꼭 맞고 만족스러운 여행이 되도록 정성껏 다듬어 드리겠습니다.
+
+──────────────────
+
+🏆 믿고 맡길 수 있는 '{{회사명}}'
+
+✅ 축적된 전문성과 노하우
+✅ 언제나 고객 최우선 맞춤 서비스
+✅ 합리적 가격의 명품 여행 패키지
+✅ 숙련된 담당자의 1:1 전담 상담
+
+생애 첫 허니문부터 소중한 부모님 효도 관광까지, 저희는 고객님의 생애 모든 소중한 여정을 진심으로 함께합니다.
+
+신뢰와 전문성으로 완벽한 여행을 약속드립니다.
+답장 기다리겠습니다. 감사합니다! ✈️
+
+{{연락처푸터}}`,
+
+    booking: `✈️ [{{회사명}}] 여행 예약 안내
+
+안녕하세요, {{고객명}}님! {{회사명}} {{담당자}}입니다. 😊
+예약을 진심으로 감사드립니다.
+원활한 여행 준비를 위해 주요 사항을 안내해 드립니다.
+
+──────────────────
+
+Ⅰ. 예약 및 결제 정보
+
+1. 예약 정보
+- 예약일자 : {{오늘날짜}}
+- 예약/여행자 : {{고객명}}님 {{연락처}}{{일행수문구}}
+- 예약번호 : {{예약번호}}
+- 출 발 일 : {{출발일}}
+- 귀 국 일 : {{귀국일}}
+- 항 공 사 : {{항공사}}
+{{항공편안내}}
+- 상세일정 : {{상품URL}}
+(위 주소를 클릭하시면 일정, 호텔 등 세부 사항을 확인할 수 있습니다.)
+
+──────────────────
+
+2. 상품가 및 결제 안내 (가상계좌 및 카드)
+
+- 상 품 가 :
+{{상품가안내}}
+
+- 상품 가격은 예약일에 따라 변동될 수 있습니다.
+- 불 포 함 : {{불포함}}
+- 상기 상품은 항공, 현지 호텔이 완료되면 확정됩니다.
+
+- 계  약  금: {{계약금}}
+{{추가할인내역}}- 최종 잔금: {{최종잔금}} (출발 3주전 다시 안내드립니다.)
+
+──────────────────
+
+3. 결제방법
+1) 카드결제: 여행사 계좌 또는 카드 단말기를 통해 결제
+
+2) 가상계좌
+{{가상계좌}}
+예  금  주 : {{예금주}}
+
+──────────────────
+
+Ⅱ. 취소 규정 및 계약 진행 일정
+
+1. 취소료 규정 (국외여행 특별약관)
+예약/결제 취소 안내
+인터넷상에서 예약/결제 취소 및 변경은 불가능하오니, 예약/결제 취소나 여행자정보 변경을 원하시면 반드시 예약담당자에게 연락하여 주시기 바랍니다.
+
+여행자의 여행계약 해제 요청 시 취소료
+여행약관에 의거하여 다음과 같이 취소료가 부과됩니다.
+[특별약관]
+{{특별약관}}
+
+여행 취소 접수 안내
+- 취소는 업무시간 내 접수 시 확인 및 적용이 가능합니다.
+- 업무시간은 월-금 09:00~18:00 (주말,공휴일 제외)
+
+2. 계약 진행 일정
+1) 계약 시: 계약금 및 여권 수령
+2) 계약 시: 호텔 및 항공 확보
+3) 출발 3~5주 전: 공항버스 예약
+4) 출발 3주 전: 잔금 납부
+5) 출발 1주 전: 최종 안내서 배부
+6) 출발 2~5일 전: 호텔/일정 확정, 가이드 배정
+7) 출발: 즐거운 여행!
+
+{{연락처푸터}}`,
+
+    dotcom: `✈️  여행 예약 안내
+
+{{고객명}} 고객님, 안녕하세요! 😊
+이번 여행의 담당자로 배정된 {{회사명}} {{담당자}}입니다.
+
+신속한 예약을 위해 현재 항공, 호텔 확인 중이며,
+잠시 후 예약 관련 안내를 위해 전화 드리겠습니다.
+통화하기 편한 시간 알려주시면 좋습니다.
+
+📋 예약 확인 내역
+• 여 행 지 : {{목적지}}
+• 출 발 일 : {{출발일}}
+• 인      원: 총 {{인원}}명
+• 예약상품 : {{상품URL}}
+
+기타 궁금하신 점은 아래 연락처로 언제든 편하게 문의해 주세요.
+고객님의 즐거운 여행을 위해 정성을 다해 준비하겠습니다!
+
+{{연락처푸터}}`,
+
+    pre_4w: `✈️ [{{회사명}}] 출발 전 필수 체크사항 안내
+
+안녕하세요, 고객님! {{회사명}} {{담당자}}입니다. 😊
+여행 출발이 어느덧 한 달 앞으로 다가왔습니다.
+출발 전 확인 사항 안내해 드립니다.
+
+1. 현금영수증
+- 현금 결제 부분 발행 가능
+- 담당자에게 현금영수증 발행할 번호 알려주세요
+- 전체를 한 분에게, 혹은 각각 나눠서 발행됩니다.
+
+──────────────────
+
+2. 여행사 회원가입 (마일리지 적립)
+
+🎁 신규가입 혜택
+- 2만원 할인 쿠폰 발행 (현금처럼 사용 가능)
+- 마일리지 적립 (항공사 마일리지와 별도)
+- 다음 여행 시 현금처럼 사용 가능
+
+📝 가입 방법
+- 가입 사이트: https://www.modetour.com/
+- 거래처명: "클럽모두" 입력
+- 개인별 가입 필수
+
+⚠️ 중요 안내
+- 출발 전 미가입 시 마일리지 적립 불가
+- 가입 후 전체 일행의 스마트폰 번호를 각각 알려주셔야 적립됨
+
+💳 2만원 쿠폰 사용 순서
+1) "신규" 회원가입 (광고수신 동의 필수)
+2) 로그아웃 후 1회 로그인
+3) 쿠폰함에서 2만원 확인 후 결제 시 사용
+
+──────────────────
+
+3. 인천공항 버스 예약 (필수!) - 광주권 출발 고객
+
+🚌 예약 정보
+- 수속 시작: 출발 3시간 전부터
+- 시간에 맞는 버스로 예약하세요
+
+🔗 예약 사이트
+- 상행버스: https://www.kobus.co.kr/main.do (출발 1달 전~)
+- 하행버스: https://txbus.t-money.co.kr/main.do (출발 2~3주 전~)
+
+📞 예약 후
+- 예약한 버스 시간을 여행사에 알려주세요
+
+{{연락처푸터}}`,
+
+    balance: `✈️ [{{회사명}}] 여행 상품 잔금 결제 안내 (담당: {{담당자}})
+
+안녕하세요, {{고객명}}님! {{회사명}} {{담당자}}입니다. 😊
+기다려주신 {{목적지}} 여행이 이제 곧 시작됩니다!
+안전하고 즐거운 여행을 위해 기간 내 잔금 결제 부탁드립니다.
+
+──────────────────
+
+💳 납부 금액
+- 상품 총액: {{상품총액}} ({{인원}}인)
+- 기납 계약금: -{{기납계약금}}원 (납부 완료){{추가할인내역}}
+──────────────────
+- 최종 결제 잔금: {{최종잔금}}
+
+──────────────────
+
+📅 납부 기한
+- {{납부기한}}까지
+
+──────────────────
+
+💡 결제 방법
+1) 가상계좌 입금
+{{가상계좌}}
+예금주 : {{예금주}}
+
+2) 카드 결제
+- 여행사 카드 단말기 또는 담당자 안내에 따라 결제
+
+──────────────────
+
+{{연락처푸터}}`,
+
+    ticket: `✈️ [{{회사명}}] 항공권 발권 및 좌석 지정 안내
+
+안녕하세요, {{고객명}}님!
+항공권 발권이 완료되었습니다.
+편안한 여행을 위해 좌석을 미리 지정하세요.
+
+──────────────────
+
+🪑 좌석 지정 방법
+
+1. 온라인 사전 신청 (항공사 홈페이지)
+- 예약번호로 접속하여 좌석 선택
+- 좌석 위치에 따라 추가 요금 발생
+- 출발 1~2일 전 무료 지정 가능
+
+
+2. 온라인 체크인 (출발 24시간 전)
+- 항공사 홈페이지/앱에서 체크인 후 변경 가능
+- 무료 좌석 지정 최종 기회
+
+3. 공항 카운터 (당일)
+- 잔여 좌석 범위 내에서 조정 요청
+
+──────────────────
+
+📞 문의처
+• 각 항공사 고객센터: {{항공사}}
+
+──────────────────
+
+⚠️ 주의사항
+- 항공사마다 좌석 지정 요건이 다릅니다.
+- 기종 변경 시 좌석이 재배정될 수 있습니다
+
+즐거운 여행 되세요! ✈️`,
+
+    confirmation: `안녕하세요! {{고객명}} 고객님
+이번 여행의 모바일 가이드북을 보내드립니다. ✈️
+
+1. 세부 일정은 아래 일정표를 기준으로 움직입니다.
+{{상품URL}}
+
+2. 아래 가이드북은 일정을 바탕으로 고객님의 여행 날짜에 맞게 저희 여행사에서 별도로 만들었습니다.
+
+📍 날씨 정보
+🧳 준비물
+💰 환전 정보
+📞 로밍
+🗺️ 여행지 가이드
+등을 담았습니다.
+
+출발 전 아래 링크에서 확인하셔서
+즐거운 여행을 만드세요! 🌟
+{{확정서링크}}`,
+
+    departure: `✈️ [{{회사명}}] 드디어 출발! 즐거운 여행 되세요! (담당: {{담당자}})
+
+안녕하세요, {{고객명}}님! {{회사명}} {{담당자}}입니다. 😊
+드디어 기다리시던 {{목적지}} 여행 출발일입니다!
+
+짐은 빠짐없이 잘 챙기셨나요? 🧳
+공항에는 항공기 출발 최소 3시간 전에는 도착하셔서 여유 있게 수속하시길 권장드립니다.
+
+──────────────────
+
+현지에서 혹시라도 비상상황이 발생하거나 도움이 필요하실 경우 아래 연락처로 연락 주세요.
+📞 현지 비상연락처: (현지 연락처)
+
+──────────────────
+
+설레는 마음 가득 안고 조심히 잘 다녀오세요!
+{{고객명}}님의 여행이 눈부시게 아름답길 진심으로 응원합니다. ✨
+
+{{담당자}} 드림 ✈️`,
+
+    happy_call: `✈️ [{{회사명}}] 여행은 즐거우셨나요? 해피콜 안내 (담당: {{담당자}})
+
+안녕하세요, {{고객명}}님! {{회사명}} {{담당자}}입니다. 😊
+{{목적지}} 여행은 무사히 잘 다녀오셨나요? 일상으로 돌아오신 소감이 어떠신지 궁금합니다.
+
+이번 여행이 {{고객명}}님께 소중한 추억으로 남았길 진심으로 바라며,
+바쁘시겠지만 소중한 여행 후기 한 줄 부탁드려도 될까요? 📝
+{{고객명}}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
+
+──────────────────
+
+🔗 후기 남기러 가기: {{후기링크}}
+
+──────────────────
+
+다음 여행도 {{고객명}}님께 가장 완벽한 일정으로 준비해 드리겠습니다.
+항상 감사드립니다! 💖
+
+{{연락처푸터}}`,
+
+    china_barcode: `📱 중국 입국 온라인 출입국 바코드 안내
+
+안녕하세요!
+중국 입국 시 필요한 온라인 출입국 바코드를 준비했습니다.
+
+──────────────────
+
+✅ 준비 방법
+
+1️⃣ 바코드 다운로드
+   스마트폰에 바코드 이미지를 저장하세요
+
+2️⃣ 중국 도착 후
+   공항 입국심사 시 직원이 보여달라고 요청할 수 있습니다
+
+3️⃣ 제시 방법
+   스마트폰 사진으로 보여주면 됩니다
+   (인쇄 불필요)
+
+──────────────────
+
+📌 참고사항
+
+• 기본적으로 전산에 기록되어 있어 확인하지 않을 수도 있습니다
+• 요청 시에만 제시하면 되므로 항상 준비해두세요
+
+
+──────────────────
+
+궁금한 점은 언제든 연락주세요
+{{연락처푸터}}`,
+};
+
+// 변수 맵을 이용해 {{변수명}} 토큰을 치환한다. 매핑에 없는 토큰은 그대로 둔다.
+function renderTemplate(template: string, variables: Record<string, string>): string {
+    return template.replace(/\{\{(.*?)\}\}/g, (match, key) => {
+        const trimmedKey = String(key).trim();
+        return variables[trimmedKey] !== undefined ? variables[trimmedKey] : match;
+    });
+}
+
+// renderTemplate의 역변환: 미리보기에서 실제 값으로 채워진 텍스트를,
+// 다른 고객에게도 재사용 가능하도록 다시 {{변수명}} 토큰으로 되돌린다.
+// 값이 비어있거나 너무 짧으면(예: 빈 문자열, 1글자) 오치환 위험이 커서 건너뛴다.
+function derenderTemplate(text: string, variables: Record<string, string>): string {
+    let result = text;
+    // 값이 긴 것부터 치환해야 짧은 값이 긴 값의 일부를 잘못 먼저 치환하는 걸 방지할 수 있음
+    const entries = Object.entries(variables)
+        .filter(([, value]) => value && value.trim().length >= 2)
+        .sort((a, b) => b[1].length - a[1].length);
+
+    for (const [key, value] of entries) {
+        // 정규식 특수문자 이스케이프 후 전역 치환
+        const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        result = result.replace(new RegExp(escaped, 'g'), `{{${key}}}`);
+    }
+    return result;
+}
 
 // 가격 문자열에서 숫자 추출
 function extractPriceNumber(priceStr: string): number {
@@ -204,11 +632,29 @@ export default function MessageTemplateCreator() {
     const [isManuallyEdited, setIsManuallyEdited] = useState(false);
     const [copied, setCopied] = useState(false);
 
+    // 사용자 정의(커스텀) 멘트 템플릿 / 빌트인 멘트 오버라이드
+    const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>([]);
+    const [loadingCustomTemplates, setLoadingCustomTemplates] = useState(false);
+
+    // 미리보기에서 바로 편집하는 모드: null이면 편집 중 아님
+    // 'builtin' - 현재 선택된 빌트인 멘트의 문구 수정
+    // 'custom-existing' - 현재 선택된 기존 커스텀 멘트 수정
+    // 'custom-new' - 새 커스텀 멘트 생성
+    const [previewEditMode, setPreviewEditMode] = useState<'builtin' | 'custom-existing' | 'custom-new' | null>(null);
+    const [newCustomLabel, setNewCustomLabel] = useState(''); // 'custom-new' 모드에서만 사용
+    const [newCustomIcon, setNewCustomIcon] = useState('💬');
+    const [savingTemplate, setSavingTemplate] = useState(false);
+    // generateMessage()가 마지막으로 사용한 변수 맵 (완료 저장 시 값 → {{토큰}} 역치환에 사용)
+    const [lastRenderVariables, setLastRenderVariables] = useState<Record<string, string>>({});
+
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const previewTextareaRef = useRef<HTMLTextAreaElement>(null);
+    const [openVariableGroup, setOpenVariableGroup] = useState<string | null>(VARIABLE_GROUPS[0].title); // 기본 그룹만 펼친 채로 시작
 
     // 고객 목록 로드
     useEffect(() => {
         fetchCustomers();
+        fetchCustomTemplates();
     }, []);
 
     // 템플릿 변경 시 수동 수정 상태 해제
@@ -284,6 +730,7 @@ export default function MessageTemplateCreator() {
         bankAccount, bankHolder, fuelSurcharge, excludedCosts, depositPerPerson, 
         confirmationLink, reviewLink, specialTerms, airline, departureDate, bookingNumber,
         productPrice, feeItems, isManualBalance, manualBalanceValue, isManuallyEdited
+        , customTemplates
     ]);
 
     async function fetchCustomers() {
@@ -301,6 +748,183 @@ export default function MessageTemplateCreator() {
             console.error('고객 목록 로딩 실패:', e);
         } finally {
             setLoadingCustomers(false);
+        }
+    }
+
+    function getTenantHeader(): Record<string, string> {
+        const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+        return tenantId ? { 'x-tenant-id': tenantId } : {};
+    }
+
+    async function fetchCustomTemplates() {
+        if (isDummy) return; // 데모(더미) 모드에서는 커스텀 멘트 저장을 지원하지 않음
+        setLoadingCustomTemplates(true);
+        try {
+            const res = await fetch('/api/message-templates', { headers: getTenantHeader() });
+            const data = await res.json();
+            if (data.success) {
+                setCustomTemplates(data.templates || []);
+            }
+        } catch (e) {
+            console.error('커스텀 멘트 로딩 실패:', e);
+        } finally {
+            setLoadingCustomTemplates(false);
+        }
+    }
+
+    // 미리보기 편집 모드 시작: 빌트인 멘트 문구 수정
+    function startEditBuiltin() {
+        setPreviewEditMode('builtin');
+        setIsManuallyEdited(true); // generateMessage 자동 재실행으로 편집 내용이 덮어써지지 않도록
+    }
+
+    // 미리보기 편집 모드 시작: 기존 커스텀 멘트 수정
+    function startEditCustom() {
+        setPreviewEditMode('custom-existing');
+        setIsManuallyEdited(true);
+    }
+
+    // 미리보기 편집 모드 시작: 새 커스텀 멘트 생성
+    function startCreateCustom() {
+        setPreviewEditMode('custom-new');
+        setNewCustomLabel('');
+        setNewCustomIcon('💬');
+        setGeneratedText('');
+        setIsManuallyEdited(true);
+    }
+
+    function cancelPreviewEdit() {
+        setPreviewEditMode(null);
+        setIsManuallyEdited(false); // 취소 시 자동 생성된 미리보기로 복귀
+    }
+
+    // 미리보기 textarea의 현재 커서 위치에 {{변수명}} 토큰을 삽입한다.
+    function insertVariableIntoPreview(varKey: string) {
+        const token = `{{${varKey}}}`;
+        const textarea = previewTextareaRef.current;
+        if (!textarea) {
+            setGeneratedText((prev) => prev + token);
+            return;
+        }
+        const start = textarea.selectionStart ?? generatedText.length;
+        const end = textarea.selectionEnd ?? generatedText.length;
+        const next = generatedText.slice(0, start) + token + generatedText.slice(end);
+        setGeneratedText(next);
+        setIsManuallyEdited(true);
+        // 삽입 후 커서를 삽입한 변수 뒤로 이동
+        requestAnimationFrame(() => {
+            textarea.focus();
+            const pos = start + token.length;
+            textarea.setSelectionRange(pos, pos);
+        });
+    }
+
+    // "완료" 클릭 시: 미리보기에 채워진 실제 값들을 다시 {{토큰}}으로 되돌려 저장한다.
+    async function finishPreviewEdit() {
+        if (previewEditMode === 'custom-new' && !newCustomLabel.trim()) {
+            alert('멘트 이름을 입력해주세요.');
+            return;
+        }
+        if (!generatedText.trim()) {
+            alert('멘트 내용을 입력해주세요.');
+            return;
+        }
+
+        const contentToSave = derenderTemplate(generatedText, lastRenderVariables);
+
+        setSavingTemplate(true);
+        try {
+            let body: any;
+            let method: 'POST' | 'PUT';
+
+            if (previewEditMode === 'builtin') {
+                const key = templateType as BuiltinTemplateType;
+                const existing = customTemplates.find((t) => t.builtinKey === key);
+                method = 'POST'; // 빌트인 오버라이드는 서버에서 upsert 처리
+                body = {
+                    label: existing?.label || TEMPLATE_LABELS[key].label,
+                    icon: existing?.icon || TEMPLATE_LABELS[key].icon,
+                    content: contentToSave,
+                    builtinKey: key,
+                };
+            } else if (previewEditMode === 'custom-existing') {
+                const customId = templateType.slice('custom:'.length);
+                const existing = customTemplates.find((t) => t.id === customId);
+                method = 'PUT';
+                body = { id: customId, label: existing?.label, icon: existing?.icon, content: contentToSave };
+            } else {
+                // custom-new
+                method = 'POST';
+                body = { label: newCustomLabel.trim(), icon: newCustomIcon || '💬', content: contentToSave };
+            }
+
+            const res = await fetch('/api/message-templates', {
+                method,
+                headers: { 'Content-Type': 'application/json', ...getTenantHeader() },
+                body: JSON.stringify(body),
+            });
+            const data = await res.json();
+            if (data.success) {
+                await fetchCustomTemplates();
+                const wasBuiltin = previewEditMode === 'builtin';
+                setPreviewEditMode(null);
+                setIsManuallyEdited(false);
+                // 저장한 멘트를 바로 선택해서 미리보기로 보여줌 (빌트인이면 그대로, 아니면 custom:id)
+                setTemplateType(wasBuiltin ? templateType : `custom:${data.template.id}`);
+            } else {
+                alert('저장 실패: ' + data.error);
+            }
+        } catch (e) {
+            console.error('멘트 저장 실패:', e);
+            alert('저장 중 오류가 발생했습니다.');
+        } finally {
+            setSavingTemplate(false);
+        }
+    }
+
+    // 고정 멘트의 저장된 문구 오버라이드를 삭제하고 기본 문구로 되돌림
+    async function resetBuiltinTemplate(key: BuiltinTemplateType) {
+        const existing = customTemplates.find((t) => t.builtinKey === key);
+        if (!existing) return;
+        if (!confirm('수정한 문구를 삭제하고 기본 문구로 되돌리시겠습니까?')) return;
+        try {
+            const res = await fetch(`/api/message-templates?id=${existing.id}`, {
+                method: 'DELETE',
+                headers: getTenantHeader(),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setCustomTemplates((prev) => prev.filter((t) => t.id !== existing.id));
+                setPreviewEditMode(null);
+                setIsManuallyEdited(false); // 기본 문구로 다시 자동 생성됨
+            } else {
+                alert('되돌리기 실패: ' + data.error);
+            }
+        } catch (e) {
+            console.error('빌트인 멘트 초기화 실패:', e);
+            alert('되돌리기 중 오류가 발생했습니다.');
+        }
+    }
+
+    async function deleteCustomTemplate(id: string) {
+        if (!confirm('이 멘트를 삭제하시겠습니까?')) return;
+        try {
+            const res = await fetch(`/api/message-templates?id=${id}`, {
+                method: 'DELETE',
+                headers: getTenantHeader(),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setCustomTemplates((prev) => prev.filter((t) => t.id !== id));
+                if (templateType === `custom:${id}`) {
+                    setTemplateType('remind');
+                }
+            } else {
+                alert('삭제 실패: ' + data.error);
+            }
+        } catch (e) {
+            console.error('커스텀 멘트 삭제 실패:', e);
+            alert('삭제 중 오류가 발생했습니다.');
         }
     }
 
@@ -359,6 +983,31 @@ export default function MessageTemplateCreator() {
         const today = new Date();
         const todayStr = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
+        // 사용자 정의(커스텀) 멘트인 경우: 변수 치환만 수행하고 이후 가격 계산 로직은 건너뜀
+        if (templateType.startsWith('custom:')) {
+            const customId = templateType.slice('custom:'.length);
+            const tpl = customTemplates.find((t) => t.id === customId);
+            const variableMap: Record<string, string> = {
+                '고객명': name,
+                '연락처': phone,
+                '목적지': dest,
+                '상품명': title,
+                '출발일': departureDateDisplay,
+                '귀국일': p?.returnDate || customer?.returnDate || '',
+                '상품URL': url || '',
+                '예약번호': bookingNumber || '',
+                '회사명': companyName,
+                '담당자': AGENT_NAME,
+            };
+            setLastRenderVariables(variableMap);
+            if (tpl) {
+                setGeneratedText(renderTemplate(tpl.content, variableMap));
+            } else {
+                setGeneratedText('');
+            }
+            return;
+        }
+
         const travelersNum = extractPriceNumber(travelers) || 1; // 최소 1명으로 가정
         const priceNum = extractPriceNumber(price);
         const fuelNum = extractPriceNumber(fuelSurcharge);
@@ -412,395 +1061,208 @@ export default function MessageTemplateCreator() {
             : (finalBalance > 0 ? `${formatPrice(finalBalance)}원` : '0원');
 
         let text = '';
+        // 이번 렌더링에 실제로 사용된 변수 맵(치환 전 {{토큰}} ↔ 치환된 값). "완료" 저장 시 역치환에 사용.
+        let usedVariables: Record<string, string> = {};
+
+        // 빌트인 멘트의 실제 사용할 원문 텍스트: 저장된 오버라이드가 있으면 그것을, 없으면 기본값을 사용
+        const getBuiltinTemplateText = (key: BuiltinTemplateType): string =>
+            customTemplates.find((t) => t.builtinKey === key)?.content || BUILTIN_TEMPLATE_DEFAULTS[key];
 
         switch (templateType) {
-            case 'remind':
-                text = `✈️ [${companyName}] 상담 상품 리마인드 (담당: ${AGENT_NAME})
-
-안녕하세요, ${name}님! ${companyName} ${AGENT_NAME}입니다. 😊
-일전에 상담 도와드린 ${dest ? dest + ' ' : ''}여행 상품은 잘 확인해 보셨을까요?
-
-🔗 기존 안내한 일정 URL : ${url || '(일정표 링크)'}
-
-상품을 살펴보시다 더 궁금하신 점이나 조정이 필요한 부분이 있으시면 언제든 편하게 말씀해 주세요. ${name}님께 가장 꼭 맞고 만족스러운 여행이 되도록 정성껏 다듬어 드리겠습니다.
-
-──────────────────
-
-🏆 믿고 맡길 수 있는 '${companyName}'
-
-✅ 축적된 전문성과 노하우
-✅ 언제나 고객 최우선 맞춤 서비스
-✅ 합리적 가격의 명품 여행 패키지
-✅ 숙련된 담당자의 1:1 전담 상담
-
-생애 첫 허니문부터 소중한 부모님 효도 관광까지, 저희는 고객님의 생애 모든 소중한 여정을 진심으로 함께합니다.
-
-신뢰와 전문성으로 완벽한 여행을 약속드립니다.
-답장 기다리겠습니다. 감사합니다! ✈️
-
-${getContactFooter()}`;
+            case 'remind': {
+                const variables: Record<string, string> = {
+                    '회사명': companyName,
+                    '담당자': AGENT_NAME,
+                    '고객명': name,
+                    '목적지': dest ? dest + ' ' : '',
+                    '상품URL': url || '(일정표 링크)',
+                    '연락처푸터': getContactFooter(),
+                };
+                usedVariables = variables;
+                text = renderTemplate(getBuiltinTemplateText('remind'), variables);
                 break;
+            }
 
-            case 'booking':
+            case 'booking': {
                 const basePriceStr = priceNum > 0 ? `${formatPrice(priceNum)}원` : (price || '');
                 const perPersonTotalStr = pricePerPersonNum > 0 ? `${formatPrice(pricePerPersonNum)}원` : basePriceStr;
                 const fuelStr = fuelNum > 0 ? `${formatPrice(fuelNum)}` : '0';
 
-                let bookingPriceCalc = `성인 ${basePriceStr}
+                const bookingPriceCalc = `성인 ${basePriceStr}
 (계약금 입금 시 요금으로 확정됩니다.)
-+ ${fuelStr}(유류 할증료 매월 변동되며 잔금 시 최종 확정 적용됩니다.) 
++ ${fuelStr}(유류 할증료 매월 변동되며 잔금 시 최종 확정 적용됩니다.)
 ${travelersNum > 0 && pricePerPersonNum > 0 ? ` = ${perPersonTotalStr} * ${travelersNum}명 = ${totalPriceStr}` : ''}`;
 
-                text = `✈️ [${companyName}] 여행 예약 안내
+                const flightText = (() => {
+                    if (!p?.itinerary || p.itinerary.length === 0) return '';
+                    const out = p.itinerary[0]?.transport;
+                    const ret = p.itinerary[p.itinerary.length - 1]?.transport;
+                    let ft = '';
+                    if (out && out.departureTime) {
+                        ft += `- 가는편 : ${out.airline || ''} ${out.flightNo || ''} (${out.departureTime} 출발 → ${out.arrivalTime || ''} 도착)\n`;
+                    }
+                    if (ret && ret.departureTime && p.itinerary.length > 1) {
+                        ft += `- 오는편 : ${ret.airline || ''} ${ret.flightNo || ''} (${ret.departureTime} 출발 → ${ret.arrivalTime || ''} 도착)\n`;
+                    }
+                    return ft.trim() ? ft : '';
+                })();
 
-안녕하세요, ${name}님! ${companyName} ${AGENT_NAME}입니다. 😊
-예약을 진심으로 감사드립니다.
-원활한 여행 준비를 위해 주요 사항을 안내해 드립니다.
+                const feeBreakdown = (() => {
+                    let extraLines = '';
+                    if (addDetails) extraLines += `[추가 비용]\n${addDetails}`;
+                    if (discountDetails) extraLines += `[할인 내역]\n${discountDetails}`;
+                    return extraLines ? `${extraLines.trim()}\n` : '';
+                })();
 
-──────────────────
-
-Ⅰ. 예약 및 결제 정보
-
-1. 예약 정보
-- 예약일자 : ${todayStr}
-- 예약/여행자 : ${name}님 ${phone}${travelersNum > 0 ? ` 일행 ${travelersNum}분` : ''}
-- 예약번호 : ${bookingNumber || '(예약번호)'}
-- 출 발 일 : ${departureDateDisplay}
-- 귀 국 일 : ${p?.returnDate || ''}
-- 항 공 사 : ${airlineDisplay}
-${(() => {
-                        if (!p?.itinerary || p.itinerary.length === 0) return '';
-                        const out = p.itinerary[0]?.transport;
-                        const ret = p.itinerary[p.itinerary.length - 1]?.transport;
-                        let flightText = '';
-                        if (out && out.departureTime) {
-                            flightText += `- 가는편 : ${out.airline || ''} ${out.flightNo || ''} (${out.departureTime} 출발 → ${out.arrivalTime || ''} 도착)\n`;
-                        }
-                        if (ret && ret.departureTime && p.itinerary.length > 1) {
-                            flightText += `- 오는편 : ${ret.airline || ''} ${ret.flightNo || ''} (${ret.departureTime} 출발 → ${ret.arrivalTime || ''} 도착)\n`;
-                        }
-                        return flightText.trim() ? flightText : '';
-                    })()}
-- 상세일정 : ${url}
-(위 주소를 클릭하시면 일정, 호텔 등 세부 사항을 확인할 수 있습니다.)
-
-──────────────────
-
-2. 상품가 및 결제 안내 (가상계좌 및 카드)
-
-- 상 품 가 : 
-${bookingPriceCalc}
-
-- 상품 가격은 예약일에 따라 변동될 수 있습니다.
-- 불 포 함 : ${excludedCosts || '가이드팁, 매너 팁, 개인 경비'}
-- 상기 상품은 항공, 현지 호텔이 완료되면 확정됩니다.
-
-- 계  약  금: ${depositDisplay}${depositDeadline ? ` (${depositDeadline}까지)` : ''}
-${(() => {
-                        let extraLines = '';
-                        if (addDetails) extraLines += `[추가 비용]\n${addDetails}`;
-                        if (discountDetails) extraLines += `[할인 내역]\n${discountDetails}`;
-                        return extraLines ? `${extraLines.trim()}\n` : '';
-                    })()}- 최종 잔금: ${remainingBalanceStr} (출발 3주전 다시 안내드립니다.)
-
-──────────────────
-
-3. 결제방법
-1) 카드결제: 여행사 계좌 또는 카드 단말기를 통해 결제
-
-2) 가상계좌
-${bankAccount}
-예  금  주 : ${bankHolder}
-
-──────────────────
-
-Ⅱ. 취소 규정 및 계약 진행 일정
-
-1. 취소료 규정 (국외여행 특별약관)
-예약/결제 취소 안내
-인터넷상에서 예약/결제 취소 및 변경은 불가능하오니, 예약/결제 취소나 여행자정보 변경을 원하시면 반드시 예약담당자에게 연락하여 주시기 바랍니다.
-
-여행자의 여행계약 해제 요청 시 취소료
-여행약관에 의거하여 다음과 같이 취소료가 부과됩니다.
-[특별약관]
-${specialTerms || `■ 여행자의 여행계약 해제 요청 시 여행약관에 의거하여 취소료가 부과됩니다.
+                const defaultSpecialTerms = `■ 여행자의 여행계약 해제 요청 시 여행약관에 의거하여 취소료가 부과됩니다.
 - 여행개시(출발일) ~30일전까지 취소 통보 시 - 계약금 환급
 - 여행개시(출발일) 29~20일전까지 취소 통보 시 - 여행경비의 10% 배상
 - 여행개시(출발일) 19~10일전까지 취소 통보 시 - 여행경비의 15% 배상
 - 여행개시(출발일) 9~8일전까지 취소 통보 시 - 여행경비의 20% 배상
 - 여행개시(출발일) 7~1일전까지 취소 통보 시 - 여행경비의 30% 배상
-- 여행개시(출발일) 당일 취소 통보 시 - 여행경비의 50% 배상`}
+- 여행개시(출발일) 당일 취소 통보 시 - 여행경비의 50% 배상`;
 
-여행 취소 접수 안내
-- 취소는 업무시간 내 접수 시 확인 및 적용이 가능합니다.
-- 업무시간은 월-금 09:00~18:00 (주말,공휴일 제외)
+                const variables: Record<string, string> = {
+                    '회사명': companyName,
+                    '담당자': AGENT_NAME,
+                    '고객명': name,
+                    '연락처': phone,
+                    '오늘날짜': todayStr,
+                    '일행수문구': travelersNum > 0 ? ` 일행 ${travelersNum}분` : '',
+                    '예약번호': bookingNumber || '(예약번호)',
+                    '출발일': departureDateDisplay,
+                    '귀국일': p?.returnDate || '',
+                    '항공사': airlineDisplay,
+                    '항공편안내': flightText,
+                    '상품URL': url || '',
+                    '상품가안내': bookingPriceCalc,
+                    '불포함': excludedCosts || '가이드팁, 매너 팁, 개인 경비',
+                    '계약금': `${depositDisplay}${depositDeadline ? ` (${depositDeadline}까지)` : ''}`,
+                    '추가할인내역': feeBreakdown,
+                    '최종잔금': remainingBalanceStr,
+                    '가상계좌': bankAccount,
+                    '예금주': bankHolder,
+                    '특별약관': specialTerms || defaultSpecialTerms,
+                    '연락처푸터': getContactFooter(),
+                };
 
-2. 계약 진행 일정
-1) 계약 시: 계약금 및 여권 수령
-2) 계약 시: 호텔 및 항공 확보
-3) 출발 3~5주 전: 공항버스 예약
-4) 출발 3주 전: 잔금 납부
-5) 출발 1주 전: 최종 안내서 배부
-6) 출발 2~5일 전: 호텔/일정 확정, 가이드 배정
-7) 출발: 즐거운 여행!
-
-${getContactFooter()}`;
+                usedVariables = variables;
+                text = renderTemplate(getBuiltinTemplateText('booking'), variables);
                 break;
+            }
 
-            case 'dotcom':
-                text = `✈️  여행 예약 안내
-
-${name} 고객님, 안녕하세요! 😊
-이번 여행의 담당자로 배정된 ${companyName} ${AGENT_NAME}입니다.
-
-신속한 예약을 위해 현재 항공, 호텔 확인 중이며,
-잠시 후 예약 관련 안내를 위해 전화 드리겠습니다.
-통화하기 편한 시간 알려주시면 좋습니다. 
-
-📋 예약 확인 내역
-• 여 행 지 : ${dest}
-• 출 발 일 : ${departureDateDisplay}
-• 인      원: 총 ${travelersNum > 0 ? travelersNum : '(미정)'}명
-• 예약상품 : ${url || '(일정표 링크)'}
-
-기타 궁금하신 점은 아래 연락처로 언제든 편하게 문의해 주세요.
-고객님의 즐거운 여행을 위해 정성을 다해 준비하겠습니다!
-
-${getContactFooter()}`;
+            case 'dotcom': {
+                const variables: Record<string, string> = {
+                    '회사명': companyName,
+                    '담당자': AGENT_NAME,
+                    '고객명': name,
+                    '목적지': dest,
+                    '출발일': departureDateDisplay,
+                    '인원': travelersNum > 0 ? String(travelersNum) : '(미정)',
+                    '상품URL': url || '(일정표 링크)',
+                    '연락처푸터': getContactFooter(),
+                };
+                usedVariables = variables;
+                text = renderTemplate(getBuiltinTemplateText('dotcom'), variables);
                 break;
+            }
 
-            case 'pre_4w':
-                text = `✈️ [${companyName}] 출발 전 필수 체크사항 안내 
-
-안녕하세요, 고객님! ${companyName} ${AGENT_NAME}입니다. 😊
-여행 출발이 어느덧 한 달 앞으로 다가왔습니다.
-출발 전 확인 사항 안내해 드립니다.
-
-1. 현금영수증
-- 현금 결제 부분 발행 가능
-- 담당자에게 현금영수증 발행할 번호 알려주세요
-- 전체를 한 분에게, 혹은 각각 나눠서 발행됩니다. 
-
-──────────────────
-
-2. 여행사 회원가입 (마일리지 적립)
-
-🎁 신규가입 혜택
-- 2만원 할인 쿠폰 발행 (현금처럼 사용 가능)
-- 마일리지 적립 (항공사 마일리지와 별도)
-- 다음 여행 시 현금처럼 사용 가능
-
-📝 가입 방법
-- 가입 사이트: https://www.modetour.com/
-- 거래처명: "클럽모두" 입력
-- 개인별 가입 필수
-
-⚠️ 중요 안내
-- 출발 전 미가입 시 마일리지 적립 불가
-- 가입 후 전체 일행의 스마트폰 번호를 각각 알려주셔야 적립됨
-
-💳 2만원 쿠폰 사용 순서
-1) "신규" 회원가입 (광고수신 동의 필수)
-2) 로그아웃 후 1회 로그인
-3) 쿠폰함에서 2만원 확인 후 결제 시 사용
-
-──────────────────
-
-3. 인천공항 버스 예약 (필수!) - 광주권 출발 고객
-
-🚌 예약 정보
-- 수속 시작: 출발 3시간 전부터
-- 시간에 맞는 버스로 예약하세요
-
-🔗 예약 사이트
-- 상행버스: https://www.kobus.co.kr/main.do (출발 1달 전~)
-- 하행버스: https://txbus.t-money.co.kr/main.do (출발 2~3주 전~)
-
-📞 예약 후
-- 예약한 버스 시간을 여행사에 알려주세요
-
-${getContactFooter()}`;
+            case 'pre_4w': {
+                const variables: Record<string, string> = {
+                    '회사명': companyName,
+                    '담당자': AGENT_NAME,
+                    '연락처푸터': getContactFooter(),
+                };
+                usedVariables = variables;
+                text = renderTemplate(getBuiltinTemplateText('pre_4w'), variables);
                 break;
+            }
 
             case 'balance': {
                 let detailBreakdown = '';
                 if (addDetails) detailBreakdown += `\n[추가 비용]\n${addDetails.trim()}`;
                 if (discountDetails) detailBreakdown += `\n[할인 내역]\n${discountDetails.trim()}`;
 
-                text = `✈️ [${companyName}] 여행 상품 잔금 결제 안내 (담당: ${AGENT_NAME})
-
-안녕하세요, ${name}님! ${companyName} ${AGENT_NAME}입니다. 😊
-기다려주신 ${dest} 여행이 이제 곧 시작됩니다!
-안전하고 즐거운 여행을 위해 기간 내 잔금 결제 부탁드립니다.
-
-──────────────────
-
-💳 납부 금액
-- 상품 총액: ${totalPriceStr} (${travelersNum}인)
-- 기납 계약금: -${totalDepositStr}원 (납부 완료)${detailBreakdown ? `\n${detailBreakdown}` : ''}
-──────────────────
-- 최종 결제 잔금: ${remainingBalanceStr}
-
-──────────────────
-
-📅 납부 기한
-- ${selectedCustomer?.balanceDueDate || '출발 3주 전'}까지
-
-──────────────────
-
-💡 결제 방법
-1) 가상계좌 입금
-${bankAccount}
-예금주 : ${bankHolder}
-
-2) 카드 결제
-- 여행사 카드 단말기 또는 담당자 안내에 따라 결제
-
-──────────────────
-
-${getContactFooter()}`;
+                const variables: Record<string, string> = {
+                    '회사명': companyName,
+                    '담당자': AGENT_NAME,
+                    '고객명': name,
+                    '목적지': dest,
+                    '상품총액': totalPriceStr,
+                    '인원': String(travelersNum),
+                    '기납계약금': totalDepositStr,
+                    '추가할인내역': detailBreakdown ? `\n${detailBreakdown}` : '',
+                    '최종잔금': remainingBalanceStr,
+                    '납부기한': selectedCustomer?.balanceDueDate || '출발 3주 전',
+                    '가상계좌': bankAccount,
+                    '예금주': bankHolder,
+                    '연락처푸터': getContactFooter(),
+                };
+                usedVariables = variables;
+                text = renderTemplate(getBuiltinTemplateText('balance'), variables);
                 break;
             }
 
-            case 'ticket':
-                text = `✈️ [${companyName}] 항공권 발권 및 좌석 지정 안내
-
-안녕하세요, ${name}님! 
-항공권 발권이 완료되었습니다.
-편안한 여행을 위해 좌석을 미리 지정하세요.
-
-──────────────────
-
-🪑 좌석 지정 방법
-
-1. 온라인 사전 신청 (항공사 홈페이지)
-- 예약번호로 접속하여 좌석 선택
-- 좌석 위치에 따라 추가 요금 발생
-- 출발 1~2일 전 무료 지정 가능
-
-
-2. 온라인 체크인 (출발 24시간 전)
-- 항공사 홈페이지/앱에서 체크인 후 변경 가능
-- 무료 좌석 지정 최종 기회
-
-3. 공항 카운터 (당일)
-- 잔여 좌석 범위 내에서 조정 요청
-
-──────────────────
-
-📞 문의처
-• 각 항공사 고객센터: ${airlineDisplay || '[항공사명]'}
-
-──────────────────
-
-⚠️ 주의사항
-- 항공사마다 좌석 지정 요건이 다릅니다.
-- 기종 변경 시 좌석이 재배정될 수 있습니다
-
-즐거운 여행 되세요! ✈️`;
+            case 'ticket': {
+                const variables: Record<string, string> = {
+                    '회사명': companyName,
+                    '고객명': name,
+                    '항공사': airlineDisplay || '[항공사명]',
+                };
+                usedVariables = variables;
+                text = renderTemplate(getBuiltinTemplateText('ticket'), variables);
                 break;
+            }
 
-            case 'confirmation':
-                text = `안녕하세요! ${name} 고객님
-이번 여행의 모바일 가이드북을 보내드립니다. ✈️
-
-1. 세부 일정은 아래 일정표를 기준으로 움직입니다.
-${url}
-
-2. 아래 가이드북은 일정을 바탕으로 고객님의 여행 날짜에 맞게 저희 여행사에서 별도로 만들었습니다. 
-
-📍 날씨 정보
-🧳 준비물 
-💰 환전 정보
-📞 로밍
-🗺️ 여행지 가이드 
-등을 담았습니다.
-
-출발 전 아래 링크에서 확인하셔서 
-즐거운 여행을 만드세요! 🌟
-${confirmationLink}`;
+            case 'confirmation': {
+                const variables: Record<string, string> = {
+                    '고객명': name,
+                    '상품URL': url,
+                    '확정서링크': confirmationLink,
+                };
+                usedVariables = variables;
+                text = renderTemplate(getBuiltinTemplateText('confirmation'), variables);
                 break;
+            }
 
-            case 'departure':
-                text = `✈️ [${companyName}] 드디어 출발! 즐거운 여행 되세요! (담당: ${AGENT_NAME})
-
-안녕하세요, ${name}님! ${companyName} ${AGENT_NAME}입니다. 😊
-드디어 기다리시던 ${dest} 여행 출발일입니다!
-
-짐은 빠짐없이 잘 챙기셨나요? 🧳
-공항에는 항공기 출발 최소 3시간 전에는 도착하셔서 여유 있게 수속하시길 권장드립니다.
-
-──────────────────
-
-현지에서 혹시라도 비상상황이 발생하거나 도움이 필요하실 경우 아래 연락처로 연락 주세요.
-📞 현지 비상연락처: (현지 연락처)
-
-──────────────────
-
-설레는 마음 가득 안고 조심히 잘 다녀오세요!
-${name}님의 여행이 눈부시게 아름답길 진심으로 응원합니다. ✨
-
-${AGENT_NAME} 드림 ✈️`;
+            case 'departure': {
+                const variables: Record<string, string> = {
+                    '회사명': companyName,
+                    '담당자': AGENT_NAME,
+                    '고객명': name,
+                    '목적지': dest,
+                };
+                usedVariables = variables;
+                text = renderTemplate(getBuiltinTemplateText('departure'), variables);
                 break;
+            }
 
-            case 'happy_call':
-                text = `✈️ [${companyName}] 여행은 즐거우셨나요? 해피콜 안내 (담당: ${AGENT_NAME})
-
-안녕하세요, ${name}님! ${companyName} ${AGENT_NAME}입니다. 😊
-${dest} 여행은 무사히 잘 다녀오셨나요? 일상으로 돌아오신 소감이 어떠신지 궁금합니다.
-
-이번 여행이 ${name}님께 소중한 추억으로 남았길 진심으로 바라며,
-바쁘시겠지만 소중한 여행 후기 한 줄 부탁드려도 될까요? 📝
-${name}님의 진솔한 후기는 저에게도 큰 힘이 됩니다!
-
-──────────────────
-
-🔗 후기 남기러 가기: ${reviewLink || '(후기 링크)'}
-
-──────────────────
-
-다음 여행도 ${name}님께 가장 완벽한 일정으로 준비해 드리겠습니다.
-항상 감사드립니다! 💖
-
-${getContactFooter()}`;
+            case 'happy_call': {
+                const variables: Record<string, string> = {
+                    '회사명': companyName,
+                    '담당자': AGENT_NAME,
+                    '고객명': name,
+                    '목적지': dest,
+                    '후기링크': reviewLink || '(후기 링크)',
+                    '연락처푸터': getContactFooter(),
+                };
+                usedVariables = variables;
+                text = renderTemplate(getBuiltinTemplateText('happy_call'), variables);
                 break;
-            case 'china_barcode':
-                text = `📱 중국 입국 온라인 출입국 바코드 안내
-
-안녕하세요!
-중국 입국 시 필요한 온라인 출입국 바코드를 준비했습니다.
-
-──────────────────
-
-✅ 준비 방법
-
-1️⃣ 바코드 다운로드
-   스마트폰에 바코드 이미지를 저장하세요
-
-2️⃣ 중국 도착 후
-   공항 입국심사 시 직원이 보여달라고 요청할 수 있습니다
-
-3️⃣ 제시 방법
-   스마트폰 사진으로 보여주면 됩니다
-   (인쇄 불필요)
-
-──────────────────
-
-📌 참고사항
-
-• 기본적으로 전산에 기록되어 있어 확인하지 않을 수도 있습니다
-• 요청 시에만 제시하면 되므로 항상 준비해두세요
-
-
-──────────────────
-
-궁금한 점은 언제든 연락주세요
-${getContactFooter()}`;
+            }
+            case 'china_barcode': {
+                const variables: Record<string, string> = {
+                    '연락처푸터': getContactFooter(),
+                };
+                usedVariables = variables;
+                text = renderTemplate(getBuiltinTemplateText('china_barcode'), variables);
                 break;
+            }
         }
 
         setGeneratedText(text);
         setRemainingBalance(remainingBalanceStr);
+        setLastRenderVariables(usedVariables);
     }
 
     function handleCopy() {
@@ -815,6 +1277,20 @@ ${getContactFooter()}`;
         c.phone.includes(searchQuery) ||
         c.destination?.includes(searchQuery)
     );
+
+    // 현재 선택된 템플릿(빌트인 또는 커스텀)의 아이콘/라벨 (빌트인은 문구 오버라이드가 있으면 그 라벨을 우선 사용)
+    const currentTemplateMeta = templateType.startsWith('custom:')
+        ? (() => {
+            const tpl = customTemplates.find((t) => `custom:${t.id}` === templateType);
+            return tpl ? { icon: tpl.icon, label: tpl.label } : { icon: '💬', label: '커스텀 멘트' };
+        })()
+        : (() => {
+            const builtinKey = templateType as BuiltinTemplateType;
+            const override = customTemplates.find((t) => t.builtinKey === builtinKey);
+            return override
+                ? { icon: override.icon, label: override.label }
+                : TEMPLATE_LABELS[builtinKey];
+        })();
 
     return (
         <div className="msg-creator">
@@ -898,15 +1374,62 @@ ${getContactFooter()}`;
                 <div>
                     <div className="msg-section-title">📋 멘트 유형</div>
                     <div className="msg-template-tabs">
-                        {(Object.keys(TEMPLATE_LABELS) as TemplateType[]).map((type) => (
+                        {(Object.keys(TEMPLATE_LABELS) as BuiltinTemplateType[]).map((type) => {
+                            const isActive = templateType === type;
+                            const override = customTemplates.find((t) => t.builtinKey === type);
+                            const displayIcon = override?.icon || TEMPLATE_LABELS[type].icon;
+                            const displayLabel = override?.label || TEMPLATE_LABELS[type].label;
+                            return (
+                                <button
+                                    key={type}
+                                    className={`msg-tab ${isActive ? 'active' : ''}`}
+                                    onClick={() => { setPreviewEditMode(null); setTemplateType(type); }}
+                                    title={override ? '문구가 수정된 멘트입니다' : undefined}
+                                >
+                                    {displayIcon} {displayLabel}{override ? ' ✎' : ''}
+                                </button>
+                            );
+                        })}
+
+                        {/* 사용자 정의(커스텀) 멘트 탭 */}
+                        {customTemplates.filter((tpl) => !tpl.builtinKey).map((tpl) => {
+                            const key = `custom:${tpl.id}`;
+                            const isActive = templateType === key;
+                            return (
+                                <div key={tpl.id} style={{ position: 'relative', display: 'inline-flex' }}>
+                                    <button
+                                        className={`msg-tab ${isActive ? 'active' : ''}`}
+                                        onClick={() => { setPreviewEditMode(null); setTemplateType(key); }}
+                                        style={{ paddingRight: isActive ? '28px' : undefined }}
+                                    >
+                                        {tpl.icon} {tpl.label}
+                                    </button>
+                                    {isActive && (
+                                        <button
+                                            type="button"
+                                            title="삭제"
+                                            onClick={(e) => { e.stopPropagation(); deleteCustomTemplate(tpl.id); }}
+                                            style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem', padding: '2px', opacity: 0.85 }}
+                                        >
+                                            🗑️
+                                        </button>
+                                    )}
+                                </div>
+                            );
+                        })}
+
+                        {/* 새 멘트 추가 버튼: 오른쪽 미리보기 창이 편집 모드로 전환됨 */}
+                        {!isDummy && (
                             <button
-                                key={type}
-                                className={`msg-tab ${templateType === type ? 'active' : ''}`}
-                                onClick={() => setTemplateType(type)}
+                                type="button"
+                                className="msg-tab"
+                                onClick={startCreateCustom}
+                                style={{ borderStyle: 'dashed', opacity: 0.85 }}
+                                title="새 멘트 만들기"
                             >
-                                {TEMPLATE_LABELS[type].icon} {TEMPLATE_LABELS[type].label}
+                                ➕ 멘트 추가
                             </button>
-                        ))}
+                        )}
                     </div>
                 </div>
 
@@ -1439,26 +1962,139 @@ ${getContactFooter()}`;
             <div className="msg-preview-panel">
                 <div className="msg-preview-header">
                     <div className="msg-preview-title">
-                        {TEMPLATE_LABELS[templateType].icon} {TEMPLATE_LABELS[templateType].label} 미리보기
+                        {previewEditMode === 'custom-new'
+                            ? '➕ 새 멘트 만들기'
+                            : `${currentTemplateMeta.icon} ${currentTemplateMeta.label} ${previewEditMode ? '수정 중' : '미리보기'}`}
                     </div>
-                    {generatedText && (
-                        <button
-                            className={`msg-copy-btn ${copied ? 'copied' : ''}`}
-                            onClick={handleCopy}
-                        >
-                            {copied ? '✅ 복사됨' : '📋 복사'}
-                        </button>
-                    )}
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        {previewEditMode ? (
+                            <>
+                                {previewEditMode === 'builtin' && customTemplates.some((t) => t.builtinKey === templateType) && (
+                                    <button
+                                        className="msg-copy-btn"
+                                        onClick={() => resetBuiltinTemplate(templateType as BuiltinTemplateType)}
+                                        disabled={savingTemplate}
+                                        style={{ opacity: savingTemplate ? 0.6 : 1 }}
+                                        title="수정했던 문구를 지우고 기본 문구로 되돌립니다"
+                                    >
+                                        ↺ 기본값으로
+                                    </button>
+                                )}
+                                <button
+                                    className="msg-copy-btn"
+                                    onClick={cancelPreviewEdit}
+                                    disabled={savingTemplate}
+                                    style={{ opacity: savingTemplate ? 0.6 : 1 }}
+                                >
+                                    취소
+                                </button>
+                                <button
+                                    className="msg-copy-btn"
+                                    onClick={finishPreviewEdit}
+                                    disabled={savingTemplate}
+                                    style={{ background: 'var(--accent-primary, #00d4aa)', color: '#000', fontWeight: 600, opacity: savingTemplate ? 0.6 : 1 }}
+                                >
+                                    {savingTemplate ? '저장 중...' : '✅ 완료'}
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                {!isDummy && (
+                                    <button
+                                        className="msg-copy-btn"
+                                        onClick={templateType.startsWith('custom:') ? startEditCustom : startEditBuiltin}
+                                    >
+                                        ✏️ 수정
+                                    </button>
+                                )}
+                                {generatedText && (
+                                    <button
+                                        className={`msg-copy-btn ${copied ? 'copied' : ''}`}
+                                        onClick={handleCopy}
+                                    >
+                                        {copied ? '✅ 복사됨' : '📋 복사'}
+                                    </button>
+                                )}
+                            </>
+                        )}
+                    </div>
                 </div>
                 <div className="msg-preview-body">
-                    {generatedText ? (
+                    {previewEditMode === 'custom-new' && (
+                        <div style={{ padding: '12px 12px 0' }}>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <input
+                                    className="msg-field-input"
+                                    placeholder="아이콘"
+                                    value={newCustomIcon}
+                                    onChange={(e) => setNewCustomIcon(e.target.value)}
+                                    style={{ width: '64px', textAlign: 'center', marginBottom: 0 }}
+                                    maxLength={4}
+                                />
+                                <input
+                                    className="msg-field-input"
+                                    placeholder="멘트 이름 (예: 여권 안내)"
+                                    value={newCustomLabel}
+                                    onChange={(e) => setNewCustomLabel(e.target.value)}
+                                    style={{ flex: 1, marginBottom: 0 }}
+                                    autoFocus
+                                />
+                            </div>
+                        </div>
+                    )}
+                    {previewEditMode && (
+                        <div style={{ padding: '8px 12px 20px' }}>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.5, marginBottom: '8px' }}>
+                                아래 내용을 원하는 대로 고치신 뒤 &quot;완료&quot;를 누르면 저장됩니다. 고객명·회사명 등 지금 채워진 값은 저장 시 자동으로 변수 처리되어, 다음에 다른 고객을 선택해도 그 고객 정보로 다시 채워집니다.
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', overflow: 'hidden' }}>
+                                {VARIABLE_GROUPS.map((group) => {
+                                    const isOpen = openVariableGroup === group.title;
+                                    return (
+                                        <div key={group.title}>
+                                            <button
+                                                type="button"
+                                                onClick={() => setOpenVariableGroup(isOpen ? null : group.title)}
+                                                style={{
+                                                    width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                                    padding: '6px 10px', background: 'rgba(255,255,255,0.03)', border: 'none',
+                                                    color: 'var(--text-secondary, #cbd5e1)', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer',
+                                                }}
+                                            >
+                                                <span>{group.title}</span>
+                                                <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>{isOpen ? '▲' : '▼'}</span>
+                                            </button>
+                                            {isOpen && (
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', padding: '8px 10px' }}>
+                                                    {group.vars.map((v) => (
+                                                        <button
+                                                            key={v.key}
+                                                            type="button"
+                                                            title={v.label}
+                                                            onClick={() => insertVariableIntoPreview(v.key)}
+                                                            style={{ fontSize: '0.72rem', padding: '3px 9px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary, #cbd5e1)', cursor: 'pointer' }}
+                                                        >
+                                                            {`{{${v.key}}}`}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                    {generatedText || previewEditMode ? (
                         <textarea
+                            ref={previewTextareaRef}
                             className="msg-preview-textarea"
                             value={generatedText}
                             onChange={(e) => {
                                 setGeneratedText(e.target.value);
                                 setIsManuallyEdited(true);
                             }}
+                            placeholder={previewEditMode === 'custom-new' ? '멘트 내용을 입력하세요. 예: 안녕하세요, 한기자님! (주)클럽모두 김호기입니다.' : undefined}
                         />
                     ) : (
                         <div className="msg-preview-empty">
