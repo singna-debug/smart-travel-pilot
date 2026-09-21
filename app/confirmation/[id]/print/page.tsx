@@ -102,6 +102,19 @@ interface ConfirmationDocument {
         roaming?: {
             tips?: string[];
         };
+        customGuides?: Array<{
+            topic?: string;
+            sections?: Array<{
+                title?: string;
+                type?: 'steps' | 'table' | 'list' | 'text' | 'route';
+                steps?: Array<{ step?: string; detail?: string }>;
+                headers?: string[];
+                rows?: any[][];
+                items?: any[];
+                content?: string;
+                route?: string[];
+            }>;
+        }>;
     };
 };
 
@@ -111,6 +124,32 @@ const formatDestination = (destStr?: string | null) => {
     if (list.length <= 1) return destStr;
     return `${list[0]} 외 ${list.length - 1}곳`;
 };
+
+// AI 응답에서 객체/배열이 올 수 있으므로 안전하게 문자열로 변환 (모바일 확정서와 동일 로직)
+function safeStr(val: any): string {
+    if (val === null || val === undefined) return '';
+    if (typeof val === 'string') return val;
+    if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+    if (Array.isArray(val)) {
+        return val.map((item: any) => {
+            if (typeof item === 'string') return item;
+            if (typeof item === 'object' && item !== null) {
+                const parts = [];
+                if (item.name) parts.push(item.name);
+                if (item.title) parts.push(item.title);
+                if (item.description) parts.push(item.description);
+                if (item.reason) parts.push(`(${item.reason})`);
+                if (item.content) parts.push(item.content);
+                return parts.length > 0 ? parts.join(' — ') : JSON.stringify(item);
+            }
+            return String(item);
+        }).join('\n');
+    }
+    if (typeof val === 'object') {
+        return Object.entries(val).map(([k, v]) => `${k}: ${safeStr(v)}`).join('\n');
+    }
+    return String(val);
+}
 
 // HTML 블록에서 <img>/<video> 및 순수 동영상 링크를 뽑아내고, 남은 텍스트는 그대로 반환한다.
 // (인쇄용 화면은 이미지/동영상을 항상 별도의 2열 그리드로 렌더링하기 위해 본문에서 분리해둔다)
@@ -400,6 +439,7 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
         sr.roaming = sr.roaming || {};
         sr.roaming.tips = Array.isArray(sr.roaming.tips) ? sr.roaming.tips : [];
         sr.landmarks = Array.isArray(sr.landmarks) ? sr.landmarks : [];
+        sr.customGuides = Array.isArray(sr.customGuides) ? sr.customGuides : [];
     }
 
     const trip = doc.trip || {};
@@ -1269,6 +1309,98 @@ export default function PrintConfirmationPage({ isDummy = false }: { isDummy?: b
                                     </div>
                                 </div>
                             )}
+                        </div>
+                    </div>
+                )}
+
+                {/* ─── 9-1. 기타 추가 가이드 (고산병/건강 등 별도 조사 항목) ─── */}
+                {secondaryResearch.customGuides && secondaryResearch.customGuides.length > 0 && (
+                    <div className="pc-section">
+                        <h3 className="pc-section-title">
+                            <span className="pc-section-icon">📌</span>
+                            기타 추가 안내사항
+                        </h3>
+                        <div className="pc-guide-blocks">
+                            {secondaryResearch.customGuides.map((guide: any, gi: number) => (
+                                <div key={gi} className="pc-guide-block" style={{ gridColumn: 'span 2', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                                    <h4 className="pc-block-title">
+                                        <div className="pc-block-icon pc-icon-blue">ℹ️</div>
+                                        {safeStr(guide.topic)}
+                                    </h4>
+                                    {(guide.sections || []).map((sec: any, si: number) => (
+                                        <div key={si} style={{ marginBottom: '14px' }}>
+                                            {sec.title && (
+                                                <h5 style={{ margin: '0 0 8px 0', fontSize: '0.78rem', fontWeight: 800, color: '#334155', borderBottom: '1px solid #f1f5f9', paddingBottom: '4px' }}>
+                                                    {safeStr(sec.title)}
+                                                </h5>
+                                            )}
+
+                                            {/* steps 타입 */}
+                                            {sec.type === 'steps' && sec.steps && sec.steps.length > 0 && (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    {sec.steps.map((s: any, idx: number) => (
+                                                        <div key={idx} style={{ display: 'flex', gap: '8px' }}>
+                                                            <div style={{ background: '#e2e8f0', color: '#475569', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 800, flexShrink: 0 }}>{idx + 1}</div>
+                                                            <div>
+                                                                <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#1e293b' }}>{safeStr(s.step)}</div>
+                                                                <div style={{ fontSize: '0.7rem', color: '#64748b', lineHeight: 1.45 }}>{safeStr(s.detail)}</div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* table 타입 */}
+                                            {sec.type === 'table' && sec.headers && sec.rows && (
+                                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.7rem', textAlign: 'left' }}>
+                                                    <thead>
+                                                        <tr style={{ background: '#f8fafc' }}>
+                                                            {sec.headers.map((h: any, hi: number) => (
+                                                                <th key={hi} style={{ padding: '6px 8px', borderBottom: '1.5px solid #e2e8f0', fontWeight: 700, color: '#475569' }}>{safeStr(h)}</th>
+                                                            ))}
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {sec.rows.map((row: any, ri: number) => (
+                                                            <tr key={ri} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                                {row.map((c: any, ci: number) => (
+                                                                    <td key={ci} style={{ padding: '6px 8px', color: '#475569' }}>{safeStr(c)}</td>
+                                                                ))}
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            )}
+
+                                            {/* list 타입 */}
+                                            {sec.type === 'list' && sec.items && sec.items.length > 0 && (
+                                                <ul className="pc-guide-list">
+                                                    {sec.items.map((item: any, ii: number) => (
+                                                        <li key={ii}>{safeStr(item)}</li>
+                                                    ))}
+                                                </ul>
+                                            )}
+
+                                            {/* text 타입 */}
+                                            {sec.type === 'text' && sec.content && (
+                                                <p className="pc-guide-text" style={{ whiteSpace: 'pre-line' }}>{safeStr(sec.content)}</p>
+                                            )}
+
+                                            {/* route 타입 */}
+                                            {sec.type === 'route' && sec.route && sec.route.length > 0 && (
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px' }}>
+                                                    {sec.route.map((r: any, ri: number) => (
+                                                        <span key={ri} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                                            <span style={{ background: '#f1f5f9', color: '#475569', padding: '3px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600 }}>{safeStr(r)}</span>
+                                                            {ri < (sec.route?.length || 0) - 1 && <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>→</span>}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
                         </div>
                     </div>
                 )}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { formatProductInfo, crawlForConfirmation, crawlTravelProduct, crawlForBooking, crawlForReservationGuide } from '@/lib/url-crawler';
-import { getTenantIdFromHeaderOrQuery, getGeminiApiKeyForTenant } from '@/lib/tenant';
+import { getTenantId, getGeminiApiKeyForTenant } from '@/lib/tenant';
 
 export const preferredRegion = 'icn1';
 export const runtime = 'nodejs';
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, error: 'URL이 필요합니다.' });
         }
 
-        const tenantId = getTenantIdFromHeaderOrQuery(req);
+        const tenantId = await getTenantId(req);
         const apiKey = await getGeminiApiKeyForTenant(tenantId);
 
         let result = null;

@@ -10,7 +10,22 @@ export default function CalendarPage() {
     useEffect(() => {
         const fetchCalendarData = async () => {
             try {
-                const response = await fetch('/api/stats');
+                let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+                if (!tenantId) {
+                    try {
+                        const { createClient } = await import('@/utils/supabase/client');
+                        const supabase = createClient();
+                        const { data: { user } } = await supabase.auth.getUser();
+                        if (user) {
+                            tenantId = user.email === 'gktla71@gmail.com' ? 'default_tenant' : user.id;
+                            localStorage.setItem('tenant_id', tenantId);
+                        }
+                    } catch (e) {}
+                }
+
+                const response = await fetch('/api/stats', {
+                    headers: tenantId ? { 'x-tenant-id': tenantId } : {}
+                });
                 const result = await response.json();
                 if (result.success) {
                     setData(result.data);

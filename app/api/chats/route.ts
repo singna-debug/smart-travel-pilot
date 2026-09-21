@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllConsultations } from '@/lib/google-sheets';
-import { getTenantIdFromHeaderOrQuery } from '@/lib/tenant';
+import { getTenantId } from '@/lib/tenant';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
         const status = searchParams.get('status');
         const search = searchParams.get('search');
         const limit = parseInt(searchParams.get('limit') || '50');
-        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const tenantId = await getTenantId(request);
         const refresh = searchParams.get('refresh') === 'true';
 
         // 테넌트 구글 시트에서 최신 데이터 즉시 조회 (새로고침 보장)

@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
                     visitorId: c.visitor_id || '',
                     reservationNumber: c.reservation_number || c.reservationNumber || '',
                     confirmationLink: c.confirmation_link || '',
+                    bankAccount: c.bank_account || '',
                     timestamp: c.timestamp,
                 });
             }

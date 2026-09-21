@@ -1,11 +1,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getMonthSheetGid, getSheetsConfigForTenant, getOrCreateMonthlySheet } from '@/lib/google-sheets';
-import { getTenantIdFromHeaderOrQuery, DEFAULT_TENANT_ID } from '@/lib/tenant';
+import { getTenantId, DEFAULT_TENANT_ID } from '@/lib/tenant';
 
 export async function GET(request: NextRequest) {
     try {
-        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const tenantId = await getTenantId(request);
 
         // 신규 가입 유저의 전용 시트 연동 처리
         if (tenantId !== DEFAULT_TENANT_ID) {

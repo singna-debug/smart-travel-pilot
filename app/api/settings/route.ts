@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { getTenantIdFromHeaderOrQuery, DEFAULT_TENANT_ID } from '@/lib/tenant';
+import { getTenantId, DEFAULT_TENANT_ID } from '@/lib/tenant';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSheetsConfigForTenant, getOrCreateMonthlySheet } from '@/lib/google-sheets';
 import { getLocalSettings, saveLocalSettings } from '@/lib/tenant-local-store';
@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
     try {
-        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const tenantId = await getTenantId(request);
         const local = getLocalSettings(tenantId);
 
         // 1. Supabase에서 해당 테넌트 설정 우선 조회
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const tenantId = await getTenantId(request);
         const body = await request.json();
 
         const sheetId = body.googleSpreadsheetId?.trim();

@@ -19,6 +19,7 @@ interface Customer {
     visitorId: string;
     reservationNumber?: string;
     confirmationLink?: string;
+    bankAccount?: string;
     timestamp: string;
 }
 
@@ -189,7 +190,7 @@ export default function MessageTemplateCreator() {
     const [deposit, setDeposit] = useState('1인 50만원');
     const [depositDeadline, setDepositDeadline] = useState('');
     const [bankAccount, setBankAccount] = useState('');
-    const [bankHolder, setBankHolder] = useState('');
+    const [bankHolder, setBankHolder] = useState('모두투어 네트워크');
     const [fuelSurcharge, setFuelSurcharge] = useState('');
     const [excludedCosts, setExcludedCosts] = useState('가이드 팁, 매너 팁, 개인 경비');
     const [depositPerPerson, setDepositPerPerson] = useState('');
@@ -236,6 +237,11 @@ export default function MessageTemplateCreator() {
             // 예약번호 로드
             const resNum = selectedCustomer.reservationNumber || '';
             setBookingNumber(resNum);
+
+            // 가상계좌번호 로드 (상담 목록에서 예약확정 시 입력한 값)
+            if (selectedCustomer.bankAccount) {
+                setBankAccount(selectedCustomer.bankAccount);
+            }
 
             if (selectedCustomer.confirmationLink) {
                 setConfirmationLink(selectedCustomer.confirmationLink);
@@ -652,8 +658,7 @@ ${bankAccount}
 
 ──────────────────
 
-📞 담당자 정보
-${companyName} ${AGENT_NAME}`;
+${getContactFooter()}`;
                 break;
             }
 
@@ -790,7 +795,7 @@ ${getContactFooter()}`;
 ──────────────────
 
 궁금한 점은 언제든 연락주세요
-☎️ 02-951-9004 / 010-9307-9004`;
+${getContactFooter()}`;
                 break;
         }
 
@@ -1033,7 +1038,7 @@ ${getContactFooter()}`;
                                 <label className="msg-field-label">예금주</label>
                                 <input
                                     className="msg-field-input"
-                                    placeholder="(주)클럽모두"
+                                    placeholder="모두투어 네트워크"
                                     value={bankHolder}
                                     onChange={(e) => setBankHolder(e.target.value)}
                                 />
@@ -1260,7 +1265,7 @@ ${getContactFooter()}`;
                                 <label className="msg-field-label">예금주</label>
                                 <input
                                     className="msg-field-input"
-                                    placeholder="(주)클럽모두"
+                                    placeholder="모두투어 네트워크"
                                     value={bankHolder}
                                     onChange={(e) => setBankHolder(e.target.value)}
                                 />

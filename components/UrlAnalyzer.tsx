@@ -653,18 +653,31 @@ export default function UrlAnalyzer() {
                     <button
                         onClick={async () => {
                             try {
-                                const tenantId = localStorage.getItem('tenant_id') || 'default_tenant';
+                                let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+                                if (!tenantId) {
+                                    try {
+                                        const { createClient } = await import('@/utils/supabase/client');
+                                        const supabase = createClient();
+                                        const { data: { user } } = await supabase.auth.getUser();
+                                        if (user) {
+                                            tenantId = user.email === 'gktla71@gmail.com' ? 'default_tenant' : user.id;
+                                            localStorage.setItem('tenant_id', tenantId);
+                                        }
+                                    } catch (e) {}
+                                }
                                 const resp = await fetch(isDummy ? '/api/dummy/sheet-info' : '/api/sheet-info', {
-                                    headers: { 'x-tenant-id': tenantId }
+                                    headers: tenantId ? { 'x-tenant-id': tenantId } : {}
                                 });
                                 const data = await resp.json();
-                                if (data.success && data.url) {
+                                if (data.success && data.url && data.url !== '#') {
                                     window.open(data.url, '_blank');
+                                } else if (tenantId === 'default_tenant') {
+                                    window.open(`https://docs.google.com/spreadsheets/d/${process.env.NEXT_PUBLIC_SHEET_ID || '17aVvFt29xlEvW5na0zvqN7B5HPOqxt55AzFJuabn2fk'}/edit`, '_blank');
                                 } else {
-                                    window.open(`https://docs.google.com/spreadsheets/d/${process.env.NEXT_PUBLIC_SHEET_ID}/edit`, '_blank');
+                                    alert('⚙️ [설정] 페이지에서 사장님/여행사 전용 구글 시트 ID를 먼저 연결 후 이용해 주세요.');
                                 }
                             } catch (e) {
-                                window.open(`https://docs.google.com/spreadsheets/d/${process.env.NEXT_PUBLIC_SHEET_ID}/edit`, '_blank');
+                                alert('⚙️ [설정] 페이지에서 사장님/여행사 전용 구글 시트 ID를 먼저 연결 후 이용해 주세요.');
                             }
                         }}
                         className="action-button"

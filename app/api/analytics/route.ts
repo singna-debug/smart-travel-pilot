@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllConsultations } from '@/lib/google-sheets';
 import { supabase } from '@/lib/supabase';
-import { getTenantIdFromHeaderOrQuery, DEFAULT_TENANT_ID } from '@/lib/tenant';
+import { getTenantId, DEFAULT_TENANT_ID } from '@/lib/tenant';
 import { differenceInDays, startOfDay, subDays, format, startOfWeek, startOfMonth } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const period = parseInt(searchParams.get('period') || '30', 10); // 7, 30, 90
-        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const tenantId = await getTenantId(request);
 
         let consultations: any[] = [];
 

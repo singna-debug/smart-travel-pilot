@@ -94,7 +94,19 @@ export default function Sidebar() {
                 </a>
                 <button
                     onClick={async () => {
-                        const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+                        let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+                        if (!tenantId) {
+                            try {
+                                const { createClient } = await import('@/utils/supabase/client');
+                                const supabase = createClient();
+                                const { data: { user } } = await supabase.auth.getUser();
+                                if (user) {
+                                    tenantId = user.email === 'gktla71@gmail.com' ? 'default_tenant' : user.id;
+                                    localStorage.setItem('tenant_id', tenantId);
+                                }
+                            } catch (e) {}
+                        }
+
                         const savedSettings = typeof window !== 'undefined' ? localStorage.getItem('tenant_settings') : null;
                         let customSheetId = null;
                         if (savedSettings) {
@@ -102,8 +114,8 @@ export default function Sidebar() {
                         }
 
                         // 사장님 본인 계정이면 사장님 구글 시트 연결
-                        if (!tenantId || tenantId === 'default_tenant') {
-                            const sheetId = process.env.NEXT_PUBLIC_SHEET_ID || '17Q0J_O13426hV2e951Q7z-8n3g8735391';
+                        if (tenantId === 'default_tenant') {
+                            const sheetId = process.env.NEXT_PUBLIC_SHEET_ID || '17aVvFt29xlEvW5na0zvqN7B5HPOqxt55AzFJuabn2fk';
                             window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`, '_blank');
                         } else if (customSheetId) {
                             window.open(`https://docs.google.com/spreadsheets/d/${customSheetId}/edit`, '_blank');
@@ -125,6 +137,13 @@ export default function Sidebar() {
                 <button 
                     onClick={async () => {
                         if (confirm('로그아웃 하시겠습니까?')) {
+                            try {
+                                localStorage.removeItem('tenant_id');
+                                localStorage.removeItem('tenant_settings');
+                                localStorage.removeItem('agent_name');
+                                localStorage.removeItem('company_name');
+                                localStorage.removeItem('agency_name');
+                            } catch (e) {}
                             await logout();
                         }
                     }} 

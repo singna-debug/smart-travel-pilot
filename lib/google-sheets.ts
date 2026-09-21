@@ -376,11 +376,11 @@ export async function getOrCreateMonthlySheet(sheets: any, spreadsheetId: string
             // 헤더 강제 주입
             const consultationHeaders = [
                 '상담일시', '고객성함', '연락처', '총인원', '재방문여부', '유입경로', '목적지', '출발일', '귀국일', '기간', '상품명', '상품URL', '상담요약', '상담단계', '등록방식', '팔로업일',
-                '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호', '확정서 링크'
+                '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호', '확정서 링크', '가상계좌번호'
             ];
             await sheets.spreadsheets.values.update({
                 spreadsheetId,
-                range: `${month}!A1:AD1`,
+                range: `${month}!A1:AE1`,
                 valueInputOption: 'USER_ENTERED',
                 requestBody: { values: [consultationHeaders] },
             });
@@ -406,12 +406,12 @@ export async function getOrCreateMonthlySheet(sheets: any, spreadsheetId: string
         // 헤더 초기화
         const consultationHeaders = [
             '상담일시', '고객성함', '연락처', '총인원', '재방문여부', '유입경로', '목적지', '출발일', '귀국일', '기간', '상품명', '상품URL', '상담요약', '상담단계', '등록방식', '팔로업일',
-            '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호', '확정서 링크'
+            '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호', '확정서 링크', '가상계좌번호'
         ];
 
         await sheets.spreadsheets.values.update({
             spreadsheetId,
-            range: `${month}!A1:AD1`,
+            range: `${month}!A1:AE1`,
             valueInputOption: 'USER_ENTERED',
             requestBody: { values: [consultationHeaders] },
         });
@@ -792,7 +792,7 @@ export async function initializeSheetHeaders(): Promise<boolean> {
         // 1. 상담 요약 시트
         const consultationHeaders = [
             '상담일시', '고객성함', '연락처', '총인원', '재방문여부', '유입경로', '목적지', '출발일', '귀국일', '기간', '상품명', '상품URL', '상담요약', '상담단계', '등록방식', '팔로업일',
-            '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호', '확정서 링크'
+            '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호', '확정서 링크', '가상계좌번호'
         ];
 
         // 2. 메시지 로그 시트
@@ -827,7 +827,7 @@ export async function initializeSheetHeaders(): Promise<boolean> {
         // 상담 요약 업데이트
         await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
-            range: `${consultationsSheet}!A1:AD1`,
+            range: `${consultationsSheet}!A1:AE1`,
             valueInputOption: 'USER_ENTERED',
             requestBody: { values: [consultationHeaders] },
         });
@@ -1027,6 +1027,7 @@ export async function getConsultationHistory(customerPhone: string): Promise<Con
                 specific_reminder_date: row[27] || '', // AB: 리마인드 (index 27)
                 reservation_number: row[28] || '',     // AC: 예약번호 (index 28)
                 confirmation_link: row[29] || '',      // AD: 확정서 링크 (index 29)
+                bank_account: row[30] || '',           // AE: 가상계좌번호 (index 30)
                 source: row[14] || '',                // O: 등록방식 (index 14)
                 timestamp: row[0],
                 visitor_id: row[25] || '',            // Z: visitor_id (index 25)
@@ -1178,6 +1179,7 @@ async function getAllConsultationsForTenant(tenantId: string, forceRefresh = fal
                 specific_reminder_date: row[27] || '',
                 reservation_number: row[28] || '',
                 confirmation_link: row[29] || '',
+                bank_account: row[30] || '',
                 source: row[14] || '수동등록',
                 visitor_id: row[25] || '',
                 sheetName: row._sheetName,
@@ -1277,6 +1279,7 @@ export async function getAllConsultations(forceRefresh = false, tenantId = 'defa
                 specific_reminder_date: row[27] || '', // AB: 리마인드 (index 27)
                 reservation_number: row[28] || '',     // AC: 예약번호 (index 28)
                 confirmation_link: row[29] || '',      // AD: 확정서 링크 (index 29)
+                bank_account: row[30] || '',           // AE: 가상계좌번호 (index 30)
                 source: row[14] || '수동등록',        // O: 등록방식 (index 14)
                 visitor_id: row[25] || '',            // Z: visitor_id (index 25)
                 sheetName: row._sheetName,
@@ -1580,7 +1583,7 @@ const FIELD_TO_COLUMN: Record<string, string> = {
     prepaidDate: 'S', noticeDate: 'T', balanceDate: 'U',
     confirmationSent: 'V', departureNotice: 'W', phoneNotice: 'X', happyCall: 'Y',
     inquiryInfoBackup: 'AA', specific_reminder_date: 'AB',
-    reservationNumber: 'AC',
+    reservationNumber: 'AC', bankAccount: 'AE',
 };
 
 export async function updateConsultationField(
@@ -1655,6 +1658,7 @@ export async function updateConsultationConfirmation(
         phoneNotice: string;
         happyCall: string;
         reservationNumber?: string;
+        bankAccount?: string;
     },
     sheetName?: string,
     tenantId: string = 'default_tenant'
@@ -1693,6 +1697,10 @@ export async function updateConsultationConfirmation(
         
         if (data.reservationNumber) {
             updates.push({ range: `${targetSheetName}!AC${rowIndex}`, values: [[data.reservationNumber]] });
+        }
+
+        if (data.bankAccount) {
+            updates.push({ range: `${targetSheetName}!AE${rowIndex}`, values: [[data.bankAccount]] });
         }
 
         await sheets.spreadsheets.values.batchUpdate({

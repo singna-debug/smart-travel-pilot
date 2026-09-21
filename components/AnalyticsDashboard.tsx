@@ -207,7 +207,19 @@ export default function AnalyticsDashboard() {
     const fetchAnalytics = useCallback(async (p: number) => {
         setLoading(true);
         try {
-            const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+            let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+            if (!tenantId) {
+                try {
+                    const { createClient } = await import('@/utils/supabase/client');
+                    const supabase = createClient();
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        tenantId = user.email === 'gktla71@gmail.com' ? 'default_tenant' : user.id;
+                        localStorage.setItem('tenant_id', tenantId);
+                    }
+                } catch (e) {}
+            }
+
             const res = await fetch(isDummy ? `/api/dummy/analytics?period=${p}` : `/api/analytics?period=${p}`, {
                 headers: tenantId ? { 'x-tenant-id': tenantId } : {}
             });

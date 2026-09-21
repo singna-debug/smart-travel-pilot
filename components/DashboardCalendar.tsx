@@ -384,7 +384,28 @@ export default function DashboardCalendar({ consultations, lists, isLoading }: D
     }
   }, [consultations, lists]);
 
-  const isDefaultTenant = typeof window !== 'undefined' ? (localStorage.getItem('tenant_id') === null || localStorage.getItem('tenant_id') === 'default_tenant') : true;
+  const [currentTenantId, setCurrentTenantId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const syncTenant = async () => {
+      let saved = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+      if (!saved) {
+        try {
+          const { createClient } = await import('@/utils/supabase/client');
+          const supabase = createClient();
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            saved = user.email === 'gktla71@gmail.com' ? 'default_tenant' : user.id;
+            localStorage.setItem('tenant_id', saved);
+          }
+        } catch (e) {}
+      }
+      setCurrentTenantId(saved || null);
+    };
+    syncTenant();
+  }, []);
+
+  const isDefaultTenant = currentTenantId === 'default_tenant';
 
   const activeEvents = parsedRealEvents.length > 0 
     ? parsedRealEvents 

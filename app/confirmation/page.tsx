@@ -204,6 +204,9 @@ export default function ConfirmationPage({ isDummy = false }: { isDummy?: boolea
                     } else if (user.id) {
                         tenantId = user.id;
                     }
+                    if (tenantId) {
+                        localStorage.setItem('tenant_id', tenantId);
+                    }
                 }
 
                 const res = await fetch('/api/settings', {

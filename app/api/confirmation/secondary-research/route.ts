@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { SecondaryResearch } from '@/types';
 import { mockSecondaryResearch } from '@/lib/dummy-data';
-import { getTenantIdFromHeaderOrQuery, getGeminiApiKeyForTenant } from '@/lib/tenant';
+import { getTenantId, getGeminiApiKeyForTenant } from '@/lib/tenant';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { destination, travelMonth, airline, baggageNote, customGuides, itinerary, targets } = body;
 
-        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const tenantId = await getTenantId(request);
         const apiKey = await getGeminiApiKeyForTenant(tenantId);
 
         // Fallback to dummy data if isDummy is true or if GEMINI_API_KEY is not configured

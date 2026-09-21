@@ -41,6 +41,7 @@ export interface ConsultationData {
   specific_reminder_date?: string;
   reservation_number?: string; // 예약번호 (AC열)
   confirmation_link?: string;  // 확정서 링크 (AD열)
+  bank_account?: string;       // 가상계좌번호 (AE열)
   isOverdue?: boolean;        // 기한초과 여부 플래그
 }
 

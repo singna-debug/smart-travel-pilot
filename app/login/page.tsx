@@ -16,6 +16,12 @@ function AuthForm() {
     const message = searchParams.get('message')
 
     React.useEffect(() => {
+        // 다른 사용자 계정 전환 시 충돌 방지를 위해 이전 테넌트 캐시 정리
+        try {
+            localStorage.removeItem('tenant_id');
+            localStorage.removeItem('tenant_settings');
+        } catch (e) {}
+
         const savedEmail = localStorage.getItem('remembered_email')
         if (savedEmail) {
             setEmail(savedEmail)

@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteConsultationFromSheet, updateConsultationStatus, updateConsultationField } from '@/lib/google-sheets';
-import { getTenantIdFromHeaderOrQuery } from '@/lib/tenant';
+import { getTenantId } from '@/lib/tenant';
 
 // 상담 개별 필드 업데이트 (PATCH)
 export async function PATCH(request: NextRequest) {
     try {
         const body = await request.json();
         const { rowIndex, field, value, sheetName } = body;
-        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const tenantId = await getTenantId(request);
 
         if (!rowIndex || !field) {
             return NextResponse.json(
@@ -40,7 +40,7 @@ export async function PUT(request: NextRequest) {
     try {
         const body = await request.json();
         const { sessionId, rowIndex, status, sheetName } = body;
-        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const tenantId = await getTenantId(request);
 
         if (!rowIndex || !status) {
             return NextResponse.json(
@@ -79,7 +79,7 @@ export async function DELETE(request: NextRequest) {
         const rowIndex = searchParams.get('rowIndex');
         const sheetName = searchParams.get('sheetName');
         const sessionId = searchParams.get('sessionId');
-        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const tenantId = await getTenantId(request);
 
         if (!rowIndex) {
             return NextResponse.json(

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { crawlTravelProduct, formatProductInfo, generateRecommendation, compareProducts, htmlToText, crawlForConfirmation, crawlForBooking, crawlForReservationGuide } from '@/lib/url-crawler';
-import { getTenantIdFromHeaderOrQuery, getGeminiApiKeyForTenant } from '@/lib/tenant';
+import { getTenantId, getGeminiApiKeyForTenant } from '@/lib/tenant';
 import type { TravelProductInfo, DetailedProductInfo } from '@/types';
 
 // URL 분석 API (단일 및 다중 URL 지원) - Departure date 2026-08-02 & recursion fix applied
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { url, urls, text, nextData, texts, nextDatas, preAnalyzedData, source, mode } = body;
 
-        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const tenantId = await getTenantId(request);
         const apiKey = await getGeminiApiKeyForTenant(tenantId);
 
         // 단일 URL

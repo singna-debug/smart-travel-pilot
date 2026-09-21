@@ -39,6 +39,7 @@ interface ChatItem {
     sheetGid?: number;
     specific_reminder_date: string;
     reservationNumber?: string;
+    bankAccount?: string;
 }
 
 const STATUS_OPTIONS = ['상담중', '예약확정', '선금완료', '잔금완료', '여행완료', '취소/보류', '상담완료'];
@@ -76,6 +77,7 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
     const [confirmModal, setConfirmModal] = useState<{ chat: ChatItem; } | null>(null);
     const [confirmUrl, setConfirmUrl] = useState('');
     const [confirmReservationNumber, setConfirmReservationNumber] = useState('');
+    const [confirmBankAccount, setConfirmBankAccount] = useState('');
     const [confirming, setConfirming] = useState(false);
     const [reminderModal, setReminderModal] = useState<ChatItem | null>(null);
     const [reminderDateInput, setReminderDateInput] = useState('');
@@ -99,8 +101,28 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
     };
 
     useEffect(() => {
-        fetchChats();
-        const interval = setInterval(fetchChats, 30000);
+        let currentTenant: string | null = null;
+        const init = async () => {
+            let saved = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+            if (!saved) {
+                try {
+                    const { createClient } = await import('@/utils/supabase/client');
+                    const supabase = createClient();
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        saved = user.email === 'gktla71@gmail.com' ? 'default_tenant' : user.id;
+                        localStorage.setItem('tenant_id', saved);
+                    }
+                } catch (e) {}
+            }
+            currentTenant = saved;
+            await fetchChats(false, saved || undefined);
+        };
+        init();
+        const interval = setInterval(() => {
+            const tid = (typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null) || currentTenant;
+            fetchChats(false, tid || undefined);
+        }, 30000);
         return () => clearInterval(interval);
     }, [statusFilter]);
 
@@ -130,10 +152,13 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
         }
 
         try {
-            const tenantId = (typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null) || 'default_tenant';
+            const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
             const res = await fetch(getApiUrl('/consultations'), {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(tenantId ? { 'x-tenant-id': tenantId } : {})
+                },
                 body: JSON.stringify({
                     rowIndex: chat.sheetRowIndex,
                     sheetName: chat.sheetName,
@@ -177,17 +202,14 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
         }
     };
 
-    const fetchChats = async (forceRefresh = false) => {
+    const fetchChats = async (forceRefresh = false, tenantIdOverride?: string) => {
         try {
-            let tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
-            if (!tenantId || tenantId === 'default_tenant') {
-                tenantId = 'default_tenant';
-            }
+            const tenantId = tenantIdOverride || (typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null);
 
             // 시트 정보 먼저 조회
             try {
                 const sheetInfoRes = await fetch('/api/sheet-info', {
-                    headers: { 'x-tenant-id': tenantId }
+                    headers: tenantId ? { 'x-tenant-id': tenantId } : {}
                 });
                 const sheetInfo = await sheetInfoRes.json();
                 if (sheetInfo.success && sheetInfo.isConfigured) {
@@ -208,7 +230,7 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
             }
 
             const response = await fetch(url, {
-                headers: { 'x-tenant-id': tenantId }
+                headers: tenantId ? { 'x-tenant-id': tenantId } : {}
             });
             const data = await response.json();
             if (data.success) {
@@ -249,15 +271,19 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
             setConfirmModal({ chat });
             setConfirmUrl('');
             setConfirmReservationNumber(chat.reservationNumber || '');
+            setConfirmBankAccount(chat.bankAccount || '');
             return;
         }
 
         setUpdating(chat.id);
         try {
-            const tenantId = (typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null) || 'default_tenant';
+            const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
             const response = await fetch(getApiUrl('/consultations'), {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(tenantId ? { 'x-tenant-id': tenantId } : {})
+                },
                 body: JSON.stringify({
                     rowIndex: chat.sheetRowIndex,
                     status: newStatus,
@@ -316,6 +342,7 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
                     sheetName: chat.sheetName,
                     confirmedProductUrl: confirmUrl.trim(),
                     reservationNumber: confirmReservationNumber.trim(),
+                    bankAccount: confirmBankAccount.trim(),
                 }),
             });
 
@@ -340,11 +367,13 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
                         phoneNotice: data.data.phoneNotice,
                         happyCall: data.data.happyCall,
                         reservationNumber: data.data.reservationNumber,
+                        bankAccount: data.data.bankAccount,
                     } : c
                 ));
                 setConfirmModal(null);
                 setConfirmUrl('');
                 setConfirmReservationNumber('');
+                setConfirmBankAccount('');
                 alert(`출발일: ${data.data.departureDate || '확인필요'}, 귀국일: ${data.data.returnDate || '확인필요'}`);
             } else {
                 alert('예약확정 실패: ' + data.error);
@@ -421,7 +450,7 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
         let successCount = 0;
         let failCount = 0;
 
-        const tenantId = (typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null) || 'default_tenant';
+        const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
 
         // 1. 시트에 있는 항목들 삭제 (행 인덱스 내림차순 정렬)
         const sortedSheetItems = [...sheetItems].sort((a, b) => (b.sheetRowIndex || 0) - (a.sheetRowIndex || 0));
@@ -429,7 +458,10 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
         for (const chat of sortedSheetItems) {
             try {
                 const url = getApiUrl(`/consultations?rowIndex=${chat.sheetRowIndex}${chat.sheetName ? `&sheetName=${encodeURIComponent(chat.sheetName)}` : ''}`);
-                const response = await fetch(url, { method: 'DELETE', headers: { 'x-tenant-id': tenantId } });
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: tenantId ? { 'x-tenant-id': tenantId } : {}
+                });
                 const data = await response.json();
                 if (data.success) {
                     successCount++;
@@ -1351,6 +1383,28 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
                                 placeholder="예약번호를 입력하세요 (예: R1234567)"
                                 value={confirmReservationNumber}
                                 onChange={(e) => setConfirmReservationNumber(e.target.value)}
+                                disabled={confirming}
+                                style={{
+                                    width: '100%', padding: '12px 14px',
+                                    backgroundColor: '#111827', border: '1px solid #374151',
+                                    borderRadius: '8px', color: '#fff', fontSize: '14px',
+                                    outline: 'none', transition: 'border-color 0.2s',
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = '#10b981'}
+                                onBlur={(e) => e.target.style.borderColor = '#374151'}
+                                onKeyDown={(e) => e.key === 'Enter' && handleConfirmReservation()}
+                            />
+                        </div>
+
+                        <div style={{ marginBottom: '16px' }}>
+                            <label style={{ fontSize: '12px', color: '#9ca3af', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
+                                가상계좌번호 (선택사항)
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="가상계좌번호를 입력하세요 (예: 국민은행 476501-04-095837)"
+                                value={confirmBankAccount}
+                                onChange={(e) => setConfirmBankAccount(e.target.value)}
                                 disabled={confirming}
                                 style={{
                                     width: '100%', padding: '12px 14px',

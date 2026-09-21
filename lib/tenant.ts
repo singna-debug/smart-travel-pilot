@@ -13,7 +13,61 @@ export interface TenantInfo {
 }
 
 /**
- * 클라이언트 / 서버 공통: 현재 요청 또는 세션의 Tenant ID 식별
+ * 서버 / 클라이언트 공통: 요청 세션 쿠키, 헤더 또는 localStorage에서 정확한 Tenant ID 식별
+ */
+export async function getTenantId(req?: any): Promise<string> {
+  // 1. 서버 사이드: Supabase Auth 세션 쿠키를 우선적으로 확인
+  if (typeof window === 'undefined') {
+    try {
+      const { createClient } = await import('@/utils/supabase/server');
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        if (user.email === 'gktla71@gmail.com') {
+          return DEFAULT_TENANT_ID;
+        }
+        return user.id;
+      }
+    } catch (e) {
+      // 서버 세션 확인 실패 시 헤더 및 쿼리 파라미터 확인으로 진행
+    }
+
+    if (req) {
+      const headerTenant = req.headers?.get?.('x-tenant-id') || req.headers?.['x-tenant-id'];
+      if (headerTenant && headerTenant !== 'null' && headerTenant !== 'undefined') {
+        return headerTenant;
+      }
+
+      try {
+        const url = new URL(req.url || 'https://localhost');
+        const queryTenant = url.searchParams.get('tenant_id');
+        if (queryTenant) return queryTenant;
+      } catch (e) {}
+    }
+
+    return DEFAULT_TENANT_ID;
+  }
+
+  // 2. 클라이언트 사이드
+  const saved = localStorage.getItem('tenant_id');
+  if (saved && saved !== 'undefined' && saved !== 'null') {
+    return saved;
+  }
+
+  const tenantSetting = localStorage.getItem('tenant_settings');
+  if (tenantSetting) {
+    try {
+      const parsed = JSON.parse(tenantSetting);
+      if (parsed.email === 'gktla71@gmail.com') return DEFAULT_TENANT_ID;
+      if (parsed.tenantId) return parsed.tenantId;
+    } catch (e) {}
+  }
+
+  return DEFAULT_TENANT_ID;
+}
+
+/**
+ * 클라이언트 / 서버 공통 동기식 식별자 (헤더/로컬스토리지 기반)
  */
 export function getTenantIdFromHeaderOrQuery(req?: any): string {
   if (typeof window !== 'undefined') {

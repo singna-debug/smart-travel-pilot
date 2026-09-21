@@ -58,6 +58,7 @@ export default function DashboardPage({ isDummy = false }: { isDummy?: boolean }
   const pendingCount = data?.lists.recentInquiries.filter(c => c.automation.status === '확인필요').length || 0;
 
   useEffect(() => {
+    let currentTenantId: string | null = null;
     const initTenant = async () => {
       try {
         const { createClient } = await import('@/utils/supabase/client');
@@ -68,30 +69,28 @@ export default function DashboardPage({ isDummy = false }: { isDummy?: boolean }
           return;
         }
         
-        if (user.email === 'gktla71@gmail.com') {
-          // 사장님 계정 및 비로그인 기본값은 무조건 default_tenant!
-          localStorage.setItem('tenant_id', 'default_tenant');
-        } else if (user.id) {
-          localStorage.setItem('tenant_id', user.id);
-        }
+        currentTenantId = user.email === 'gktla71@gmail.com' ? 'default_tenant' : user.id;
+        localStorage.setItem('tenant_id', currentTenantId);
+        await fetchDashboardData(false, currentTenantId);
       } catch (e) {
-        localStorage.setItem('tenant_id', 'default_tenant');
         window.location.href = '/login';
         return;
       }
-      fetchDashboardData(false);
     };
 
     initTenant();
-    const interval = setInterval(() => fetchDashboardData(false), 60000);
+    const interval = setInterval(() => {
+      const tid = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : currentTenantId;
+      fetchDashboardData(false, tid || undefined);
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  const fetchDashboardData = async (forceRefresh = false) => {
+  const fetchDashboardData = async (forceRefresh = false, tenantIdOverride?: string) => {
     try {
       const baseUrl = isDummy ? '/api/dummy/stats' : '/api/stats';
       const url = forceRefresh ? `${baseUrl}?refresh=true` : baseUrl;
-      const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
+      const tenantId = tenantIdOverride || (typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null);
       
       const response = await fetch(url, {
         headers: tenantId ? { 'x-tenant-id': tenantId } : {}

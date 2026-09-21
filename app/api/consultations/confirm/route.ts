@@ -12,7 +12,7 @@ import { getTenantIdFromHeaderOrQuery } from '@/lib/tenant';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { rowIndex, sheetName, confirmedProductUrl, reservationNumber } = body;
+        const { rowIndex, sheetName, confirmedProductUrl, reservationNumber, bankAccount } = body;
         const tenantId = getTenantIdFromHeaderOrQuery(request);
 
         if (!rowIndex || !confirmedProductUrl) {
@@ -98,6 +98,7 @@ export async function POST(request: NextRequest) {
             phoneNotice,
             happyCall,
             reservationNumber,
+            bankAccount,
         });
 
         // 3. Google Sheets 일괄 업데이트
@@ -118,6 +119,7 @@ export async function POST(request: NextRequest) {
                 phoneNotice,
                 happyCall,
                 reservationNumber,
+                bankAccount,
             },
             sheetName,
             tenantId
@@ -143,6 +145,7 @@ export async function POST(request: NextRequest) {
                     phoneNotice,
                     happyCall,
                     reservationNumber,
+                    bankAccount,
                 },
             });
         } else {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { crawlForConfirmation, htmlToText } from '@/lib/url-crawler';
-import { getTenantIdFromHeaderOrQuery, getGeminiApiKeyForTenant } from '@/lib/tenant';
+import { getTenantId, getGeminiApiKeyForTenant } from '@/lib/tenant';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // 60초까지 연장 (Vercel Pro 플랜 지원)
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'URL이 필요합니다.' }, { status: 400 });
         }
 
-        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const tenantId = await getTenantId(request);
         const apiKey = await getGeminiApiKeyForTenant(tenantId);
 
         let result: any = null;

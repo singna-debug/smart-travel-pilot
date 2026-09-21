@@ -1,7 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { crawlTravelProduct } from '@/lib/url-crawler';
-import { getTenantIdFromHeaderOrQuery, getGeminiApiKeyForTenant } from '@/lib/tenant';
+import { getTenantId, getGeminiApiKeyForTenant } from '@/lib/tenant';
 
 export async function POST(request: NextRequest) {
     try {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'URL is required' }, { status: 400 });
         }
 
-        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const tenantId = await getTenantId(request);
         const apiKey = await getGeminiApiKeyForTenant(tenantId);
 
         const productInfo = await crawlTravelProduct(url, undefined, apiKey);

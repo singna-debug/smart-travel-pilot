@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllConsultations } from '@/lib/google-sheets';
-import { getTenantIdFromHeaderOrQuery } from '@/lib/tenant';
+import { getTenantId } from '@/lib/tenant';
 import { differenceInDays, isAfter, isBefore, addDays, startOfDay, parseISO, format } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const refresh = searchParams.get('refresh') === 'true';
-        const tenantId = getTenantIdFromHeaderOrQuery(request);
+        const tenantId = await getTenantId(request);
 
         // 항상 해당 테넌트의 구글 시트에서 데이터 조회
         const consultations = await getAllConsultations(refresh, tenantId);
