@@ -1634,6 +1634,40 @@ export async function updateConsultationField(
 }
 
 /**
+ * 지정한 시트의 그리드 열 개수가 minColumns보다 적으면 그만큼 확장합니다.
+ * 과거에 생성된 월별 시트는 컬럼이 AC~AD열까지만 있는 경우가 있어,
+ * 그 이후에 추가된 열(예: AE=가상계좌번호)에 값을 쓰면 실패할 수 있습니다.
+ */
+async function ensureSheetColumnCount(sheets: any, spreadsheetId: string, sheetName: string, minColumns: number): Promise<void> {
+    try {
+        const meta = await sheets.spreadsheets.get({ spreadsheetId });
+        const target = (meta.data.sheets || []).find((s: any) => s.properties?.title === sheetName);
+        if (!target) return;
+
+        const currentColumns = target.properties?.gridProperties?.columnCount || 0;
+        if (currentColumns >= minColumns) return;
+
+        await sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            requestBody: {
+                requests: [{
+                    updateSheetProperties: {
+                        properties: {
+                            sheetId: target.properties.sheetId,
+                            gridProperties: { columnCount: minColumns },
+                        },
+                        fields: 'gridProperties.columnCount',
+                    },
+                }],
+            },
+        });
+        console.log(`[Google Sheets] '${sheetName}' 시트 열 개수를 ${currentColumns} → ${minColumns}로 확장했습니다.`);
+    } catch (error: any) {
+        console.error(`[Google Sheets] '${sheetName}' 시트 열 확장 실패:`, error.message);
+    }
+}
+
+/**
  * 예약확정 시 확정상품 URL 및 자동 계산 날짜를 일괄 업데이트합니다.
  * 컬럼 매핑 (0-indexed):
  *   G(6)=목적지, H(7)=출발일, I(8)=귀국일,
@@ -1699,10 +1733,6 @@ export async function updateConsultationConfirmation(
             updates.push({ range: `${targetSheetName}!AC${rowIndex}`, values: [[data.reservationNumber]] });
         }
 
-        if (data.bankAccount) {
-            updates.push({ range: `${targetSheetName}!AE${rowIndex}`, values: [[data.bankAccount]] });
-        }
-
         await sheets.spreadsheets.values.batchUpdate({
             spreadsheetId: sheetId,
             requestBody: {
@@ -1710,6 +1740,25 @@ export async function updateConsultationConfirmation(
                 data: updates,
             },
         });
+
+        // 가상계좌번호(AE열)는 핵심 업데이트와 분리해서 별도로 기록한다.
+        // 과거에 생성된 월별 시트는 그리드가 AC~AD열까지만 있어 AE열 쓰기가
+        // "Invalid range" 등으로 실패할 수 있는데, 같은 batchUpdate에 섞여 있으면
+        // 요청 전체가 실패(롤백)되어 날짜 계산 등 핵심 예약확정 처리까지 함께
+        // 실패해버리기 때문에 분리하고, 쓰기 전에 그리드를 AE열 이상으로 확장해둔다.
+        if (data.bankAccount) {
+            try {
+                await ensureSheetColumnCount(sheets, sheetId, targetSheetName, 31); // AE열 = 31번째 컬럼
+                await sheets.spreadsheets.values.update({
+                    spreadsheetId: sheetId,
+                    range: `${targetSheetName}!AE${rowIndex}`,
+                    valueInputOption: 'USER_ENTERED',
+                    requestBody: { values: [[data.bankAccount]] },
+                });
+            } catch (bankError: any) {
+                console.error('[Google Sheets] 가상계좌번호(AE열) 기록 실패 (예약확정 자체는 계속 진행):', bankError.message);
+            }
+        }
 
         console.log(`[Google Sheets] ${targetSheetName} 행 ${rowIndex} 예약확정 일괄 업데이트 완료`);
         cachedConsultations = null; // 캐시 초가화
