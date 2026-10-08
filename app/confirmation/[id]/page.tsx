@@ -1627,7 +1627,10 @@ export default function ConfirmationViewerPage({ isDummy = false }: { isDummy?: 
         if (!doc) return;
         const customerName = doc.customer?.name || '고객';
         const destination = doc.trip?.destination || '여행지';
-        const totalTravelers = doc.trip?.travelers?.length || 1;
+        // 총 인원은 "인원" 입력값(성인+소아+유아)을 우선 사용한다.
+        // 여행자 명단(travelers)은 이름을 개별 입력한 사람 수일 뿐이라 실제 인원과 다를 수 있다.
+        const countFromFields = (doc.trip?.adultCount || 0) + (doc.trip?.childCount || 0) + (doc.trip?.infantCount || 0);
+        const totalTravelers = countFromFields > 0 ? countFromFields : (doc.trip?.travelers?.length || 1);
         const otherCount = totalTravelers - 1;
 
         let titleStr = `여행 확정서 - ${customerName}`;
