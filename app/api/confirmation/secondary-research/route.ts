@@ -239,9 +239,13 @@ export async function POST(request: NextRequest) {
         const pureDestination = getPureDestination(destination);
         const context = `목적지: ${pureDestination} (전체 명칭: ${destination}), 시기: ${travelMonth || '현재'}, 항공사: ${airline || '비명시'}, 수하물규정: ${baggageNote || '비명시'}`;
 
-        // --- 🌊 [핵심] 일자별 멀티 시티 날씨 로직 (basics가 포함된 경우에만 실행) ---
+        // --- 🌊 [핵심] 일자별 멀티 시티 날씨 로직 ---
+        // "날씨만 다시 조사" 버튼처럼 targets: ['weather']만 올 때도 이 로직이 돌아야
+        // dailyWeatherData가 채워지고, 그래야 날씨 프롬프트에 "전체 일정 N일"이 정확히 전달된다.
+        // (이전에는 'basics'가 없으면 통째로 스킵되어 dailyWeatherData=[]로 남고,
+        //  AI가 "전체 일정(0일)"을 받아 임의로 1일치만 생성하는 버그가 있었음)
         let dailyWeatherData: any[] = [];
-        if (!targets || targets.length === 0 || targets.includes('basics')) {
+        if (!targets || targets.length === 0 || targets.includes('basics') || targets.includes('weather')) {
             try {
                 // 1. 일정(Itinerary)에서 일자별 주요 도시 추출
                 const itineraryArr = Array.isArray(itinerary) ? itinerary : [];
@@ -302,13 +306,18 @@ export async function POST(request: NextRequest) {
 
         // 2. 날씨 (weather)
         if (!isPartial || targets.includes('weather') || targets.includes('basics')) {
+            // 일정 전체 일수: dailyWeatherData가 비어있어도(위 로직이 스킵되거나 실패한 경우)
+            // itinerary 배열 길이를 그대로 신뢰해서 AI가 "0일" 또는 "1일"로 오판하지 않게 한다.
+            const itineraryArr = Array.isArray(itinerary) ? itinerary : [];
+            const expectedDays = dailyWeatherData.length > 0 ? dailyWeatherData.length : itineraryArr.length;
             tasks.push({
                 name: 'weather',
                 prompt: `
 컨텍스트: ${context}
 실시간 일자별 도시 날씨 데이터: ${JSON.stringify(dailyWeatherData)}
 
-미션: 위 실시간 날씨 데이터(dailyWeatherData)를 바탕으로 **전체 일정(${dailyWeatherData.length}일)**에 대한 일별 기온을 JSON으로 작성하세요.
+미션: 위 실시간 날씨 데이터(dailyWeatherData)를 바탕으로 **전체 일정(${expectedDays}일)**에 대한 일별 기온을 JSON으로 작성하세요.
+**반드시 forecast 배열에 정확히 ${expectedDays}개의 항목을 포함해야 합니다. 1일치만 작성하면 안 됩니다.**
 **중요: 목적지(${pureDestination})의 날씨와 정보를 생성해야 합니다. 한국 도시의 정보를 생성하면 절대 안 됩니다.**
 {
   "weather": {
