@@ -126,6 +126,9 @@ export async function GET(request: NextRequest) {
             sheetGid: c.sheetGid,
             specific_reminder_date: c.specific_reminder_date || '',
             previousInquiries: c.previousInquiries || [],
+            reservationNumber: c.reservation_number || '',
+            confirmationLink: c.confirmation_link || '',
+            bankAccount: c.bank_account || '',
         }));
 
         return NextResponse.json({

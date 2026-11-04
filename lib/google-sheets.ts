@@ -652,7 +652,7 @@ export async function upsertConsultationToSheet(data: ConsultationData, tenantId
         for (const sheetTitle of sheetsToSearch) {
             const resp = await sheets.spreadsheets.values.get({
                 spreadsheetId: sheetId,
-                range: `${sheetTitle}!A:AB`,
+                range: `${sheetTitle}!A:AE`,
             });
             const rows = resp.data.values || [];
 
@@ -728,7 +728,9 @@ export async function upsertConsultationToSheet(data: ConsultationData, tenantId
             data.visitor_id || '',                  // Z: visitor_id (25)
             data.automation.inquiry_info_backup || '', // AA: inquiry_info_backup (26)
             data.specific_reminder_date || '',      // AB: 특정날 리마인드 (27)
-            data.reservation_number || '',          // AC: 예약번호 (28)
+            data.reservation_number || (foundRow ? (foundRow[28] || '') : ''), // AC: 예약번호 (28)
+            data.confirmation_link || (foundRow ? (foundRow[29] || '') : ''),  // AD: 확정서 링크 (29)
+            data.bank_account || (foundRow ? (foundRow[30] || '') : ''),       // AE: 가상계좌번호 (30)
         ];
 
         // 2. 행 삭제
@@ -757,7 +759,7 @@ export async function upsertConsultationToSheet(data: ConsultationData, tenantId
 
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
-            range: `${targetSheet}!A:AC`,
+            range: `${targetSheet}!A:AE`,
             valueInputOption: 'USER_ENTERED',
             requestBody: { values: [newRow] },
         });
@@ -1069,7 +1071,8 @@ async function fetchAllSheetData(forceRefresh = false): Promise<any[]> {
     const sheetsToRead = monthlySheets.length > 0 ? [...monthlySheets].sort().reverse() : [fallbackSheet];
 
     // BatchGet을 사용하여 모든 시트 데이터를 한 번의 API 호출로 가져옴
-    const ranges = sheetsToRead.map(s => `${s}!A:AC`);
+    // AE열(가상계좌번호)까지 포함해야 예약확정/멘트제작에서 가상계좌가 정상 로드됨
+    const ranges = sheetsToRead.map(s => `${s}!A:AE`);
     const resp = await sheets.spreadsheets.values.batchGet({
         spreadsheetId: sheetId,
         ranges: ranges,
@@ -1122,7 +1125,8 @@ async function getAllConsultationsForTenant(tenantId: string, forceRefresh = fal
         if (sheetsToRead.length === 0) return [];
 
         // 모든 시트에서 데이터 일괄 조회
-        const ranges = sheetsToRead.map((s: string) => `${s}!A:AD`);
+        // AE열(가상계좌번호)까지 포함해야 예약확정/멘트제작에서 가상계좌가 정상 로드됨
+        const ranges = sheetsToRead.map((s: string) => `${s}!A:AE`);
         const resp = await sheets.spreadsheets.values.batchGet({ spreadsheetId, ranges });
 
         const allRows: any[] = [];
