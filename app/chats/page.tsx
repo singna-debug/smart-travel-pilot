@@ -103,18 +103,19 @@ export default function ChatsPage({ isDummy = false }: { isDummy?: boolean }) {
     useEffect(() => {
         let currentTenant: string | null = null;
         const init = async () => {
+            // localStorage 캐시값보다 실제 로그인 세션을 항상 우선한다.
+            // (캐시가 오래되거나 계정 전환 후 갱신되지 않으면 상담등록과
+            // 다른 테넌트의 시트를 보게 되어 "등록은 되는데 목록엔 안 보임" 문제가 생김)
             let saved = typeof window !== 'undefined' ? localStorage.getItem('tenant_id') : null;
-            if (!saved) {
-                try {
-                    const { createClient } = await import('@/utils/supabase/client');
-                    const supabase = createClient();
-                    const { data: { user } } = await supabase.auth.getUser();
-                    if (user) {
-                        saved = user.email === 'gktla71@gmail.com' ? 'default_tenant' : user.id;
-                        localStorage.setItem('tenant_id', saved);
-                    }
-                } catch (e) {}
-            }
+            try {
+                const { createClient } = await import('@/utils/supabase/client');
+                const supabase = createClient();
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    saved = user.email === 'gktla71@gmail.com' ? 'default_tenant' : user.id;
+                    localStorage.setItem('tenant_id', saved);
+                }
+            } catch (e) {}
             currentTenant = saved;
             await fetchChats(false, saved || undefined);
         };
