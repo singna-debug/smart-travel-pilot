@@ -3,6 +3,7 @@ import { upsertConsultationToSheet } from '@/lib/google-sheets';
 import type { ConsultationData } from '@/types';
 import { calculateAutomationDates, getTodayString } from '@/lib/date-calculator';
 import { crawlTravelProduct } from '@/lib/url-crawler';
+import { getTenantId } from '@/lib/tenant';
 
 // 연락처 포맷팅 (010-XXXX-XXXX)
 function formatPhone(phoneStr: string): string {
@@ -56,7 +57,11 @@ function formatDurationString(durationStr: string): string {
 
 export async function POST(request: NextRequest) {
     try {
-        const tenantId = request.headers.get('x-tenant-id') || 'default_tenant';
+        // 세션 쿠키를 우선 확인해 실제 로그인 사용자의 테넌트로 저장한다.
+        // (헤더값만 믿으면 클라이언트의 localStorage tenant_id가 오래됐거나
+        // 비어있을 때 상담목록 조회(세션 기반)와 다른 시트에 저장되어
+        // "등록은 되는데 목록엔 안 보임" 문제가 발생함)
+        const tenantId = await getTenantId(request);
         const body = await request.json();
         const {
             customerName,

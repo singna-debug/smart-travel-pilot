@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllConsultations } from '@/lib/google-sheets';
+import { getTenantId } from '@/lib/tenant';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,7 +8,7 @@ export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const query = searchParams.get('q') || '';
-        const tenantId = request.headers.get('x-tenant-id') || 'default_tenant';
+        const tenantId = await getTenantId(request);
         
         // Fetch all consultations from this tenant's sheet
         const consultations = await getAllConsultations(false, tenantId);
