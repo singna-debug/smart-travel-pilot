@@ -378,6 +378,8 @@ export async function getOrCreateMonthlySheet(sheets: any, spreadsheetId: string
                 '상담일시', '고객성함', '연락처', '총인원', '재방문여부', '유입경로', '목적지', '출발일', '귀국일', '기간', '상품명', '상품URL', '상담요약', '상담단계', '등록방식', '팔로업일',
                 '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호', '확정서 링크', '가상계좌번호'
             ];
+            // 기존 '시트1'은 기본 그리드가 26열(Z열)뿐일 수 있어 AE1까지 쓰려면 먼저 확장해야 함
+            await ensureSheetColumnCount(sheets, spreadsheetId, month, 31); // AE열 = 31번째 컬럼
             await sheets.spreadsheets.values.update({
                 spreadsheetId,
                 range: `${month}!A1:AE1`,
@@ -408,6 +410,9 @@ export async function getOrCreateMonthlySheet(sheets: any, spreadsheetId: string
             '상담일시', '고객성함', '연락처', '총인원', '재방문여부', '유입경로', '목적지', '출발일', '귀국일', '기간', '상품명', '상품URL', '상담요약', '상담단계', '등록방식', '팔로업일',
             '확정상품', '예약확정일', '선금일', '출발전안내(4주)', '잔금일', '확정서 발송', '출발안내', '전화 안내', '해피콜', 'visitor_id', 'inquiry_info_backup', '특정날 리마인드', '예약번호', '확정서 링크', '가상계좌번호'
         ];
+
+        // 신규 생성된 시트는 기본 그리드가 26열(Z열)뿐이라 AE1까지 쓰려면 먼저 확장해야 함
+        await ensureSheetColumnCount(sheets, spreadsheetId, month, 31); // AE열 = 31번째 컬럼
 
         await sheets.spreadsheets.values.update({
             spreadsheetId,
@@ -756,6 +761,11 @@ export async function upsertConsultationToSheet(data: ConsultationData, tenantId
         // 3. 새 데이터 추가 (현재 월 시트에)
         const currentMonth = format(new Date(), 'yyyy-MM');
         const { title: targetSheet } = await getOrCreateMonthlySheet(sheets, sheetId, currentMonth);
+
+        // 과거에 생성된 월별 시트는 그리드가 AC~AD열까지만 있는 경우가 있어,
+        // AE열(가상계좌번호)까지 쓰는 append 요청이 "exceeds grid limits"로
+        // 전체 거부될 수 있다. 쓰기 전에 그리드를 AE열 이상으로 확장해둔다.
+        await ensureSheetColumnCount(sheets, sheetId, targetSheet, 31); // AE열 = 31번째 컬럼
 
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
