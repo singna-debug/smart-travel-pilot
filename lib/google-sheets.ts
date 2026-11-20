@@ -763,17 +763,30 @@ export async function upsertConsultationToSheet(data: ConsultationData, tenantId
         const { title: targetSheet } = await getOrCreateMonthlySheet(sheets, sheetId, currentMonth);
 
         // 과거에 생성된 월별 시트는 그리드가 AC~AD열까지만 있는 경우가 있어,
-        // AE열(가상계좌번호)까지 쓰는 append 요청이 "exceeds grid limits"로
+        // AE열(가상계좌번호)까지 쓰는 요청이 "exceeds grid limits"로
         // 전체 거부될 수 있다. 쓰기 전에 그리드를 AE열 이상으로 확장해둔다.
         await ensureSheetColumnCount(sheets, sheetId, targetSheet, 31); // AE열 = 31번째 컬럼
 
-        await sheets.spreadsheets.values.append({
+        // values.append는 대상 range 안에서 "데이터가 있는 테이블의 폭"을 스스로
+        // 추정해 다음 빈 행을 계산하는데, 과거에 뒤쪽 열(AC~AE 등)까지 빈 문자열이
+        // 실제로 기록된 지저분한 행이 섞여 있으면 폭 추정이 틀어져 새 행이 A열이 아닌
+        // 엉뚱한 뒤쪽 열부터 쓰이는 사고가 난다. 이를 피하기 위해 A열(상담일시) 기준으로
+        // 직접 다음 빈 행 번호를 찾아 명시적인 셀 범위에 update로 쓴다.
+        // (values.get은 값이 있는 마지막 행까지만 반환하므로 +1이 곧 다음 빈 행이다.)
+        const colAResp = await sheets.spreadsheets.values.get({
             spreadsheetId: sheetId,
-            range: `${targetSheet}!A:AE`,
+            range: `${targetSheet}!A:A`,
+        });
+        const colARowCount = (colAResp.data.values || []).length;
+        const nextRowIndex = Math.max(colARowCount + 1, 2); // 최소 2행부터 (1행은 헤더)
+
+        await sheets.spreadsheets.values.update({
+            spreadsheetId: sheetId,
+            range: `${targetSheet}!A${nextRowIndex}:AE${nextRowIndex}`,
             valueInputOption: 'USER_ENTERED',
             requestBody: { values: [newRow] },
         });
-        log(`[Upsert] 새 데이터 추가 완료 (${targetSheet})`);
+        log(`[Upsert] 새 데이터 추가 완료 (${targetSheet}, row ${nextRowIndex})`);
         cachedConsultations = null; // 캐시 초기화
         return true;
     } catch (error: any) {
